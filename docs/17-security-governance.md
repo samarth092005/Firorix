@@ -1,0 +1,12 @@
+# Security and Governance
+- Approved BTP identity; role and system-scoped authorization.
+- Least-privilege SAP technical user; read-only discovery initially.
+- TLS and approved Cloud Connector mapping.
+- Secrets in BTP destination/approved secret store, never Git or browser.
+- No arbitrary SQL/RFC/code execution.
+- Source inspection only when authorized.
+- Data classification and redaction before AI processing.
+- Audit user/action/entity/system/time/result/correlation ID.
+- Upload size/type validation, safe generated file keys, ACL and malware scanning if available.
+- Generated code review: release compatibility, API release status, authorization, input validation and clean-core.
+- Production requires threat model, vulnerability assessment, backup/restore, monitoring and incident ownership.
