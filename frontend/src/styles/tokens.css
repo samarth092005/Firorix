@@ -1,0 +1,97 @@
+/* FioriX Modern Minimalist Design Tokens - Clean, Airy, Premium Enterprise */
+:root {
+  /* Primary Brand & Interactive Colors */
+  --fiori-primary: #0066FF;
+  --fiori-primary-hover: #0052CC;
+  --fiori-primary-active: #003D99;
+  --fiori-primary-light: #EFF6FF;
+  --fiori-primary-subtle: #F5F9FF;
+  --fiori-primary-glow: rgba(0, 102, 255, 0.12);
+
+  /* Shell / Header / Navigation */
+  --fiori-shell-bg: #FFFFFF;
+  --fiori-shell-border: #E5E7EB;
+  --fiori-shell-text: #111827;
+  --fiori-shell-icon: #6B7280;
+
+  --fiori-sidebar-bg: #FFFFFF;
+  --fiori-sidebar-border: #E5E7EB;
+  --fiori-sidebar-hover: #F3F4F6;
+  --fiori-sidebar-active: #EFF6FF;
+  --fiori-sidebar-active-text: #0066FF;
+
+  /* Canvas & Surfaces */
+  --fiori-bg: #F8FAFC;
+  --fiori-surface: #FFFFFF;
+  --fiori-surface-subtle: #F8FAFC;
+  --fiori-surface-hover: #F1F5F9;
+  --fiori-surface-selected: #EFF6FF;
+
+  /* Typography / Neutrals */
+  --fiori-text-primary: #0F172A;
+  --fiori-text-secondary: #475569;
+  --fiori-text-muted: #94A3B8;
+  --fiori-text-inverse: #FFFFFF;
+
+  /* Fine Structural Borders */
+  --fiori-border: #E2E8F0;
+  --fiori-border-light: #F1F5F9;
+  --fiori-border-dark: #CBD5E1;
+
+  /* Semantic State Tokens - Soft Pastel Modern Pills */
+  --fiori-success: #15803D;
+  --fiori-success-bg: #DCFCE7;
+  --fiori-success-border: #BBF7D0;
+
+  --fiori-warning: #C2410C;
+  --fiori-warning-bg: #FFEDD5;
+  --fiori-warning-border: #FED7AA;
+
+  --fiori-error: #B91C1C;
+  --fiori-error-bg: #FEE2E2;
+  --fiori-error-border: #FECACA;
+
+  --fiori-info: #0284C7;
+  --fiori-info-bg: #E0F2FE;
+  --fiori-info-border: #BAE6FD;
+
+  --fiori-neutral: #475569;
+  --fiori-neutral-bg: #F1F5F9;
+  --fiori-neutral-border: #E2E8F0;
+
+  /* Backward Compatibility Aliases */
+  --fiori-navy: #0F172A;
+  --fiori-teal: #0066FF;
+  --fiori-teal-hover: #0052CC;
+  --fiori-teal-light: #EFF6FF;
+  --fiori-teal-focus: rgba(0, 102, 255, 0.18);
+
+  /* Modern Subtle Elevation Shadows */
+  --fiori-shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --fiori-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --fiori-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --fiori-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --fiori-shadow-card: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.03);
+
+  /* Spacing Scale */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* Rounded Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 9999px;
+
+  /* Font Stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}

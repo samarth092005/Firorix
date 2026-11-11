@@ -1,0 +1,536 @@
+{
+  "timestamp": "2026-11-05T05:59:46.861Z",
+  "system": {
+    "sid": "S21",
+    "client": "200",
+    "host": "192.168.1.55:8000"
+  },
+  "steps": {
+    "gatewayCatalog": {
+      "elapsedMs": 4130,
+      "success": true,
+      "httpStatus": 200,
+      "totalCount": 1318,
+      "returnedCount": 1318,
+      "sampleServices": [
+        {
+          "id": "ZFAR_DOWN_PAYMENT_REQUEST_MANAGE_SR_0001",
+          "technicalServiceName": "ZFAR_DOWN_PAYMENT_REQUEST_MANAGE_SR",
+          "title": "FAR_DOWN_PAYMENT_REQUEST_MANAGE_SRV",
+          "description": "Manage Down Payment Requests (AR)"
+        },
+        {
+          "id": "ZFAR_MANAGE_PAYMENT_ADVICES_SRV_0001",
+          "technicalServiceName": "ZFAR_MANAGE_PAYMENT_ADVICES_SRV",
+          "title": "FAR_MANAGE_PAYMENT_ADVICES_SRV",
+          "description": "Manage Payment Advices"
+        },
+        {
+          "id": "ZFAR_DISP_PAYMENT_CARD_DATA_SRV_0001",
+          "technicalServiceName": "ZFAR_DISP_PAYMENT_CARD_DATA_SRV",
+          "title": "FAR_DISP_PAYMENT_CARD_DATA_SRV",
+          "description": "Display Payment Card Data"
+        },
+        {
+          "id": "ZUI_DGTLPAYT_REFUND_02_0001",
+          "technicalServiceName": "ZUI_DGTLPAYT_REFUND_02",
+          "title": "UI_DGTLPAYT_REFUND_02",
+          "description": "UI_DGTLPAYT_REFUND_02"
+        },
+        {
+          "id": "ZFAR_MY_DUNNING_PROPOSAL_SRV_0001",
+          "technicalServiceName": "ZFAR_MY_DUNNING_PROPOSAL_SRV",
+          "title": "FAR_MY_DUNNING_PROPOSAL_SRV",
+          "description": "Dunning proposals belonging to an accounting clerk"
+        }
+      ]
+    },
+    "adtProbe": {
+      "elapsedMs": 744,
+      "accessible": false,
+      "httpStatus": 403,
+      "status": "UNAUTHORIZED",
+      "code": "SADT_RESOURCE_003",
+      "message": "No authorization to access the resource /sap/bc/adt/discovery.",
+      "requiredAuthorizations": [
+        "PFCG Authorization Object: S_ADT_RES (Activity 03: Display)",
+        "PFCG Authorization Object: S_DEVELOP (Activity 03: Display for object types PROG, TRAN, DEVC)",
+        "Alternative: Custom read-only OData service (e.g. Z_FIORIX_DISCOVERY_SRV) with S_TABU_DIS (Activity 03) for TSTC/TSTCT/TADIR"
+      ]
+    },
+    "tcodeDiscovery": {
+      "elapsedMs": 708,
+      "success": true,
+      "verificationStatus": "PARTIALLY_AVAILABLE",
+      "transaction": {
+        "tcode": "F-53",
+        "description": "Post Outgoing Payments - For Suppliers",
+        "language": "EN",
+        "functionalArea": "Financial Accounting — Accounts Payable (FI-AP)",
+        "transactionType": "TRANSACTION",
+        "program": {
+          "value": "SAPMF05A",
+          "status": "PENDING_VERIFICATION",
+          "evidence": [
+            "Pending Basis authorization for TRDIR/TADIR access"
+          ]
+        },
+        "package": {
+          "value": "FBAS",
+          "status": "PENDING_VERIFICATION",
+          "evidence": [
+            "Pending Basis authorization for TADIR access"
+          ]
+        },
+        "metadataSource": "LIVE_SAP_S21_GATEWAY_CORROBORATION",
+        "verificationStatus": "PARTIALLY_AVAILABLE"
+      },
+      "correlatedGatewayServices": [
+        {
+          "technicalServiceName": "ZFAP_PAYMENT_POST_SRV",
+          "title": "FAP_PAYMENT_POST_SRV",
+          "description": "Post Outgoing Supplier Payment",
+          "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_PAYMENT_POST_SRV",
+          "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_PAYMENT_POST_SRV/$metadata",
+          "serviceType": "UI",
+          "provenance": "LIVE_SAP_S21"
+        },
+        {
+          "technicalServiceName": "ZFAR_PAYMENT_POST_SRV",
+          "title": "FAR_PAYMENT_POST_SRV",
+          "description": "Post Incoming Customer Payment (aka f-28)",
+          "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_PAYMENT_POST_SRV",
+          "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_PAYMENT_POST_SRV/$metadata",
+          "serviceType": "UI",
+          "provenance": "LIVE_SAP_S21"
+        },
+        {
+          "technicalServiceName": "ZFAR_MANUAL_CLEARING_SRV",
+          "title": "FAR_MANUAL_CLEARING_SRV",
+          "description": "Manual clearing of incoming payments",
+          "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_MANUAL_CLEARING_SRV",
+          "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_MANUAL_CLEARING_SRV/$metadata",
+          "serviceType": "UI",
+          "provenance": "LIVE_SAP_S21"
+        },
+        {
+          "technicalServiceName": "ZFAC_GL_MANUAL_CLEARING_SRV",
+          "title": "FAC_GL_MANUAL_CLEARING_SRV",
+          "description": "GL Open Items Manual Clearing",
+          "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAC_GL_MANUAL_CLEARING_SRV",
+          "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAC_GL_MANUAL_CLEARING_SRV/$metadata",
+          "serviceType": "UI",
+          "provenance": "LIVE_SAP_S21"
+        },
+        {
+          "technicalServiceName": "ZFAP_MANUAL_CLEARING_SRV",
+          "title": "FAP_MANUAL_CLEARING_SRV",
+          "description": "Manual clearing of outgoing payments",
+          "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_MANUAL_CLEARING_SRV",
+          "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_MANUAL_CLEARING_SRV/$metadata",
+          "serviceType": "UI",
+          "provenance": "LIVE_SAP_S21"
+        }
+      ],
+      "basisAuthorizationRequirements": {
+        "status": "ACTION_REQUIRED_FOR_FULL_ABAP_METADATA",
+        "requiredObjects": [
+          "PFCG Authorization Object: S_ADT_RES (Activity 03: Display)",
+          "PFCG Authorization Object: S_DEVELOP (Activity 03: Display for object types PROG, TRAN, DEVC)",
+          "Alternative: Custom read-only OData service (e.g. Z_FIORIX_DISCOVERY_SRV) with S_TABU_DIS (Activity 03) for TSTC/TSTCT/TADIR"
+        ],
+        "impact": "FioriX successfully discovers Gateway OData services and live S21 integration endpoints, but cannot inspect raw database tables (TSTC, TSTCT, TADIR, TRDIR) without these authorizations."
+      }
+    },
+    "catalogueSearch": {
+      "elapsedMs": 3308,
+      "success": true,
+      "totalCount": 3,
+      "candidates": [
+        {
+          "appId": "F-53",
+          "appName": "Post Outgoing Payments - For Suppliers",
+          "appType": "SAP GUI",
+          "uiTechnology": "SAP GUI for HTML",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "odataServices": [],
+          "businessRole": "Other"
+        },
+        {
+          "appId": "F1612",
+          "appName": "Post Outgoing Payments",
+          "appType": "Transactional",
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "odataServices": [
+            "FAP_PAYMENT_POST_SRV"
+          ],
+          "sapui5Component": "fin.ap.payment.post",
+          "businessRole": "SAP_BR_AP_ACCOUNTANT * SAP_BR_AR_ACCOUNTANT"
+        },
+        {
+          "appId": "F1367",
+          "appName": "Clear Outgoing Payments",
+          "appType": "Transactional",
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "odataServices": [
+            "FAC_FINANCIALS_POSTING_SRV",
+            "FAC_FINANCIAL_DOCUMENT_SRV_01",
+            "CV_ATTACHMENT_SRV",
+            "FAP_MANUAL_CLEARING_SRV"
+          ],
+          "sapui5Component": "* fin.ap.manualclearing",
+          "businessRole": "SAP_BR_AP_ACCOUNTANT * SAP_SFIN_BCR_PAYABLES_CLERK"
+        }
+      ]
+    },
+    "candidateDetails": {
+      "F1612": {
+        "success": true,
+        "fromCache": false,
+        "provenance": "OFFICIAL_CATALOGUE_LIVE",
+        "app": {
+          "appId": "F1612",
+          "appName": "Post Outgoing Payments",
+          "description": "Accounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.\r\n\r\nAccounts Payable Accountant (Ariba Invoicing) : \r\nManages and uploads supplier invoices centrally in SAP Ariba Invoicing.",
+          "appType": "Transactional",
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "businessProcess": "Budget and Finance, Corporate Finance, Finance, Finance & Risk, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain * Budget and Finance, Corporate Finance, Finance, Purchasing, Sourcing and Procurement, Supply Chain",
+          "lineOfBusiness": "Budget and Finance, Corporate Finance, Finance, Finance & Risk, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "softwareComponent": "S4CORE 109",
+          "businessRole": "SAP_BR_AP_ACCOUNTANT * SAP_BR_AR_ACCOUNTANT",
+          "businessCatalog": "SAP_SFIN_BC_AP_PAY_PROC, SAP_SFIN_BC_APAR_OPER, SAP_SFIN_BC_AR_OUT_PAYM",
+          "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
+          "odataServices": [
+            "FAP_PAYMENT_POST_SRV"
+          ],
+          "sapui5Component": "fin.ap.payment.post",
+          "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ap_postpaym",
+          "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1612')/",
+          "provenance": "OFFICIAL_CATALOGUE_LIVE",
+          "retrievalTimestamp": "2026-11-05T05:59:56.401Z"
+        }
+      },
+      "F-53": {
+        "success": true,
+        "fromCache": false,
+        "provenance": "OFFICIAL_CATALOGUE_LIVE",
+        "app": {
+          "appId": "F-53",
+          "appName": "Post Outgoing Payments - For Suppliers",
+          "description": "Others : \r\nDummy Role\r\n\r\n",
+          "appType": "SAP GUI",
+          "uiTechnology": "SAP GUI for HTML",
+          "businessProcess": "",
+          "lineOfBusiness": "",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "softwareComponent": "S4CORE 109",
+          "businessRole": "Other",
+          "businessCatalog": "Without Catalog Assignment",
+          "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
+          "odataServices": [],
+          "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F-53')/",
+          "provenance": "OFFICIAL_CATALOGUE_LIVE",
+          "retrievalTimestamp": "2026-11-05T05:59:57.131Z"
+        }
+      },
+      "F1367": {
+        "success": true,
+        "fromCache": false,
+        "provenance": "OFFICIAL_CATALOGUE_LIVE",
+        "app": {
+          "appId": "F1367",
+          "appName": "Clear Outgoing Payments",
+          "description": "Accounts Payable Accountant (Ariba Invoicing) : \r\nManages and uploads supplier invoices centrally in SAP Ariba Invoicing.",
+          "appType": "Transactional",
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "businessProcess": "Budget and Finance, Corporate Finance, Finance, Finance & Risk, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain * Budget and Finance, Corporate Finance, Finance, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain * Budget and Finance, Corporate Finance, Finance, Purchasing, Sourcing and Procurement, Supply Chain",
+          "lineOfBusiness": "Budget and Finance, Corporate Finance, Finance, Finance & Risk, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "softwareComponent": "S4CORE 109",
+          "businessRole": "SAP_BR_AP_ACCOUNTANT * SAP_SFIN_BCR_PAYABLES_CLERK",
+          "businessCatalog": "SAP_SFIN_BC_AP_PAY_PROC, SAP_SFIN_BC_AP_CLEARING",
+          "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
+          "odataServices": [
+            "FAC_FINANCIALS_POSTING_SRV",
+            "FAC_FINANCIAL_DOCUMENT_SRV_01",
+            "CV_ATTACHMENT_SRV",
+            "FAP_MANUAL_CLEARING_SRV"
+          ],
+          "sapui5Component": "* fin.ap.manualclearing",
+          "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_apmanclear",
+          "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1367')/",
+          "provenance": "OFFICIAL_CATALOGUE_LIVE",
+          "retrievalTimestamp": "2026-11-05T05:59:57.841Z"
+        }
+      }
+    },
+    "dependencyCheck": {
+      "FAP_PAYMENT_POST_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAP_PAYMENT_POST_SRV_0001",
+            "technicalServiceName": "ZFAP_PAYMENT_POST_SRV",
+            "title": "FAP_PAYMENT_POST_SRV",
+            "description": "Post Outgoing Supplier Payment",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_PAYMENT_POST_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_PAYMENT_POST_SRV/$metadata"
+          }
+        ]
+      },
+      "ZFAP_PAYMENT_POST_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAP_PAYMENT_POST_SRV_0001",
+            "technicalServiceName": "ZFAP_PAYMENT_POST_SRV",
+            "title": "FAP_PAYMENT_POST_SRV",
+            "description": "Post Outgoing Supplier Payment",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_PAYMENT_POST_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_PAYMENT_POST_SRV/$metadata"
+          }
+        ]
+      },
+      "FAP_MANUAL_CLEARING_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAP_MANUAL_CLEARING_SRV_0001",
+            "technicalServiceName": "ZFAP_MANUAL_CLEARING_SRV",
+            "title": "FAP_MANUAL_CLEARING_SRV",
+            "description": "Manual clearing of outgoing payments",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_MANUAL_CLEARING_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_MANUAL_CLEARING_SRV/$metadata"
+          }
+        ]
+      },
+      "ZFAP_MANUAL_CLEARING_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAP_MANUAL_CLEARING_SRV_0001",
+            "technicalServiceName": "ZFAP_MANUAL_CLEARING_SRV",
+            "title": "FAP_MANUAL_CLEARING_SRV",
+            "description": "Manual clearing of outgoing payments",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_MANUAL_CLEARING_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAP_MANUAL_CLEARING_SRV/$metadata"
+          }
+        ]
+      },
+      "FAR_PAYMENT_POST_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAR_PAYMENT_POST_SRV_0001",
+            "technicalServiceName": "ZFAR_PAYMENT_POST_SRV",
+            "title": "FAR_PAYMENT_POST_SRV",
+            "description": "Post Incoming Customer Payment (aka f-28)",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_PAYMENT_POST_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_PAYMENT_POST_SRV/$metadata"
+          }
+        ]
+      },
+      "ZFAR_PAYMENT_POST_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAR_PAYMENT_POST_SRV_0001",
+            "technicalServiceName": "ZFAR_PAYMENT_POST_SRV",
+            "title": "FAR_PAYMENT_POST_SRV",
+            "description": "Post Incoming Customer Payment (aka f-28)",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_PAYMENT_POST_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAR_PAYMENT_POST_SRV/$metadata"
+          }
+        ]
+      },
+      "FAC_FINANCIALS_POSTING_SRV": {
+        "found": false,
+        "matches": []
+      },
+      "FAC_FINANCIAL_DOCUMENT_SRV_01": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZFAC_FINANCIAL_DOCUMENT_SRV_01_0001",
+            "technicalServiceName": "ZFAC_FINANCIAL_DOCUMENT_SRV_01",
+            "title": "FAC_FINANCIAL_DOCUMENT_SRV_01",
+            "description": "oData Financial Document (Display and Reversal)",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAC_FINANCIAL_DOCUMENT_SRV_01",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/FAC_FINANCIAL_DOCUMENT_SRV_01/$metadata"
+          }
+        ]
+      },
+      "CV_ATTACHMENT_SRV": {
+        "found": true,
+        "matches": [
+          {
+            "id": "ZCV_ATTACHMENT_SRV_0001",
+            "technicalServiceName": "ZCV_ATTACHMENT_SRV",
+            "title": "CV_ATTACHMENT_SRV",
+            "description": "Gateway : ODATA model for CV - attachments",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/CV_ATTACHMENT_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/CV_ATTACHMENT_SRV/$metadata"
+          },
+          {
+            "id": "ZAPI_CV_ATTACHMENT_SRV_0001",
+            "technicalServiceName": "ZAPI_CV_ATTACHMENT_SRV",
+            "title": "API_CV_ATTACHMENT_SRV",
+            "description": "Gateway: API for Attachment Service",
+            "serviceUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/API_CV_ATTACHMENT_SRV",
+            "metadataUrl": "http://192.168.1.55:8000/sap/opu/odata/sap/API_CV_ATTACHMENT_SRV/$metadata"
+          }
+        ]
+      }
+    },
+    "metadataChecks": {
+      "ZFAP_PAYMENT_POST_SRV": {
+        "success": true,
+        "httpStatus": 200,
+        "entitySetsCount": 478,
+        "functionImportsCount": 53,
+        "sampleEntitySets": [
+          "FinsPostingAPARItems",
+          "FinsPostingPaymentHeaders",
+          "FinsPostingPaymentDifferences",
+          "VHGLAccountsForInput",
+          "FinsPostingWithholdingTaxes"
+        ],
+        "sampleOperations": [
+          {
+            "name": "RecurringAccountingDocumentDelete",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "ModifyDisputes",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "BankStatementPostArea1",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "RecurringAccountingDocumentPostDue",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "BankStatementComplete",
+            "httpMethod": "POST"
+          }
+        ]
+      },
+      "ZFAP_MANUAL_CLEARING_SRV": {
+        "success": true,
+        "httpStatus": 200,
+        "entitySetsCount": 490,
+        "functionImportsCount": 53,
+        "sampleEntitySets": [
+          "FinsPostingAPARItems",
+          "APARWorklistItems",
+          "FinsPostingPaymentClearingHeaders",
+          "FinsPostingPaymentDifferences",
+          "VHGLAccountsForInput"
+        ],
+        "sampleOperations": [
+          {
+            "name": "RecurringAccountingDocumentDelete",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "ModifyDisputes",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "BankStatementPostArea1",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "RecurringAccountingDocumentPostDue",
+            "httpMethod": "POST"
+          },
+          {
+            "name": "BankStatementComplete",
+            "httpMethod": "POST"
+          }
+        ]
+      }
+    },
+    "evaluation": {
+      "status": "VERIFIED_MATCH",
+      "candidatesCount": 3,
+      "candidates": [
+        {
+          "appId": "F1612",
+          "appName": "Post Outgoing Payments",
+          "appType": "Transactional",
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "matchType": "DIRECT_SUCCESSOR_ODATA_VERIFIED",
+          "matchStatus": "VERIFIED_MATCH",
+          "confidence": "HIGH",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "verifiedODataServices": [
+            "FAP_PAYMENT_POST_SRV"
+          ],
+          "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1612')/",
+          "rationale": "Verified modern SAP Fiori elements successor application. Mandatory backend OData service (FAP_PAYMENT_POST_SRV) is active and registered on target SAP S21 Gateway.",
+          "evidence": [
+            "Official SAP Fiori Apps Reference Library record: F1612 (\"Post Outgoing Payments\")",
+            "Application Type: Transactional (SAP Fiori (SAPUI5))",
+            "OData Service Dependency: FAP_PAYMENT_POST_SRV",
+            "Target SAP S21 Live Verification: OData service is registered in Gateway Catalog",
+            "Release Compatibility: SAP S/4HANA Cloud Private Edition 2025"
+          ],
+          "provenance": "OFFICIAL_CATALOGUE"
+        },
+        {
+          "appId": "F-53",
+          "appName": "Post Outgoing Payments - For Suppliers",
+          "appType": "SAP GUI",
+          "uiTechnology": "SAP GUI for HTML",
+          "matchType": "SAP_GUI_HTML",
+          "matchStatus": "POSSIBLE_MATCH",
+          "confidence": "HIGH",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F-53')/",
+          "rationale": "Classic SAP GUI transaction hosted in Fiori Launchpad via SAP GUI for HTML (WebGUI tile F-53).",
+          "evidence": [
+            "Official SAP Fiori Apps Reference Library record: F-53 (\"Post Outgoing Payments - For Suppliers\")",
+            "Application Type: SAP GUI (SAP GUI for HTML / WebGUI)",
+            "Intent: Without Catalog Assignment"
+          ],
+          "provenance": "OFFICIAL_CATALOGUE"
+        },
+        {
+          "appId": "F1367",
+          "appName": "Clear Outgoing Payments",
+          "appType": "Transactional",
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "matchType": "DIRECT_SUCCESSOR_ODATA_VERIFIED",
+          "matchStatus": "VERIFIED_MATCH",
+          "confidence": "HIGH",
+          "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+          "verifiedODataServices": [
+            "FAC_FINANCIAL_DOCUMENT_SRV_01",
+            "CV_ATTACHMENT_SRV",
+            "FAP_MANUAL_CLEARING_SRV"
+          ],
+          "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1367')/",
+          "rationale": "Verified modern SAP Fiori elements successor application. Mandatory backend OData service (FAC_FINANCIALS_POSTING_SRV, FAC_FINANCIAL_DOCUMENT_SRV_01, CV_ATTACHMENT_SRV, FAP_MANUAL_CLEARING_SRV) is active and registered on target SAP S21 Gateway.",
+          "evidence": [
+            "Official SAP Fiori Apps Reference Library record: F1367 (\"Clear Outgoing Payments\")",
+            "Application Type: Transactional (SAP Fiori (SAPUI5))",
+            "OData Service Dependency: FAC_FINANCIALS_POSTING_SRV, FAC_FINANCIAL_DOCUMENT_SRV_01, CV_ATTACHMENT_SRV, FAP_MANUAL_CLEARING_SRV",
+            "Target SAP S21 Live Verification: OData service is registered in Gateway Catalog",
+            "Release Compatibility: SAP S/4HANA Cloud Private Edition 2025"
+          ],
+          "provenance": "OFFICIAL_CATALOGUE"
+        }
+      ],
+      "evaluatedAgainstS21ServicesCount": 1318,
+      "provenance": "OFFICIAL_CATALOGUE_CORRELATION",
+      "timestamp": "2026-11-05T06:00:06.906Z"
+    }
+  }
+}

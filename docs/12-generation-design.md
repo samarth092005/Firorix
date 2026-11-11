@@ -1,22 +1,47 @@
-# Custom Fiori Generation
-Entry conditions: approved BUILD decision, confirmed requirements, target release, supported generation profile, reviewed data source and authorization model.
+# Custom Fiori Application Generation Design
+**Document Version:** 2.0.0  
+**Status:** ARCHITECTURALLY CONFIRMED  
 
-Structured app specification:
-```json
-{
-  "projectId": "GEN-0001",
-  "assessmentId": "ASM-0001",
-  "targetReleaseProfile": "S4_PROFILE",
-  "applicationPattern": "LIST_REPORT_OBJECT_PAGE",
-  "dataModel": {"entities": [], "associations": []},
-  "serviceModel": {"protocol": "RELEASE_COMPATIBLE", "exposedEntities": []},
-  "ui": {"fields": [], "sections": [], "actions": [], "navigation": []},
-  "businessRules": [],
-  "authorizations": [],
-  "validations": []
-}
+## 1. Governance Gate & Entry Conditions
+
+Custom Fiori generation is **not an arbitrary code generator**. It is locked behind a strict governance gate:
+1. Linked assessment recommendation must be formally recorded as **`BUILD`**.
+2. All critical business requirements must be **`CONFIRMED`** by a certified functional consultant.
+3. An authorized Solution Architect must have recorded an **`APPROVED`** sign-off.
+4. Target S/4HANA release profile (e.g. `S/4HANA 2022 FPS02`) must be verified.
+5. Generation is restricted to **release-compatible, verified application patterns** (e.g. List Report and Object Page).
+
+---
+
+## 2. Generated Artifact Hierarchy (Clean Core Tier 1)
+
+All generated artifacts adhere strictly to **SAP Clean Core Tier 1** developer extensibility:
+
+```
+generated-draft-project/
+├── abap/
+│   ├── cds/
+│   │   ├── Z_I_CustomEntityRoot.cds      # Root View Entity (define root view entity ...)
+│   │   ├── Z_I_CustomEntityItem.cds      # Composition Item View Entity
+│   │   └── Z_C_CustomEntityManage.cds    # Consumption Projection View Entity
+│   ├── dcl/
+│   │   └── Z_I_CustomEntityRoot.dcl      # Access Control definition (@AccessControl.authorizationCheck)
+│   ├── srvd/
+│   │   └── ZSD_CUSTOM_ENTITY.srvd        # RAP Service Definition exposing projection views
+│   └── srvb/
+│       └── ZSB_CUSTOM_ENTITY_V4.srvb     # Service Binding metadata (OData V4 - UI)
+└── ui5/
+    └── webapp/
+        ├── manifest.json                 # SAP Fiori Elements OData V4 descriptor
+        ├── Component.js                  # Standard Fiori Elements Component extension
+        └── i18n/
+            └── i18n.properties           # Translatable UI labels and facet headers
 ```
 
-Potential artifacts: ABAP CDS view entities/projections, metadata extensions/UI annotations, RAP behavior definitions/implementations where supported, service definitions/bindings, SAPUI5/Fiori elements project, manifest, routing and i18n.
+---
 
-Use release-specific templates. Do not generate arbitrary apps from a T-Code alone. Record template version and artifact checksum. No automatic activation or production transport in initial demo. SAP-side activation/service testing is required before claiming deployability.
+## 3. Template Versioning & Draft Storage
+
+- **Semantic Template Versioning:** Generator templates are tagged with semantic versioning (e.g. `TEMPLATE-LROP-V4-2022.1.0`) linked directly to target S/4HANA release profiles.
+- **Draft-Only Status:** All generated outputs are exported as reviewable draft files (ZIP archive). **Under no circumstances does FioriX execute automated CTS transport creation or activation on the S/4HANA host.**
+- **Developer Review Workflow:** Developers import the generated draft files into their isolated S/4HANA DEV sandbox using Eclipse ADT or abapGit, running local syntax checks and ATC variants before any transport request is assigned.

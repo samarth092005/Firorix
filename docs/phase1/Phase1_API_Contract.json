@@ -1,0 +1,65 @@
+{
+  "method": "POST",
+  "path": "/api/v1/tcode-search",
+  "mode": "MOCK",
+  "request": {
+    "systemId": "S4H-DEV-200",
+    "tcode": "ME21N",
+    "language": "EN"
+  },
+  "response_example": {
+    "requestId": "DEMO-000001",
+    "mode": "MOCK",
+    "system": {
+      "systemId": "S4H-DEV-200",
+      "systemName": "S/4HANA Development (Demo)",
+      "client": "200",
+      "release": "S4HANA_2023_FPS_DEMO"
+    },
+    "transaction": {
+      "tcode": "ME21N",
+      "exists": true,
+      "classification": "STANDARD",
+      "description": "Synthetic demo description",
+      "program": "SAPLMEGUI_DEMO",
+      "screenNumber": "0100",
+      "metadataStatus": "COMPLETE",
+      "evidence": [
+        "TSTC fixture",
+        "TSTCT fixture",
+        "repository fixture"
+      ]
+    },
+    "matching": {
+      "status": "MATCH_FOUND",
+      "candidates": [
+        {
+          "appId": "DEMO_APP_PO_001",
+          "appName": "Purchase Order Workbench (Demo)",
+          "appType": "TRANSACTIONAL",
+          "productVersion": "S4HANA_2023_FPS_DEMO",
+          "matchType": "DIRECT_MATCH",
+          "matchEvidence": [
+            "Exact T-Code association in synthetic demo catalogue"
+          ],
+          "catalogueStatus": "CATALOGUE_FOUND",
+          "descriptorStatus": "NOT_CHECKED",
+          "accessStatus": "NOT_CHECKED",
+          "sourceLabel": "Synthetic Fiori catalogue fixture"
+        }
+      ]
+    },
+    "overallStatus": "VERIFIED"
+  },
+  "status_codes": [
+    "INVALID_INPUT",
+    "SYSTEM_NOT_CONFIGURED",
+    "CONNECTION_ERROR",
+    "ACCESS_DENIED",
+    "NOT_FOUND",
+    "METADATA_INCOMPLETE",
+    "NO_VERIFIED_MATCH",
+    "MATCH_FOUND"
+  ],
+  "note": "Example only. Synthetic data; not a live SAP response."
+}

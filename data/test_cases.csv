@@ -1,0 +1,16 @@
+﻿test_id,input,expected_transaction,expected_classification,expected_match,expected_status,purpose
+T01,ME21N,EXISTS,STANDARD,DIRECT_MATCH,MATCH_FOUND,Standard T-Code with direct candidate
+T02,VA01,EXISTS,STANDARD,DIRECT_MATCH,MATCH_FOUND,Second standard T-Code with direct candidate
+T03,ZPURCHASE,EXISTS,CUSTOM,RELATED_MATCH,MATCH_FOUND,Custom T-Code with curated related candidate
+T04,ZREPORT01,EXISTS,CUSTOM,NO_VERIFIED_MATCH,NO_VERIFIED_MATCH,Existing custom T-Code without app mapping
+T05,ZNOMATCH,EXISTS,STANDARD,NO_VERIFIED_MATCH,NO_VERIFIED_MATCH,Existing standard T-Code without app mapping
+T06,ZINCOMPLETE,EXISTS,CUSTOM,NO_VERIFIED_MATCH,METADATA_INCOMPLETE,Exists despite missing optional metadata
+T07,ZINVALID,NOT_FOUND,N/A,NOT_RUN,NOT_FOUND,Absent T-Code; successful lookup
+T08,ZCONNERR,NOT_CHECKED,N/A,NOT_RUN,CONNECTION_ERROR,Connection failure must not become not found
+T09,ZDENIED,NOT_CHECKED,N/A,NOT_RUN,ACCESS_DENIED,Authorization failure
+T10,,NOT_CHECKED,N/A,NOT_RUN,INVALID_INPUT,Blank input
+T11,  me21n  ,EXISTS,STANDARD,DIRECT_MATCH,MATCH_FOUND,Trim and uppercase normalization
+T12,ME21N,EXISTS,STANDARD,DIRECT_MATCH,MATCH_FOUND,Incompatible release candidate excluded
+T13,ME21N,EXISTS,STANDARD,DIRECT_MATCH,MATCH_FOUND,Evidence and source label present
+T14,ME21N,EXISTS,STANDARD,DIRECT_MATCH,MATCH_FOUND,No keyword-only match
+T15,ME21N,NOT_CHECKED,N/A,NOT_RUN,SYSTEM_NOT_CONFIGURED,Unknown system

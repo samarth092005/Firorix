@@ -1,0 +1,124 @@
+{
+  "totalRecords": 272,
+  "uniqueApplicationIds": 272,
+  "duplicateRecordsCount": 0,
+  "sourceDistribution": {
+    "OFFICIAL_FAL_EXPORT": 25,
+    "OFFICIAL_CATALOGUE_LIVE": 247
+  },
+  "recordsByProductSuite": {
+    "SAP_S4HANA_ON_PREMISE": 35,
+    "SAP_S4HANA_CLOUD_PRIVATE": 224,
+    "SAP_S4HANA_CLOUD_PUBLIC": 10,
+    "SAP_BUSINESS_SUITE": 3
+  },
+  "recordsByAppType": {
+    "Transactional": 56,
+    "SAP GUI": 202,
+    "Fact sheet": 4,
+    "Web Dynpro": 7,
+    "Analytical": 1,
+    "SAP Fiori - Remote": 1,
+    "Analytical, BW Query used": 1
+  },
+  "recordsByUiTechnology": {
+    "SAP Fiori elements": 38,
+    "SAP GUI for HTML": 202,
+    "SAP Fiori (SAPUI5)": 22,
+    "SAP Fiori: Generic Job Scheduling Framework": 1,
+    "Web Dynpro": 7,
+    "SAP Fiori (SAPUI5) * SAP Fiori - Remote": 1,
+    "SAP Fiori: Design Studio": 1
+  },
+  "recordsByRelease": {
+    "SAP S/4HANA 2023": 25,
+    "SAP S/4HANA Cloud Private Edition 2025": 224,
+    "SAP S/4HANA Cloud Public Edition 2608": 10,
+    "SAP S/4HANA 1909": 2,
+    "SAP enhancement package 8 for SAP ERP 6.0| SAP Fiori principal apps 1.0 for SAP ERP": 1,
+    "SAP S/4HANA 2022": 2,
+    "SAP S/4HANA 1610": 2,
+    "SAP S/4HANA 1709": 2,
+    "SAP S/4HANA 2020": 1,
+    "SAP S/4HANA 2021": 1,
+    "SAP enhancement package 7 for SAP ERP 6.0| SAP enhancement package 8 for SAP ERP 6.0": 2
+  },
+  "recordsWithMissingCriticalMetadata": {
+    "totalRecordsAnalyzed": 272,
+    "missingOData": 225,
+    "missingBusinessRole": 0,
+    "missingDescription": 0
+  },
+  "lastSuccessfulImport": "2026-11-10T12:42:00.898Z",
+  "sourceVersion": "S4HANA_2023_FPS02_OFFICIAL",
+  "targetRelease": "SAP S/4HANA 2023 On-Premise",
+  "liveSourceStatus": "OFFICIAL_EXPORT_IMPORTED",
+  "importStatus": "SUCCESS",
+  "lastImportSummary": {
+    "success": true,
+    "dryRun": false,
+    "totalRecords": 25,
+    "importedCount": 5,
+    "updatedCount": 20,
+    "skippedCount": 0,
+    "rejectedCount": 0,
+    "conflicts": [
+      {
+        "appId": "F1612",
+        "conflictType": "EXISTING_RECORD_UPDATED",
+        "message": "Existing record for F1612 updated with new attributes from import.",
+        "oldValues": {
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "appType": "Transactional"
+        },
+        "newValues": {
+          "uiTechnology": "SAP Fiori elements",
+          "appType": "Transactional"
+        }
+      },
+      {
+        "appId": "F1345",
+        "conflictType": "EXISTING_RECORD_UPDATED",
+        "message": "Existing record for F1345 updated with new attributes from import.",
+        "oldValues": {
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "appType": "Transactional"
+        },
+        "newValues": {
+          "uiTechnology": "SAP Fiori elements",
+          "appType": "Transactional"
+        }
+      },
+      {
+        "appId": "F0718",
+        "conflictType": "EXISTING_RECORD_UPDATED",
+        "message": "Existing record for F0718 updated with new attributes from import.",
+        "oldValues": {
+          "uiTechnology": "SAP Fiori (SAPUI5)",
+          "appType": "Transactional"
+        },
+        "newValues": {
+          "uiTechnology": "SAP Fiori elements",
+          "appType": "Transactional"
+        }
+      },
+      {
+        "appId": "F0731",
+        "conflictType": "EXISTING_RECORD_UPDATED",
+        "message": "Existing record for F0731 updated with new attributes from import.",
+        "oldValues": {
+          "uiTechnology": "Web Dynpro",
+          "appType": "Web Dynpro"
+        },
+        "newValues": {
+          "uiTechnology": "SAP Fiori elements",
+          "appType": "Transactional"
+        }
+      }
+    ],
+    "errors": [],
+    "provenance": "OFFICIAL_FAL_EXPORT",
+    "sourceVersion": "S4HANA_2023_FPS02_OFFICIAL",
+    "timestamp": "2026-11-10T12:42:00.898Z"
+  }
+}

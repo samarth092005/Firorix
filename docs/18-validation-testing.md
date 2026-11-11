@@ -1,15 +1,46 @@
-# Validation and Testing
-Statuses: PASS, FAIL, WARNING, NOT_EXECUTED, REQUIRES_HUMAN_REVIEW.
+# Validation & Testing Architecture
+**Document Version:** 2.0.0  
+**Status:** ARCHITECTURALLY CONFIRMED  
 
-Test layers:
-1. Unit: CAP logic, fit-gap, decision rules, schemas.
-2. Contract: ADT adapter, destination, OData metadata, API schemas.
-3. Integration: CAP/HANA, workers, SAP connectivity, storage.
-4. UI: navigation, forms, tables, side panels and role visibility.
-5. Security: access control, IDOR, injection, uploads, secrets and tokens.
-6. Resilience: SAP unavailable, timeout, retry, duplicate job, worker restart, storage failure.
-7. Acceptance: functional consultant, ABAP developer and architect review.
+## 1. Multi-Layer Testing Architecture
 
-SAP-side checks: object existence, CDS syntax/activation in DEV, service binding and OData metadata, ATC/ABAP Unit where configured, generated UI against real service.
+```
+Layer 7: Stakeholder Acceptance (Functional Consultant & Architect Sign-off)
+   ▲
+Layer 6: SAP Sandbox Activation (Manual developer import via ADT / abapGit)
+   ▲
+Layer 5: Clean Core Tier 1 Validation (AST linting, C1 released CDS checks, auth checks)
+   ▲
+Layer 4: End-to-End Browser Journey (Playwright / wdi5 across 6 primary navigation areas)
+   ▲
+Layer 3: Integration Tests (CAP OData V4 services + SQLite / HANA container + Destination mock)
+   ▲
+Layer 2: Contract & Schema Tests (OpenAPI, JSON Schema, and CDS AST validation)
+   ▲
+Layer 1: Unit Tests (Vitest: fit-gap scoring rules, state machine transitions, parser logic)
+```
 
-A ZIP build or frontend compilation is not proof of deployable SAP app. SAP-side activation and service testing are required.
+---
+
+## 2. Validation Centre Compliance Categories
+
+The Validation Centre evaluates generated draft artifacts against four mandatory categories:
+
+1. **`CLEAN_CORE` (Tier 1 Extensibility):**
+   - Verifies that all entity associations target C1-released SAP Core Data Services views (e.g. `I_SalesOrder`, `I_Customer`).
+   - Verifies zero direct modification or select from unreleased standard SAP tables.
+2. **`ARCHITECTURE`:**
+   - Verifies OData V4 protocol usage for SAP Fiori Elements floorplans (`sap.fe.templates`).
+   - Verifies naming conventions (`Z_I_*` for basic views, `Z_C_*` for consumption views, `ZSD_*` for service definitions).
+3. **`SECURITY`:**
+   - Verifies that root CDS view entities declare `@AccessControl.authorizationCheck: #CHECK`.
+   - Verifies that corresponding Access Control (`.dcl`) files are generated.
+4. **`RELEASE_COMPATIBILITY`:**
+   - Verifies that modern CDS syntax (`DEFINE ROOT VIEW ENTITY`) is used for S/4HANA 2020+ target systems, rejecting deprecated DDIC-based `DEFINE VIEW`.
+
+---
+
+## 3. Client-Side vs. SAP-Side Verification Boundary
+
+- **Client-Side Verification (Sprints 1–13):** Executed by FioriX offline using AST parsers, schema validators, and linter engines. Returns `PASS`, `WARNING`, `FAIL`, or `NOT_RUN`.
+- **SAP-Side Verification (Post-Export / Manual Dev Sandbox):** Executed manually by ABAP developers in an isolated S/4HANA DEV sandbox via ADT or abapGit. FioriX does not perform automated activation or CTS transport creation.

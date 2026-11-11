@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build artifacts
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Environment variables and secrets (Strictly ignored)
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Databases & local postgres clusters
+*.db
+*.sqlite
+*.sqlite3
+.cds-services.json
+**/backups/
+**/quarantine/
+backend/data/backups/
+backend/data/db/
+backend/data/embedded-postgres/
+backend/data/pg_data/
+backend/data/quarantine/
+backend/data/generation-projects/
+backend/data/artifacts/
+backend/data/generated_sample_fiori_app/
+data/db/
+data/artifacts/
+data/generated_sample_fiori_app/
+
+# Temp, lock, and backup runtime files
+*.tmp
+*.tmp.*
+*.bak
+*.bak.*
+*.lock
+*.lock.*
+
+# Export bundles & transient media
+backend/exports/
+docs/foundation.zip
+screenshot_*.png
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Editor and OS files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db

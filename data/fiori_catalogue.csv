@@ -1,0 +1,8 @@
+app_id,app_name,app_type,ui_technology,product_version,software_component,source_label,source_status,descriptor_status,access_status
+DEMO_APP_PO_001,Purchase Order Workbench (Demo),TRANSACTIONAL,SAP Fiori elements,S4HANA_2023_FPS_DEMO,S4CORE 108,Synthetic Fiori catalogue fixture,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED
+DEMO_APP_SO_001,Sales Order Processing (Demo),TRANSACTIONAL,SAP Fiori elements,S4HANA_2023_FPS_DEMO,S4CORE 108,Synthetic Fiori catalogue fixture,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED
+DEMO_APP_PUR_002,Purchase Request Monitor (Demo),ANALYTICAL,SAPUI5 freestyle,S4HANA_2023_FPS_DEMO,S4CORE 108,Synthetic Fiori catalogue fixture,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED
+DEMO_APP_OLD_001,Legacy Purchasing Overview (Demo),TRANSACTIONAL,SAP Fiori elements,S4HANA_2020_DEMO,S4CORE 105,Synthetic Fiori catalogue fixture,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED
+F3616,Currency Exchange Rates,TRANSACTIONAL,SAP Fiori elements,SAP Fiori for SAP S/4HANA 2023,S4CORE 108,Official SAP Fiori Apps Reference Library,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED
+FB03,Display Document,TRANSACTIONAL,SAP GUI for HTML,SAP Fiori for SAP S/4HANA 2023,S4CORE 108,Official SAP Fiori Apps Reference Library,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED
+F0717,Manage Journal Entries,TRANSACTIONAL,SAP Fiori elements,SAP Fiori for SAP S/4HANA 2023,S4CORE 108,Official SAP Fiori Apps Reference Library,VERIFIED_DEMO_FIXTURE,NOT_CHECKED,NOT_CHECKED

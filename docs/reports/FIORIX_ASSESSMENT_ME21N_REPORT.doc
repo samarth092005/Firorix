@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+  <meta charset='utf-8'>
+  <title>FioriX Assessment Report - ME21N</title>
+  <style>
+    body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11pt; color: #1B2838; line-height: 1.5; margin: 30px; }
+    h1 { color: #003A8C; font-size: 20pt; border-bottom: 2pt solid #0066FF; padding-bottom: 6px; }
+    h2 { color: #102A43; font-size: 14pt; margin-top: 20px; border-bottom: 1pt solid #D9E2EC; padding-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 14px; }
+    th { background-color: #F0F4F8; color: #102A43; font-weight: bold; border: 1pt solid #CBD2D9; padding: 6px 10px; text-align: left; }
+    td { border: 1pt solid #CBD2D9; padding: 6px 10px; font-size: 10pt; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 9pt; background-color: #EFF6FF; color: #0066FF; border: 1pt solid #BFDBFE; }
+  </style>
+</head>
+<body>
+  <h1>SAP Transaction Modernization Assessment — ME21N</h1>
+  <p><strong>Platform:</strong> FioriX Enterprise Discovery Platform &nbsp;|&nbsp; <strong>Target Landscape:</strong> S21 Client 200 (SAP S/4HANA 2023 Private Edition)</p>
+  <p><strong>Report Date:</strong> 2026-11-08 &nbsp;|&nbsp; <strong>Assessment ID:</strong> ASM-S21-ME21N &nbsp;|&nbsp; <strong>Status:</strong> <span class="badge">APPROVED</span></p>
+
+  <h2>1. Executive Summary</h2>
+  <table>
+    <tr><th>Attribute</th><th>Finding</th></tr>
+    <tr><td><strong>Transaction Code</strong></td><td>ME21N (Create Purchase Order)</td></tr>
+    <tr><td><strong>Classification</strong></td><td>STANDARD (Package: ME, Component: S4CORE 108)</td></tr>
+    <tr><td><strong>Outcome / Decision</strong></td><td><strong>ADOPT</strong> — Standard Clean Core Fiori Successor</td></tr>
+    <tr><td><strong>Recommended Fiori App</strong></td><td>F0842A (Manage Purchase Orders)</td></tr>
+    <tr><td><strong>UI Technology</strong></td><td>SAP Fiori elements</td></tr>
+    <tr><td><strong>Release Compatibility</strong></td><td>COMPATIBLE (S4CORE 108 SP0003)</td></tr>
+    <tr><td><strong>Evidence Score</strong></td><td>88/100 (COMPLETE)</td></tr>
+    <tr><td><strong>Provenance</strong></td><td>AUTHORITATIVE_DDIC_SNAPSHOT (Verified SAP S/4HANA 2023 DDIC)</td></tr>
+  </table>
+
+  <h2>2. SAP Transaction Technical Profile (DDIC)</h2>
+  <table>
+    <tr><th>DDIC Table</th><th>Field / Parameter</th><th>Extracted Value</th><th>Status</th></tr>
+    <tr><td>TSTC</td><td>TCODE</td><td>ME21N</td><td>VERIFIED</td></tr>
+    <tr><td>TSTCT</td><td>TTEXT</td><td>Create Purchase Order</td><td>VERIFIED</td></tr>
+    <tr><td>TSTC</td><td>PGMNA (Main Program)</td><td>SAPLMEGUI</td><td>VERIFIED</td></tr>
+    <tr><td>TSTC</td><td>DYPNO (Screen Number)</td><td>1000</td><td>VERIFIED</td></tr>
+    <tr><td>TADIR</td><td>DEVCLASS (Package)</td><td>ME</td><td>VERIFIED</td></tr>
+    <tr><td>TDEVC / CVERS</td><td>COMPONENT</td><td>S4CORE 108</td><td>VERIFIED</td></tr>
+  </table>
+
+  <h2>3. Fiori Candidate Matching &amp; Comparison</h2>
+  <table>
+    <tr><th>App ID</th><th>Application Title</th><th>UI Technology</th><th>Clean Core Status</th><th>Supported Releases</th></tr>
+    <tr><td><strong>F0842A</strong></td><td>Manage Purchase Orders</td><td>SAP Fiori elements</td><td>GREEN (Native Fiori)</td><td>SAP S/4HANA 2023, 2022, 2021</td></tr>
+    <tr><td><strong>ME21N</strong></td><td>Create Purchase Order (WebGUI)</td><td>SAP GUI for HTML</td><td>AMBER (Dynpro Wrapper)</td><td>SAP S/4HANA 2023, 2022</td></tr>
+  </table>
+
+  <h2>4. Fit-Gap Matrix</h2>
+  <table>
+    <tr><th>Req ID</th><th>Capability</th><th>Status</th><th>Coverage Details</th></tr>
+    <tr><td>REQ-01</td><td>Multi-Line PO Creation</td><td>SUPPORTED</td><td>Standard Fiori elements app F0842A covers functional baseline.</td></tr>
+    <tr><td>REQ-02</td><td>Approval Workflow</td><td>SUPPORTED</td><td>Flexible Workflow for POs supported natively in S4CORE 108.</td></tr>
+    <tr><td>REQ-03</td><td>Release Compatibility</td><td>SUPPORTED</td><td>Target release SAP S/4HANA 2023 verified compatible.</td></tr>
+    <tr><td>REQ-04</td><td>Screen Enhancements</td><td>PARTIAL</td><td>Custom Dynpro fields require Key User Extensibility migration.</td></tr>
+  </table>
+
+  <h2>5. Recommendation &amp; Governance Next Steps</h2>
+  <p><strong>Action:</strong> Adopt standard SAP Fiori elements application Manage Purchase Orders (F0842A) as primary modern successor for classic transaction ME21N.</p>
+  <ul>
+    <li>Basis Team: Activate Gateway service MM_PUR_PO_MAINT_V2_SRV in Client 200.</li>
+    <li>Security Team: Assign SAP_BR_PURCHASER to procurement personnel in FLP Content Manager.</li>
+    <li>Functional Team: Execute UAT comparing account-assignment lines against legacy ME21N.</li>
+  </ul>
+</body>
+</html>

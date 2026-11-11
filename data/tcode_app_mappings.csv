@@ -1,0 +1,10 @@
+mapping_id,system_id,tcode,app_id,match_type,rationale,review_status,release_compatibility
+MAP-001,S4H-DEV-200,ME21N,DEMO_APP_PO_001,DIRECT_MATCH,Exact T-Code association in synthetic demo catalogue.,APPROVED_FOR_DEMO,COMPATIBLE
+MAP-002,S4H-DEV-200,VA01,DEMO_APP_SO_001,DIRECT_MATCH,Exact T-Code association in synthetic demo catalogue.,APPROVED_FOR_DEMO,COMPATIBLE
+MAP-003,S4H-DEV-200,ZPURCHASE,DEMO_APP_PUR_002,RELATED_MATCH,Curated demo mapping: related purchasing workflow; equivalence is not established.,APPROVED_FOR_DEMO,COMPATIBLE
+MAP-004,S4H-DEV-200,ME21N,DEMO_APP_OLD_001,POSSIBLE_MATCH,Legacy candidate intentionally incompatible with selected demo release.,APPROVED_FOR_DEMO,INCOMPATIBLE
+MAP-005,S4H-DEV-200,OB08,F3616,EXPLICIT_SUCCESSOR,SAP-designated successor confirmed: Currency Exchange Rates (F3616).,APPROVED_FOR_DEMO,COMPATIBLE
+MAP-006,S4H-DEV-200,FB03,FB03,SAP_GUI_HTML,Classic SAP GUI transaction hosted in Fiori Launchpad via SAP GUI for HTML.,APPROVED_FOR_DEMO,COMPATIBLE
+MAP-007,S4H-DEV-200,FBL1N,PENDING,CATALOGUE_PENDING_VERIFICATION,TSTC and TSTCT verified. TADIR classification and official Fiori catalogue matching remain pending.,PENDING_VERIFICATION,UNKNOWN
+MAP-008,S4H-DEV-200,FB01,F0717,FUNCTIONAL_ALTERNATIVE,Related standard application available (Manage Journal Entries); functional alternative rather than direct screen successor.,APPROVED_FOR_DEMO,COMPATIBLE
+MAP-009,S4H-DEV-200,ZNOAPP,NONE,NO_STANDARD_APP_EXISTS,Verified absence: Official SAP Fiori for S/4HANA 2023 catalogue audited with no standard application for this transaction.,APPROVED_FOR_DEMO,COMPATIBLE

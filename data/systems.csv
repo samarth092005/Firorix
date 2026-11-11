@@ -1,0 +1,5 @@
+system_id,system_name,client,release_label,mode,active
+S21-200,S21 S/4HANA 2023 Private Edition (Live),200,SAP S/4HANA 2023 (S4CORE 108),LIVE_SAP,1
+S21-200-DEMO,S21 S/4HANA 2023 Private Edition (Demo),200,SAP S/4HANA 2023 (S4CORE 108),MOCK,1
+S4H-DEV-200,S/4HANA Development (Demo),200,S4HANA_2023_FPS_DEMO,MOCK,1
+S4H-QAS-200,S/4HANA Quality (Demo),200,S4HANA_2023_FPS_DEMO,MOCK,1

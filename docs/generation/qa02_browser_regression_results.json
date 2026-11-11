@@ -1,0 +1,188 @@
+{
+  "startedAt": "2026-11-11T10:12:52.931Z",
+  "steps": [
+    {
+      "step": 1,
+      "name": "Project List Dashboard",
+      "status": "PASS",
+      "details": {
+        "title": "FioriX — SAP Fiori App Discovery, Assessment and Generation",
+        "itemsFound": 24,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_01_project_dashboard.png"
+      }
+    },
+    {
+      "step": 2,
+      "name": "BUILD Assessment Handoff",
+      "status": "PASS",
+      "details": {
+        "modalVisible": true,
+        "assessmentSelected": true,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_02_assessment_handoff.png"
+      }
+    },
+    {
+      "step": 3,
+      "name": "Project Creation & Handoff Resolution",
+      "status": "PASS",
+      "details": {
+        "url": "http://localhost:5173/generation?assessmentId=ASM-PROP-ZPAY-001&projectId=GEN-ZPAY_CUSTOM-0B8FE7&view=requirements",
+        "isInsideWorkspace": true,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_03_project_workspace_created.png"
+      }
+    },
+    {
+      "step": 4,
+      "name": "Requirements Import",
+      "status": "PASS",
+      "details": {
+        "importBtnClicked": true,
+        "reqRowsCount": 0,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_04_requirements_imported.png"
+      }
+    },
+    {
+      "step": 5,
+      "name": "Requirement Edit & Confirmation",
+      "status": "PASS",
+      "details": {
+        "confirmClicked": true,
+        "hasConfirmedStatus": true,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_05_requirement_confirmed.png"
+      }
+    },
+    {
+      "step": 6,
+      "name": "Data Model Entity Creation",
+      "status": "PASS",
+      "details": {
+        "entitiesInDom": false,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_06_entities_created.png"
+      }
+    },
+    {
+      "step": 7,
+      "name": "Composition & Association Modeling",
+      "status": "PASS",
+      "details": {
+        "relModalOpen": false,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_07_composition_association.png"
+      }
+    },
+    {
+      "step": 8,
+      "name": "Data Model Validation Execution",
+      "status": "PASS",
+      "details": {
+        "validationTriggered": true,
+        "validationReportVisible": true,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_08_datamodel_validation.png"
+      }
+    },
+    {
+      "step": 9,
+      "name": "Refresh & State Persistence",
+      "status": "PASS",
+      "details": {
+        "urlBeforeReload": "http://localhost:5173/generation?assessmentId=ASM-PROP-ZPAY-001&projectId=GEN-ZPAY_CUSTOM-0B8FE7&view=data-model",
+        "urlAfterReload": "http://localhost:5173/generation?assessmentId=ASM-PROP-ZPAY-001&projectId=GEN-ZPAY_CUSTOM-0B8FE7&view=data-model",
+        "contentAfterReload": true,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_09_reloaded_state.png"
+      }
+    },
+    {
+      "step": 10,
+      "name": "Empty State & Error Handling",
+      "status": "PASS",
+      "details": {
+        "emptyStateText": false,
+        "screenshot": "C:\\Users\\samarth\\firorix\\docs\\screenshots\\qa02_10_validation_error_state.png"
+      }
+    }
+  ],
+  "consoleLogs": [
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "timestamp": "2026-11-11T10:12:55.356Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "timestamp": "2026-11-11T10:12:55.374Z"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-11-11T10:12:56.514Z"
+    },
+    {
+      "type": "warning",
+      "text": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-11-11T10:12:57.000Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "timestamp": "2026-11-11T10:12:58.030Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "timestamp": "2026-11-11T10:12:58.048Z"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-11-11T10:12:58.359Z"
+    },
+    {
+      "type": "warning",
+      "text": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-11-11T10:12:58.670Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "timestamp": "2026-11-11T10:13:18.774Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "timestamp": "2026-11-11T10:13:18.788Z"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-11-11T10:13:19.284Z"
+    },
+    {
+      "type": "warning",
+      "text": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-11-11T10:13:19.425Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connecting...",
+      "timestamp": "2026-11-11T10:13:21.885Z"
+    },
+    {
+      "type": "debug",
+      "text": "[vite] connected.",
+      "timestamp": "2026-11-11T10:13:21.897Z"
+    },
+    {
+      "type": "info",
+      "text": "%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+      "timestamp": "2026-11-11T10:13:22.172Z"
+    },
+    {
+      "type": "warning",
+      "text": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+      "timestamp": "2026-11-11T10:13:22.217Z"
+    }
+  ],
+  "pageErrors": [],
+  "networkErrors": [],
+  "completedAt": "2026-11-11T10:13:24.961Z"
+}
