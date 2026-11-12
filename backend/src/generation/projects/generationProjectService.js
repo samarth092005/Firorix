@@ -56,12 +56,28 @@ export class GenerationProjectService {
       };
     }
 
-    // 2. Server-authoritative approval check on the assessment record itself
-    const isApproved = Boolean(
+    // 2. Server-authoritative approval check on the assessment record itself or associated handoffs
+    let isApproved = Boolean(
       assessment.lifecycleStatus === LIFECYCLE_STATES.APPROVED ||
       assessment.leadArchitectApproval?.approved === true ||
       assessment.approvalStatus === 'APPROVED'
     );
+
+    // If not marked on assessment directly, check if a valid approved handoff exists for this assessment
+    if (!isApproved && this.handoffStore && typeof this.handoffStore.listHandoffs === 'function') {
+      try {
+        const handoffs = await this.handoffStore.listHandoffs({ assessmentId: assessment.id });
+        const approvedHandoff = handoffs.find((h) => h.approvalStatus === 'APPROVED' || h.leadArchitectApproval?.approved === true);
+        if (approvedHandoff) {
+          isApproved = true;
+          if (!assessment.leadArchitectApproval) {
+            assessment.leadArchitectApproval = approvedHandoff.leadArchitectApproval;
+          }
+        }
+      } catch {
+        // non-blocking
+      }
+    }
 
     if (!isApproved) {
       return {
@@ -78,11 +94,20 @@ export class GenerationProjectService {
   }
 
   /**
-   * P1-C: Creates a Generation Studio Project from an approved Discovery BUILD assessment.
-   * Enforces idempotency: if a project already exists for this assessment, returns it.
+   * P1-C: Creates a Generation Studio Project from an approved Discovery BUILD assessment or handoff.
+   * Enforces idempotency: if a project already exists for this assessment or handoff, returns it.
    */
   async createProjectFromHandoff(payload = {}, userContext = null) {
-    const assessmentId = payload.sourceAssessmentId || payload.assessmentId;
+    let handoffRecord = null;
+    if (payload.handoffId && this.handoffStore && typeof this.handoffStore.getHandoff === 'function') {
+      try {
+        handoffRecord = await this.handoffStore.getHandoff(payload.handoffId);
+      } catch {
+        // non-blocking lookup
+      }
+    }
+
+    const assessmentId = payload.sourceAssessmentId || payload.assessmentId || handoffRecord?.sourceAssessmentId;
 
     const validation = await this.validateAssessmentForBuildHandoff(assessmentId, userContext);
     if (!validation.isValid) {
@@ -93,9 +118,12 @@ export class GenerationProjectService {
 
     const assessment = validation.assessment;
 
-    // Idempotency check: see if a project already exists for this source assessment
+    // Idempotency check: see if a project already exists for this source assessment or handoff
     const existingProjects = await this.projectStore.listProjects({ pageSize: 500 });
-    const match = existingProjects.projects.find((p) => p.sourceAssessmentId === assessment.id);
+    const match = existingProjects.projects.find(
+      (p) => p.sourceAssessmentId === assessment.id ||
+             (payload.handoffId && (p.handoffId === payload.handoffId || p.assessmentContext?.handoffId === payload.handoffId))
+    );
 
     if (match) {
       return {
@@ -143,6 +171,114 @@ export class GenerationProjectService {
     const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     const projectId = payload.projectId || `GEN-${sourceTCode}-${randSuffix}`;
 
+    const cleanTcode = sourceTCode.replace(/[^A-Z0-9]/gi, '') || 'APP';
+    const rootEntityName = `Z_I_${cleanTcode}`;
+
+    // Pre-populate initial requirements from discovery facts
+    const initialRequirements = [
+      {
+        requirementId: `REQ-${cleanTcode}-001`,
+        title: `Modernize ${sourceTCode} (${assessment.description || 'Core Business Transaction'})`,
+        category: 'FUNCTIONAL',
+        priority: 'MUST_HAVE',
+        status: 'CONFIRMED',
+        sourceType: 'ASSESSMENT_IMPORT',
+        source: 'ASSESSMENT_IMPORT',
+        description: `Replace legacy SAP GUI transaction ${sourceTCode} with modern SAP Fiori Elements List Report and Object Page application.`,
+        acceptanceCriteria: [
+          `User can search and filter ${sourceTCode} records responsively.`,
+          `User can inspect record details with responsive facets on Object Page.`,
+          `Transactional processing handled via OData V4 service with draft capability.`
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      {
+        requirementId: `REQ-${cleanTcode}-002`,
+        title: 'Clean Core RAP Managed Architecture',
+        category: 'TECHNICAL',
+        priority: 'MUST_HAVE',
+        status: 'CONFIRMED',
+        sourceType: 'ASSESSMENT_IMPORT',
+        source: 'ASSESSMENT_IMPORT',
+        description: 'Implement ABAP RESTful Application Programming Model (RAP) Managed Scenario under Clean Core Tier 2 Cloud developer contract.',
+        acceptanceCriteria: [
+          'Root CDS view entity with standard audit fields (CreatedBy, CreatedAt, LastChangedAt).',
+          'Draft-enabled behavior definition with locking and early numbering.',
+          'Service definition and V4 service binding exposed for Fiori Elements.'
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    if (Array.isArray(identifiedGaps)) {
+      identifiedGaps.forEach((gap, idx) => {
+        const gapTitle = typeof gap === 'string' ? gap : (gap.gapTitle || gap.description || `Gap ${idx + 1}`);
+        initialRequirements.push({
+          requirementId: `REQ-${cleanTcode}-GAP-${idx + 1}`,
+          title: `Custom Requirement: ${gapTitle.slice(0, 60)}`,
+          category: 'BUSINESS',
+          priority: 'SHOULD_HAVE',
+          status: 'CONFIRMED',
+          sourceType: 'ASSESSMENT_IMPORT',
+          source: 'ASSESSMENT_IMPORT',
+          description: gapTitle,
+          acceptanceCriteria: [
+            `Verify custom business rule for "${gapTitle.slice(0, 40)}" in RAP validation/action.`
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      });
+    }
+
+    // Pre-populate starter Clean Core data model
+    const starterDataModel = {
+      specVersion: 1,
+      rootEntity: rootEntityName,
+      entities: [
+        {
+          id: `ENT-${cleanTcode}-ROOT`,
+          name: rootEntityName,
+          description: assessment.description || `${sourceTCode} Header Entity`,
+          isRoot: true,
+          entityType: 'ROOT',
+          fields: [
+            { id: 'FLD-UUID', name: 'NodeUUID', abapType: 'UUID', isKey: true, isMandatory: true, semanticRole: 'IDENTIFIER', description: 'Technical Primary Key' },
+            { id: 'FLD-ID', name: `${cleanTcode}ID`, abapType: 'CHAR', length: 10, isKey: false, isMandatory: true, semanticRole: 'BUSINESS_KEY', description: 'Business Identifier' },
+            { id: 'FLD-DESC', name: 'Description', abapType: 'CHAR', length: 120, isKey: false, isMandatory: false, semanticRole: 'TEXT', description: 'Record Description' },
+            { id: 'FLD-STATUS', name: 'StatusCode', abapType: 'CHAR', length: 4, isKey: false, isMandatory: false, semanticRole: 'STATUS', description: 'Overall Status' },
+            { id: 'FLD-CRDAT', name: 'CreatedAt', abapType: 'DATS', isKey: false, isMandatory: false, semanticRole: 'CREATED_AT', description: 'Creation Date' },
+            { id: 'FLD-CRUSR', name: 'CreatedBy', abapType: 'CHAR', length: 12, isKey: false, isMandatory: false, semanticRole: 'CREATED_BY', description: 'Created By User' },
+            { id: 'FLD-CHGAT', name: 'LastChangedAt', abapType: 'TIMESTAMPL', isKey: false, isMandatory: false, semanticRole: 'LAST_CHANGED_AT', description: 'Last Changed Timestamp' }
+          ],
+          relationships: []
+        }
+      ],
+      relationships: [],
+      validationReport: {
+        isValid: true,
+        summary: { totalEntities: 1, totalFields: 7, totalRelationships: 0, errorCount: 0, warningCount: 0 },
+        issues: []
+      },
+      status: 'DRAFT_IN_PROGRESS'
+    };
+
+    // Pre-populate baseline architecture
+    const starterArchitecture = {
+      specVersion: 1,
+      rapScenario: payload.architectureBaseline?.backendModel || handoffRecord?.architectureBaseline?.backendModel || 'RAP_MANAGED',
+      odataVersion: payload.architectureBaseline?.odataVersion || handoffRecord?.architectureBaseline?.odataVersion || 'ODATA_V4',
+      uiPattern: payload.architectureBaseline?.uiPattern || handoffRecord?.architectureBaseline?.uiPattern || 'LIST_REPORT_OBJECT_PAGE',
+      cleanCoreTier: payload.architectureBaseline?.cleanCoreTier || handoffRecord?.architectureBaseline?.cleanCoreTier || 'TIER_2_CLOUD_DEVELOPER',
+      isDraftEnabled: true,
+      rootEntity: rootEntityName,
+      status: 'CONFIGURED'
+    };
+
+    const effectiveHandoffId = payload.handoffId || handoffRecord?.handoffId || `HND-${Date.now()}`;
+
     const projectPayload = {
       projectId,
       tenantId: payload.tenantId || assessment.tenantId || userContext?.tenantId || 'DEFAULT-TENANT-S21',
@@ -150,13 +286,22 @@ export class GenerationProjectService {
       description: payload.description || assessment.description || `Modernization project for SAP transaction ${sourceTCode}`,
       origin: PROJECT_ORIGINS.DISCOVERY_BUILD,
       sourceAssessmentId: assessment.id,
+      handoffId: effectiveHandoffId,
       sourceTransactionCode: sourceTCode,
       sourceSystemId: targetSystemId,
       sourceClient: targetClient,
       targetProduct: 'SAP S/4HANA',
       targetRelease,
       targetDeploymentModel: payload.targetDeploymentModel || TARGET_DEPLOYMENT_MODELS.ON_PREMISE,
+      requirementsSpec: {
+        specVersion: 1,
+        items: initialRequirements,
+        status: 'IN_PROGRESS'
+      },
+      dataModelSpec: starterDataModel,
+      architectureSpec: starterArchitecture,
       assessmentContext: {
+        handoffId: effectiveHandoffId,
         businessDomain,
         programName: technicalEvidenceSummary.programName,
         packageName: technicalEvidenceSummary.packageName,
@@ -256,7 +401,7 @@ export class GenerationProjectService {
    * Routes to assessment handoff or standalone creation based on origin.
    */
   async createProject(payload = {}, userContext = null) {
-    if (payload.origin === PROJECT_ORIGINS.DISCOVERY_BUILD || payload.sourceAssessmentId) {
+    if (payload.origin === PROJECT_ORIGINS.DISCOVERY_BUILD || payload.sourceAssessmentId || payload.handoffId) {
       return await this.createProjectFromHandoff(payload, userContext);
     }
     return await this.createStandaloneProject(payload, userContext);

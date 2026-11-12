@@ -17,7 +17,8 @@ import {
   Key,
   Info,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Sparkles
 } from 'lucide-react';
 import {
   GenerationProject,
@@ -92,6 +93,9 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   const [fieldModalOpen, setFieldModalOpen] = useState<boolean>(false);
   const [relModalOpen, setRelModalOpen] = useState<boolean>(false);
   const [cdsModalOpen, setCdsModalOpen] = useState<boolean>(false);
+  const [suggestModalOpen, setSuggestModalOpen] = useState<boolean>(false);
+  const [isSuggesting, setIsSuggesting] = useState<boolean>(false);
+  const [suggestedModel, setSuggestedModel] = useState<any>(null);
 
   // CDS search state
   const [cdsSearch, setCdsSearch] = useState('');
@@ -391,6 +395,41 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
     }
   };
 
+  // Suggest Data Model from Discovery Evidence
+  const handleSuggestDataModel = async () => {
+    setIsSuggesting(true);
+    setError(null);
+    try {
+      const res = await defaultFrontendGenerationProjectService.suggestDataModel(project.projectId);
+      setSuggestedModel(res.suggestedDataModel);
+      setSuggestModalOpen(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate data model suggestion.');
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
+
+  // Apply Suggested Data Model
+  const handleApplySuggestion = async () => {
+    if (!suggestedModel) return;
+    try {
+      setIsLoading(true);
+      await defaultFrontendGenerationProjectService.saveDataModel(project.projectId, {
+        entities: suggestedModel.entities,
+        relationships: suggestedModel.relationships
+      });
+      setSuggestModalOpen(false);
+      await loadDataModel();
+      await handleValidate();
+      setSuccessMsg('Evidence-driven CDS data model applied successfully!');
+    } catch (err: any) {
+      setError(err.message || 'Failed to apply suggested data model.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
       {/* Top Banner & Validation Controls */}
@@ -422,6 +461,27 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            onClick={handleSuggestDataModel}
+            disabled={isSuggesting}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              background: '#0F172A',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: isSuggesting ? 'not-allowed' : 'pointer'
+            }}
+            title="Derive entities and fields from verified discovery facts"
+          >
+            <Sparkles size={16} color="#38BDF8" /> {isSuggesting ? 'Analyzing Discovery...' : 'Suggest Data Model'}
+          </button>
+
           <button
             onClick={handleValidate}
             disabled={isValidating}
@@ -1058,6 +1118,238 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={() => setCdsModalOpen(false)} style={{ padding: '6px 12px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Suggest Data Model from Discovery Evidence */}
+      {suggestModalOpen && suggestedModel && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '24px'
+          }}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '12px',
+              maxWidth: '850px',
+              width: '100%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                padding: '20px 24px',
+                borderBottom: '1px solid #E2E8F0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#F8FAFC'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Sparkles size={22} color="#0284C7" />
+                <div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#0F172A', margin: 0 }}>
+                    Evidence-Grounded Data Model Suggestion
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#64748B', margin: '4px 0 0 0' }}>
+                    Derived from transaction scope & Clean Core RAP standards for {project.sourceTransactionCode || 'Custom Project'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSuggestModalOpen(false)}
+                style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#94A3B8' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Evidence Provenance Summary Bar */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                <div style={{ padding: '12px', background: '#F1F5F9', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 600 }}>Root Entity</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>{suggestedModel.rootEntity}</div>
+                </div>
+                <div style={{ padding: '12px', background: '#F1F5F9', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 600 }}>Entities Proposed</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>{suggestedModel.entities?.length || 0}</div>
+                </div>
+                <div style={{ padding: '12px', background: '#F0FDF4', borderRadius: '8px', border: '1px solid #BBF7D0' }}>
+                  <div style={{ fontSize: '11px', color: '#166534', textTransform: 'uppercase', fontWeight: 600 }}>Verified / Proven</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#166534', marginTop: '4px' }}>
+                    {suggestedModel.provenanceSummary?.verifiedCount || 0} fields
+                  </div>
+                </div>
+                <div style={{ padding: '12px', background: '#EFF6FF', borderRadius: '8px', border: '1px solid #BFDBFE' }}>
+                  <div style={{ fontSize: '11px', color: '#1E40AF', textTransform: 'uppercase', fontWeight: 600 }}>Inferred / Recommended</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#1E40AF', marginTop: '4px' }}>
+                    {suggestedModel.provenanceSummary?.inferredCount || 0} fields
+                  </div>
+                </div>
+              </div>
+
+              {/* Missing Evidence / Transparency Alert */}
+              {Array.isArray(suggestedModel.missingEvidence) && suggestedModel.missingEvidence.length > 0 && (
+                <div
+                  style={{
+                    padding: '14px 16px',
+                    backgroundColor: '#FFFBEB',
+                    border: '1px solid #FDE68A',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: '#92400E', fontSize: '13px' }}>
+                    <AlertTriangle size={16} /> Missing Live Evidence & Governance Assumptions:
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12px', color: '#78350F' }}>
+                    {suggestedModel.missingEvidence.map((note: string, idx: number) => (
+                      <li key={idx} style={{ marginTop: '2px' }}>{note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Proposed Entities & Fields */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>
+                  Proposed Entities & Field Architecture:
+                </div>
+                {suggestedModel.entities?.map((ent: any, idx: number) => (
+                  <div
+                    key={idx}
+                    style={{
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      backgroundColor: '#FAFAFA'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontWeight: 700, color: '#0284C7', fontSize: '14px' }}>{ent.name}</span>
+                        <span
+                          style={{
+                            fontSize: '11px',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontWeight: 600,
+                            backgroundColor: ent.entityType === 'ROOT' ? '#EFF6FF' : '#F1F5F9',
+                            color: ent.entityType === 'ROOT' ? '#1D4ED8' : '#475569',
+                            border: `1px solid ${ent.entityType === 'ROOT' ? '#BFDBFE' : '#CBD5E1'}`
+                          }}
+                        >
+                          {ent.entityType}
+                        </span>
+                        <span style={{ fontSize: '12px', color: '#64748B' }}>({ent.description})</span>
+                      </div>
+                      <span style={{ fontSize: '12px', color: '#64748B' }}>{ent.fields?.length || 0} Fields</span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {ent.fields?.map((fld: any, fIdx: number) => (
+                        <div
+                          key={fIdx}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 8px',
+                            backgroundColor: '#FFFFFF',
+                            border: '1px solid #E2E8F0',
+                            borderRadius: '4px',
+                            fontSize: '12px'
+                          }}
+                        >
+                          <span style={{ fontWeight: 600, color: fld.isKey ? '#B45309' : '#334155' }}>
+                            {fld.isKey && '🔑 '}{fld.name}
+                          </span>
+                          <span style={{ fontSize: '10px', color: '#64748B', fontFamily: 'monospace' }}>
+                            {fld.type}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '9px',
+                              padding: '1px 4px',
+                              borderRadius: '2px',
+                              backgroundColor: fld.provenance === 'LIVE_SAP_S21' || fld.provenance === 'VERIFIED_LOCAL_METADATA' ? '#DCFCE7' : '#F1F5F9',
+                              color: fld.provenance === 'LIVE_SAP_S21' || fld.provenance === 'VERIFIED_LOCAL_METADATA' ? '#166534' : '#475569'
+                            }}
+                          >
+                            {fld.provenance === 'LIVE_SAP_S21' || fld.provenance === 'VERIFIED_LOCAL_METADATA' ? 'Verified' : 'Inferred'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div
+              style={{
+                padding: '16px 24px',
+                borderTop: '1px solid #E2E8F0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px',
+                backgroundColor: '#F8FAFC'
+              }}
+            >
+              <button
+                onClick={() => setSuggestModalOpen(false)}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #CBD5E1',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: '#475569',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApplySuggestion}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 18px',
+                  backgroundColor: '#0284C7',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#FFFFFF',
+                  cursor: 'pointer'
+                }}
+              >
+                <CheckCircle2 size={16} /> Apply Suggested Data Model
               </button>
             </div>
           </div>

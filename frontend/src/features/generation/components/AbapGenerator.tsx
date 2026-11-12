@@ -130,6 +130,34 @@ export const AbapGenerator: React.FC<AbapGeneratorProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleRegenerateSingle = async () => {
+    if (!selectedArtifactId || !selectedArtifact) return;
+    if (
+      selectedArtifact.manualEditStatus === 'MODIFIED' &&
+      !window.confirm(
+        `Warning: "${selectedArtifact.objectName}" has custom manual modifications. Regenerating will overwrite this specific file with the latest RAP template. Continue?`
+      )
+    ) {
+      return;
+    }
+    setIsSavingEdit(true);
+    setError(null);
+    try {
+      await frontendGenerationProjectService.regenerateAbap(project.projectId, {
+        artifactId: selectedArtifactId,
+        forceOverwrite: true
+      });
+      setSuccessMsg(`Artifact "${selectedArtifact.objectName}" regenerated successfully.`);
+      await loadArtifacts();
+      const updated = await frontendGenerationProjectService.getProject(project.projectId);
+      onProjectUpdated(updated);
+    } catch (err: any) {
+      setError(err.message || 'Failed to regenerate artifact');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header Bar */}
@@ -338,6 +366,28 @@ export const AbapGenerator: React.FC<AbapGeneratorProps> = ({
                   >
                     {copied ? <Check size={14} color="#059669" /> : <Copy size={14} />}
                     {copied ? 'Copied!' : 'Copy Source'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleRegenerateSingle}
+                    disabled={isSavingEdit}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '6px 12px',
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #CBD5E1',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: '#475569',
+                      cursor: isSavingEdit ? 'not-allowed' : 'pointer'
+                    }}
+                    title="Regenerate only this artifact from current model without overwriting others"
+                  >
+                    <RefreshCw size={14} /> Regenerate Artifact
                   </button>
 
                   {selectedArtifact.manualEditStatus === 'MODIFIED' && (

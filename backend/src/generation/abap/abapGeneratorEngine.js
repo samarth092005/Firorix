@@ -91,10 +91,23 @@ export class AbapGeneratorEngine {
     const docs = generateAbapDocumentation(project, architecture, generatedArtifacts);
     generatedArtifacts.push(...docs);
 
+    // Filter to selective target artifact if requested
+    let artifactsToCommit = generatedArtifacts;
+    if (options.artifactId) {
+      const match = generatedArtifacts.filter(
+        (a) => a.artifactId === options.artifactId ||
+               a.filePath === options.artifactId ||
+               a.objectName === options.artifactId
+      );
+      if (match.length > 0) {
+        artifactsToCommit = match;
+      }
+    }
+
     // Commit generated artifacts into the authoritative registry
-    const runRecord = ArtifactRegistry.commitArtifacts(project, generatedArtifacts, {
+    const runRecord = ArtifactRegistry.commitArtifacts(project, artifactsToCommit, {
       forceOverwrite: options.forceOverwrite === true,
-      phase: 'GEN_05_ABAP'
+      phase: options.artifactId ? `GEN_05_SELECTIVE_${options.artifactId}` : 'GEN_05_ABAP'
     });
 
     // Advance project lifecycle status to GENERATED (or READY_FOR_GENERATION if UI still pending)

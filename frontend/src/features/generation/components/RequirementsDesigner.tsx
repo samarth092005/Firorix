@@ -37,6 +37,10 @@ interface RequirementsDesignerProps {
 }
 
 const CATEGORY_LABELS: Record<RequirementCategory, string> = {
+  BUSINESS: 'Business Requirement',
+  FUNCTIONAL: 'Functional Requirement',
+  TECHNICAL: 'Technical / Architecture',
+  NON_FUNCTIONAL: 'Non-Functional (Security/Perf)',
   DATA_READ: 'Data Read / Query',
   DATA_CREATE: 'Data Create / Insert',
   DATA_UPDATE: 'Data Update / Change',

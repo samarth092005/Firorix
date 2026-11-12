@@ -202,6 +202,47 @@ export class GenerationHandoffStore {
       this._handoffs.set(handoffId, handoffRecord);
       await this._persist();
 
+      // Synchronize approval state directly onto the assessment record
+      try {
+        if (assessment.lifecycleStatus === 'RECOMMENDATION_COMPLETED') {
+          await this.assessmentStore.update(
+            assessment.id,
+            { lifecycleStatus: 'PENDING_REVIEW' },
+            actorName,
+            'Submitted for architectural review prior to handoff approval',
+            userContext
+          );
+        }
+        await this.assessmentStore.update(
+          assessment.id,
+          {
+            leadArchitectApproval: handoffRecord.leadArchitectApproval,
+            approvalStatus: 'APPROVED',
+            lifecycleStatus: 'APPROVED',
+            handoffId
+          },
+          actorName,
+          `Synchronized architect approval from generation handoff ${handoffId}`,
+          userContext
+        );
+      } catch (err) {
+        try {
+          await this.assessmentStore.update(
+            assessment.id,
+            {
+              leadArchitectApproval: handoffRecord.leadArchitectApproval,
+              approvalStatus: 'APPROVED',
+              handoffId
+            },
+            actorName,
+            `Recorded architect approval from generation handoff ${handoffId}`,
+            userContext
+          );
+        } catch {
+          // non-blocking
+        }
+      }
+
       // Record audit event in assessment
       try {
         await this.assessmentStore.recordModernizationAction(

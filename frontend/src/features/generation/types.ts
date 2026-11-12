@@ -100,6 +100,10 @@ export interface ProjectSummary {
 // ==========================================
 
 export type RequirementCategory =
+  | 'BUSINESS'
+  | 'FUNCTIONAL'
+  | 'TECHNICAL'
+  | 'NON_FUNCTIONAL'
   | 'DATA_READ'
   | 'DATA_CREATE'
   | 'DATA_UPDATE'

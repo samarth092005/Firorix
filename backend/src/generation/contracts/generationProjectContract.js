@@ -89,6 +89,7 @@ export function createGenerationProjectRecord(input = {}, userContext = null) {
     description: input.description || '',
     origin,
     sourceAssessmentId: input.sourceAssessmentId || null,
+    handoffId: input.handoffId || input.assessmentContext?.handoffId || null,
     sourceTransactionCode: input.sourceTransactionCode ? input.sourceTransactionCode.toUpperCase() : null,
     sourceSystemId: input.sourceSystemId || null,
     sourceClient: input.sourceClient || null,

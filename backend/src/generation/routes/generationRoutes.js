@@ -263,6 +263,21 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
     return true;
   }
 
+  // 9b. POST /api/v1/generation/projects/:projectId/data-model/suggest (or /datamodel/suggest)
+  const suggestMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/(?:data-model|datamodel)\/suggest$/);
+  if (req.method === 'POST' && suggestMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(suggestMatch[1]);
+    try {
+      const payload = await readJsonBody(req);
+      const result = await dataModelService.suggestDataModel(projectId, payload, currentUser);
+      sendJson(res, 200, result);
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
   // 10. GET /api/v1/generation/projects/:projectId/data-model (or /datamodel)
   const dataModelMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/(?:data-model|datamodel)$/);
   if (req.method === 'GET' && dataModelMatch) {

@@ -246,6 +246,51 @@ export class FrontendGenerationProjectService {
   }
 
   // ============================================================
+  // GEN-01 / SPRINT 1: HANDOFF & PROJECT PROVISIONING
+  // ============================================================
+
+  /**
+   * Retrieves a persisted generation handoff record by handoffId.
+   */
+  async getHandoff(handoffId: string): Promise<any> {
+    if (!handoffId || !handoffId.trim()) {
+      throw new Error('Handoff ID is required.');
+    }
+    const res = await fetch(`${API_GEN_BASE}/handoff/${encodeURIComponent(handoffId.trim())}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.errorMessage || `Failed to retrieve handoff "${handoffId}" (HTTP ${res.status})`);
+    }
+    return data.handoff;
+  }
+
+  /**
+   * Idempotently resolves or provisions a generation project from an approved handoff.
+   */
+  async provisionProjectFromHandoff(handoffId: string): Promise<{ project: GenerationProject; alreadyExists: boolean; message?: string }> {
+    if (!handoffId || !handoffId.trim()) {
+      throw new Error('Handoff ID is required to provision a project.');
+    }
+    const res = await fetch(API_PROJECTS, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        origin: 'DISCOVERY_BUILD',
+        handoffId: handoffId.trim()
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.errorMessage || data.error || `Failed to provision project from handoff (HTTP ${res.status})`);
+    }
+    return {
+      project: data.project,
+      alreadyExists: Boolean(data.alreadyExists),
+      message: data.message
+    };
+  }
+
+  // ============================================================
   // GEN-02: ASSESSMENT CONTEXT RESOLUTION
   // ============================================================
 
@@ -401,6 +446,51 @@ export class FrontendGenerationProjectService {
         status: 'EMPTY'
       }
     };
+  }
+
+  /**
+   * Saves the entire data model specification for a project.
+   */
+  async saveDataModel(projectId: string, dataModel: Partial<DataModelSpec>): Promise<{ dataModel: DataModelSpec }> {
+    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataModel)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.errorMessage || `Failed to save data model (HTTP ${res.status})`);
+    }
+    return data;
+  }
+
+  /**
+   * Requests an evidence-driven Data Model suggestion from discovery facts.
+   */
+  async suggestDataModel(projectId: string, options: Record<string, any> = {}): Promise<{
+    success: boolean;
+    suggestedDataModel: {
+      rootEntity: string;
+      entities: GenerationEntity[];
+      relationships: GenerationRelationship[];
+      missingEvidence: string[];
+      provenanceSummary: {
+        verifiedCount: number;
+        inferredCount: number;
+        missingEvidenceCount: number;
+      };
+    };
+  }> {
+    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(options)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.errorMessage || `Failed to generate data model suggestion (HTTP ${res.status})`);
+    }
+    return data;
   }
 
   /**
@@ -614,6 +704,22 @@ export class FrontendGenerationProjectService {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `ABAP generation failed (HTTP ${res.status})`);
+    }
+    return data;
+  }
+
+  /**
+   * Regenerates ABAP artifacts, supporting selective single-artifact regeneration.
+   */
+  async regenerateAbap(projectId: string, options: any = {}): Promise<{ totalGenerated: number; artifacts: GeneratedArtifact[]; runRecord: GenerationRun }> {
+    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/abap/regenerate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(options)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.errorMessage || `ABAP regeneration failed (HTTP ${res.status})`);
     }
     return data;
   }

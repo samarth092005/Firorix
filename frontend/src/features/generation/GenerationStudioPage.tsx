@@ -14,16 +14,19 @@ export const GenerationStudioPage: React.FC = () => {
   // URL-driven internal navigation state
   const urlProjectId = searchParams.get('projectId') || null;
   const urlView = (searchParams.get('view') as StudioInternalView) || 'projects';
+  const incomingHandoffId = searchParams.get('handoffId') || null;
   const incomingAssessmentId = searchParams.get('assessmentId') || searchParams.get('sourceAssessmentId') || searchParams.get('id') || null;
 
   const [activeProject, setActiveProject] = useState<GenerationProject | null>(null);
   const [activeView, setActiveView] = useState<StudioInternalView>(urlView);
   const [projectsList, setProjectsList] = useState<GenerationProject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isInitializingHandoff, setIsInitializingHandoff] = useState<boolean>(Boolean(incomingHandoffId && !urlProjectId));
+  const [handoffStatusMessage, setHandoffStatusMessage] = useState<string>('Resolving approved Clean Core modernization handoff...');
   const [error, setError] = useState<string | null>(null);
 
-  // Modal states
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(Boolean(incomingAssessmentId && !urlProjectId));
+  // Modal states - only open for raw assessmentId when NO handoffId exists
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(Boolean(incomingAssessmentId && !incomingHandoffId && !urlProjectId));
 
   // Sync state to URL search parameters
   const updateUrlParams = useCallback((projectId: string | null, view: StudioInternalView) => {
@@ -80,12 +83,47 @@ export const GenerationStudioPage: React.FC = () => {
     loadProjects();
   }, [loadProjects]);
 
-  // Handle incoming assessment handoff query
+  // Handle incoming assessment handoff query (only when NOT using handoffId)
   useEffect(() => {
-    if (incomingAssessmentId && !urlProjectId) {
+    if (incomingAssessmentId && !incomingHandoffId && !urlProjectId) {
       setIsCreateModalOpen(true);
     }
-  }, [incomingAssessmentId, urlProjectId]);
+  }, [incomingAssessmentId, incomingHandoffId, urlProjectId]);
+
+  // Handle incoming approved handoff: auto-provision / resolve without opening popup
+  useEffect(() => {
+    if (incomingHandoffId && !urlProjectId) {
+      let isCancelled = false;
+      setIsInitializingHandoff(true);
+      setHandoffStatusMessage('Resolving approved architectural handoff & provisioning workspace...');
+
+      frontendGenerationProjectService
+        .provisionProjectFromHandoff(incomingHandoffId)
+        .then(async (res) => {
+          if (isCancelled) return;
+          setHandoffStatusMessage('Workspace provisioned. Initializing engineering context...');
+          await loadProjects();
+          setActiveProject(res.project);
+          setActiveView('requirements');
+          updateUrlParams(res.project.projectId, 'requirements');
+        })
+        .catch((err: any) => {
+          if (isCancelled) return;
+          console.error('Failed to auto-provision project from handoff:', err);
+          setError(err?.message || 'Failed to initialize project from architectural handoff.');
+          setActiveView('projects');
+        })
+        .finally(() => {
+          if (!isCancelled) {
+            setIsInitializingHandoff(false);
+          }
+        });
+
+      return () => {
+        isCancelled = true;
+      };
+    }
+  }, [incomingHandoffId, urlProjectId, loadProjects, updateUrlParams]);
 
   // Navigation handlers
   const handleSelectView = (view: StudioInternalView) => {
@@ -200,8 +238,57 @@ export const GenerationStudioPage: React.FC = () => {
       />
 
       {/* Main View Area */}
-      <div style={{ flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto' }}>
-        {activeView === 'projects' ? (
+      <div style={{ flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '16px 24px' }}>
+        {isInitializingHandoff ? (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '60px 24px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              marginTop: '40px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.03)'
+            }}
+          >
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                border: '3px solid #E2E8F0',
+                borderTopColor: '#0070F2',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                marginBottom: '20px'
+              }}
+            />
+            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>
+              Initializing Generation Workspace
+            </h3>
+            <p style={{ fontSize: '14px', color: '#64748B', maxWidth: '500px', textAlign: 'center' }}>
+              {handoffStatusMessage}
+            </p>
+            {incomingHandoffId && (
+              <span
+                style={{
+                  marginTop: '16px',
+                  display: 'inline-block',
+                  padding: '4px 10px',
+                  fontSize: '12px',
+                  fontFamily: 'monospace',
+                  backgroundColor: '#F1F5F9',
+                  color: '#475569',
+                  borderRadius: '4px'
+                }}
+              >
+                Handoff ID: {incomingHandoffId}
+              </span>
+            )}
+          </div>
+        ) : activeView === 'projects' ? (
           <ProjectsDashboard
             projects={projectsList}
             isLoading={isLoading}

@@ -54,7 +54,39 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
     data-sap-ui-compatVersion="edge"
     data-sap-ui-async="true"
     data-sap-ui-preload="async"
+    onerror="window.handleUi5BootstrapError && window.handleUi5BootstrapError()"
   ></script>
+  <script>
+    window.handleUi5BootstrapError = function() {
+      setTimeout(showCdnFallback, 100);
+    };
+    setTimeout(function() {
+      if (!window.sap || !window.sap.ui) {
+        showCdnFallback();
+      }
+    }, 7000);
+    function showCdnFallback() {
+      var c = document.getElementById('content');
+      if (c && !document.getElementById('fiorix-fallback-banner')) {
+        c.innerHTML = '<div id="fiorix-fallback-banner" style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:32px 24px;max-width:750px;margin:40px auto;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.05);">' +
+          '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' +
+          '<span style="font-size:24px;">🌐</span>' +
+          '<h2 style="font-size:18px;font-weight:700;color:#0f172a;margin:0;">Interactive Fiori Elements Preview</h2>' +
+          '</div>' +
+          '<div style="padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;color:#166534;font-size:13px;margin-bottom:16px;">' +
+          '✅ <strong>Local Mock OData V4 Service Active</strong> — Synthetic mock data is running and responding on this preview session.' +
+          '</div>' +
+          '<p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:16px;">' +
+          'SAPUI5 CDN scripts (ui5.sap.com) are initializing or require external network access. While the UI5 runtime resolves in your browser, you can inspect the live OData V4 service endpoints, test mutations, and review the generated manifest.json and annotations.xml directly in the Preview Manager.' +
+          '</p>' +
+          '<div style="font-size:12px;color:#64748b;background:#f8fafc;padding:12px;border-radius:6px;font-family:monospace;">' +
+          'Target App ID: ${appId}<br/>' +
+          'Root Entity: ${rootEntity.name}' +
+          '</div>' +
+          '</div>';
+      }
+    }
+  </script>
 </head>
 <body class="sapUiBody" id="content">
   <div

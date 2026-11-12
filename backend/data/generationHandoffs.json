@@ -4052,5 +4052,397 @@
     "updatedAt": "2026-11-12T09:06:14.840Z",
     "createdBy": "USR-ADMIN-01",
     "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-1794474900327-38A09E",
+    "sourceAssessmentId": "ASM-1794474900299-ZTEST_BUILD-SA89",
+    "tcode": "ZTEST_BUILD",
+    "transactionDescription": "Custom Test Transaction for BUILD handoff",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:15:00.327Z",
+      "justification": "Approved custom Clean Core RAP Managed implementation"
+    },
+    "cleanCoreJustification": "Approved custom Clean Core RAP Managed implementation",
+    "businessRequirements": {
+      "process": "Supply Chain",
+      "scenario": "Internal Warehouse Logistics",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:15:00.327Z",
+    "updatedAt": "2026-11-12T09:15:00.327Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-ZTEST_BUILD-B21F81",
+    "sourceAssessmentId": "ASM-1794474900299-ZTEST_BUILD-SA89",
+    "tcode": "ZTEST_BUILD",
+    "transactionDescription": "Custom Test Transaction for BUILD handoff",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:15:00.603Z",
+      "justification": "Approved custom Clean Core RAP Managed implementation"
+    },
+    "cleanCoreJustification": "Approved custom Clean Core RAP Managed implementation",
+    "businessRequirements": {
+      "process": "Supply Chain",
+      "scenario": "Internal Warehouse Logistics",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:15:00.603Z",
+    "updatedAt": "2026-11-12T09:15:00.603Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-1794475572379-EC0375",
+    "sourceAssessmentId": "ASM-1794475572362-F_53-DY6B",
+    "tcode": "F-53",
+    "transactionDescription": "Post Outgoing Payments (Custom Clearing)",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:26:12.379Z",
+      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Approved custom RAP Managed application under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Financial Accounting",
+      "scenario": "Accounts Payable",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:26:12.379Z",
+    "updatedAt": "2026-11-12T09:26:12.379Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-F-53-BFA03D",
+    "sourceAssessmentId": "ASM-1794475572362-F_53-DY6B",
+    "tcode": "F-53",
+    "transactionDescription": "Post Outgoing Payments (Custom Bank Reconciliation Workflow)",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:26:12.591Z",
+      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Approved custom RAP Managed application under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Financial Accounting",
+      "scenario": "Accounts Payable",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:26:12.591Z",
+    "updatedAt": "2026-11-12T09:26:12.591Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-1794475605077-219599",
+    "sourceAssessmentId": "ASM-1794475605062-F_53-CKY8",
+    "tcode": "F-53",
+    "transactionDescription": "Post Outgoing Payments (Custom Clearing)",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:26:45.077Z",
+      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Approved custom RAP Managed application under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Financial Accounting",
+      "scenario": "Accounts Payable",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:26:45.077Z",
+    "updatedAt": "2026-11-12T09:26:45.077Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-F-53-B83752",
+    "sourceAssessmentId": "ASM-1794475605062-F_53-CKY8",
+    "tcode": "F-53",
+    "transactionDescription": "Post Outgoing Payments (Custom Bank Reconciliation Workflow)",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:26:45.298Z",
+      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Approved custom RAP Managed application under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Financial Accounting",
+      "scenario": "Accounts Payable",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:26:45.298Z",
+    "updatedAt": "2026-11-12T09:26:45.298Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-1794475645958-71BE60",
+    "sourceAssessmentId": "ASM-1794475645935-F_53-BKBH",
+    "tcode": "F-53",
+    "transactionDescription": "Post Outgoing Payments (Custom Clearing)",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:27:25.958Z",
+      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Approved custom RAP Managed application under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Financial Accounting",
+      "scenario": "Accounts Payable",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:27:25.958Z",
+    "updatedAt": "2026-11-12T09:27:25.958Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-F-53-CF4B48",
+    "sourceAssessmentId": "ASM-1794475645935-F_53-BKBH",
+    "tcode": "F-53",
+    "transactionDescription": "Post Outgoing Payments (Custom Bank Reconciliation Workflow)",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T09:27:26.218Z",
+      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Approved custom RAP Managed application under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Financial Accounting",
+      "scenario": "Accounts Payable",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-12T09:27:26.218Z",
+    "updatedAt": "2026-11-12T09:27:26.218Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
   }
 ]
