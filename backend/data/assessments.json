@@ -10,7 +10,7 @@
     "classification": "STANDARD",
     "businessArea": "Financial Accounting",
     "status": "PENDING_VERIFICATION",
-    "lifecycleStatus": "PENDING_VERIFICATION",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
     "assessmentResult": "EXPLICIT_SUCCESSOR",
     "fitGapScore": 88,
     "scoreCoverage": 75,
@@ -33,7 +33,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-06T07:58:43.599Z",
-    "updatedAt": "2026-11-12T09:27:25.934Z",
+    "updatedAt": "2026-11-12T10:21:50.311Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -173,7 +173,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-06T11:20:13.891Z",
-    "updatedAt": "2026-11-12T09:27:25.934Z",
+    "updatedAt": "2026-11-12T10:21:50.311Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -268,7 +268,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-07T07:47:12.199Z",
-    "updatedAt": "2026-11-12T09:27:25.934Z",
+    "updatedAt": "2026-11-12T10:21:50.311Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -394,7 +394,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-08T06:20:37.913Z",
-    "updatedAt": "2026-11-12T09:27:25.934Z",
+    "updatedAt": "2026-11-12T10:21:50.311Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -534,7 +534,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-08T07:51:19.402Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.311Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -669,7 +669,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-08T11:05:35.365Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.312Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -815,7 +815,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-08T11:21:34.172Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.312Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -966,7 +966,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-08T11:22:30.019Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.312Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1102,7 +1102,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-10T15:05:10.711Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.312Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1358,7 +1358,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-10T15:05:10.846Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.312Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1645,7 +1645,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-10T15:05:10.907Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.312Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1743,7 +1743,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-11T07:49:04.382Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.313Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1838,7 +1838,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T05:16:29.567Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.313Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1975,7 +1975,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T06:01:56.800Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.313Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -2112,7 +2112,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T08:42:41.653Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.313Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -2249,7 +2249,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T08:45:14.341Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.314Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -2375,7 +2375,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T09:15:00.299Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.314Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -2517,7 +2517,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T09:15:00.827Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.314Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -2607,12 +2607,26 @@
     "assessmentResult": "BUILD",
     "fitGapScore": 0,
     "scoreCoverage": 50,
-    "matchingFioriApp": null,
+    "matchingFioriApp": {
+      "appId": "F1612",
+      "appName": "Post Outgoing Payments",
+      "appType": "SAPUI5 freestyle",
+      "uiTechnology": "SAPUI5 freestyle",
+      "releaseCompatibility": "COMPATIBLE",
+      "sourceLabel": "Official SAP Fiori Apps Reference Library",
+      "businessRoles": [
+        "SAP_BR_AP_ACCOUNTANT",
+        "SAP_BR_AR_ACCOUNTANT"
+      ],
+      "odataServices": [
+        "FAP_PAYMENT_POST_SRV"
+      ]
+    },
     "gapsCount": 1,
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T09:26:12.362Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:28:15.398Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -2757,6 +2771,36 @@
         },
         "previousHash": "9371e9c44fa832e9d981d84906f0be54a0a9054924dd2c4b2de941fdc14236c9",
         "integrityHash": "7262cf628636b8ffe8c2e98704088f251ee33dfbb212b9b72063fd238b01611a"
+      },
+      {
+        "eventId": "AUD-MOD-1794479295398-BF0B44",
+        "timestamp": "2026-11-12T10:28:15.398Z",
+        "author": "Enterprise System Administrator",
+        "actorId": "USR-ADMIN-01",
+        "actorRole": "ADMIN",
+        "previousState": "APPROVED",
+        "newState": "APPROVED",
+        "action": "ADD_FOUND",
+        "comment": "Modernization Decision Stage 4: Associated official candidate F1612 (\"Post Outgoing Payments\") to assessment.",
+        "details": {
+          "actionType": "ADD_FOUND",
+          "appId": "F1612",
+          "appName": "Post Outgoing Payments",
+          "appType": "SAPUI5 freestyle",
+          "uiTechnology": "SAPUI5 freestyle",
+          "supportedRelease": "SAP S/4HANA Cloud Private Edition 2025",
+          "provenance": "Official SAP Fiori Apps Reference Library",
+          "officialSourceUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1612')/",
+          "businessRoles": [
+            "SAP_BR_AP_ACCOUNTANT",
+            "SAP_BR_AR_ACCOUNTANT"
+          ],
+          "odataServices": [
+            "FAP_PAYMENT_POST_SRV"
+          ]
+        },
+        "previousHash": "7262cf628636b8ffe8c2e98704088f251ee33dfbb212b9b72063fd238b01611a",
+        "integrityHash": "114a153a63a159cf4de5a0e99d11e4214d39fcb706fbf753140fa5a0f67c70a2"
       }
     ],
     "versionHistory": [
@@ -2788,7 +2832,61 @@
     "businessContext": null,
     "applicationRequirements": null,
     "discoveryMetadata": null,
-    "evidenceNotes": []
+    "evidenceNotes": [],
+    "modernizationDecisions": [
+      {
+        "actionId": "ACT-1794479295398-C199F9",
+        "actionType": "ADD_FOUND",
+        "timestamp": "2026-11-12T10:28:15.398Z",
+        "author": "Enterprise System Administrator",
+        "actorId": "USR-ADMIN-01",
+        "actorRole": "ADMIN",
+        "details": {
+          "appId": "F1612",
+          "appName": "Post Outgoing Payments",
+          "appType": "SAPUI5 freestyle",
+          "uiTechnology": "SAPUI5 freestyle",
+          "supportedRelease": "SAP S/4HANA Cloud Private Edition 2025",
+          "provenance": "Official SAP Fiori Apps Reference Library",
+          "officialSourceUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1612')/",
+          "businessRoles": [
+            "SAP_BR_AP_ACCOUNTANT",
+            "SAP_BR_AR_ACCOUNTANT"
+          ],
+          "odataServices": [
+            "FAP_PAYMENT_POST_SRV"
+          ]
+        },
+        "comment": "Modernization Decision Stage 4: Associated official candidate F1612 (\"Post Outgoing Payments\") to assessment.",
+        "idempotencyKey": null
+      }
+    ],
+    "modernizationDecision": {
+      "actionId": "ACT-1794479295398-C199F9",
+      "actionType": "ADD_FOUND",
+      "timestamp": "2026-11-12T10:28:15.398Z",
+      "author": "Enterprise System Administrator",
+      "actorId": "USR-ADMIN-01",
+      "actorRole": "ADMIN",
+      "details": {
+        "appId": "F1612",
+        "appName": "Post Outgoing Payments",
+        "appType": "SAPUI5 freestyle",
+        "uiTechnology": "SAPUI5 freestyle",
+        "supportedRelease": "SAP S/4HANA Cloud Private Edition 2025",
+        "provenance": "Official SAP Fiori Apps Reference Library",
+        "officialSourceUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1612')/",
+        "businessRoles": [
+          "SAP_BR_AP_ACCOUNTANT",
+          "SAP_BR_AR_ACCOUNTANT"
+        ],
+        "odataServices": [
+          "FAP_PAYMENT_POST_SRV"
+        ]
+      },
+      "comment": "Modernization Decision Stage 4: Associated official candidate F1612 (\"Post Outgoing Payments\") to assessment.",
+      "idempotencyKey": null
+    }
   },
   {
     "id": "ASM-1794475605062-F_53-CKY8",
@@ -2810,7 +2908,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T09:26:45.062Z",
-    "updatedAt": "2026-11-12T09:27:25.935Z",
+    "updatedAt": "2026-11-12T10:21:50.314Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -3008,7 +3106,7 @@
     "evidenceConfidence": "MEDIUM",
     "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
     "createdAt": "2026-11-12T09:27:25.936Z",
-    "updatedAt": "2026-11-12T09:27:26.260Z",
+    "updatedAt": "2026-11-12T10:21:50.314Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -3184,76 +3282,288 @@
     "businessContext": null,
     "applicationRequirements": null,
     "discoveryMetadata": null,
+    "evidenceNotes": []
+  },
+  {
+    "id": "ASM-1794477444120-ZPURCHASE-8S65",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "fx-mwddjdhn-br9r6w",
+    "tcode": "ZPURCHASE",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "classification": "CUSTOM",
+    "businessArea": "Custom Extension",
+    "status": "APPROVED",
+    "lifecycleStatus": "APPROVED",
+    "assessmentResult": "CUSTOM_RAP_REQUIRED",
+    "fitGapScore": 75,
+    "scoreCoverage": 80,
+    "matchingFioriApp": null,
+    "gapsCount": 0,
+    "evidenceConfidence": "HIGH",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-12T09:57:24.121Z",
+    "updatedAt": "2026-11-12T10:22:55.272Z",
+    "createdBy": "USR-BAEBA8D1",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-12T09:57:24.121Z"
+    },
+    "description": "Assessment for ZPURCHASE",
+    "subArea": "",
+    "programName": "ZFIORIX_PURCHASE_MAIN",
+    "screenNumber": "0100",
+    "packageName": "ZPURCH_MOD",
+    "originalSystem": "S21",
+    "softwareComponent": "HOME",
+    "rationale": "",
+    "dimensionResults": null,
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": null,
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794477444121-ZDCU",
+        "timestamp": "2026-11-12T09:57:24.121Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "DRAFT",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "ZPURCHASE",
+          "fitGapScore": 0,
+          "assessmentResult": "PENDING_VERIFICATION"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "ad0e31f6716b20ff58b718ca554799edadeada2d09b368c19e1e56f1e2f1c68c"
+      },
+      {
+        "eventId": "AUD-1794478910315-PCJR",
+        "timestamp": "2026-11-12T10:21:50.315Z",
+        "author": "Enterprise Architecture Board",
+        "actorId": "USR-8255EC54",
+        "actorRole": "APPROVER",
+        "previousState": "PENDING_REVIEW",
+        "newState": "APPROVED",
+        "action": "STATE_TRANSITION",
+        "comment": "Enterprise Architecture Board formally approved custom Clean Core RAP BUILD decision.",
+        "details": {},
+        "previousHash": "ad0e31f6716b20ff58b718ca554799edadeada2d09b368c19e1e56f1e2f1c68c",
+        "integrityHash": "6f913a5896a01b35ff6e738b1c3f44c046a53a83f6783cfb5bb798eb8dc6848e"
+      },
+      {
+        "eventId": "AUD-1794478967631-UGG6",
+        "timestamp": "2026-11-12T10:22:47.631Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "ARCHITECT",
+        "previousState": "APPROVED",
+        "newState": "PENDING_REVIEW",
+        "action": "STATE_TRANSITION",
+        "comment": "Submitted for Enterprise Architecture Board Clean Core review.",
+        "details": {},
+        "previousHash": "6f913a5896a01b35ff6e738b1c3f44c046a53a83f6783cfb5bb798eb8dc6848e",
+        "integrityHash": "4dd80bcf962d520f674ab409f72d00a291e9bbedaf9b70ffb900729d3d97e290"
+      },
+      {
+        "eventId": "AUD-1794478967686-F1JP",
+        "timestamp": "2026-11-12T10:22:47.686Z",
+        "author": "Enterprise Architecture Board",
+        "actorId": "USR-8255EC54",
+        "actorRole": "APPROVER",
+        "previousState": "PENDING_REVIEW",
+        "newState": "APPROVED",
+        "action": "STATE_TRANSITION",
+        "comment": "Enterprise Architecture Board formally approved custom Clean Core RAP BUILD decision.",
+        "details": {},
+        "previousHash": "4dd80bcf962d520f674ab409f72d00a291e9bbedaf9b70ffb900729d3d97e290",
+        "integrityHash": "1e5cac9cdff6234209ae2d97892fba4e332e4a96abdff06ab732b7b22fdc0626"
+      },
+      {
+        "eventId": "AUD-1794478975256-WCJJ",
+        "timestamp": "2026-11-12T10:22:55.256Z",
+        "author": "Enterprise System Administrator",
+        "actorId": "USR-ADMIN-01",
+        "actorRole": "ADMIN",
+        "previousState": "APPROVED",
+        "newState": "APPROVED",
+        "action": "UPDATED",
+        "comment": "Synchronized architect approval from generation handoff HND-GEN-ZPURCHASE-A43A47",
+        "details": {},
+        "previousHash": "1e5cac9cdff6234209ae2d97892fba4e332e4a96abdff06ab732b7b22fdc0626",
+        "integrityHash": "a090820032cd2f1f23188b42ce71d23b98894a71818663ea20472ab3693cc62b"
+      },
+      {
+        "eventId": "AUD-MOD-1794478975272-1149E0",
+        "timestamp": "2026-11-12T10:22:55.272Z",
+        "author": "Enterprise System Administrator",
+        "actorId": "USR-ADMIN-01",
+        "actorRole": "ADMIN",
+        "previousState": "APPROVED",
+        "newState": "APPROVED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-GEN-ZPURCHASE-A43A47 created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-GEN-ZPURCHASE-A43A47",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "a090820032cd2f1f23188b42ce71d23b98894a71818663ea20472ab3693cc62b",
+        "integrityHash": "ad53a73d918fd95cdf7fed5127c1bbd6bdfb6633b6e0d9de155461b91721c036"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-12T09:57:24.121Z",
+        "lifecycleStatus": "DRAFT",
+        "fitGapScore": 0,
+        "modifiedBy": "Lead SAP Architect"
+      },
+      {
+        "version": 2,
+        "savedAt": "2026-11-12T10:21:50.315Z",
+        "lifecycleStatus": "APPROVED",
+        "fitGapScore": 75,
+        "modifiedBy": "Enterprise Architecture Board"
+      },
+      {
+        "version": 3,
+        "savedAt": "2026-11-12T10:22:47.631Z",
+        "lifecycleStatus": "PENDING_REVIEW",
+        "fitGapScore": 75,
+        "modifiedBy": "Lead SAP Architect"
+      },
+      {
+        "version": 4,
+        "savedAt": "2026-11-12T10:22:47.686Z",
+        "lifecycleStatus": "APPROVED",
+        "fitGapScore": 75,
+        "modifiedBy": "Enterprise Architecture Board"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": {
+      "businessProcess": "Custom Extension",
+      "primaryScenario": "Operational execution of transaction ZPURCHASE",
+      "selectedRequirements": [
+        "Real-time dictionary validation",
+        "Authorization check"
+      ],
+      "expectedFunctionality": [
+        "Screen navigation",
+        "Data persistence"
+      ],
+      "assessmentObjective": "Evaluate modern Fiori alternative or WebGUI feasibility for ZPURCHASE in S21.",
+      "businessCriticality": "HIGH"
+    },
+    "applicationRequirements": {
+      "relevantBusinessRole": "Purchasing Manager (SAP_BR_PURCHASER)",
+      "knownODataService": "Service binding determined by FAL",
+      "requiredFunctionality": [
+        "Audit Logging",
+        "Real-time Validation"
+      ],
+      "knownLimitations": "",
+      "targetReleaseProfile": "SAP S/4HANA 2023 Private Edition",
+      "isUserProvidedUnverified": false
+    },
+    "discoveryMetadata": {
+      "description": "Custom Purchase Request Overview",
+      "programName": "ZFIORIX_PURCHASE_MAIN",
+      "screenNumber": "0100",
+      "packageName": "ZPURCH_MOD",
+      "classification": "CUSTOM",
+      "originalSystem": "S21",
+      "softwareComponent": "HOME"
+    },
     "evidenceNotes": [],
+    "author": "Enterprise Architecture Board",
+    "autoAdvance": true,
+    "comment": "Enterprise Architecture Board formally approved custom Clean Core RAP BUILD decision.",
+    "isOverride": true,
+    "actorRole": "APPROVER",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Enterprise System Administrator",
       "approverId": "USR-ADMIN-01",
-      "timestamp": "2026-11-12T09:27:26.218Z",
-      "justification": "Approved custom RAP Managed application under Clean Core Tier 2."
+      "timestamp": "2026-11-12T10:22:55.240Z",
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
     },
     "approvalStatus": "APPROVED",
-    "handoffId": "HND-GEN-F-53-CF4B48",
+    "handoffId": "HND-GEN-ZPURCHASE-A43A47",
     "modernizationDecisions": [
       {
-        "actionId": "ACT-1794475646010-F721E4",
+        "actionId": "ACT-1794478975273-B4AF17",
         "actionType": "BUILD_PROJECT",
-        "timestamp": "2026-11-12T09:27:26.010Z",
+        "timestamp": "2026-11-12T10:22:55.272Z",
         "author": "Enterprise System Administrator",
         "actorId": "USR-ADMIN-01",
         "actorRole": "ADMIN",
         "details": {
-          "handoffId": "HND-1794475645958-71BE60",
+          "handoffId": "HND-GEN-ZPURCHASE-A43A47",
           "proposedAppType": "RAP_MANAGED",
           "stage": "DRAFT",
           "approvalStatus": "APPROVED",
           "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
         },
-        "comment": "Generation Studio handoff HND-1794475645958-71BE60 created in stage DRAFT. Architect sign-off recorded.",
-        "idempotencyKey": null
-      },
-      {
-        "actionId": "ACT-1794475646261-E70E0A",
-        "actionType": "BUILD_PROJECT",
-        "timestamp": "2026-11-12T09:27:26.260Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "details": {
-          "handoffId": "HND-GEN-F-53-CF4B48",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "comment": "Generation Studio handoff HND-GEN-F-53-CF4B48 created in stage DRAFT. Architect sign-off recorded.",
+        "comment": "Generation Studio handoff HND-GEN-ZPURCHASE-A43A47 created in stage DRAFT. Architect sign-off recorded.",
         "idempotencyKey": null
       }
     ],
     "buildProject": {
-      "handoffId": "HND-GEN-F-53-CF4B48",
+      "handoffId": "HND-GEN-ZPURCHASE-A43A47",
       "proposedAppType": "RAP_MANAGED",
       "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER",
       "architectApproved": true,
       "approverName": "Enterprise System Administrator",
-      "justification": "Generation Studio handoff HND-GEN-F-53-CF4B48 created in stage DRAFT. Architect sign-off recorded.",
-      "lastUpdated": "2026-11-12T09:27:26.260Z"
+      "justification": "Generation Studio handoff HND-GEN-ZPURCHASE-A43A47 created in stage DRAFT. Architect sign-off recorded.",
+      "lastUpdated": "2026-11-12T10:22:55.272Z"
     },
     "modernizationDecision": {
-      "actionId": "ACT-1794475646261-E70E0A",
+      "actionId": "ACT-1794478975273-B4AF17",
       "actionType": "BUILD_PROJECT",
-      "timestamp": "2026-11-12T09:27:26.260Z",
+      "timestamp": "2026-11-12T10:22:55.272Z",
       "author": "Enterprise System Administrator",
       "actorId": "USR-ADMIN-01",
       "actorRole": "ADMIN",
       "details": {
-        "handoffId": "HND-GEN-F-53-CF4B48",
+        "handoffId": "HND-GEN-ZPURCHASE-A43A47",
         "proposedAppType": "RAP_MANAGED",
         "stage": "DRAFT",
         "approvalStatus": "APPROVED",
         "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
       },
-      "comment": "Generation Studio handoff HND-GEN-F-53-CF4B48 created in stage DRAFT. Architect sign-off recorded.",
+      "comment": "Generation Studio handoff HND-GEN-ZPURCHASE-A43A47 created in stage DRAFT. Architect sign-off recorded.",
       "idempotencyKey": null
     }
   }

@@ -122,8 +122,12 @@ export class BtpDestinationAdapter {
   constructor(options = {}) {
     this.destinationName = options.destinationName || process.env.SAP_DESTINATION_NAME || 'S21';
     this.sapClient = options.sapClient || process.env.SAP_CLIENT || '200';
-    this.timeoutMs = Number(options.timeoutMs || process.env.SAP_TIMEOUT_MS) || 10000;
+    this.timeoutMs = Number(options.timeoutMs || process.env.SAP_TIMEOUT_MS) || 1500;
     this.adminSecret = options.adminSecret || process.env.FIORIX_ADMIN_SECRET || '';
+
+    // Fast circuit-breaker for unreachable SAP host to avoid 10-20s freezes
+    this.lastFailureTime = 0;
+    this.failureCooldownMs = 60000; // 60 seconds fast-failure cache
 
     // Dependency injection points for testing without real BTP/SAP calls
     this.vcapServices = options.vcapServices !== undefined ? options.vcapServices : process.env.VCAP_SERVICES;
@@ -486,6 +490,18 @@ export class BtpDestinationAdapter {
       requestHeaders['Authorization'] = `Basic ${basicHash}`;
     }
 
+    // Fast-fail if host recently timed out/failed (prevents 15-20s UI freezes on every search)
+    const now = Date.now();
+    if (this.lastFailureTime && (now - this.lastFailureTime < this.failureCooldownMs)) {
+      return {
+        success: false,
+        statusCode: 'CONNECTION_FAILED',
+        httpStatus: 504,
+        errorMessage: `Destination "${this.destinationName}" is unreachable (cached network failure). Falling back immediately to authoritative catalog fixtures.`,
+        details: { path, cached: true }
+      };
+    }
+
     try {
       const response = await this.sdkExecuteHttpRequest(
         targetDestination,
@@ -531,6 +547,7 @@ export class BtpDestinationAdapter {
       err?.name === 'AbortError';
 
     if (isTimeout) {
+      this.lastFailureTime = Date.now();
       return {
         success: false,
         statusCode: 'TIMEOUT',

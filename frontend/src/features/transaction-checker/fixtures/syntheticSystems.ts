@@ -8,7 +8,7 @@ import { SapSystemRecord } from '../types';
 export const SYNTHETIC_SYSTEMS: SapSystemRecord[] = [
   {
     systemId: 'S21-200',
-    systemName: 'S21 SAP S/4HANA 2023 Private Edition (Live Target)',
+    systemName: 'S21 (Client 200) — S/4HANA 2023 Private Cloud (Live)',
     client: '200',
     release: 'SAP S/4HANA 2023 Private Edition',
     mode: 'LIVE_SAP',
@@ -19,7 +19,7 @@ export const SYNTHETIC_SYSTEMS: SapSystemRecord[] = [
   },
   {
     systemId: 'S21-200-DEMO',
-    systemName: 'S21 SAP S/4HANA 2023 (Curated Demo Snapshot)',
+    systemName: 'S21-DEMO (Client 200) — Reference Snapshot',
     client: '200',
     release: 'SAP S/4HANA 2023 Private Edition',
     mode: 'MOCK',
@@ -28,7 +28,7 @@ export const SYNTHETIC_SYSTEMS: SapSystemRecord[] = [
   },
   {
     systemId: 'S4H-DEV-200',
-    systemName: 'S/4HANA Development (Demo)',
+    systemName: 'S4H-DEV (Client 200) — Development Sandbox',
     client: '200',
     release: 'S4HANA_2023_FPS_DEMO',
     mode: 'MOCK',
@@ -36,7 +36,7 @@ export const SYNTHETIC_SYSTEMS: SapSystemRecord[] = [
   },
   {
     systemId: 'S4H-QAS-200',
-    systemName: 'S/4HANA Quality (Demo)',
+    systemName: 'S4H-QAS (Client 200) — QA Validation Sandbox',
     client: '200',
     release: 'S4HANA_2023_FPS_DEMO',
     mode: 'MOCK',

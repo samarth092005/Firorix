@@ -63,24 +63,37 @@ export const TechnicalImplementationPanel: React.FC<TechnicalImplementationPanel
           gap: '12px'
         }}
       >
-        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '4px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
+        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>UI TECHNOLOGY STACK</div>
           <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>{uiTechnology}</div>
         </div>
 
-        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '4px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
+        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>MAIN PROGRAM</div>
+          <div style={{ fontSize: '12.5px', fontWeight: 700, fontFamily: 'var(--font-mono, monospace)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>
+            {assessment.programName || 'SAPMF05A'}
+          </div>
+        </div>
+
+        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
+          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>PACKAGE / MODULE</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>
+            {assessment.packageName || technicalComponent}
+          </div>
+        </div>
+
+        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>ICF SERVICE HANDLER</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>{getIcfPath()}</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>
+            {getIcfPath()}
+          </div>
         </div>
 
-        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '4px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>TECHNICAL COMPONENT</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>{technicalComponent}</div>
-        </div>
-
-        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '4px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
+        <div style={{ padding: '12px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)' }}>
           <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>SOFTWARE COMPONENT</div>
-          <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>{assessment.softwareComponent || 'S4CORE 108'}</div>
+          <div style={{ fontSize: '12px', fontWeight: 600, fontFamily: 'var(--font-mono, monospace)', color: 'var(--fiori-navy, #102A43)', marginTop: '4px' }}>
+            {assessment.softwareComponent || 'S4CORE 108'}
+          </div>
         </div>
       </div>
 

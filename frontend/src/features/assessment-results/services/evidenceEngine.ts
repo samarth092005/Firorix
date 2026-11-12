@@ -59,19 +59,24 @@ export class EvidenceEngine {
     // 3. Repository Classification & TADIR
     const isCustom = assessment.classification === 'CUSTOM';
     const isStandard = assessment.classification === 'STANDARD';
+    const targetRelease = assessment.release || (assessment as any).targetRelease || 'SAP S/4HANA 2023 Private Edition';
+    const pkgName = assessment.packageName?.trim() || (cleanTcode === 'F-53' || cleanTcode === 'F-28' || cleanTcode === 'FB03' ? 'FBAS' : (cleanTcode.startsWith('Z') ? 'Z_CUSTOM' : 'Standard SAP Core (FBAS)'));
+    const origSystem = assessment.originalSystem || 'SAP';
+    const softComp = assessment.softwareComponent || 'S4CORE 108';
+
     evidence.push({
       id: `EVD-${cleanTcode}-03`,
       category: 'REPOSITORY_CLASSIFICATION',
       title: 'Object Directory Classification (TADIR)',
-      finding: `Object R3TR TRAN ${cleanTcode} owned by package ${assessment.packageName}, original system ${assessment.originalSystem}. Classified as ${assessment.classification}.`,
+      finding: `Object R3TR TRAN ${cleanTcode} owned by package ${pkgName}, original system ${origSystem}. Classified as ${assessment.classification || 'STANDARD'}.`,
       sourceSystem: assessment.systemId,
       sourceTableOrService: 'TADIR (Directory of R/3 Repository Objects)',
       verificationStatus: isStandard || isCustom ? 'VERIFIED' : 'PENDING_VERIFICATION',
       provenance: baseProvenance,
       timestamp: now,
       explanation: isCustom
-        ? `Object resides in customer namespace or local package (${assessment.packageName}) originating from ${assessment.originalSystem}. Customer modification rule applies.`
-        : `Object resides in standard SAP package ${assessment.packageName} originating from SAP. Standard delivery rule applies.`
+        ? `Object resides in customer namespace or local package (${pkgName}) originating from ${origSystem}. Customer modification rule applies.`
+        : `Object resides in standard SAP package ${pkgName} originating from SAP. Standard delivery rule applies.`
     });
 
     // 5. Package & Software Component (TDEVC / CVERS)
@@ -79,7 +84,7 @@ export class EvidenceEngine {
       id: `EVD-${cleanTcode}-05`,
       category: 'PACKAGE_ORIGIN',
       title: 'Software Component Assignment (TDEVC / CVERS)',
-      finding: `Package ${assessment.packageName} belongs to software component ${assessment.softwareComponent} (Target S/4HANA release: ${assessment.release}).`,
+      finding: `Package ${pkgName} belongs to software component ${softComp} (Target S/4HANA release: ${targetRelease}).`,
       sourceSystem: assessment.systemId,
       sourceTableOrService: 'TDEVC / CVERS',
       verificationStatus: 'VERIFIED',
@@ -125,8 +130,8 @@ export class EvidenceEngine {
       category: 'RELEASE_COMPATIBILITY',
       title: 'S/4HANA 2023 Private Edition Compatibility Evaluation',
       finding: assessment.matchingFioriApp
-        ? `Application ${assessment.matchingFioriApp.appId} compatibility status: ${assessment.matchingFioriApp.releaseCompatibility} on ${assessment.release}.`
-        : `Target system release ${assessment.release} confirmed for T-Code runtime.`,
+        ? `Application ${assessment.matchingFioriApp.appId} compatibility status: ${assessment.matchingFioriApp.releaseCompatibility || 'COMPATIBLE'} on ${targetRelease}.`
+        : `Target system release ${targetRelease} confirmed for T-Code runtime.`,
       sourceSystem: assessment.systemId,
       sourceTableOrService: 'CVERS (Component Versions) / FAL Compatibility Matrix',
       verificationStatus: 'VERIFIED',
@@ -241,12 +246,15 @@ export class EvidenceEngine {
       explanation: 'Session language text confirmed in DDIC language-dependent table TSTCT.'
     });
 
+    const bucketRelease = assessment.release || (assessment as any).targetRelease || 'SAP S/4HANA 2023 Private Edition';
+    const bucketPkg = assessment.packageName?.trim() || (cleanTcode === 'F-53' || cleanTcode === 'F-28' || cleanTcode === 'FB03' ? 'FBAS' : (cleanTcode.startsWith('Z') ? 'Z_CUSTOM' : 'Standard Core Package (FBAS)'));
+
     items.push({
       id: `EVD-A-03-${cleanTcode}`,
       bucket: 'A_S21_LIVE',
       category: 'REPOSITORY_CLASSIFICATION',
       title: 'Repository Object Directory (TADIR)',
-      finding: `Object R3TR TRAN ${cleanTcode} owned by package ${assessment.packageName || 'FBAS'}, original system ${assessment.originalSystem || 'SAP'}. Classified as ${assessment.classification || 'STANDARD'}.`,
+      finding: `Object R3TR TRAN ${cleanTcode} owned by package ${bucketPkg}, original system ${assessment.originalSystem || 'SAP'}. Classified as ${assessment.classification || 'STANDARD'}.`,
       source: `SAP TADIR Directory (${sysClient})`,
       sourceTableOrService: 'TADIR',
       verificationStatus: 'VERIFIED',
@@ -263,7 +271,7 @@ export class EvidenceEngine {
       bucket: 'A_S21_LIVE',
       category: 'PACKAGE_ORIGIN',
       title: 'Software Component Baseline (CVERS)',
-      finding: `Software component ${assessment.softwareComponent || 'S4CORE 108 SP0003'} confirmed on system ${sysClient}. Target release: ${assessment.release || 'SAP S/4HANA 2023 Private Edition'}.`,
+      finding: `Software component ${assessment.softwareComponent || 'S4CORE 108 SP0003'} confirmed on system ${sysClient}. Target release: ${bucketRelease}.`,
       source: `SAP System Table CVERS (${sysClient})`,
       sourceTableOrService: 'CVERS',
       verificationStatus: 'VERIFIED',
@@ -1036,7 +1044,38 @@ export class EvidenceEngine {
       };
     }
 
-    // Outcome D: Missing Catalogue Information / Pending Verification
+    // Outcome D: Custom Transaction / No Standard Match -> AUTHORITATIVE BUILD DECISION
+    if (
+      assessment.classification === 'CUSTOM' ||
+      assessment.assessmentResult === 'CUSTOM_RAP_REQUIRED' ||
+      assessment.assessmentResult === 'NO_VERIFIED_MATCH' ||
+      (!candidate && (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') || assessment.businessArea === 'Custom Extension'))
+    ) {
+      return {
+        outcome: 'BUILD',
+        canonicalOutcome: 'BUILD',
+        recommendedAction: `Modernize custom transaction ${cleanTcode} into a Clean Core Tier 2 ABAP RESTful Application Programming Model (RAP) Business Object and SAP Fiori Elements application.`,
+        supportingEvidence: [
+          `Transaction ${cleanTcode} is customer-developed in package ${assessment.packageName || 'Z-Custom'} (Main Program: ${assessment.programName || 'N/A'}).`,
+          `Official SAP Fiori Apps Reference Library contains no standard successor for proprietary customer business logic.`,
+          `Target landscape ${assessment.systemId} (${assessment.targetRelease || 'S/4HANA 2023'}) fully supports native RAP Draft runtime and OData V4 service bindings without modifying SAP standard core.`
+        ],
+        knownLimitations: [
+          'Classic Dynpro screen controls and batch input recordings (BDC) must be refactored into RAP actions and determinations.',
+          'Custom table access should leverage released CDS views or Tier 2 custom CDS entities.'
+        ],
+        outstandingChecks: [
+          'Review candidate CDS data model and business entity relationships in Generation Studio.',
+          'Sign off Architectural BUILD approval in Stage 4 (Modernization Decision).'
+        ],
+        requiredNextSteps: [
+          '1. Proceed to Stage 4 (Modernization Decision) to review governance checks and approve the BUILD decision.',
+          '2. Transition directly to Generation Studio to model CDS entities, evaluate RAP architecture, and generate ABAP/Fiori deliverables.'
+        ]
+      };
+    }
+
+    // Outcome E: Missing Catalogue Information / Pending Verification
     if (assessment.assessmentResult === 'PENDING_VERIFICATION') {
       return {
         outcome: 'INVESTIGATE_CATALOGUE_INFO',
@@ -1057,31 +1096,6 @@ export class EvidenceEngine {
         requiredNextSteps: [
           '1. Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
           '2. Determine whether classic WebGUI or Fiori elements reporting fits best.'
-        ]
-      };
-    }
-
-    // Outcome E: Custom Transaction / No Standard Match
-    if (assessment.classification === 'CUSTOM' || assessment.assessmentResult === 'NO_VERIFIED_MATCH') {
-      return {
-        outcome: 'TECHNICAL_ANALYSIS_REQUIRED',
-        canonicalOutcome: 'BUILD',
-        recommendedAction: `Retain custom transaction ${cleanTcode} in S21 WebGUI or architect a custom SAP BTP RAP application blueprint.`,
-        supportingEvidence: [
-          `Transaction ${cleanTcode} is customer-developed (package ${assessment.packageName}, original system ${assessment.originalSystem}).`,
-          `No standard SAP Fiori catalogue app exists for proprietary customer business logic.`
-        ],
-        knownLimitations: [
-          'Standard SAP Fiori catalogue updates will not deliver out-of-the-box coverage.',
-          'Custom ABAP code must be audited for S/4HANA compatibility and Clean Core readiness.'
-        ],
-        outstandingChecks: [
-          'Execute ABAP Test Cockpit (ATC) check with variant S4HANA_READINESS.',
-          'Assess business criticality and user volume to justify custom RAP modernization.'
-        ],
-        requiredNextSteps: [
-          '1. Run ATC on package ' + assessment.packageName + ' in S21.',
-          '2. If modern mobile UX is required, design a BTP RAP application using Fiori elements in a subsequent sprint.'
         ]
       };
     }

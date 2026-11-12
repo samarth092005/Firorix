@@ -258,8 +258,7 @@ export const OverviewPage: React.FC = () => {
                 }}
                 title={`SAP Fiori MCP Server: ${mcpStatus.status} (@sap-ux/fiori-mcp-server)`}
               >
-                <Sparkles size={11} color={mcpStatus.connected ? '#0066FF' : '#94A3B8'} />
-                <span>MCP: {mcpStatus.connected ? 'Connected' : mcpStatus.status}</span>
+
               </span>
             </div>
           </div>
@@ -405,106 +404,89 @@ export const OverviewPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Interactive Quick Discovery Bar */}
+      {/* 3. Modernization Architecture & Capability Landscape Panel */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
-          padding: '18px 20px',
+          padding: '20px',
           borderRadius: '10px',
           border: '1px solid #E2E8F0',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
-              Quick Transaction Lookup
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Layers size={16} color="#0066FF" />
+              <span>SAP S/4HANA Modernization Architecture &amp; System Capabilities</span>
             </div>
             <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
-              Enter any SAP GUI transaction code to inspect its Fiori equivalent or jump directly into assessment.
+              Clean Core assessment framework connecting live SAP S21 Data Dictionary (DDIC) to official Fiori successors.
             </div>
+          </div>
+          <span style={{ fontSize: '11px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: '3px 10px', borderRadius: '12px' }}>
+            ● Target S21-200 Active
+          </span>
+        </div>
+
+        {/* 3 Status Pillar Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+          {/* Pillar 1: Target Landscape */}
+          <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target System</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#DCFCE7', color: '#15803D', padding: '1px 6px', borderRadius: '4px' }}>S/4HANA 2023</span>
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>S21 Private Cloud (Client 200)</div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>SAP_BASIS 758 • S4CORE 108 • Gateway Catalog</div>
+          </div>
+
+          {/* Pillar 2: Official Fiori Catalogue */}
+          <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Catalogue Index</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#DBEAFE', color: '#1D4ED8', padding: '1px 6px', borderRadius: '4px' }}>OFFICIAL SAP</span>
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>18,225+ Fiori Applications</div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>Synchronized with SAP Fiori Apps Library OData</div>
+          </div>
+
+          {/* Pillar 3: Clean Core Assessment */}
+          <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fit-Gap Engine</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#F3E8FF', color: '#7E22CE', padding: '1px 6px', borderRadius: '4px' }}>CLEAN CORE</span>
+            </div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>5-Dimension Deterministic Scoring</div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>Functional 35%, Technical 25%, Process 15%, Roles 15%, Compat 10%</div>
           </div>
         </div>
 
-        <form onSubmit={handleQuickDiscover} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <Search
-              size={16}
-              style={{
-                position: 'absolute',
-                left: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#94A3B8'
-              }}
-            />
-            <input
-              type="text"
-              value={quickTcode}
-              onChange={(e) => setQuickTcode(e.target.value.toUpperCase())}
-              placeholder="e.g. ME21N, FB50, VA01, MM01, F-02..."
-              style={{
-                width: '100%',
-                padding: '9px 12px 9px 38px',
-                border: '1px solid #CBD5E1',
-                borderRadius: '6px',
-                fontSize: '13px',
-                fontFamily: 'monospace',
-                color: '#0F172A',
-                outline: 'none',
-                boxSizing: 'border-box'
-              }}
-            />
+        {/* Quick Launchpad Strip */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F0F7FF', border: '1px solid #BAE6FD', borderRadius: '8px', padding: '10px 16px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ fontSize: '12px', color: '#0369A1' }}>
+            <strong>Modernization Actions:</strong> Inspect any SAP GUI transaction or explore official Fiori successor matches.
           </div>
-
-          <button
-            type="submit"
-            style={{
-              padding: '9px 18px',
-              backgroundColor: '#0066FF',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <span>Discover Fiori Apps</span>
-            <ArrowRight size={14} />
-          </button>
-        </form>
-
-        {/* Quick Sample Chips */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', color: '#64748B', fontWeight: 500 }}>Popular transactions:</span>
-          {['ME21N', 'FB50', 'VA01', 'MM01', 'F-02'].map((code) => (
+          <div style={{ display: 'flex', gap: '8px' }}>
             <button
-              key={code}
               type="button"
-              onClick={() => {
-                setQuickTcode(code);
-                navigate(`/transaction-discovery?tcode=${code}`);
-              }}
-              style={{
-                background: '#F1F5F9',
-                border: '1px solid #E2E8F0',
-                borderRadius: '4px',
-                padding: '3px 8px',
-                fontSize: '12px',
-                fontFamily: 'monospace',
-                fontWeight: 600,
-                color: '#334155',
-                cursor: 'pointer'
-              }}
+              onClick={() => navigate('/catalogue')}
+              style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', border: '1px solid #93C5FD', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#0284C7', cursor: 'pointer' }}
             >
-              {code}
+              Browse Catalogue (18k+ Apps)
             </button>
-          ))}
+            <button
+              type="button"
+              onClick={() => navigate('/transaction-discovery')}
+              style={{ padding: '6px 14px', backgroundColor: '#0066FF', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+            >
+              <span>Inspect Transaction</span>
+              <ArrowRight size={13} />
+            </button>
+          </div>
         </div>
       </div>
 

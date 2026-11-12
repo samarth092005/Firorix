@@ -29,7 +29,11 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
-  Zap
+  Zap,
+  X,
+  Activity,
+  Compass,
+  BookOpen
 } from 'lucide-react';
 import { LoadingState } from '../../../components/common';
 
@@ -64,7 +68,6 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [tcode, setTcode] = useState<string>(initialTcode);
   const [systemId, setSystemId] = useState<string>(initialSystemId);
   const [client, setClient] = useState<string>('200');
-  const [language, setLanguage] = useState<'EN' | 'DE'>('EN');
   const [targetRelease, setTargetRelease] = useState<string>('SAP S/4HANA 2023 Private Edition');
   const [progressState, setProgressState] = useState<DiscoverySearchProgressState>('IDLE');
 
@@ -75,7 +78,6 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [selectedCandidate, setSelectedCandidate] = useState<CatalogueReference | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mcpPipelineResult, setMcpPipelineResult] = useState<UnifiedDiscoveryMatchResult | null>(null);
-  const [mcpEnabled, setMcpEnabled] = useState<boolean>(true);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
 
   // Business Scope & Intake (Expandable Drawer)
@@ -83,12 +85,43 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [businessProcess, setBusinessProcess] = useState<string>('Financial Accounting');
   const [primaryScenario, setPrimaryScenario] = useState<string>('');
   const [criticality, setCriticality] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('HIGH');
+  const [activeCategory, setActiveCategory] = useState<'ALL' | 'FI' | 'MM' | 'SD' | 'CUSTOM'>('ALL');
 
   // Available systems from adapter
   const availableSystems = mockSapAdapter.getAvailableSystems();
 
-  // Curated quick-select transactions from verified S/4HANA 2023 snapshot
-  const curatedTcodes = ['F-53', 'ME21N', 'VA01', 'FB50', 'MIGO', 'BP', 'FS00', 'MIRO', 'FB60', 'OB52', 'ZPURCHASE'];
+  const PRESET_CATEGORIES: Record<string, Array<{ tcode: string; desc: string; mod: string }>> = {
+    ALL: [
+      { tcode: 'F-53', desc: 'Post Outgoing Payments - For Suppliers', mod: 'FI-AP' },
+      { tcode: 'ME21N', desc: 'Create Purchase Order', mod: 'MM-PUR' },
+      { tcode: 'VA01', desc: 'Create Sales Order', mod: 'SD-SLS' },
+      { tcode: 'FB50', desc: 'Enter G/L Account Document', mod: 'FI-GL' },
+      { tcode: 'MIGO', desc: 'Goods Movement', mod: 'MM-IM' },
+      { tcode: 'BP', desc: 'Maintain Business Partner', mod: 'Cross-Domain' }
+    ],
+    FI: [
+      { tcode: 'F-53', desc: 'Post Outgoing Payments - For Suppliers', mod: 'FI-AP' },
+      { tcode: 'FB50', desc: 'Enter G/L Account Document', mod: 'FI-GL' },
+      { tcode: 'FS00', desc: 'G/L Account Master Record Maintenance', mod: 'FI-GL' },
+      { tcode: 'FB60', desc: 'Enter Incoming Invoices', mod: 'FI-AP' },
+      { tcode: 'F-28', desc: 'Post Incoming Payments - For Customers', mod: 'FI-AR' }
+    ],
+    MM: [
+      { tcode: 'ME21N', desc: 'Create Purchase Order', mod: 'MM-PUR' },
+      { tcode: 'MIGO', desc: 'Goods Movement', mod: 'MM-IM' },
+      { tcode: 'MIRO', desc: 'Enter Incoming Invoice', mod: 'MM-LIV' },
+      { tcode: 'ME23N', desc: 'Display Purchase Order', mod: 'MM-PUR' }
+    ],
+    SD: [
+      { tcode: 'VA01', desc: 'Create Sales Order', mod: 'SD-SLS' },
+      { tcode: 'VA02', desc: 'Change Sales Order', mod: 'SD-SLS' },
+      { tcode: 'VL01N', desc: 'Create Outbound Delivery with Reference', mod: 'LE-SHP' }
+    ],
+    CUSTOM: [
+      { tcode: 'ZPURCHASE', desc: 'Legacy Custom Purchase Approval Dynpro', mod: 'Z-Custom' },
+      { tcode: 'ZFIORI_REPORT', desc: 'Custom Financial Consolidation Dynpro', mod: 'Z-Custom' }
+    ]
+  };
 
   // Execute discovery on search
   const executeDiscovery = async (targetTcode: string, sysId: string = systemId) => {
@@ -125,12 +158,12 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           systemId: sysId,
           client,
           targetRelease,
-          language,
+          language: 'EN',
           useLiveSap: isLiveSystem,
-          mcpOptions: { enabled: mcpEnabled },
-          useMcp: mcpEnabled
+          mcpOptions: { enabled: false },
+          useMcp: false
         }).catch((pErr: any) => {
-          console.warn('[Discovery Workspace] MCP Pipeline note:', pErr?.message);
+          console.warn('[Discovery Workspace] Match pipeline fallback:', pErr?.message);
           return null;
         })
       ]);
@@ -218,10 +251,10 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
       client,
       targetRelease,
       matchingFioriApp: candidateApp,
-      fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : 50,
-      assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : 'PENDING_VERIFICATION',
-      status: 'IN_PROGRESS',
-      lifecycleStatus: candidateApp ? 'MATCHING_COMPLETED' : 'DISCOVERY_COMPLETED',
+      fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
+      assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : (metadata?.classification === 'CUSTOM' ? 'CUSTOM_RAP_REQUIRED' : 'PENDING_VERIFICATION'),
+      status: 'COMPLETED',
+      lifecycleStatus: candidateApp ? 'MATCHING_COMPLETED' : 'RECOMMENDATION_COMPLETED',
       businessContext: {
         businessProcess,
         primaryScenario: primaryScenario || `Operational execution of ${cleanTcode}`,
@@ -237,6 +270,12 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           ? 'SAP_BR_PURCHASER'
           : selectedCandidate?.appId === 'F1873'
           ? 'SAP_BR_INTERNAL_SALES_REP'
+          : cleanTcode.includes('PURCH') || cleanTcode.startsWith('ME')
+          ? 'SAP_BR_PURCHASER'
+          : cleanTcode.startsWith('VA') || cleanTcode.startsWith('SD')
+          ? 'SAP_BR_INTERNAL_SALES_REP'
+          : cleanTcode.startsWith('F-53') || cleanTcode.startsWith('FB60')
+          ? 'SAP_BR_AP_ACCOUNTANT'
           : 'SAP_BR_BUSINESS_PROCESS_SPECIALIST',
         knownODataService: selectedCandidate?.odataServices?.[0] || 'Service binding determined by FAL',
         requiredFunctionality: ['Audit Logging', 'Real-time Validation'],
@@ -261,58 +300,76 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Enterprise Search & Discovery Header */}
+      {/* Enterprise Search & Discovery Header Box */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
           border: '1px solid var(--fiori-border, #E2E8F0)',
-          borderRadius: 'var(--radius-md, 6px)',
-          padding: '20px 24px',
-          boxShadow: 'var(--fiori-shadow-sm, 0 1px 3px rgba(0,0,0,0.05))',
+          borderRadius: '12px',
+          padding: '22px 26px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px'
+          gap: '16px',
+          position: 'relative'
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <h2 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)' }}>
-              SAP Transaction Discovery &amp; Architectural Inspection
-            </h2>
-            <p style={{ margin: 0, fontSize: '12px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-              Inspect live SAP Data Dictionary (DDIC) repository facts and match against official SAP Fiori Apps Reference Library successors.
-            </p>
+        {/* Top Context & System Status Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', borderBottom: '1px solid #F1F5F9', paddingBottom: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '6px',
+                backgroundColor: '#EFF6FF',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Zap size={16} color="var(--fiori-primary, #0066FF)" />
+            </div>
+            <div>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
+                SAP Inspection &amp; Successor Matching Command Deck
+              </span>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-            <Server size={13} color="var(--fiori-primary, #0A6ED1)" />
-            <span>Target:</span>
-            <strong style={{ color: 'var(--fiori-navy, #102A43)' }}>{systemId}</strong>
-            <span style={{ color: '#CBD5E1' }}>•</span>
-            <span>Client:</span>
-            <strong style={{ color: 'var(--fiori-navy, #102A43)' }}>{client}</strong>
-            <span style={{ color: '#CBD5E1' }}>•</span>
-            <span style={{ color: '#15803D', fontWeight: 600 }}>LIVE_SAP</span>
-            <span style={{ color: '#CBD5E1' }}>•</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11.5px', flexWrap: 'wrap' }}>
             <div
-              onClick={() => setMcpEnabled(!mcpEnabled)}
               style={{
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '2px 8px',
-                borderRadius: '10px',
-                backgroundColor: mcpEnabled ? '#EFF6FF' : '#F1F5F9',
-                border: `1px solid ${mcpEnabled ? '#93C5FD' : '#CBD5E1'}`,
-                color: mcpEnabled ? '#1D4ED8' : '#64748B',
-                fontWeight: 600,
-                fontSize: '10.5px',
-                cursor: 'pointer'
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: '14px',
+                backgroundColor: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                color: '#166534',
+                fontWeight: 600
               }}
-              title="Toggle SAP Fiori MCP Server intelligence (@sap-ux/fiori-mcp-server)"
             >
-              <Sparkles size={11} color={mcpEnabled ? '#2563EB' : '#94A3B8'} />
-              <span>MCP Server: <strong>{mcpEnabled ? 'CONNECTED' : 'OFF'}</strong></span>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#16A34A', display: 'inline-block' }} />
+              <span>Target: {systemId}</span>
+              <span style={{ color: '#86EFAC' }}>•</span>
+              <span>Client {client}</span>
+              <span style={{ color: '#86EFAC' }}>•</span>
+              <span style={{ fontWeight: 700 }}>LIVE_SAP</span>
+            </div>
+
+            <div
+              style={{
+                padding: '4px 10px',
+                borderRadius: '14px',
+                backgroundColor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                color: '#475569',
+                fontWeight: 600
+              }}
+            >
+              📚 18,225+ Catalogue Apps
             </div>
           </div>
         </div>
@@ -325,14 +382,14 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           }}
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(220px, 1.4fr) minmax(180px, 1fr) 90px auto',
-            gap: '12px',
+            gridTemplateColumns: 'minmax(280px, 1.8fr) minmax(260px, 1.2fr) auto',
+            gap: '14px',
             alignItems: 'flex-end'
           }}
         >
           {/* T-Code Input */}
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginBottom: '4px' }}>
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginBottom: '5px', letterSpacing: '0.3px' }}>
               TRANSACTION CODE (T-CODE)
             </label>
             <div style={{ position: 'relative' }}>
@@ -346,25 +403,52 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                 }}
                 placeholder="e.g. ME21N, F-53, VA01, FB50, FS00"
                 style={{
-                  height: '38px',
+                  height: '42px',
                   fontFamily: 'var(--font-mono, monospace)',
                   fontSize: '14px',
                   fontWeight: 700,
-                  letterSpacing: '0.5px',
-                  paddingLeft: '32px'
+                  letterSpacing: '0.6px',
+                  paddingLeft: '34px',
+                  paddingRight: tcode ? '32px' : '12px',
+                  borderRadius: '8px'
                 }}
                 autoFocus
               />
               <Search
-                size={14}
-                style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--fiori-text-secondary, #64748B)' }}
+                size={15}
+                style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--fiori-text-secondary, #64748B)' }}
               />
+              {tcode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTcode('');
+                    setMetadata(null);
+                    setProgressState('IDLE');
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '12px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: '#94A3B8',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}
+                  title="Clear input"
+                >
+                  <X size={15} />
+                </button>
+              )}
             </div>
           </div>
 
           {/* Target System Select */}
           <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginBottom: '4px' }}>
+            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginBottom: '5px', letterSpacing: '0.3px' }}>
               SAP LANDSCAPE
             </label>
             <select
@@ -378,30 +462,13 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   setTargetRelease(sys.release || 'SAP S/4HANA 2023 Private Edition');
                 }
               }}
-              style={{ height: '38px', fontSize: '12px' }}
+              style={{ height: '42px', fontSize: '12.5px', borderRadius: '8px' }}
             >
               {availableSystems.map((sys) => (
                 <option key={sys.systemId} value={sys.systemId}>
-                  {sys.systemId} — {sys.systemName || sys.release}
+                  {sys.systemName || sys.systemId}
                 </option>
               ))}
-            </select>
-          </div>
-
-          {/* Language Select */}
-          <div>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginBottom: '4px' }}>
-              LANGUAGE
-            </label>
-            <select
-              className="fiori-select"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as 'EN' | 'DE')}
-              style={{ height: '38px', fontSize: '12px', fontWeight: 600 }}
-              title="SAP Session Language for TSTCT Dictionary Descriptions"
-            >
-              <option value="EN">EN</option>
-              <option value="DE">DE</option>
             </select>
           </div>
 
@@ -411,18 +478,21 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             className="fiori-btn fiori-btn-primary"
             disabled={isLoading || !tcode.trim()}
             style={{
-              height: '38px',
-              padding: '0 20px',
+              height: '42px',
+              padding: '0 24px',
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              fontSize: '13px',
-              fontWeight: 600,
-              backgroundColor: 'var(--fiori-primary, #0A6ED1)',
-              color: '#FFFFFF'
+              gap: '8px',
+              fontSize: '13.5px',
+              fontWeight: 700,
+              backgroundColor: 'var(--fiori-primary, #0066FF)',
+              color: '#FFFFFF',
+              borderRadius: '8px',
+              boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)',
+              transition: 'all 0.15s ease'
             }}
           >
-            {isLoading ? <Clock size={14} /> : <Zap size={14} />}
+            {isLoading ? <Clock size={16} /> : <Zap size={16} />}
             {isLoading ? 'Inspecting...' : 'Inspect & Match'}
           </button>
         </form>
@@ -505,36 +575,6 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             <span>{searchError}</span>
           </div>
         )}
-
-        {/* Quick Curator Bar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>
-          <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>
-            Quick Pilot Scenarios:
-          </span>
-          {curatedTcodes.map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() => {
-                setTcode(item);
-                executeDiscovery(item);
-              }}
-              style={{
-                padding: '3px 10px',
-                borderRadius: '12px',
-                fontSize: '11px',
-                fontFamily: 'var(--font-mono, monospace)',
-                fontWeight: tcode === item ? 700 : 500,
-                backgroundColor: tcode === item ? 'var(--fiori-sidebar-active, #E1EFFD)' : '#F8FAFC',
-                color: tcode === item ? 'var(--fiori-primary, #0A6ED1)' : 'var(--fiori-navy, #102A43)',
-                border: tcode === item ? '1px solid var(--fiori-primary, #0A6ED1)' : '1px solid var(--fiori-border, #E2E8F0)',
-                cursor: 'pointer'
-              }}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Loading State */}
@@ -543,6 +583,216 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           message={`Querying SAP S21 Data Dictionary & SAP Fiori Apps Library for ${tcode}...`}
           subMessage="Extracting TSTC, TADIR, and querying official FAL OData endpoints..."
         />
+      )}
+
+      {/* Interactive Architecture Workspace (Default State when no transaction is searched yet) */}
+      {!isLoading && !metadata && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Domain-based Preset Navigator Card */}
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '10px',
+              padding: '20px',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={16} color="#0066FF" />
+                  <span>Interactive Discovery Presets by Business Domain</span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+                  Select any enterprise transaction to instantly inspect DDIC program evidence and match official Fiori apps.
+                </div>
+              </div>
+
+              {/* Category Pills */}
+              <div style={{ display: 'flex', gap: '4px', backgroundColor: '#F1F5F9', padding: '3px', borderRadius: '8px' }}>
+                {(['ALL', 'FI', 'MM', 'SD', 'CUSTOM'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    style={{
+                      padding: '4px 10px',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      backgroundColor: activeCategory === cat ? '#FFFFFF' : 'transparent',
+                      color: activeCategory === cat ? '#0066FF' : '#64748B',
+                      boxShadow: activeCategory === cat ? '0 1px 2px rgba(0,0,0,0.08)' : 'none'
+                    }}
+                  >
+                    {cat === 'ALL' && 'All Domains'}
+                    {cat === 'FI' && 'Financials (FI)'}
+                    {cat === 'MM' && 'Procurement (MM)'}
+                    {cat === 'SD' && 'Sales (SD)'}
+                    {cat === 'CUSTOM' && 'Custom (Z)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Presets Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '10px' }}>
+              {(PRESET_CATEGORIES[activeCategory] || PRESET_CATEGORIES.ALL).map((item) => (
+                <div
+                  key={item.tcode}
+                  onClick={() => {
+                    setTcode(item.tcode);
+                    executeDiscovery(item.tcode);
+                  }}
+                  style={{
+                    padding: '12px 14px',
+                    backgroundColor: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease-in-out',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#93C5FD';
+                    e.currentTarget.style.backgroundColor = '#F0F7FF';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = '#E2E8F0';
+                    e.currentTarget.style.backgroundColor = '#F8FAFC';
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 800, fontFamily: 'monospace', color: '#0F172A' }}>
+                      {item.tcode}
+                    </span>
+                    <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: item.mod.startsWith('Z') ? '#FEF3C7' : '#EFF6FF', color: item.mod.startsWith('Z') ? '#B45309' : '#1D4ED8' }}>
+                      {item.mod}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: '#475569', lineHeight: 1.3 }}>
+                    {item.desc}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', fontWeight: 600, color: '#0066FF' }}>
+                    <span>Inspect Transaction</span>
+                    <ArrowRight size={12} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 3 Architecture Pillar Capability Boxes */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
+            {/* Box 1 */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: '10px',
+                padding: '18px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Database size={17} color="#0066FF" />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Live SAP DDIC Probing</div>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>Target S21 Client 200</div>
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.4, margin: 0 }}>
+                Corroborates transaction existence via SAP Data Dictionary tables (TSTC, TADIR, TDEVC) and Gateway OData catalog services.
+              </p>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '6px' }}>
+                {['TSTC Program', 'TADIR Object', 'TDEVC Package', 'SU24 Auth'].map((tag) => (
+                  <span key={tag} style={{ fontSize: '10px', fontWeight: 600, backgroundColor: '#F1F5F9', color: '#475569', padding: '2px 6px', borderRadius: '4px' }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 2 */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: '10px',
+                padding: '18px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Layers size={17} color="#16A34A" />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Official Fiori Catalogue</div>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>18,225+ S/4HANA Apps</div>
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.4, margin: 0 }}>
+                Matches transactions to standard official Fiori apps, determining App IDs, UI technologies (Elements vs Freestyle), and semantic objects.
+              </p>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '6px' }}>
+                {['18,225+ Apps', 'Official Successor', 'FAL OData', 'UI5 / Elements'].map((tag) => (
+                  <span key={tag} style={{ fontSize: '10px', fontWeight: 600, backgroundColor: '#F0FDF4', color: '#166534', padding: '2px 6px', borderRadius: '4px' }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Box 3 */}
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: '10px',
+                padding: '18px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#FAF5FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={17} color="#9333EA" />
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Clean Core Fit-Gap</div>
+                  <div style={{ fontSize: '11px', color: '#64748B' }}>5-Dimension Deterministic Scoring</div>
+                </div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.4, margin: 0 }}>
+                Evaluates Functional (35%), Technical (25%), Process (15%), Roles (15%), and Compatibility (10%) to guide Adopt, Configure, or Build.
+              </p>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '6px' }}>
+                {['Functional 35%', 'Technical 25%', 'Process 15%', 'Roles 15%'].map((tag) => (
+                  <span key={tag} style={{ fontSize: '10px', fontWeight: 600, backgroundColor: '#FAF5FF', color: '#6B21A8', padding: '2px 6px', borderRadius: '4px' }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Discovery Results Workspace */}

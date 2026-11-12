@@ -96,27 +96,7 @@ export const SettingsPage: React.FC = () => {
           </div>
         </div>
 
-        {/* System & Runtime Telemetry */}
-        <div className="fiori-card">
-          <div className="fiori-card-header">
-            <div className="fiori-card-title">
-              <Info size={16} color="var(--fiori-teal)" /> Platform & Build Information
-            </div>
-          </div>
-          <div className="fiori-card-body" style={{ fontSize: '12px', display: 'grid', gridTemplateColumns: '160px 1fr', gap: '6px' }}>
-            <span style={{ color: 'var(--fiori-text-secondary)' }}>FioriX Version:</span>
-            <span><strong>1.0.0 (Sprint 1 Release)</strong></span>
 
-            <span style={{ color: 'var(--fiori-text-secondary)' }}>Frontend Architecture:</span>
-            <span>React 18.3 &bull; TypeScript 5.5 &bull; Vite 5.4</span>
-
-            <span style={{ color: 'var(--fiori-text-secondary)' }}>Design System:</span>
-            <span>SAP Fiori Horizon Enterprise Design System</span>
-
-            <span style={{ color: 'var(--fiori-text-secondary)' }}>Backend Target:</span>
-            <span>SAP Cloud Application Programming Model (CAP Node.js / HANA Cloud)</span>
-          </div>
-        </div>
       </div>
 
       <ConfirmDialog

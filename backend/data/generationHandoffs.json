@@ -4444,5 +4444,54 @@
     "updatedAt": "2026-11-12T09:27:26.218Z",
     "createdBy": "USR-ADMIN-01",
     "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-ZPURCHASE-A43A47",
+    "sourceAssessmentId": "ASM-1794477444120-ZPURCHASE-8S65",
+    "tcode": "ZPURCHASE",
+    "transactionDescription": "Assessment for ZPURCHASE",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "ZFIORIX_PURCHASE_MAIN",
+    "packageName": "ZPURCH_MOD",
+    "classification": "CUSTOM",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-12T10:22:55.240Z",
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Custom Extension",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "ZFIORIX_PURCHASE_MAIN",
+      "screenNumber": "0100",
+      "packageName": "ZPURCH_MOD",
+      "softwareComponent": "HOME"
+    },
+    "createdAt": "2026-11-12T10:22:55.240Z",
+    "updatedAt": "2026-11-12T10:22:55.240Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
   }
 ]

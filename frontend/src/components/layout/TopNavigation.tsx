@@ -15,9 +15,15 @@ import {
   Clock,
   Settings,
   ShieldCheck,
-  Scale
+  Scale,
+  X,
+  Trash2,
+  Inbox,
+  FileText,
+  Zap
 } from 'lucide-react';
 import { authService } from '../../services/authService';
+import { notificationService, AppNotification } from '../../services/notificationService';
 import { SystemStatusIndicator } from '../common/SystemStatusIndicator';
 import { SystemConnectionState } from '../../services/contracts/types';
 
@@ -34,7 +40,38 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(2);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [notifFilter, setNotifFilter] = useState<'ALL' | 'UNREAD'>('ALL');
+
+  // Subscribe to live notifications & initialize store
+  useEffect(() => {
+    const unsubscribe = notificationService.subscribe((items) => {
+      setNotifications(items);
+    });
+    notificationService.initialize();
+    return () => unsubscribe();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Format relative timestamp
+  const formatRelativeTime = (isoString: string): string => {
+    try {
+      const now = Date.now();
+      const past = new Date(isoString).getTime();
+      const diffMs = now - past;
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      const diffDays = Math.floor(diffHours / 24);
+      if (diffDays === 1) return 'Yesterday';
+      return `${diffDays}d ago`;
+    } catch {
+      return 'Recent';
+    }
+  };
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -180,18 +217,28 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             aria-label="System notifications"
           >
             <Bell size={17} />
-            {unreadNotifications > 0 && (
+            {unreadCount > 0 && (
               <span
                 style={{
                   position: 'absolute',
-                  top: '6px',
-                  right: '6px',
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  backgroundColor: '#EA580C'
+                  top: '4px',
+                  right: '4px',
+                  minWidth: '15px',
+                  height: '15px',
+                  borderRadius: '10px',
+                  backgroundColor: '#EA580C',
+                  color: '#FFFFFF',
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 3px',
+                  boxShadow: '0 1px 3px rgba(234, 88, 12, 0.4)'
                 }}
-              />
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
             )}
           </button>
 
@@ -200,17 +247,18 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
               style={{
                 position: 'absolute',
                 right: 0,
-                top: '40px',
-                width: '320px',
+                top: '42px',
+                width: '380px',
                 backgroundColor: '#FFFFFF',
-                borderRadius: 'var(--radius-md, 10px)',
-                boxShadow: 'var(--fiori-shadow-lg)',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
                 border: '1px solid var(--fiori-border, #E2E8F0)',
                 color: 'var(--fiori-text-primary, #0F172A)',
                 zIndex: 200,
                 overflow: 'hidden'
               }}
             >
+              {/* Header */}
               <div
                 style={{
                   padding: '12px 16px',
@@ -221,67 +269,261 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   alignItems: 'center'
                 }}
               >
-                <span style={{ fontWeight: 600, fontSize: '13px', color: '#0F172A' }}>
-                  System Notifications
-                </span>
-                {unreadNotifications > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setUnreadNotifications(0)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      fontSize: '11px',
-                      color: 'var(--fiori-primary, #0066FF)',
-                      cursor: 'pointer',
-                      fontWeight: 600
-                    }}
-                  >
-                    Mark read
-                  </button>
-                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '13px', color: '#0F172A' }}>
+                    Notifications
+                  </span>
+                  {unreadCount > 0 && (
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        padding: '1px 6px',
+                        borderRadius: '10px',
+                        backgroundColor: '#EFF6FF',
+                        color: 'var(--fiori-primary, #0066FF)',
+                        fontWeight: 600
+                      }}
+                    >
+                      {unreadCount} new
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => notificationService.markAllAsRead()}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '11px',
+                        color: 'var(--fiori-primary, #0066FF)',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        padding: '2px 4px'
+                      }}
+                      title="Mark all as read"
+                    >
+                      Mark all read
+                    </button>
+                  )}
+                  {notifications.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => notificationService.clearAll()}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#94A3B8',
+                        cursor: 'pointer',
+                        padding: '2px',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                      title="Clear all notifications"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              <div style={{ maxHeight: '260px', overflowY: 'auto' }}>
-                <div
+              {/* Filter Tabs */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  backgroundColor: '#FFFFFF',
+                  borderBottom: '1px solid #F1F5F9'
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setNotifFilter('ALL')}
                   style={{
-                    padding: '12px 16px',
-                    borderBottom: '1px solid var(--fiori-border-light, #F1F5F9)',
-                    display: 'flex',
-                    gap: '10px'
+                    padding: '4px 10px',
+                    borderRadius: '14px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: notifFilter === 'ALL' ? '#0F172A' : '#F1F5F9',
+                    color: notifFilter === 'ALL' ? '#FFFFFF' : '#64748B'
                   }}
                 >
-                  <CheckCircle2 size={16} color="#16A34A" style={{ marginTop: '2px', flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#0F172A' }}>Assessment Completed: F-53</div>
-                    <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #475569)', marginTop: '2px' }}>
-                      Explicit successor F0773 verified for Outgoing Payments in S21.
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--fiori-text-muted, #94A3B8)', marginTop: '4px' }}>
-                      2 hours ago
-                    </div>
-                  </div>
-                </div>
+                  All ({notifications.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotifFilter('UNREAD')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '14px',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: notifFilter === 'UNREAD' ? '#0F172A' : '#F1F5F9',
+                    color: notifFilter === 'UNREAD' ? '#FFFFFF' : '#64748B'
+                  }}
+                >
+                  Unread ({unreadCount})
+                </button>
+              </div>
 
-                <div
-                  style={{
-                    padding: '12px 16px',
-                    borderBottom: '1px solid var(--fiori-border-light, #F1F5F9)',
-                    display: 'flex',
-                    gap: '10px'
-                  }}
-                >
-                  <AlertCircle size={16} color="#D97706" style={{ marginTop: '2px', flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#0F172A' }}>Catalogue Cached</div>
-                    <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #475569)', marginTop: '2px' }}>
-                      S/4HANA 2023 FPS02 catalogue snapshot active.
+              {/* List */}
+              <div style={{ maxHeight: '340px', overflowY: 'auto' }}>
+                {notifications.filter((n) => (notifFilter === 'UNREAD' ? !n.read : true)).length === 0 ? (
+                  <div
+                    style={{
+                      padding: '36px 20px',
+                      textAlign: 'center',
+                      color: '#94A3B8',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <Inbox size={28} color="#CBD5E1" />
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#475569' }}>
+                      {notifFilter === 'UNREAD' ? 'No unread notifications' : 'No notifications'}
                     </div>
-                    <div style={{ fontSize: '10px', color: 'var(--fiori-text-muted, #94A3B8)', marginTop: '4px' }}>
-                      Today at 08:00
+                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                      You are all caught up with your workspace activities.
                     </div>
                   </div>
-                </div>
+                ) : (
+                  notifications
+                    .filter((n) => (notifFilter === 'UNREAD' ? !n.read : true))
+                    .map((item) => {
+                      const getIcon = () => {
+                        switch (item.category) {
+                          case 'GENERATION':
+                            return <Sparkles size={15} color="#0284C7" />;
+                          case 'ASSESSMENT':
+                            return item.type === 'SUCCESS' ? (
+                              <CheckCircle2 size={15} color="#16A34A" />
+                            ) : (
+                              <FileText size={15} color="#0066FF" />
+                            );
+                          case 'DISCOVERY':
+                            return <Zap size={15} color="#EA580C" />;
+                          case 'SYSTEM':
+                          default:
+                            return <Server size={15} color="#6366F1" />;
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={item.id}
+                          style={{
+                            padding: '12px 16px',
+                            borderBottom: '1px solid #F1F5F9',
+                            display: 'flex',
+                            gap: '12px',
+                            backgroundColor: item.read ? '#FFFFFF' : '#F8FAFC',
+                            cursor: item.actionUrl ? 'pointer' : 'default',
+                            transition: 'background-color 0.15s ease',
+                            position: 'relative'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = item.read ? '#F8FAFC' : '#F1F5F9';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = item.read ? '#FFFFFF' : '#F8FAFC';
+                          }}
+                          onClick={() => {
+                            notificationService.markAsRead(item.id);
+                            if (item.actionUrl) {
+                              navigate(item.actionUrl);
+                              setShowNotifications(false);
+                            }
+                          }}
+                        >
+                          <div style={{ marginTop: '2px', flexShrink: 0 }}>{getIcon()}</div>
+                          <div style={{ flex: 1, minWidth: 0, paddingRight: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                              <span
+                                style={{
+                                  fontSize: '12px',
+                                  fontWeight: item.read ? 600 : 700,
+                                  color: '#0F172A'
+                                }}
+                              >
+                                {item.title}
+                              </span>
+                              {!item.read && (
+                                <span
+                                  style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    backgroundColor: 'var(--fiori-primary, #0066FF)'
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '11px',
+                                color: '#475569',
+                                lineHeight: '1.4',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}
+                            >
+                              {item.message}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '10px',
+                                color: '#94A3B8',
+                                marginTop: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                              }}
+                            >
+                              <span>{formatRelativeTime(item.timestamp)}</span>
+                              {item.actionLabel && (
+                                <span style={{ color: 'var(--fiori-primary, #0066FF)', fontWeight: 600 }}>
+                                  {item.actionLabel} →
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              notificationService.dismiss(item.id);
+                            }}
+                            style={{
+                              position: 'absolute',
+                              top: '10px',
+                              right: '10px',
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#94A3B8',
+                              cursor: 'pointer',
+                              padding: '2px',
+                              borderRadius: '4px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                            title="Dismiss notification"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
+                      );
+                    })
+                )}
               </div>
             </div>
           )}

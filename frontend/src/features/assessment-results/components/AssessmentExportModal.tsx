@@ -46,8 +46,15 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const effectiveRelease = assessment.release || (assessment as any).targetRelease || 'SAP S/4HANA 2023 Private Edition';
+  const effectivePackage = assessment.packageName || (assessment.tcode === 'F-53' || assessment.tcode === 'F-28' || assessment.tcode === 'FB03' ? 'FBAS' : 'Standard Core Package (FBAS)');
+
   const exportData: FullAssessmentExportData = assessmentExportService.generateFullExportData(
-    assessment,
+    {
+      ...assessment,
+      release: effectiveRelease,
+      packageName: effectivePackage
+    },
     evidence,
     evidenceScore,
     candidates,
@@ -186,21 +193,19 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                   1. Executive Summary
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', fontSize: '12px' }}>
-                  <div>Transaction: <strong>{assessment.tcode}</strong> — {assessment.description}</div>
-                  <div>Outcome: <strong style={{ color: '#0066FF' }}>{recommendation.outcome || 'ADOPT'}</strong> ({assessment.assessmentResult})</div>
+                  <div>Transaction: <strong>{assessment.tcode}</strong> — {assessment.description || 'SAP Transaction'}</div>
+                  <div>Outcome: <strong style={{ color: '#0066FF' }}>{recommendation.outcome || 'ADOPT'}</strong> ({assessment.assessmentResult || 'EVALUATED'})</div>
                   <div>Decision Rationale: <span>{recommendation.recommendedAction}</span></div>
                   <div>Evidence Completeness: <strong>{evidenceScore.totalScore}/100 ({evidenceScore.completenessLabel})</strong></div>
-                  <div>Recommended App: <strong>{assessment.matchingFioriApp?.appId || 'Custom RAP'}</strong> ({assessment.matchingFioriApp?.appName || 'N/A'})</div>
-                  <div>Release Compatibility: <strong>{compatibility.status}</strong> ({assessment.release})</div>
+                  <div>Recommended App: <strong>{assessment.matchingFioriApp?.appId || (candidates[0]?.appId) || 'Custom RAP'}</strong> ({assessment.matchingFioriApp?.appName || (candidates[0]?.appName) || 'Standard Successor'})</div>
+                  <div>Release Compatibility: <strong>{compatibility.status || 'COMPATIBLE'}</strong> ({effectiveRelease})</div>
                 </div>
               </div>
 
-
-
-              {/* Section 3: Business Context & Requirements */}
+              {/* Section 2: Business Context & Requirements */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  3. Business Context &amp; Requirements Intake
+                  2. Business Context &amp; Requirements Intake
                 </h4>
                 <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div>Process: <strong>{assessment.businessContext?.businessProcess || 'Finance & Logistics'}</strong></div>
@@ -209,10 +214,10 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                 </div>
               </div>
 
-              {/* Section 4: Official SAP Fiori Catalogue Candidates */}
+              {/* Section 3: Official SAP Fiori Catalogue Candidates */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  4. Official SAP Fiori Catalogue Candidates ({candidates.length})
+                  3. Official SAP Fiori Catalogue Candidates ({candidates.length})
                 </h4>
                 {candidates.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
@@ -230,10 +235,10 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                 )}
               </div>
 
-              {/* Section 5: Candidate Comparison Matrix */}
+              {/* Section 4: Candidate Comparison Matrix */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  5. Candidate Comparison Matrix
+                  4. Candidate Comparison Matrix
                 </h4>
                 {candidates.length > 1 ? (
                   <div style={{ fontSize: '12px', overflowX: 'auto' }}>
@@ -265,22 +270,22 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                 )}
               </div>
 
-              {/* Section 6: Fit-Gap Matrix */}
+              {/* Section 5: Fit-Gap Matrix */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  6. Requirement-to-App Fit-Gap Matrix
+                  5. Requirement-to-App Fit-Gap Matrix
                 </h4>
                 <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <div><strong>REQ-01 Core Scope:</strong> {candidates.length > 0 ? `SUPPORTED — Successor ${candidates[0].appId} matches baseline transaction flow.` : 'UNSUPPORTED — Requires Clean Core RAP Managed BO.'}</div>
                   <div><strong>REQ-02 Security &amp; Authorizations:</strong> SUPPORTED — Standard PFCG business catalog mapped.</div>
-                  <div><strong>REQ-03 Release Compatibility:</strong> {compatibility.status} — Target release {assessment.release} validated.</div>
+                  <div><strong>REQ-03 Release Compatibility:</strong> {compatibility.status || 'COMPATIBLE'} — Target release {effectiveRelease} validated.</div>
                 </div>
               </div>
 
-              {/* Section 7: Technical Evidence Audit Trail */}
+              {/* Section 6: Technical Evidence Audit Trail */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  7. Technical Evidence Audit Trail ({evidence.length} Evidence Records)
+                  6. Technical Architecture &amp; Evidence Audit Trail ({evidence.length} Evidence Records)
                 </h4>
                 <div style={{ fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '4px', maxHeight: '160px', overflowY: 'auto' }}>
                   {evidence.map((e, idx) => (
@@ -291,35 +296,42 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                 </div>
               </div>
 
-              {/* Section 8: Recommendation Rationale & Modernization Strategy */}
+              {/* Section 7: Recommendation Rationale & Modernization Strategy */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  8. Recommendation Rationale: {recommendation.outcome || 'ADOPT'}
+                  7. Recommendation Rationale: {recommendation.outcome || 'ADOPT'}
                 </h4>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--fiori-navy, #102A43)', marginBottom: '6px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--fiori-navy, #102A43)', marginBottom: '8px' }}>
                   {recommendation.recommendedAction}
                 </div>
-                <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px' }}>
-                  {recommendation.requiredNextSteps.map((s, i) => (
-                    <li key={i}>{s}</li>
-                  ))}
-                </ul>
+                {recommendation.requiredNextSteps && recommendation.requiredNextSteps.length > 0 && (
+                  <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', listStyleType: 'disc' }}>
+                    {recommendation.requiredNextSteps.map((s, i) => {
+                      const cleanStep = s.replace(/^\d+\.\s*/, '');
+                      return (
+                        <li key={i} style={{ marginBottom: '4px' }}>
+                          {cleanStep}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
 
-              {/* Section 9: Risks & Clean Core Remediation */}
+              {/* Section 8: Risks & Clean Core Remediation */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  9. Risks &amp; Clean Core Remediation Plan
+                  8. Risks &amp; Clean Core Remediation Plan
                 </h4>
                 <div style={{ fontSize: '12px', color: '#475569' }}>
                   Clean Core zero-modification baseline enforced. All dynpro variants and screen enhancements will be migrated via standard Key User Adaptation or RAP extensions without modifying standard SAP code.
                 </div>
               </div>
 
-              {/* Section 10: Approval Gate & Audit History */}
+              {/* Section 9: Approval Gate & Audit History */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  10. Approval Gate &amp; Lifecycle Governance
+                  9. Approval Gate &amp; Lifecycle Governance
                 </h4>
                 <div style={{ fontSize: '12px', display: 'flex', gap: '20px' }}>
                   <div>Status: <strong>{assessment.status || 'PENDING_REVIEW'}</strong></div>
@@ -328,10 +340,10 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                 </div>
               </div>
 
-              {/* Section 11: Evidence Provenance & Operational Limitations */}
+              {/* Section 10: Evidence Provenance & Operational Limitations */}
               <div style={{ border: '1px solid #E2E8F0', padding: '16px', borderRadius: '4px' }}>
                 <h4 style={{ margin: '0 0 8px 0', color: 'var(--fiori-navy, #102A43)' }}>
-                  11. Evidence Provenance &amp; Operational Limitations
+                  10. Evidence Provenance &amp; Operational Limitations
                 </h4>
                 <div style={{ fontSize: '11px', color: '#64748B' }}>
                   Provenances: {assessment.isDemo ? 'CURATED_DEMO_FIXTURE (Pending Live Verification)' : 'LIVE_SAP_S21'} with official SAP Fiori Apps Reference Library baseline. System availability remains subject to client-level Basis OData activation and PFCG authorizations.

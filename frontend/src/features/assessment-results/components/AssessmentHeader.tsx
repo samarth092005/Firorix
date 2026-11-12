@@ -27,6 +27,20 @@ export const AssessmentHeader: React.FC<AssessmentHeaderProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const formatAssessedDate = (dateStr?: string) => {
+    if (!dateStr) return 'Today';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return 'Today';
+    }
+  };
+
+  const displayRelease = assessment.targetRelease || (assessment as any).release || (assessment as any).targetSystem?.release || 'SAP S/4HANA 2023 FPS01';
+  const displayAssessedDate = formatAssessedDate(assessment.createdAt || assessment.updatedAt || (assessment as any).lastAssessed);
+
   return (
     <div
       style={{
@@ -101,11 +115,11 @@ export const AssessmentHeader: React.FC<AssessmentHeaderProps> = ({
             </span>
             <span>•</span>
             <span>
-              Release: <strong style={{ color: 'var(--fiori-text-primary, #1B2838)' }}>{assessment.release}</strong>
+              Release: <strong style={{ color: 'var(--fiori-text-primary, #1B2838)' }}>{displayRelease}</strong>
             </span>
             <span>•</span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Calendar size={13} /> Assessed: <strong>{assessment.lastAssessed}</strong>
+              <Calendar size={13} /> Assessed: <strong>{displayAssessedDate}</strong>
             </span>
           </div>
         </div>

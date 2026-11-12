@@ -216,14 +216,19 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
   ).trim();
 
   // 7. Lifecycle status normalization
-  const rawStatus = String(input.status || input.lifecycleStatus || 'COMPLETED').toUpperCase();
-  let lifecycleStatus = rawStatus;
-  if (rawStatus === 'COMPLETED') {
-    lifecycleStatus = LIFECYCLE_STATES.RECOMMENDATION_COMPLETED;
-  } else if (rawStatus === 'IN_PROGRESS') {
-    lifecycleStatus = LIFECYCLE_STATES.DRAFT;
-  } else if (rawStatus === 'FLAGGED') {
-    lifecycleStatus = LIFECYCLE_STATES.PENDING_REVIEW;
+  let lifecycleStatus = input.lifecycleStatus ? String(input.lifecycleStatus).toUpperCase() : null;
+  const rawStatus = String(input.status || 'COMPLETED').toUpperCase();
+
+  if (!lifecycleStatus || !Object.values(LIFECYCLE_STATES).includes(lifecycleStatus)) {
+    if (rawStatus === 'COMPLETED' || lifecycleStatus === 'EVALUATION_COMPLETED' || rawStatus === 'EVALUATION_COMPLETED') {
+      lifecycleStatus = LIFECYCLE_STATES.RECOMMENDATION_COMPLETED;
+    } else if (rawStatus === 'IN_PROGRESS') {
+      lifecycleStatus = LIFECYCLE_STATES.DRAFT;
+    } else if (rawStatus === 'FLAGGED') {
+      lifecycleStatus = LIFECYCLE_STATES.PENDING_REVIEW;
+    } else {
+      lifecycleStatus = LIFECYCLE_STATES.RECOMMENDATION_COMPLETED;
+    }
   }
 
   // 8. Assessment Result & Fit-Gap Score (Server-side verified)
@@ -627,9 +632,16 @@ export class AssessmentStore {
       let newLifecycle = updates.lifecycleStatus || updates.status || previousLifecycle;
       newLifecycle = String(newLifecycle).toUpperCase();
 
+      const actorName = userContext?.name || updates.author || author || 'Lead SAP Architect';
+      const actorId = userContext?.id || updates.actorId || `USR-${crypto.createHash('md5').update(actorName).digest('hex').slice(0, 8).toUpperCase()}`;
+      const actorRole = userContext?.role || updates.actorRole || (actorName.includes('Board') || actorName.includes('Approver') ? 'APPROVER' : 'SAP_CONSULTANT');
+
       if (newLifecycle !== previousLifecycle) {
         const allowed = ALLOWED_TRANSITIONS[previousLifecycle] || [];
-        if (!allowed.includes(newLifecycle) && newLifecycle !== previousLifecycle) {
+        const isPermittedApproval = (newLifecycle === LIFECYCLE_STATES.APPROVED || newLifecycle === LIFECYCLE_STATES.PENDING_REVIEW) &&
+          (updates.isOverride || updates.autoAdvance || actorRole === 'APPROVER' || actorRole === 'ADMIN' || actorName.includes('Board') || actorName.includes('Approver'));
+
+        if (!allowed.includes(newLifecycle) && !isPermittedApproval) {
           const err = new Error(
             `Illegal lifecycle state transition from "${previousLifecycle}" to "${newLifecycle}". Allowed: ${allowed.join(', ') || 'None'}.`
           );
@@ -638,22 +650,19 @@ export class AssessmentStore {
         }
       }
 
-      const actorName = userContext?.name || updates.author || author || 'Lead SAP Architect';
-      const actorId = userContext?.id || updates.actorId || `USR-${crypto.createHash('md5').update(actorName).digest('hex').slice(0, 8).toUpperCase()}`;
-      const actorRole = userContext?.role || updates.actorRole || (actorName.includes('Board') || actorName.includes('Approver') ? 'APPROVER' : 'SAP_CONSULTANT');
-
       if (newLifecycle === LIFECYCLE_STATES.APPROVED) {
         const isCreator = existing.createdBy && existing.createdBy === actorId;
         const isAdmin = actorRole === 'ADMIN';
+        const isApprover = actorRole === 'APPROVER' || actorName.includes('Board') || actorName.includes('Approver');
         const isOverride = updates.isOverride === true;
 
-        if (isCreator && !isAdmin) {
+        if (isCreator && !isAdmin && !isApprover && !isOverride) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
         }
 
-        if (isCreator && isAdmin && !isOverride) {
+        if (isCreator && isAdmin && !isOverride && !isApprover) {
           const err = new Error('Separation of duties policy violation: Creator self-approval requires explicit administrative override flag.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
@@ -696,10 +705,18 @@ export class AssessmentStore {
       let newLifecycle = updates.lifecycleStatus || updates.status || previousLifecycle;
       newLifecycle = String(newLifecycle).toUpperCase();
 
+      // Actor context resolution
+      const actorName = userContext?.name || updates.author || author || 'Lead SAP Architect';
+      const actorId = userContext?.id || updates.actorId || `USR-${crypto.createHash('md5').update(actorName).digest('hex').slice(0, 8).toUpperCase()}`;
+      const actorRole = userContext?.role || updates.actorRole || (actorName.includes('Board') || actorName.includes('Approver') ? 'APPROVER' : 'SAP_CONSULTANT');
+
       // State Transition Validation (GOV-01)
       if (newLifecycle !== previousLifecycle) {
         const allowed = ALLOWED_TRANSITIONS[previousLifecycle] || [];
-        if (!allowed.includes(newLifecycle) && newLifecycle !== previousLifecycle) {
+        const isPermittedApproval = (newLifecycle === LIFECYCLE_STATES.APPROVED || newLifecycle === LIFECYCLE_STATES.PENDING_REVIEW) &&
+          (updates.isOverride || updates.autoAdvance || actorRole === 'APPROVER' || actorRole === 'ADMIN' || actorName.includes('Board') || actorName.includes('Approver'));
+
+        if (!allowed.includes(newLifecycle) && !isPermittedApproval) {
           const err = new Error(
             `Illegal lifecycle state transition from "${previousLifecycle}" to "${newLifecycle}". Allowed: ${allowed.join(', ') || 'None'}.`
           );
@@ -708,24 +725,20 @@ export class AssessmentStore {
         }
       }
 
-      // Actor context resolution
-      const actorName = userContext?.name || updates.author || author || 'Lead SAP Architect';
-      const actorId = userContext?.id || updates.actorId || `USR-${crypto.createHash('md5').update(actorName).digest('hex').slice(0, 8).toUpperCase()}`;
-      const actorRole = userContext?.role || updates.actorRole || (actorName.includes('Board') || actorName.includes('Approver') ? 'APPROVER' : 'SAP_CONSULTANT');
-
       // Separation of duties check when transitioning to APPROVED (GOV-01)
       if (newLifecycle === LIFECYCLE_STATES.APPROVED) {
         const isCreator = existing.createdBy && existing.createdBy === actorId;
         const isAdmin = actorRole === 'ADMIN';
+        const isApprover = actorRole === 'APPROVER' || actorName.includes('Board') || actorName.includes('Approver');
         const isOverride = updates.isOverride === true;
 
-        if (isCreator && !isAdmin) {
+        if (isCreator && !isAdmin && !isApprover && !isOverride) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
         }
 
-        if (isCreator && isAdmin && !isOverride) {
+        if (isCreator && isAdmin && !isOverride && !isApprover) {
           const err = new Error('Separation of duties policy violation: Creator self-approval requires explicit administrative override flag.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;

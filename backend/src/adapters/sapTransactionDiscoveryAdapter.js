@@ -228,20 +228,33 @@ export class SapTransactionDiscoveryAdapter {
     const client = options.client || '200';
     const language = options.language || 'EN';
 
-    // 2. Probe SAP Gateway Catalog & S21 reachability
-    let catalogResult;
-    try {
-      catalogResult = await this.gatewayAdapter.getCatalogServices();
-    } catch (catErr) {
+    // 2 & 3. Probe SAP Gateway Catalog & ADT Interface concurrently for sub-second response
+    const [rawCatalogResult, adtProbe] = await Promise.all([
+      this.gatewayAdapter.getCatalogServices().catch((catErr) => ({
+        success: false,
+        statusCode: 'GATEWAY_ERROR',
+        httpStatus: 502,
+        errorMessage: sanitizeErrorMessage(catErr.message)
+      })),
+      this.probeAdtInterface().catch((adtErr) => ({
+        accessible: false,
+        httpStatus: 502,
+        status: 'CONNECTION_FAILED',
+        message: sanitizeErrorMessage(adtErr.message)
+      }))
+    ]);
+
+    let catalogResult = rawCatalogResult;
+    if (!catalogResult || !catalogResult.success) {
       if (options.strictLive === true) {
         return {
           success: false,
           statusCode: 'LIVE_CONNECTION_FAILED',
           verificationStatus: 'LIVE_CONNECTION_FAILED',
-          httpStatus: 502,
+          httpStatus: catalogResult?.httpStatus || 502,
           tcode,
-          errorMessage: `Failed to connect to SAP S21 Gateway Catalog: ${sanitizeErrorMessage(catErr.message)}`,
-          evidence: ['S21 Gateway HTTP request failed or timed out.'],
+          errorMessage: catalogResult?.errorMessage || 'Live SAP S21 connection failed during Gateway Catalog query.',
+          evidence: [`S21 Gateway returned status: ${catalogResult?.statusCode || 'GATEWAY_UNAVAILABLE'}`],
           provenance: 'LIVE_SAP_S21',
           timestamp: new Date().toISOString()
         };
@@ -251,35 +264,10 @@ export class SapTransactionDiscoveryAdapter {
         services: [],
         totalCount: 0,
         isOfflineFallback: true,
-        notice: `Target SAP S21 Gateway unreachable (${sanitizeErrorMessage(catErr.message)}). Proceeding with Authoritative DDIC Repository.`
+        notice: 'Target SAP S21 Gateway unreachable. Proceeding with Authoritative DDIC Repository.'
       };
     }
 
-    if (!catalogResult.success) {
-      if (options.strictLive === true) {
-        return {
-          success: false,
-          statusCode: 'LIVE_CONNECTION_FAILED',
-          verificationStatus: 'LIVE_CONNECTION_FAILED',
-          httpStatus: catalogResult.httpStatus || 502,
-          tcode,
-          errorMessage: catalogResult.errorMessage || 'Live SAP S21 connection failed during Gateway Catalog query.',
-          evidence: [`S21 Gateway returned status: ${catalogResult.statusCode}`],
-          provenance: 'LIVE_SAP_S21',
-          timestamp: new Date().toISOString()
-        };
-      }
-      catalogResult = {
-        success: true,
-        services: [],
-        totalCount: 0,
-        isOfflineFallback: true,
-        notice: 'Target SAP S21 Gateway connection failed. Proceeding with Authoritative DDIC Repository.'
-      };
-    }
-
-    // 3. Probe ADT Interface
-    const adtProbe = await this.probeAdtInterface();
     const isAdtAccessible = adtProbe.accessible;
 
     // 3b. If ADT is accessible, perform live repository search on S21
