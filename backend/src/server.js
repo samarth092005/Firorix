@@ -395,15 +395,18 @@ export function createServer(options = {}) {
         return false;
       };
 
-      if (customSecret && isAdminSecretValid(customSecret)) {
-        return {
-          id: req.headers['x-fiorix-admin-user'] || 'USR-ADMIN-01',
-          name: req.headers['x-fiorix-admin-name'] || 'Enterprise System Administrator',
-          email: req.headers['x-fiorix-admin-email'] || 'admin@fiorix.corp',
-          role: USER_ROLES.ADMIN,
-          tenantId: requestTenantId,
-          department: 'SAP Architecture & Platform Governance'
-        };
+      if (customSecret) {
+        if (isAdminSecretValid(customSecret)) {
+          return {
+            id: req.headers['x-fiorix-admin-user'] || 'USR-ADMIN-01',
+            name: req.headers['x-fiorix-admin-name'] || 'Enterprise System Administrator',
+            email: req.headers['x-fiorix-admin-email'] || 'admin@fiorix.corp',
+            role: USER_ROLES.ADMIN,
+            tenantId: requestTenantId,
+            department: 'SAP Architecture & Platform Governance'
+          };
+        }
+        return { isUnauthenticated: true, authError: 'INVALID_ADMIN_SECRET' };
       }
 
       if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -540,15 +543,23 @@ export function createServer(options = {}) {
       if (currentUser && currentUser.role === USER_ROLES.ADMIN) {
         return true;
       }
-      const configuredSecret = process.env.FIORIX_ADMIN_SECRET;
-      if (!configuredSecret) return true;
       const authHeader = req.headers.authorization;
       const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
       const customHeaderSecret = req.headers['x-fiorix-admin-secret']
         ? String(req.headers['x-fiorix-admin-secret']).trim()
         : null;
       const providedSecret = customHeaderSecret || bearerSecret;
-      return adapter.verifyAdminSecret(providedSecret);
+
+      if (providedSecret) {
+        const configuredSecret = process.env.FIORIX_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
+        if (providedSecret === configuredSecret) return true;
+        if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(providedSecret)) return true;
+        return false;
+      }
+
+      const configuredSecret = process.env.FIORIX_ADMIN_SECRET;
+      if (!configuredSecret) return true;
+      return false;
     };
 
     // 1. Root Service Index

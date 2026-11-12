@@ -127,11 +127,14 @@ export const catalogueService = {
     }
 
     // 2. Canonical backend call via centralized API client
+    const rawQuery = (filter?.searchQuery || '').trim();
+    const isPotentialTcode = rawQuery.length > 0 && /^[A-Z0-9_\-\/]{1,20}$/i.test(rawQuery);
+
     const params: CatalogueSearchParams = {
       query: filter?.searchQuery,
       appId: filter?.appId,
       appName: filter?.appName,
-      tcode: filter?.tcode,
+      tcode: filter?.tcode || (isPotentialTcode ? rawQuery.toUpperCase() : undefined),
       lineOfBusiness: filter?.lineOfBusiness,
       businessProcess: filter?.businessProcess,
       appType: filter?.appType,

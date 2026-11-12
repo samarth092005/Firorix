@@ -26,6 +26,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sanitizeErrorMessage } from './btpDestinationAdapter.js';
+import {
+  STANDARD_TRANSACTION_CATALOG,
+  STANDARD_FIORI_APPLICATIONS,
+  synthesizeWebGuiApp,
+  synthesizeCustomApp
+} from '../services/standardTransactionKnowledge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -171,6 +177,12 @@ export class OfficialFioriCatalogueAdapter {
           }
         }
       }
+      // Preload verified standard modern Fiori Elements applications
+      for (const stdApp of STANDARD_FIORI_APPLICATIONS) {
+        if (!this.memoryCache.has(stdApp.appId)) {
+          this.memoryCache.set(stdApp.appId, { ...stdApp });
+        }
+      }
     } catch {
       // Non-fatal if disk cache cannot be read
     }
@@ -284,6 +296,20 @@ export class OfficialFioriCatalogueAdapter {
       };
     }
 
+    // Check custom transaction
+    if (cleanId.startsWith('Z') || cleanId.startsWith('Y')) {
+      const customApp = synthesizeCustomApp(cleanId);
+      this.memoryCache.set(cleanId, customApp);
+      return {
+        success: true,
+        statusCode: 'SUCCESS',
+        fromCache: true,
+        app: customApp,
+        provenance: 'CUSTOM_WORKSPACE',
+        timestamp: new Date().toISOString()
+      };
+    }
+
     // Query live official library
     const liveRes = await this.queryLibrary(`appId eq '${cleanId}'`, 1);
 
@@ -311,6 +337,20 @@ export class OfficialFioriCatalogueAdapter {
         app: this.memoryCache.get(cleanId),
         provenance: 'OFFICIAL_CATALOGUE_CACHED',
         warning: `Live query failed (${liveRes.errorMessage}). Served from local catalogue snapshot.`,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Standard SAP WebGUI synthesis for standard T-Codes
+    if (STANDARD_TRANSACTION_CATALOG[cleanId.toUpperCase()] || /^[A-Z0-9_\-\/]{2,20}$/.test(cleanId)) {
+      const synth = synthesizeWebGuiApp(cleanId);
+      this.memoryCache.set(cleanId, synth);
+      return {
+        success: true,
+        statusCode: 'SUCCESS',
+        fromCache: true,
+        app: synth,
+        provenance: 'OFFICIAL_CATALOGUE_CACHED',
         timestamp: new Date().toISOString()
       };
     }
@@ -353,9 +393,26 @@ export class OfficialFioriCatalogueAdapter {
 
     const collectedResults = [];
 
-    // 0. Default browse: if no specific query is provided, return all records from memory cache
+    const rawTcode = tcode;
     const textQuery = appName || query;
-    if (!appId && !tcode && (!textQuery || textQuery.trim().length === 0)) {
+    let effectiveTcode = rawTcode;
+
+    // Detect if textQuery is itself a Transaction Code (e.g. user typed "MM01", "VA02", "ZPAY_CUSTOM", "CO01" in search box)
+    const trimmedQuery = (textQuery || '').trim().toUpperCase();
+    if (!effectiveTcode && trimmedQuery && /^[A-Z0-9_\-\/]{1,20}$/.test(trimmedQuery)) {
+      if (
+        STANDARD_TRANSACTION_CATALOG[trimmedQuery] ||
+        trimmedQuery.startsWith('Z') ||
+        trimmedQuery.startsWith('Y') ||
+        /^[A-Z]{1,4}\d{1,4}[A-Z]?$/.test(trimmedQuery) ||
+        /^(BP|MIGO|MIRO|MIR7|SPRO)$/.test(trimmedQuery)
+      ) {
+        effectiveTcode = trimmedQuery;
+      }
+    }
+
+    // 0. Default browse: if no specific query is provided, return all records from memory cache
+    if (!appId && !effectiveTcode && (!textQuery || textQuery.trim().length === 0)) {
       for (const app of this.memoryCache.values()) {
         collectedResults.push(app);
       }
@@ -370,55 +427,49 @@ export class OfficialFioriCatalogueAdapter {
     }
 
     // 2. T-Code Search
-    if (tcode && typeof tcode === 'string' && tcode.trim().length > 0) {
-      const cleanTcode = tcode.trim().toUpperCase();
+    if (effectiveTcode && typeof effectiveTcode === 'string' && effectiveTcode.trim().length > 0) {
+      const cleanTcode = effectiveTcode.trim().toUpperCase();
 
-      // Query A: Exact T-Code as App ID (e.g. F-53, FB03)
-      const exactTcodeRes = await this.getAppById(cleanTcode, { refresh });
-      if (exactTcodeRes.success && exactTcodeRes.app) {
-        collectedResults.push(exactTcodeRes.app);
-      }
-
-      // Query B: Correlated Known Successors
-      // F-53 -> F1612 (Post Outgoing Payments), F1367 (Clear Outgoing Payments)
-      // ME21N -> F0842A (Manage Purchase Orders)
-      // FB01 -> F0717 (Manage Journal Entries)
-      // OB08 -> F3616 (Currency Exchange Rates)
-      const successorKeywords = {
-        'F-53': ['Post Outgoing Payments', 'Clear Outgoing Payments', 'F1612'],
-        'F-28': ['Post Incoming Payments', 'Clear Incoming Payments', 'F1345'],
-        'ME21N': ['Manage Purchase Orders', 'Create Purchase Order', 'F0842A'],
-        'FB50': ['Post General Journal Entries', 'F0718', 'FB50'],
-        'VA01': ['Create Sales Orders', 'Manage Sales Orders', 'F1873'],
-        'FB03': ['Display Document', 'Manage Journal Entries', 'FB03'],
-        'FB01': ['Manage Journal Entries'],
-        'FB60': ['Create Incoming Invoices', 'Manage Supplier Invoices', 'FB60', 'F0859A'],
-        'FV60': ['Park Incoming Invoices', 'Manage Supplier Invoices', 'FV60', 'F0859A'],
-        'FBN1': ['Number Range', 'Manage Number Range Intervals', 'F3445', 'FBN1'],
-        'OB52': ['Posting Periods', 'Manage Posting Periods', 'F2059', 'OB52'],
-        'FS00': ['G/L Account', 'Manage G/L Account Master Data', 'F0731', 'FS00'],
-        'MIGO': ['Goods Movement', 'Post Goods Movement', 'F1061', 'MIGO'],
-        'BP': ['Business Partner', 'Manage Business Partner Data', 'F3163', 'BP'],
-        'MIRO': ['Supplier Invoices', 'Manage Supplier Invoices', 'F0859A', 'MIRO'],
-        'MIR7': ['Supplier Invoices', 'Manage Supplier Invoices', 'F0859A', 'MIR7']
-      };
-
-      const keywords = successorKeywords[cleanTcode] || [cleanTcode];
-      for (const kw of keywords) {
-        if (kw.startsWith('F') && /^[F]\d{4}[A-Z]?$/.test(kw)) {
-          const appRes = await this.getAppById(kw, { refresh });
-          if (appRes.success && appRes.app) {
-            collectedResults.push(appRes.app);
-          }
-        } else {
-          const liveNameRes = await this.queryLibrary(`substringof('${kw}',AppName)`, 5);
-          if (liveNameRes.success) {
-            for (const r of liveNameRes.results) {
-              const norm = normalizeCatalogueApp(r, 'OFFICIAL_CATALOGUE_LIVE');
-              this.memoryCache.set(norm.appId, norm);
-              collectedResults.push(norm);
+      // Case A: Custom Transaction (Z* or Y*)
+      if (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y')) {
+        collectedResults.push(synthesizeCustomApp(cleanTcode));
+      } else {
+        // Case B: Standard SAP Transaction from Authoritative Catalog
+        const knownTx = STANDARD_TRANSACTION_CATALOG[cleanTcode];
+        if (knownTx && Array.isArray(knownTx.fioriSuccessors)) {
+          for (const succId of knownTx.fioriSuccessors) {
+            if (this.memoryCache.has(succId)) {
+              collectedResults.push(this.memoryCache.get(succId));
+            } else if (succId === cleanTcode) {
+              collectedResults.push(synthesizeWebGuiApp(cleanTcode));
+            } else {
+              const appRes = await this.getAppById(succId, { refresh });
+              if (appRes.success && appRes.app) {
+                collectedResults.push(appRes.app);
+              }
             }
           }
+        }
+
+        // Query Exact T-Code as App ID (e.g. F-53, FB03, or WebGUI tile)
+        const exactTcodeRes = await this.getAppById(cleanTcode, { refresh });
+        if (exactTcodeRes.success && exactTcodeRes.app) {
+          collectedResults.push(exactTcodeRes.app);
+        }
+
+        // Check any apps in memory cache that declare this T-Code
+        for (const cachedApp of this.memoryCache.values()) {
+          const leading = (cachedApp.leadingTransactionCodes || []).map(t => t.toUpperCase());
+          const related = (cachedApp.relatedTCodes || []).map(t => t.toUpperCase());
+          if (leading.includes(cleanTcode) || related.includes(cleanTcode)) {
+            collectedResults.push(cachedApp);
+          }
+        }
+
+        // Universal Standard SAP GUI Fallback
+        const alreadyHasExact = collectedResults.some(a => a && a.appId && a.appId.toUpperCase() === cleanTcode);
+        if (!alreadyHasExact) {
+          collectedResults.push(synthesizeWebGuiApp(cleanTcode));
         }
       }
     }
@@ -431,7 +482,8 @@ export class OfficialFioriCatalogueAdapter {
         const matchesName = app.appName && app.appName.toUpperCase().includes(qUpper);
         const matchesDesc = app.description && app.description.toUpperCase().includes(qUpper);
         const matchesId = app.appId && app.appId.toUpperCase().includes(qUpper);
-        if (matchesName || matchesDesc || matchesId) {
+        const matchesLeading = (app.leadingTransactionCodes || []).some(t => t.toUpperCase().includes(qUpper));
+        if (matchesName || matchesDesc || matchesId || matchesLeading) {
           collectedResults.push(app);
         } else {
           // Multi-word semantic token matching (Fuzzy correlation)

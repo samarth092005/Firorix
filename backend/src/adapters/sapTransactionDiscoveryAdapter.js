@@ -21,6 +21,7 @@
 import { btpDestinationAdapter, sanitizeErrorMessage } from './btpDestinationAdapter.js';
 import { sapGatewayMetadataAdapter } from './sapGatewayMetadataAdapter.js';
 import { defaultTransactionMasterIndex } from '../services/transactionMasterIndex.js';
+import { STANDARD_TRANSACTION_CATALOG } from '../services/standardTransactionKnowledge.js';
 import {
   validateTcodeSyntax,
   TransactionRegistryProvider,
@@ -38,6 +39,7 @@ export const SAP_TCODE_REGEX = /^[A-Z0-9_\-\/]{1,20}$/;
  * Known standard SAP reference metadata used for backward compatibility and fast lookup.
  */
 export const STANDARD_SAP_TRANSACTION_REGISTRY = {
+  ...STANDARD_TRANSACTION_CATALOG,
   'F-53': {
     tcode: 'F-53',
     standardDescription: 'Post Outgoing Payments - For Suppliers',
@@ -163,6 +165,42 @@ export class SapTransactionDiscoveryAdapter {
   }
 
   /**
+   * Performs live SAP ADT repository quick search for a transaction code.
+   */
+  async searchAdtTransaction(tcode) {
+    try {
+      const response = await this.btpAdapter.executeRequest({
+        path: `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeURIComponent(tcode)}&maxResults=5`,
+        method: 'GET',
+        headers: {
+          Accept: 'application/xml, text/xml, */*'
+        }
+      });
+      if (response && response.success && response.data) {
+        const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        const re = new RegExp('<adtcore:objectReference[^>]+adtcore:name="' + tcode + '"[^>]*/>', 'i');
+        const match = raw.match(re);
+        if (match) {
+          const tag = match[0];
+          const nameMatch = tag.match(/adtcore:name="([^"]+)"/);
+          const pkgMatch = tag.match(/adtcore:packageName="([^"]+)"/);
+          const descMatch = tag.match(/adtcore:description="([^"]+)"/);
+          return {
+            found: true,
+            tcode: nameMatch ? nameMatch[1] : tcode,
+            packageName: pkgMatch ? pkgMatch[1] : null,
+            description: descMatch ? descMatch[1] : null,
+            provenance: 'LIVE_SAP_S21_ADT'
+          };
+        }
+      }
+      return { found: false };
+    } catch {
+      return { found: false };
+    }
+  }
+
+  /**
    * Discovers transaction metadata from S21 using the provider architecture,
    * correlating with the live Gateway Catalog and providing honest verification.
    */
@@ -195,35 +233,60 @@ export class SapTransactionDiscoveryAdapter {
     try {
       catalogResult = await this.gatewayAdapter.getCatalogServices();
     } catch (catErr) {
-      return {
-        success: false,
-        statusCode: 'LIVE_CONNECTION_FAILED',
-        verificationStatus: 'LIVE_CONNECTION_FAILED',
-        httpStatus: 502,
-        tcode,
-        errorMessage: `Failed to connect to SAP S21 Gateway Catalog: ${sanitizeErrorMessage(catErr.message)}`,
-        evidence: ['S21 Gateway HTTP request failed or timed out.'],
-        provenance: 'LIVE_SAP_S21',
-        timestamp: new Date().toISOString()
+      if (options.strictLive === true) {
+        return {
+          success: false,
+          statusCode: 'LIVE_CONNECTION_FAILED',
+          verificationStatus: 'LIVE_CONNECTION_FAILED',
+          httpStatus: 502,
+          tcode,
+          errorMessage: `Failed to connect to SAP S21 Gateway Catalog: ${sanitizeErrorMessage(catErr.message)}`,
+          evidence: ['S21 Gateway HTTP request failed or timed out.'],
+          provenance: 'LIVE_SAP_S21',
+          timestamp: new Date().toISOString()
+        };
+      }
+      catalogResult = {
+        success: true,
+        services: [],
+        totalCount: 0,
+        isOfflineFallback: true,
+        notice: `Target SAP S21 Gateway unreachable (${sanitizeErrorMessage(catErr.message)}). Proceeding with Authoritative DDIC Repository.`
       };
     }
 
     if (!catalogResult.success) {
-      return {
-        success: false,
-        statusCode: 'LIVE_CONNECTION_FAILED',
-        verificationStatus: 'LIVE_CONNECTION_FAILED',
-        httpStatus: catalogResult.httpStatus || 502,
-        tcode,
-        errorMessage: catalogResult.errorMessage || 'Live SAP S21 connection failed during Gateway Catalog query.',
-        evidence: [`S21 Gateway returned status: ${catalogResult.statusCode}`],
-        provenance: 'LIVE_SAP_S21',
-        timestamp: new Date().toISOString()
+      if (options.strictLive === true) {
+        return {
+          success: false,
+          statusCode: 'LIVE_CONNECTION_FAILED',
+          verificationStatus: 'LIVE_CONNECTION_FAILED',
+          httpStatus: catalogResult.httpStatus || 502,
+          tcode,
+          errorMessage: catalogResult.errorMessage || 'Live SAP S21 connection failed during Gateway Catalog query.',
+          evidence: [`S21 Gateway returned status: ${catalogResult.statusCode}`],
+          provenance: 'LIVE_SAP_S21',
+          timestamp: new Date().toISOString()
+        };
+      }
+      catalogResult = {
+        success: true,
+        services: [],
+        totalCount: 0,
+        isOfflineFallback: true,
+        notice: 'Target SAP S21 Gateway connection failed. Proceeding with Authoritative DDIC Repository.'
       };
     }
 
     // 3. Probe ADT Interface
     const adtProbe = await this.probeAdtInterface();
+    const isAdtAccessible = adtProbe.accessible;
+
+    // 3b. If ADT is accessible, perform live repository search on S21
+    let adtTx = { found: false };
+    if (isAdtAccessible) {
+      adtTx = await this.searchAdtTransaction(tcode);
+    }
 
     // 4. Corroborate with Gateway Services on S21
     const correlatedServices = await this.correlationProvider.correlateServices(
@@ -231,15 +294,15 @@ export class SapTransactionDiscoveryAdapter {
       catalogResult.services || []
     );
 
-    // 5. Query Registry Provider (Authoritative DDIC snapshot or live status)
+    // 5. Query Registry Provider (Authoritative DDIC snapshot, live ADT, or live status)
     const registryResult = await this.registryProvider.checkExistence(tcode, {
       systemId,
       client,
       adtProbe,
+      adtTx,
       isLiveMode: true
     });
 
-    const isAdtAccessible = adtProbe.accessible;
     const elapsedMs = Date.now() - startTime;
 
     // 6. Handle Confirmed Non-Existent
@@ -270,10 +333,11 @@ export class SapTransactionDiscoveryAdapter {
       language,
       systemId,
       client,
+      adtTx,
       correlatedService: correlatedServices[0]
     });
 
-    const repoMetadata = this.repositoryProvider.resolveMetadata(tcode, { systemId, client });
+    const repoMetadata = this.repositoryProvider.resolveMetadata(tcode, { systemId, client, adtTx });
     const ddicMetadata = this.ddicProvider.resolveDDIC(tcode, { systemId, client });
     const authMetadata = this.authProvider.resolveAuthorizations(tcode);
     const standardRef = STANDARD_SAP_TRANSACTION_REGISTRY[tcode];
@@ -313,10 +377,12 @@ export class SapTransactionDiscoveryAdapter {
         : `ADT Interface: ${adtProbe.code || 'HTTP 403'} (${adtProbe.message}) — low-level table metadata pending Basis authorization.`
     ];
 
-    if (registryResult.state === TRANSACTION_EXISTENCE_STATES.CONFIRMED_REGISTERED) {
+    if (adtTx && adtTx.found) {
+      evidence.push(`ADT Live Repository: Transaction verified live in S21 (Package: ${adtTx.packageName}, Description: "${adtTx.description}").`);
+    } else if (registryResult.state === TRANSACTION_EXISTENCE_STATES.CONFIRMED_REGISTERED) {
       evidence.push(`DDIC Snapshot: Verified record in S/4HANA 2023 Master Index (Program: ${repoMetadata.program}, Package: ${repoMetadata.packageName}).`);
     } else {
-      evidence.push(`Discovery Status: Transaction "${tcode}" valid format, pending direct TSTC check due to ADT authorization restrictions.`);
+      evidence.push(`Discovery Status: Transaction "${tcode}" valid format, pending direct TSTC check.`);
     }
 
     if (correlatedServices.length > 0) {

@@ -12,6 +12,7 @@ import { fioriCatalogueAdapter } from '../../../services/catalogue/catalogueAdap
 import { assessmentService } from '../../../services/assessmentService';
 import { mockSapAdapter } from '../../transaction-checker/adapters/mockSapAdapter';
 import { apiClient, UnifiedDiscoveryMatchResult } from '../../../services/api/apiClient';
+import { DiscoveryVerificationModal } from './DiscoveryVerificationModal';
 import {
   Search,
   Server,
@@ -75,6 +76,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mcpPipelineResult, setMcpPipelineResult] = useState<UnifiedDiscoveryMatchResult | null>(null);
   const [mcpEnabled, setMcpEnabled] = useState<boolean>(true);
+  const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
 
   // Business Scope & Intake (Expandable Drawer)
   const [isScopeDrawerOpen, setIsScopeDrawerOpen] = useState<boolean>(false);
@@ -144,6 +146,11 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         setProgressState('FAILED');
       } else {
         setProgressState('COMPLETED');
+      }
+
+      // Automatically show Discovery Verification Popup Modal
+      if (discoRes && (discoRes.exists !== false || catCandidates.length > 0)) {
+        setIsVerificationModalOpen(true);
       }
 
       // Pre-populate business scope if a preset matches
@@ -593,6 +600,27 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <button
                 type="button"
+                className="fiori-btn fiori-btn-secondary"
+                onClick={() => setIsVerificationModalOpen(true)}
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  height: '34px',
+                  padding: '0 14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  border: '1px solid #CBD5E1',
+                  color: '#334155'
+                }}
+                title="View Dual SAP S/4HANA & Fiori Catalogue Verification Popup"
+              >
+                <ShieldCheck size={14} color="#059669" />
+                <span>Verification Summary</span>
+              </button>
+
+              <button
+                type="button"
                 className="fiori-btn fiori-btn-primary"
                 onClick={handleOpenAssessmentWorkbench}
                 style={{
@@ -800,81 +828,13 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           {/* SAP Fiori MCP Server Live Intelligence & Documentation Card */}
           {mcpPipelineResult?.mcpAssisted && (
             <div
-              style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #BAE6FD',
-                borderRadius: 'var(--radius-md, 6px)',
-                padding: '16px 20px',
-                boxShadow: '0 2px 4px rgba(2, 132, 199, 0.06)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '10px',
-                background: 'linear-gradient(180deg, #F0F9FF 0%, #FFFFFF 100%)'
-              }}
+             
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '6px',
-                      backgroundColor: '#0284C7',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: '#FFFFFF'
-                    }}
-                  >
-                    <Sparkles size={14} />
-                  </div>
-                  <div>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#0369A1' }}>
-                      SAP Fiori MCP Intelligence (@sap-ux/fiori-mcp-server)
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#0284C7', marginLeft: '8px' }}>
-                      Live stdio verified • Document Search &amp; Candidate Provenance Enriched
-                    </span>
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#0369A1', fontWeight: 600 }}>
-                  <CheckCircle2 size={13} color="#0284C7" />
-                  <span>Protocol Handshake Active (v1.15.24)</span>
-                </div>
-              </div>
 
-              {/* MCP Findings Summary */}
-              <div style={{ fontSize: '12px', color: '#0C4A6E', lineHeight: 1.5, padding: '10px 12px', backgroundColor: '#FFFFFF', borderRadius: '6px', border: '1px solid #E0F2FE' }}>
-                <strong>Fiori Successor Rationale:</strong>{' '}
-                {mcpPipelineResult.matching?.bestCandidate?.matchingReasons?.[0] ||
-                  `Direct SAP standard replacement identified for ${metadata.tcode}. Application architecture aligns with modern Fiori Launchpad role definitions.`}
-              </div>
 
-              {/* Key Architectural Highlights from MCP */}
-              {mcpPipelineResult.matching?.bestCandidate?.positiveFactors && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '8px', marginTop: '2px' }}>
-                  {mcpPipelineResult.matching.bestCandidate.positiveFactors.slice(0, 3).map((factor: string, idx: number) => (
-                    <div
-                      key={idx}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '6px',
-                        fontSize: '11.5px',
-                        color: '#0369A1',
-                        backgroundColor: '#F8FAFC',
-                        padding: '6px 10px',
-                        borderRadius: '4px',
-                        border: '1px solid #E2E8F0'
-                      }}
-                    >
-                      <CheckCircle2 size={13} color="#16A34A" style={{ flexShrink: 0, marginTop: '2px' }} />
-                      <span>{factor}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
+
+
             </div>
           )}
 
@@ -968,6 +928,18 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           </div>
         </div>
       )}
+
+      {/* Discovery & Fiori Catalogue Dual Verification Modal Pop-up */}
+      <DiscoveryVerificationModal
+        isOpen={isVerificationModalOpen}
+        onClose={() => setIsVerificationModalOpen(false)}
+        metadata={metadata}
+        candidates={candidates}
+        systemId={systemId}
+        client={client}
+        targetRelease={targetRelease}
+        onProceedToAssessment={handleOpenAssessmentWorkbench}
+      />
     </div>
   );
 };

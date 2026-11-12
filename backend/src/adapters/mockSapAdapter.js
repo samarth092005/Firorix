@@ -1,4 +1,5 @@
 import { EvidenceClassifier } from '../evidenceClassifier.js';
+import { STANDARD_TRANSACTION_CATALOG } from '../services/standardTransactionKnowledge.js';
 
 export const SYSTEMS = [
   {
@@ -425,6 +426,59 @@ export class MockSapAdapter {
           evidence: combinedEvidence,
           tadir: fixture.tadir,
           classificationDetails: classificationEval.details
+        }
+      };
+    }
+
+    // 2. Check Authoritative Standard Catalog
+    const standardKnown = STANDARD_TRANSACTION_CATALOG[trimmed];
+    if (standardKnown) {
+      return {
+        success: true,
+        system,
+        transaction: {
+          tcode: trimmed,
+          exists: true,
+          classification: 'STANDARD',
+          description: standardKnown.description,
+          program: standardKnown.program,
+          screenNumber: standardKnown.screenNumber || '0100',
+          packageName: standardKnown.packageName,
+          originalSystem: 'SAP',
+          softwareComponent: standardKnown.softwareComponent,
+          metadataStatus: 'COMPLETE',
+          evidence: [
+            'Authoritative DDIC Master Index verified',
+            `Standard SAP package ${standardKnown.packageName}`,
+            `Modern Fiori successor: ${standardKnown.primaryFioriAppId}`
+          ],
+          tadir: { devclass: standardKnown.packageName, srcsystem: 'SAP', softwareComponent: standardKnown.softwareComponent }
+        }
+      };
+    }
+
+    // 3. Known Curated Custom Transactions
+    if (trimmed === 'ZPAY_CUSTOM') {
+      return {
+        success: true,
+        system,
+        transaction: {
+          tcode: trimmed,
+          exists: true,
+          classification: 'CUSTOM',
+          description: 'Custom Supplier Payment Portal (ZPAY)',
+          program: 'ZPAY_CUSTOM_PROG',
+          screenNumber: '0100',
+          packageName: 'ZPAY_DEV',
+          originalSystem: system.systemId.split('-')[0] || 'S21',
+          softwareComponent: 'LOCAL_CUSTOMER',
+          metadataStatus: 'COMPLETE',
+          evidence: [
+            'TSTC verified: customer namespace transaction registered',
+            'Customer package ZPAY_DEV in customer namespace',
+            'Classified as CUSTOM (BUILD recommended)'
+          ],
+          tadir: { devclass: 'ZPAY_DEV', srcsystem: 'S21', softwareComponent: 'LOCAL_CUSTOMER' }
         }
       };
     }

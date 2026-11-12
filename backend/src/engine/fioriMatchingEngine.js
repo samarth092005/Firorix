@@ -103,6 +103,9 @@ export class FioriMatchingEngine {
       candidateApps = searchResult.candidates || [];
     }
 
+    // Filter out synthesized custom workspace entries or non-standard tiles from standard candidate matching
+    candidateApps = candidateApps.filter((a) => !a.isCustom && !a.isSynthesizedWebGui);
+
     if (candidateApps.length === 0) {
       return {
         success: true,
@@ -117,6 +120,22 @@ export class FioriMatchingEngine {
         verificationWarnings: ['Absence of standard Fiori app: consider SAP GUI for HTML or custom extension.'],
         recommendationReadiness: RECOMMENDATION_READINESS.NO_SUITABLE_STANDARD_CANDIDATE,
         scoringWeights: this.weights,
+        assessmentHandoff: (transaction.classification === 'CUSTOM' || tcode.startsWith('Z') || tcode.startsWith('Y')) ? {
+          requirement: {
+            title: `Modernise custom transaction ${tcode}`,
+            tcode,
+            statement: `Customer proprietary transaction ${tcode} requires Clean Core RAP modernization in Generation Studio.`,
+            businessProcess: 'Custom Modernization',
+            capabilities: ['Custom Business Logic', 'Fiori Elements UI'],
+            isCustom: true
+          },
+          candidate: null,
+          context: {
+            systemId: (params.transaction && (params.transaction.systemId || params.transaction.targetSystem?.systemId)) || 'S21-200',
+            client: (params.transaction && (params.transaction.client || params.transaction.targetSystem?.client)) || '200',
+            systemRelease: targetRelease
+          }
+        } : null,
         evaluatedAt: new Date().toISOString()
       };
     }
@@ -308,7 +327,7 @@ export class FioriMatchingEngine {
       'F1367': ['F-53'],
       'F0718': ['FB50', 'F-02'],
       'F0842A': ['ME21N', 'ME22N', 'ME23N'],
-      'F1873': ['VA01', 'VA02', 'VA03'],
+      'F1873': ['VA01', 'VA02', 'VA03', 'VA05'],
       'F1345': ['F-28'],
       'F0717': ['FB01', 'FB02', 'FB03'],
       'F0859A': ['FB60', 'FV60', 'MIRO', 'MIR7'],
@@ -316,7 +335,35 @@ export class FioriMatchingEngine {
       'F3163': ['BP'],
       'F0731': ['FS00'],
       'F2059': ['OB52'],
-      'F3445': ['FBN1']
+      'F3445': ['FBN1'],
+      'F1602': ['MM01', 'MM02', 'MM03'],
+      'F0771': ['F110'],
+      'F3956': ['CO01', 'CO02', 'CO03'],
+      'F2175': ['IW31', 'IW32', 'IW33'],
+      'F1813': ['CS01', 'CS02', 'CS03'],
+      'F0798': ['VF01', 'VF02', 'VF03', 'VF04'],
+      'F2228': ['VL01N', 'VL02N', 'VL03N', 'VL06O'],
+      'F0712': ['FBL1N'],
+      'F0711': ['FBL3N'],
+      'F0713': ['FBL5N'],
+      'F1303': ['SU01', 'SU10'],
+      'F1492': ['PFCG'],
+      'F1443': ['KS01', 'KS02', 'KS03'],
+      'F2078': ['QA01', 'QA02', 'QA03'],
+      'F1643': ['ME51N'],
+      'F2229': ['ME52N', 'ME53N', 'ME54N'],
+      'F2427': ['KB11N'],
+      'F1444': ['KO01', 'KO02', 'KO03'],
+      'F2564': ['SE11'],
+      'F2565': ['SE38'],
+      'F1708': ['SM30'],
+      'F1709': ['SPRO'],
+      'F2850': ['FB70'],
+      'F3389': ['MIGO'],
+      'F1595': ['MB51'],
+      'F2342': ['MB52'],
+      'F0247': ['MD04'],
+      'F3616': ['OB08']
     };
 
     let tcodeRelationshipType = 'UNVERIFIED_RELATIONSHIP';
