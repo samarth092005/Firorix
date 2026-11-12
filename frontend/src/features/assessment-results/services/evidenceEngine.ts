@@ -986,9 +986,9 @@ export class EvidenceEngine {
           `Execute end-to-end integration test with target payment/master data scenarios.`
         ],
         requiredNextSteps: [
-          `1. Basis Team: Activate ICF nodes and OData services in S21 client 200.`,
-          `2. Security Team: Configure business catalogue in Fiori Launchpad Content Manager (/UI2/FLPCM_CUST).`,
-          `3. Functional Consultant: Conduct user acceptance testing comparing open-item processing with ${cleanTcode}.`
+          `Basis Team: Activate ICF nodes and OData services in S21 client 200.`,
+          `Security Team: Configure business catalogue in Fiori Launchpad Content Manager (/UI2/FLPCM_CUST).`,
+          `Functional Consultant: Conduct user acceptance testing comparing open-item processing with ${cleanTcode}.`
         ]
       };
     }
@@ -1013,8 +1013,8 @@ export class EvidenceEngine {
           'Verify Launchpad tile catalog mapping for transaction display.'
         ],
         requiredNextSteps: [
-          '1. Ensure Launchpad application descriptor is registered in /UI2/FLPCM_CUST.',
-          '2. Validate user authorization for S_TCODE and S_TABU_DIS.'
+          'Ensure Launchpad application descriptor is registered in /UI2/FLPCM_CUST.',
+          'Validate user authorization for S_TCODE and S_TABU_DIS.'
         ]
       };
     }
@@ -1038,8 +1038,8 @@ export class EvidenceEngine {
           'Verify document type authorizations in S21 client 200.'
         ],
         requiredNextSteps: [
-          '1. Organize fit-gap workshop with Finance leads.',
-          '2. Pilot standard application alongside classic transaction in S21 quality client.'
+          'Organize fit-gap workshop with Finance leads.',
+          'Pilot standard application alongside classic transaction in S21 quality client.'
         ]
       };
     }
@@ -1069,8 +1069,8 @@ export class EvidenceEngine {
           'Sign off Architectural BUILD approval in Stage 4 (Modernization Decision).'
         ],
         requiredNextSteps: [
-          '1. Proceed to Stage 4 (Modernization Decision) to review governance checks and approve the BUILD decision.',
-          '2. Transition directly to Generation Studio to model CDS entities, evaluate RAP architecture, and generate ABAP/Fiori deliverables.'
+          'Proceed to Stage 4 (Modernization Decision) to review governance checks and approve the BUILD decision.',
+          'Transition directly to Generation Studio to model CDS entities, evaluate RAP architecture, and generate ABAP/Fiori deliverables.'
         ]
       };
     }
@@ -1094,8 +1094,8 @@ export class EvidenceEngine {
           `Inspect SAP Simplification List for specific migration guidance.`
         ],
         requiredNextSteps: [
-          '1. Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
-          '2. Determine whether classic WebGUI or Fiori elements reporting fits best.'
+          'Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
+          'Determine whether classic WebGUI or Fiori elements reporting fits best.'
         ]
       };
     }
@@ -1115,7 +1115,7 @@ export class EvidenceEngine {
         'Check S21 CVERS component levels against SAP Note simplification requirements.'
       ],
       requiredNextSteps: [
-        '1. Coordinate with SAP Basis team regarding upcoming SPS upgrade schedule.'
+        'Coordinate with SAP Basis team regarding upcoming SPS upgrade schedule.'
       ]
     };
   }
