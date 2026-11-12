@@ -141,6 +141,18 @@ export class TransactionDiscoveryEngine {
           client: targetSystem.client,
           systemRelease: targetSystem.release,
           errorMessage: liveResult.errorMessage || `Transaction "${tcode}" could not be discovered on live SAP system ${systemId}.`,
+          transactionIdentity: {
+            userSuppliedTCode: tcode,
+            formatValidation: { passed: normResult.isValid, classification: 'UNKNOWN' },
+            sapExistenceVerification: {
+              status: 'NOT_FOUND',
+              classification: 'NON_EXISTENT',
+              details: liveResult.errorMessage || `Transaction code "${tcode}" does not exist in SAP system.`
+            },
+            programMetadata: { value: null, status: 'NOT_FOUND', classification: 'NON_EXISTENT' },
+            packageMetadata: { value: null, status: 'NOT_FOUND', classification: 'NON_EXISTENT' },
+            authorizationMetadata: { value: null, status: 'NOT_FOUND', classification: 'NON_EXISTENT' }
+          },
           evidence: liveResult.evidence || [],
           technicalEvidence: liveResult.evidence || [],
           evidenceSources: liveResult.evidence || [],

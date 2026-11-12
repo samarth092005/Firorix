@@ -182,12 +182,12 @@ export class TransactionRegistryProvider {
         };
       }
 
-      if (adtProbe.accessible && adtProbe.confirmedMissing) {
+      if (adtProbe.accessible && (!options.adtTx || !options.adtTx.found)) {
         return {
           state: TRANSACTION_EXISTENCE_STATES.CONFIRMED_NON_EXISTENT,
           exists: false,
           tcode: cleanTcode,
-          reason: `Transaction "${cleanTcode}" confirmed non-existent in SAP TSTC via ADT probe.`,
+          reason: `Transaction "${cleanTcode}" does not exist in SAP system S21 repository.`,
           provenance: 'LIVE_SAP_S21_ADT_VERIFIED'
         };
       }

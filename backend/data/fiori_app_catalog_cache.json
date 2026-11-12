@@ -8002,7 +8002,7 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('MMBE')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "VA21",
@@ -8042,7 +8042,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/trnovr_anlyss1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F5757')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "F7273",
@@ -8062,7 +8062,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/ppds_prjstocks1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F7273')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "F8922",
@@ -8084,7 +8084,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/espp_sfstkprjs1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F8922')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "J3RFLVMOBVEDH",
@@ -8102,7 +8102,7 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('J3RFLVMOBVEDH')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "PEG07",
@@ -8120,7 +8120,7 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('PEG07')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "RWBE",
@@ -8138,7 +8138,7 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('RWBE')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:46:06.797Z"
+    "retrievalTimestamp": "2026-11-12T08:56:22.455Z"
   },
   {
     "appId": "FB01",
@@ -8237,6 +8237,48 @@
       "F024"
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F024')/",
+    "provenance": "OFFICIAL_CATALOGUE_CACHED",
+    "isSynthesizedWebGui": true
+  },
+  {
+    "appId": "FG34",
+    "appName": "FG34 (SAP GUI for HTML)",
+    "description": "Standard SAP GUI transaction FG34 hosted in SAP Fiori Launchpad via WebGUI tile.",
+    "appType": "SAP GUI",
+    "uiTechnology": "SAP GUI for HTML",
+    "businessProcess": "Finance",
+    "lineOfBusiness": "Finance",
+    "productVersion": "SAP S/4HANA 2023 Private Edition",
+    "softwareComponent": "S4CORE 108",
+    "businessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
+    "businessCatalog": "SAP_TC_CA_PR_BE_APPS",
+    "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
+    "odataServices": [],
+    "leadingTransactionCodes": [
+      "FG34"
+    ],
+    "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FG34')/",
+    "provenance": "OFFICIAL_CATALOGUE_CACHED",
+    "isSynthesizedWebGui": true
+  },
+  {
+    "appId": "ABCXYZ99",
+    "appName": "ABCXYZ99 (SAP GUI for HTML)",
+    "description": "Standard SAP GUI transaction ABCXYZ99 hosted in SAP Fiori Launchpad via WebGUI tile.",
+    "appType": "SAP GUI",
+    "uiTechnology": "SAP GUI for HTML",
+    "businessProcess": "Cross-Functional",
+    "lineOfBusiness": "Cross-Functional",
+    "productVersion": "SAP S/4HANA 2023 Private Edition",
+    "softwareComponent": "S4CORE 108",
+    "businessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
+    "businessCatalog": "SAP_TC_CA_PR_BE_APPS",
+    "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
+    "odataServices": [],
+    "leadingTransactionCodes": [
+      "ABCXYZ99"
+    ],
+    "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('ABCXYZ99')/",
     "provenance": "OFFICIAL_CATALOGUE_CACHED",
     "isSynthesizedWebGui": true
   }

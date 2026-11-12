@@ -430,52 +430,45 @@ export class OfficialFioriCatalogueAdapter {
     if (effectiveTcode && typeof effectiveTcode === 'string' && effectiveTcode.trim().length > 0) {
       const cleanTcode = effectiveTcode.trim().toUpperCase();
 
-      // Case A: Custom Transaction (Z* or Y*)
+      // Case A: Custom Transaction (Z* or Y*) - Custom transactions have NO standard Fiori apps
       if (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y')) {
-        collectedResults.push(synthesizeCustomApp(cleanTcode));
+        // No standard Fiori apps exist for custom customer transactions
       } else {
         // Case B: Standard SAP Transaction from Authoritative Catalog
         const knownTx = STANDARD_TRANSACTION_CATALOG[cleanTcode];
         if (knownTx && Array.isArray(knownTx.fioriSuccessors)) {
           for (const succId of knownTx.fioriSuccessors) {
-            if (this.memoryCache.has(succId)) {
-              collectedResults.push(this.memoryCache.get(succId));
-            } else if (succId === cleanTcode) {
-              collectedResults.push(synthesizeWebGuiApp(cleanTcode));
-            } else {
-              const appRes = await this.getAppById(succId, { refresh });
-              if (appRes.success && appRes.app) {
-                collectedResults.push(appRes.app);
+            // Only include real Fiori apps (not WebGUI self-references)
+            if (succId !== cleanTcode) {
+              if (this.memoryCache.has(succId)) {
+                collectedResults.push(this.memoryCache.get(succId));
+              } else {
+                const appRes = await this.getAppById(succId, { refresh });
+                if (appRes.success && appRes.app) {
+                  collectedResults.push(appRes.app);
+                }
               }
             }
           }
         }
 
-        // Query Exact T-Code as App ID (e.g. F-53, FB03, or WebGUI tile)
-        const exactTcodeRes = await this.getAppById(cleanTcode, { refresh });
-        if (exactTcodeRes.success && exactTcodeRes.app) {
-          collectedResults.push(exactTcodeRes.app);
-        }
-
-        // Check any apps in memory cache that declare this T-Code
+        // Check any apps in memory cache that explicitly declare this T-Code
         for (const cachedApp of this.memoryCache.values()) {
           const leading = (cachedApp.leadingTransactionCodes || []).map(t => t.toUpperCase());
           const related = (cachedApp.relatedTCodes || []).map(t => t.toUpperCase());
           if (leading.includes(cleanTcode) || related.includes(cleanTcode)) {
-            collectedResults.push(cachedApp);
+            // Exclude self-referential WebGUI entries from being treated as standard Fiori apps
+            if (cachedApp.appId.toUpperCase() !== cleanTcode || (cachedApp.uiTechnology && !cachedApp.uiTechnology.includes('GUI'))) {
+              collectedResults.push(cachedApp);
+            }
           }
-        }
-
-        // Universal Standard SAP GUI Fallback
-        const alreadyHasExact = collectedResults.some(a => a && a.appId && a.appId.toUpperCase() === cleanTcode);
-        if (!alreadyHasExact) {
-          collectedResults.push(synthesizeWebGuiApp(cleanTcode));
         }
       }
     }
 
     // 3. Application Name or General Query Search
-    if (textQuery && typeof textQuery === 'string' && textQuery.trim().length > 0) {
+    // ONLY run general free-text query search if NO specific T-Code was targeted
+    if (!effectiveTcode && textQuery && typeof textQuery === 'string' && textQuery.trim().length > 0) {
       // Always include local/ingested catalogue memory cache matches
       const qUpper = textQuery.toUpperCase();
       for (const app of this.memoryCache.values()) {

@@ -188,13 +188,23 @@ export class FioriMatchingEngine {
       cand.rank = idx + 1;
     });
 
-    const bestCandidate = evaluatedCandidates[0] || null;
+    // Filter out candidates that have no verified relationship to the transaction code
+    const verifiedCandidates = evaluatedCandidates.filter((c) =>
+      c.tcodeRelationshipType === 'OFFICIAL_SUCCESSOR' ||
+      c.tcodeRelationshipType === 'DIRECT_EQUIVALENT' ||
+      c.matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_MATCH ||
+      c.matchClassification === MATCH_CLASSIFICATIONS.STRONG_CANDIDATE
+    );
+
+    const hasVerifiedApp = verifiedCandidates.length > 0;
+    const finalCandidates = hasVerifiedApp ? verifiedCandidates : [];
+    const bestCandidate = hasVerifiedApp ? finalCandidates[0] : null;
 
     // -------------------------------------------------------------------------
     // 4. Overall Match Classification & Recommendation Readiness
     // -------------------------------------------------------------------------
     let overallMatchClassification = MATCH_CLASSIFICATIONS.NO_MATCH;
-    let recommendationReadiness = RECOMMENDATION_READINESS.INSUFFICIENT_EVIDENCE;
+    let recommendationReadiness = RECOMMENDATION_READINESS.NO_SUITABLE_STANDARD_CANDIDATE;
 
     if (bestCandidate) {
       overallMatchClassification = bestCandidate.matchClassification;
@@ -216,7 +226,7 @@ export class FioriMatchingEngine {
     // -------------------------------------------------------------------------
     // 5. Candidate Comparison Matrix
     // -------------------------------------------------------------------------
-    const candidateComparison = evaluatedCandidates.map((c) => ({
+    const candidateComparison = finalCandidates.map((c) => ({
       rank: c.rank,
       appId: c.appId,
       appName: c.appName,
@@ -267,18 +277,37 @@ export class FioriMatchingEngine {
           userAuthorizations: []
         }
       };
+    } else {
+      assessmentHandoff = {
+        requirement: {
+          title: `Modernise transaction ${tcode}`,
+          tcode,
+          statement: `Transaction ${tcode} has no standard SAP Fiori successor in the official catalogue and requires Clean Core RAP modernization in Generation Studio.`,
+          businessProcess: (transaction && transaction.businessProcess) || 'Core Business Process',
+          capabilities: ['Clean Core RAP Service', 'Fiori Elements UI'],
+          isCustom: Boolean(transaction.classification === 'CUSTOM' || tcode.startsWith('Z') || tcode.startsWith('Y'))
+        },
+        candidate: null,
+        context: {
+          systemId: (params.transaction && (params.transaction.systemId || params.transaction.targetSystem?.systemId)) || 'S21-200',
+          client: (params.transaction && (params.transaction.client || params.transaction.targetSystem?.client)) || '200',
+          systemRelease: targetRelease,
+          activeServices: liveGatewayServices,
+          userAuthorizations: []
+        }
+      };
     }
 
     return {
       success: true,
-      statusCode: 'SUCCESS',
+      statusCode: finalCandidates.length > 0 ? 'SUCCESS' : 'NO_CANDIDATES_FOUND',
       transactionCode: tcode,
       transactionDescription: tcodeDesc,
       matchClassification: overallMatchClassification,
       recommendationReadiness,
-      totalCandidatesEvaluated: evaluatedCandidates.length,
+      totalCandidatesEvaluated: finalCandidates.length,
       bestCandidate,
-      rankedCandidates: evaluatedCandidates,
+      rankedCandidates: finalCandidates,
       candidateComparison,
       assessmentHandoff,
       scoringWeights: this.weights,

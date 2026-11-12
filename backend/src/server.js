@@ -1395,6 +1395,43 @@ export function createServer(options = {}) {
             return;
           }
 
+          if (!discoveryResult.success && (discoveryResult.statusCode === 'NOT_FOUND' || discoveryResult.verificationStatus === 'NOT_FOUND')) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: false,
+              statusCode: 'NOT_FOUND',
+              overallStatus: 'NOT_FOUND',
+              requestId,
+              tcode: discoveryResult.tcode,
+              mode: isLiveMode ? 'LIVE_SAP' : 'MOCK',
+              timestamp,
+              system: {
+                systemId,
+                client,
+                release: targetRelease,
+                mode: isLiveMode ? 'LIVE_SAP' : 'MOCK'
+              },
+              transaction: {
+                tcode: discoveryResult.tcode,
+                exists: false,
+                classification: 'NOT_FOUND',
+                description: `Transaction "${discoveryResult.tcode}" does not exist in target SAP system.`
+              },
+              discovery: discoveryResult,
+              matching: {
+                status: 'NOT_FOUND',
+                matchClassification: 'NO_MATCH',
+                candidates: [],
+                totalCandidatesEvaluated: 0,
+                bestCandidate: null
+              },
+              candidates: [],
+              bestMatch: null,
+              errorMessage: `Transaction code "${discoveryResult.tcode}" does not exist in SAP system ${systemId}.`
+            }));
+            return;
+          }
+
           // 2. Canonical catalogue search
           const localSearchResult = await officialCatalogueAdapter.searchApps({
             tcode: discoveryResult.tcode,
@@ -1417,7 +1454,7 @@ export function createServer(options = {}) {
           const rawClassification = matchResult.matchClassification || matchResult.statusCode;
           const status = (rawClassification === 'STRONG_CANDIDATE' || rawClassification === 'VERIFIED_MATCH' || rawClassification === 'MATCH_FOUND')
             ? 'MATCH_FOUND'
-            : (rawClassification || (candidates.length > 0 ? 'MATCH_FOUND' : 'NO_VERIFIED_MATCH'));
+            : (candidates.length === 0 ? 'NO_STANDARD_APP_EXISTS' : (rawClassification || 'NO_VERIFIED_MATCH'));
           const overallStatus = status;
 
           // Legacy transaction format compatibility
@@ -3296,6 +3333,39 @@ export function createServer(options = {}) {
                 errorMessage: discoveryResult.errorMessage,
                 validationErrors: discoveryResult.validationErrors
               })
+            );
+            return;
+          }
+
+          if (!discoveryResult.success && (discoveryResult.statusCode === 'NOT_FOUND' || discoveryResult.verificationStatus === 'NOT_FOUND')) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(
+              JSON.stringify(
+                {
+                  success: false,
+                  requestId,
+                  statusCode: 'NOT_FOUND',
+                  tcode: discoveryResult.tcode || tcode,
+                  discovery: discoveryResult,
+                  matching: {
+                    success: true,
+                    statusCode: 'NOT_FOUND',
+                    matchClassification: 'NO_MATCH',
+                    recommendationReadiness: 'NO_SUITABLE_STANDARD_CANDIDATE',
+                    totalCandidatesEvaluated: 0,
+                    bestCandidate: null,
+                    rankedCandidates: [],
+                    candidateComparison: []
+                  },
+                  recommendationReadiness: 'NO_SUITABLE_STANDARD_CANDIDATE',
+                  readinessReason: `Transaction "${discoveryResult.tcode || tcode}" does not exist in target SAP system.`,
+                  candidates: [],
+                  bestMatch: null,
+                  errorMessage: `Transaction code "${discoveryResult.tcode || tcode}" does not exist in SAP system.`
+                },
+                null,
+                2
+              )
             );
             return;
           }
