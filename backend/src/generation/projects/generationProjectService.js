@@ -47,20 +47,43 @@ export class GenerationProjectService {
       };
     }
 
-    // 1. Check recommendation outcome is BUILD
-    const outcome = assessment.recommendation?.outcome || assessment.assessmentResult;
-    if (outcome !== 'BUILD' && outcome !== 'CUSTOM_RAP_REQUIRED') {
-      return {
-        isValid: false,
-        error: `Assessment "${assessmentId}" does not have an approved BUILD recommendation (current outcome: "${outcome}"). Only genuine functional gaps requiring custom RAP applications can be handed off to Generation Studio.`
-      };
+    // 1. Check recommendation outcome is BUILD or architect-approved BUILD action
+    const isBuildOutcome = Boolean(
+      assessment.recommendation?.outcome === 'BUILD' ||
+      assessment.assessmentResult === 'BUILD' ||
+      assessment.assessmentResult === 'CUSTOM_RAP_REQUIRED' ||
+      assessment.buildProject?.architectApproved === true ||
+      assessment.modernizationDecision?.actionType === 'BUILD_PROJECT' ||
+      (Array.isArray(assessment.modernizationDecisions) && assessment.modernizationDecisions.some((d) => d.actionType === 'BUILD_PROJECT'))
+    );
+
+    if (!isBuildOutcome) {
+      // Also check if an approved BUILD handoff exists in handoffStore
+      let hasApprovedBuildHandoff = false;
+      if (this.handoffStore && typeof this.handoffStore.listHandoffs === 'function') {
+        try {
+          const handoffs = await this.handoffStore.listHandoffs({ assessmentId: assessment.id });
+          hasApprovedBuildHandoff = handoffs.some((h) => h.approvalStatus === 'APPROVED' || h.leadArchitectApproval?.approved === true);
+        } catch {
+          // non-blocking
+        }
+      }
+
+      if (!hasApprovedBuildHandoff) {
+        const outcome = assessment.recommendation?.outcome || assessment.assessmentResult;
+        return {
+          isValid: false,
+          error: `Assessment "${assessmentId}" does not have an approved BUILD recommendation (current outcome: "${outcome}"). Only genuine functional gaps requiring custom RAP applications can be handed off to Generation Studio.`
+        };
+      }
     }
 
     // 2. Server-authoritative approval check on the assessment record itself or associated handoffs
     let isApproved = Boolean(
       assessment.lifecycleStatus === LIFECYCLE_STATES.APPROVED ||
       assessment.leadArchitectApproval?.approved === true ||
-      assessment.approvalStatus === 'APPROVED'
+      assessment.approvalStatus === 'APPROVED' ||
+      assessment.buildProject?.architectApproved === true
     );
 
     // If not marked on assessment directly and not explicitly rejected/unapproved, check if a valid approved handoff exists for this assessment

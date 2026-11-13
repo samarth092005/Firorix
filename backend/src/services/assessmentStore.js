@@ -1363,6 +1363,19 @@ export class AssessmentStore {
           justification,
           lastUpdated: now
         };
+        existing.assessmentResult = 'CUSTOM_RAP_REQUIRED';
+        if (!existing.recommendation) {
+          existing.recommendation = {
+            outcome: 'BUILD',
+            canonicalOutcome: 'BUILD',
+            recommendationType: 'BUILD',
+            rationale: justification || 'Enterprise Architect approved custom Clean Core RAP development under Tier 2 Cloud Extensibility.',
+            targetTier: details.cleanCoreTier || 'TIER_2_CLOUD_DEVELOPER'
+          };
+        } else {
+          existing.recommendation.outcome = 'BUILD';
+          existing.recommendation.canonicalOutcome = 'BUILD';
+        }
       }
 
       // Actor context resolution

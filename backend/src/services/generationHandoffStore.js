@@ -242,7 +242,15 @@ export class GenerationHandoffStore {
             {
               leadArchitectApproval: handoffRecord.leadArchitectApproval,
               approvalStatus: 'APPROVED',
-              handoffId
+              handoffId,
+              assessmentResult: 'CUSTOM_RAP_REQUIRED',
+              recommendation: assessment.recommendation ? { ...assessment.recommendation, outcome: 'BUILD' } : {
+                outcome: 'BUILD',
+                canonicalOutcome: 'BUILD',
+                recommendationType: 'BUILD',
+                rationale: handoffRecord.architectureBaseline?.justification || 'Custom Clean Core RAP development approved by Enterprise Architect.',
+                targetTier: handoffRecord.architectureBaseline?.cleanCoreTier || 'TIER_2_CLOUD_DEVELOPER'
+              }
             },
             actorName,
             `Recorded architect approval from generation handoff ${handoffId}`,

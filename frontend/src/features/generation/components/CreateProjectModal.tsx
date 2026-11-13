@@ -117,8 +117,18 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   if (!isOpen) return null;
 
   const selectedAssessment = assessments.find((a) => a.id === selectedAssessmentId);
-  const isSelectedBuildOutcome = selectedAssessment?.recommendation?.outcome === 'BUILD' || selectedAssessment?.assessmentResult === 'CUSTOM_RAP_REQUIRED';
-  const isSelectedApproved = selectedAssessment?.status === 'APPROVED' || selectedAssessment?.lifecycleStatus === 'APPROVED' || selectedAssessment?.leadArchitectApproval?.approved;
+  const isSelectedBuildOutcome =
+    selectedAssessment?.recommendation?.outcome === 'BUILD' ||
+    (selectedAssessment?.assessmentResult as string) === 'CUSTOM_RAP_REQUIRED' ||
+    (selectedAssessment?.assessmentResult as string) === 'BUILD' ||
+    selectedAssessment?.modernizationDecision?.actionType === 'BUILD_PROJECT' ||
+    Boolean(selectedAssessment?.buildProject?.architectApproved) ||
+    Boolean(selectedAssessment?.buildProject);
+  const isSelectedApproved =
+    selectedAssessment?.status === 'APPROVED' ||
+    selectedAssessment?.lifecycleStatus === 'APPROVED' ||
+    selectedAssessment?.leadArchitectApproval?.approved ||
+    selectedAssessment?.buildProject?.architectApproved;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -426,7 +436,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                         color: isSelectedBuildOutcome ? '#166534' : '#92400E'
                       }}
                     >
-                      Outcome: {selectedAssessment.recommendation?.outcome || 'NONE'}
+                      Outcome: {selectedAssessment.recommendation?.outcome || (selectedAssessment.buildProject || selectedAssessment.modernizationDecision?.actionType === 'BUILD_PROJECT' ? 'BUILD' : selectedAssessment.assessmentResult || 'NONE')}
                     </span>
                   </div>
 
