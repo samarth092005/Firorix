@@ -693,7 +693,7 @@
   {
     "appId": "F1345",
     "appName": "Post Incoming Payments",
-    "description": "Project Manager - Professional Services : \r\n<p>Manages execution of Professional Services Projects (commercial projects) ensuring scope, time, budget &amp; client satisfaction.</p>\r\n\r\nAccounts Payable Accountant (Ariba Invoicing) : \r\nManages and uploads supplier invoices centrally in SAP Ariba Invoicing.\r\n\r\nAccounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
+    "description": "Accounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.\r\n\r\n",
     "appType": "Transactional",
     "uiTechnology": "SAP Fiori (SAPUI5)",
     "businessProcess": "Budget and Finance, Corporate Finance, Finance, Finance & Risk, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain * Budget and Finance, Corporate Finance, Finance, Mid-Office",
@@ -701,6 +701,7 @@
     "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
     "softwareComponent": "S4CORE 109",
     "businessRole": "SAP_BR_AP_ACCOUNTANT * SAP_BR_AR_ACCOUNTANT * SAP_BR_PROJECT_MANAGER_PROF * SAP_SFIN_BCR_RECEIVABLES_CLERK",
+    "roleTooltips": "Project Manager - Professional Services : \r\n<p>Manages execution of Professional Services Projects (commercial projects) ensuring scope, time, budget &amp; client satisfaction.</p>\r\n\r\nAccounts Payable Accountant (Ariba Invoicing) : \r\nManages and uploads supplier invoices centrally in SAP Ariba Invoicing.\r\n\r\nAccounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
     "businessCatalog": "SAP_SFIN_BC_AP_PAY_PROC, SAP_SFIN_BC_APAR_OPER, SAP_SFIN_BC_AR_INC_PAYM, SAP_SFIN_BC_APAR_PAYM",
     "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
     "odataServices": [
@@ -710,7 +711,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1345')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.757Z"
   },
   {
     "appId": "ME21N",
@@ -8234,7 +8235,7 @@
   {
     "appId": "F0773",
     "appName": "Clear Incoming Payments",
-    "description": "Accounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
+    "description": "Accounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.\r\n\r\n",
     "appType": "Transactional",
     "uiTechnology": "SAP Fiori (SAPUI5)",
     "businessProcess": "Budget and Finance, Corporate Finance, Finance, Finance & Risk, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain * Budget and Finance, Corporate Finance, Finance, Mid-Office * Budget and Finance, Corporate Finance, Finance, Mid-Office, Purchasing, Sourcing and Procurement, Supply Chain",
@@ -8242,6 +8243,7 @@
     "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
     "softwareComponent": "S4CORE 109",
     "businessRole": "SAP_BR_AR_ACCOUNTANT * SAP_SFIN_BCR_RECEIVABLES_CLERK",
+    "roleTooltips": "Accounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
     "businessCatalog": "SAP_SFIN_BC_AR_CLEARING",
     "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
     "odataServices": [
@@ -8254,7 +8256,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_armanclear",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0773')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.757Z"
   },
   {
     "appId": "F0984A",
@@ -8285,7 +8287,7 @@
   {
     "appId": "F1619",
     "appName": "Reprocessing Rate of Incoming Payments",
-    "description": "Accounts Receivable Manager : \r\nCarries out all functions in accounts receivable accounting with an emphasis on setting guidelines and period-end closing.",
+    "description": "Accounts Receivable Manager : \r\nCarries out all functions in accounts receivable accounting with an emphasis on setting guidelines and period-end closing.\r\n\r\n",
     "appType": "Analytical",
     "uiTechnology": "SAP Fiori: SAP Smart Business generic drill down app",
     "businessProcess": "Budget and Finance, Corporate Finance, Finance, Mid-Office",
@@ -8293,6 +8295,7 @@
     "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
     "softwareComponent": "S4CORE 109",
     "businessRole": "SAP_BR_AR_MANAGER",
+    "roleTooltips": "Accounts Receivable Manager : \r\nCarries out all functions in accounts receivable accounting with an emphasis on setting guidelines and period-end closing.",
     "businessCatalog": "SAP_SFIN_BC_AR_ANALYTICS",
     "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
     "odataServices": [
@@ -8303,12 +8306,12 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/sbrt_appss1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1619')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "F2970",
     "appName": "Collect Incoming Payments",
-    "description": "Accounts Receivable Accountant for Israel : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution (for Israel).",
+    "description": "Collect Incoming Payments — standard application for Israel.",
     "appType": "Transactional",
     "uiTechnology": "SAP Fiori elements",
     "businessProcess": "",
@@ -8316,6 +8319,7 @@
     "productVersion": "SAP S/4HANA Cloud Public Edition 2608",
     "softwareComponent": "SAPSCORE 136",
     "businessRole": "SAP_BR_AR_ACCOUNTANT_IL",
+    "roleTooltips": "Accounts Receivable Accountant for Israel : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution (for Israel).",
     "businessCatalog": "SAP_FIN_BC_AR_CASH_OPS_IL_PC",
     "technicalCatalog": "SAP_TC_FIN_GLO_GL_COMMON",
     "odataServices": [
@@ -8325,12 +8329,12 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_csilposting",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2970')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "F5588",
     "appName": "Analyze Incoming Payments",
-    "description": "Accounts Payable and Receivable Accountant (FI-CA) : \r\nDeals with payment and credit clarification of B2B and B2C customers and works off complex customer requests according account clarification.\r\n\r\nAccounts Payable and Receivable Manager (FI-CA) : \r\nMinimizes overdue receivables and bad debt losses, analyzes and improves customer payment behavior, and optimizes receivables processing costs.",
+    "description": "Accounts Payable and Receivable Manager (FI-CA) : \r\nMinimizes overdue receivables and bad debt losses, analyzes and improves customer payment behavior, and optimizes receivables processing costs.\r\n\r\n",
     "appType": "Transactional",
     "uiTechnology": "SAP Fiori elements",
     "businessProcess": "Budget and Finance, Constituent Omnichannel Services, Contributions, Revenue, and Taxes, Corporate Finance, Finance, Mid-Office",
@@ -8338,6 +8342,7 @@
     "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
     "softwareComponent": "S4CORE 109",
     "businessRole": "SAP_BR_APR_ACCOUNTANT_FICA * SAP_BR_APR_MANAGER_FICA",
+    "roleTooltips": "Accounts Payable and Receivable Accountant (FI-CA) : \r\nDeals with payment and credit clarification of B2B and B2C customers and works off complex customer requests according account clarification.\r\n\r\nAccounts Payable and Receivable Manager (FI-CA) : \r\nMinimizes overdue receivables and bad debt losses, analyzes and improves customer payment behavior, and optimizes receivables processing costs.",
     "businessCatalog": "SAP_FICA_BC_ANALYTICS",
     "technicalCatalog": "SAP_TC_O2C_COMMON",
     "odataServices": [
@@ -8347,12 +8352,12 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/caincgpay_anls1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F5588')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "F9325",
     "appName": "Post Incoming Payments - Japan",
-    "description": "Accounts Receivable Accountant for Japan : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
+    "description": "Post Incoming Payments - Japan — standard application for Invoice Summary.",
     "appType": "Transactional",
     "uiTechnology": "SAP Fiori app variant",
     "businessProcess": "",
@@ -8360,6 +8365,7 @@
     "productVersion": "SAP S/4HANA Cloud Public Edition 2608",
     "softwareComponent": "SAPSCORE 136",
     "businessRole": "SAP_BR_AR_ACCOUNTANT_JP",
+    "roleTooltips": "Accounts Receivable Accountant for Japan : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
     "businessCatalog": "SAP_FIN_BC_AR_DOC_PROC_JP_PC",
     "technicalCatalog": "SAP_TC_FIN_GLO_GL_COMMON",
     "odataServices": [
@@ -8369,12 +8375,12 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F9325')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "FBZ1",
     "appName": "Post Incoming Payments - For Customers, Post Incoming Payments - For Suppliers",
-    "description": "Accounts Payable Accountant (Ariba Invoicing) : \r\nManages and uploads supplier invoices centrally in SAP Ariba Invoicing.\r\n\r\nAccounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.\r\n\r\nAccounts Receivable Accountant for Japan : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
+    "description": "Others : \r\nDummy Role\r\n\r\n",
     "appType": "SAP GUI",
     "uiTechnology": "SAP GUI for HTML",
     "businessProcess": "",
@@ -8382,12 +8388,13 @@
     "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
     "softwareComponent": "S4CORE 109",
     "businessRole": "SAP_BR_AP_ACCOUNTANT * SAP_BR_AR_ACCOUNTANT * SAP_BR_AR_ACCOUNTANT_JP",
+    "roleTooltips": "Accounts Payable Accountant (Ariba Invoicing) : \r\nManages and uploads supplier invoices centrally in SAP Ariba Invoicing.\r\n\r\nAccounts Receivable Accountant : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.\r\n\r\nAccounts Receivable Accountant for Japan : \r\nCarries out the most important functions in accounts receivable accounting with a special focus on creation and execution.",
     "businessCatalog": "SAP_SFIN_BC_APAR_PAYM,SAP_SFIN_BC_AR_INC_PAYM",
     "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ1')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "FBZ3",
@@ -8405,12 +8412,12 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ3')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "FPCPL",
     "appName": "Clarify Incoming Payments",
-    "description": "Accounts Payable and Receivable Accountant (FI-CA) : \r\nDeals with payment and credit clarification of B2B and B2C customers and works off complex customer requests according account clarification.\r\n\r\nAdministrator - Accounts Payable and Receivable (FI-CA) : \r\nIs responsible for the planning, scheduling and execution of jobs and mass activities within FI-CA, including critical Business processes, such as payment run, payment lot, dunning run.",
+    "description": "Accounts Payable and Receivable Accountant (FI-CA) : \r\nDeals with payment and credit clarification of B2B and B2C customers and works off complex customer requests according account clarification.\r\n\r\n",
     "appType": "SAP GUI",
     "uiTechnology": "SAP GUI for HTML",
     "businessProcess": "",
@@ -8418,12 +8425,13 @@
     "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
     "softwareComponent": "S4CORE 109",
     "businessRole": "SAP_BR_ADMIN_APR_FICA * SAP_BR_APR_ACCOUNTANT_FICA",
+    "roleTooltips": "Accounts Payable and Receivable Accountant (FI-CA) : \r\nDeals with payment and credit clarification of B2B and B2C customers and works off complex customer requests according account clarification.\r\n\r\nAdministrator - Accounts Payable and Receivable (FI-CA) : \r\nIs responsible for the planning, scheduling and execution of jobs and mass activities within FI-CA, including critical Business processes, such as payment run, payment lot, dunning run.",
     "businessCatalog": "SAP_FICA_BC_PAY_CLRFC",
     "technicalCatalog": "SAP_TC_FICA_PY_BE_APPS:S4FICA",
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FPCPL')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:54:00.606Z"
+    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
   },
   {
     "appId": "F7319",
@@ -8468,5 +8476,26 @@
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0247')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
     "retrievalTimestamp": "2026-11-13T04:39:25.380Z"
+  },
+  {
+    "appId": "F-28",
+    "appName": "Post Incoming Payments - For Customers (SAP GUI)",
+    "description": "Classic SAP transaction F-28 (Post Incoming Payments - For Customers) hosted directly in SAP Fiori Launchpad via SAP GUI for HTML (WebGUI bridge).",
+    "appType": "SAP GUI",
+    "uiTechnology": "SAP GUI for HTML",
+    "businessProcess": "Finance",
+    "lineOfBusiness": "Finance",
+    "productVersion": "SAP S/4HANA 2023 Private Edition",
+    "softwareComponent": "S4CORE 108",
+    "businessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
+    "businessCatalog": "SAP_TC_CA_PR_BE_APPS",
+    "technicalCatalog": "SAP_TC_FIN_FO_COMMON",
+    "odataServices": [],
+    "leadingTransactionCodes": [
+      "F-28"
+    ],
+    "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F-28')/",
+    "provenance": "OFFICIAL_CATALOGUE_CACHED",
+    "isSynthesizedWebGui": true
   }
 ]

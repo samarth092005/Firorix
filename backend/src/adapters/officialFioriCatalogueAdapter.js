@@ -106,10 +106,19 @@ export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_L
   const productVersion = rawApp.PVBackend || rawApp.PVFrontend || 'SAP S/4HANA';
   const softwareComponent = rawApp.BackendSoftwareComponentVersions || rawApp.FrontendSoftwareComponent || undefined;
 
+  let cleanDesc = rawApp.RoleDescription;
+  if (!cleanDesc || cleanDesc.includes(' : \n') || cleanDesc.length > 250) {
+    if (rawApp.ApplicationComponentText) {
+      cleanDesc = `${appName} — standard application for ${rawApp.ApplicationComponentText}.`;
+    } else {
+      cleanDesc = `Standard SAP Fiori successor application for ${appName}.`;
+    }
+  }
+
   return {
     appId,
     appName,
-    description: rawApp.RoleCombinedToolTipDescription || rawApp.RoleDescription || appName,
+    description: cleanDesc,
     appType,
     uiTechnology,
     businessProcess,
@@ -117,6 +126,7 @@ export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_L
     productVersion,
     softwareComponent,
     businessRole,
+    roleTooltips: rawApp.RoleCombinedToolTipDescription || undefined,
     businessCatalog,
     technicalCatalog,
     odataServices,
@@ -340,8 +350,8 @@ export class OfficialFioriCatalogueAdapter {
       };
     }
 
-    // Standard SAP WebGUI synthesis for standard T-Codes
-    if (STANDARD_TRANSACTION_CATALOG[cleanId.toUpperCase()] || /^[A-Z0-9_\-\/]{2,20}$/.test(cleanId)) {
+    // Standard SAP WebGUI synthesis for standard T-Codes in canonical catalog
+    if (STANDARD_TRANSACTION_CATALOG[cleanId.toUpperCase()]) {
       const synth = synthesizeWebGuiApp(cleanId);
       this.memoryCache.set(cleanId, synth);
       return {

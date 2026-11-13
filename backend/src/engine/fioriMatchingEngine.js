@@ -195,7 +195,8 @@ export class FioriMatchingEngine {
       c.matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_MATCH ||
       c.matchClassification === MATCH_CLASSIFICATIONS.STRONG_CANDIDATE ||
       c.matchClassification === MATCH_CLASSIFICATIONS.PARTIAL_FIT ||
-      c.matchClassification === MATCH_CLASSIFICATIONS.ALTERNATIVE_APPROACH
+      c.matchClassification === MATCH_CLASSIFICATIONS.ALTERNATIVE_APPROACH ||
+      c.matchClassification === MATCH_CLASSIFICATIONS.WEAK_CANDIDATE
     );
 
     const hasVerifiedApp = verifiedCandidates.length > 0;

@@ -33,9 +33,49 @@ import {
   X,
   Activity,
   Compass,
-  BookOpen
+  BookOpen,
+  Users,
+  UserCheck
 } from 'lucide-react';
 import { LoadingState } from '../../../components/common';
+
+function formatCandidateDetails(candidate: CatalogueReference | null) {
+  if (!candidate) return { cleanDesc: '', roles: [] as string[] };
+
+  let cleanDesc = (candidate.description || '').trim();
+  let roles: string[] = Array.isArray(candidate.businessRoles) && candidate.businessRoles.length > 0
+    ? [...candidate.businessRoles]
+    : [];
+
+  // Check if description is a dump of roles with "Role Name : Role Description"
+  const isRoleDump = cleanDesc.includes(' : ') && (cleanDesc.length > 180 || roles.length === 0);
+  if (isRoleDump) {
+    const roleMatches = cleanDesc.match(/([A-Z][A-Za-z0-9\s\-–/()]+?)\s*:\s*([^:]+?)(?=(?:[A-Z][A-Za-z0-9\s\-–/()]+?\s*:)|$)/g);
+    if (roleMatches && roleMatches.length > 0) {
+      const parsedRoles: string[] = [];
+      roleMatches.forEach((m) => {
+        const colonIdx = m.indexOf(':');
+        if (colonIdx > 0) {
+          const rName = m.substring(0, colonIdx).trim();
+          if (rName.length >= 3 && rName.length < 55 && !rName.includes('.')) {
+            parsedRoles.push(rName);
+          }
+        }
+      });
+      if (parsedRoles.length > 0 && roles.length === 0) {
+        roles = Array.from(new Set(parsedRoles));
+      }
+    }
+
+    cleanDesc = `Official SAP Fiori successor for ${candidate.appName || candidate.appId}${candidate.technicalComponent ? ` (${candidate.technicalComponent})` : ''}. Enables browser-based workflows aligned with S/4HANA Clean Core.`;
+  }
+
+  if (!cleanDesc) {
+    cleanDesc = `Standard SAP Fiori successor identified in official SAP Fiori Apps Reference Library.`;
+  }
+
+  return { cleanDesc, roles };
+}
 
 export type DiscoverySearchProgressState =
   | 'IDLE'
@@ -79,6 +119,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [searchError, setSearchError] = useState<string | null>(null);
   const [mcpPipelineResult, setMcpPipelineResult] = useState<UnifiedDiscoveryMatchResult | null>(null);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
+  const [isRolesExpanded, setIsRolesExpanded] = useState<boolean>(false);
 
   // Business Scope & Intake (Expandable Drawer)
   const [isScopeDrawerOpen, setIsScopeDrawerOpen] = useState<boolean>(false);
@@ -438,7 +479,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)', marginBottom: '5px', letterSpacing: '0.3px' }}>
               TRANSACTION CODE (T-CODE)
             </label>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', width: '100%' }}>
               <input
                 type="text"
                 className="fiori-input"
@@ -449,20 +490,29 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                 }}
                 placeholder="e.g. ME21N, F-53, VA01, FB50, FS00"
                 style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
                   height: '42px',
                   fontFamily: 'var(--font-mono, monospace)',
                   fontSize: '14px',
                   fontWeight: 700,
                   letterSpacing: '0.6px',
                   paddingLeft: '34px',
-                  paddingRight: tcode ? '32px' : '12px',
+                  paddingRight: tcode ? '36px' : '12px',
                   borderRadius: '8px'
                 }}
                 autoFocus
               />
               <Search
                 size={15}
-                style={{ position: 'absolute', left: '12px', top: '14px', color: 'var(--fiori-text-secondary, #64748B)' }}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--fiori-text-secondary, #64748B)',
+                  pointerEvents: 'none'
+                }}
               />
               {tcode && (
                 <button
@@ -475,14 +525,17 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   style={{
                     position: 'absolute',
                     right: '10px',
-                    top: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
                     color: '#94A3B8',
-                    padding: '2px',
+                    padding: '4px',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '4px'
                   }}
                   title="Clear input"
                 >
@@ -508,7 +561,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   setTargetRelease(sys.release || 'SAP S/4HANA 2023 Private Edition');
                 }
               }}
-              style={{ height: '42px', fontSize: '12.5px', borderRadius: '8px' }}
+              style={{ width: '100%', boxSizing: 'border-box', height: '42px', fontSize: '12.5px', borderRadius: '8px' }}
             >
               {availableSystems.map((sys) => (
                 <option key={sys.systemId} value={sys.systemId}>
@@ -1149,86 +1202,202 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                 )}
               </div>
 
-              {selectedCandidate ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div
-                    style={{
-                      padding: '14px',
-                      backgroundColor: '#F8FAFC',
-                      border: '1px solid var(--fiori-border, #E2E8F0)',
-                      borderRadius: '4px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <span style={{ fontSize: '14px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', color: '#0A6ED1' }}>
-                            {selectedCandidate.appId}
-                          </span>
-                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#102A43' }}>
-                            — {selectedCandidate.appName}
-                          </span>
+              {selectedCandidate ? (() => {
+                const { cleanDesc, roles } = formatCandidateDetails(selectedCandidate);
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div
+                      style={{
+                        padding: '16px',
+                        backgroundColor: '#F8FAFC',
+                        border: '1px solid var(--fiori-border, #E2E8F0)',
+                        borderRadius: '6px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '13.5px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', color: '#0A6ED1', backgroundColor: '#EFF6FF', padding: '2px 8px', borderRadius: '4px', border: '1px solid #BFDBFE' }}>
+                              {selectedCandidate.appId}
+                            </span>
+                            <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#102A43' }}>
+                              — {selectedCandidate.appName}
+                            </span>
+                          </div>
+                          <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#475569', lineHeight: 1.5 }}>
+                            {cleanDesc}
+                          </p>
                         </div>
-                        <p style={{ margin: '4px 0 0 0', fontSize: '11.5px', color: '#64748B', lineHeight: 1.4 }}>
-                          {selectedCandidate.description || 'Standard SAP Fiori successor identified in official Apps Library.'}
-                        </p>
+
+                        <span
+                          style={{
+                            fontSize: '10.5px',
+                            fontWeight: 700,
+                            padding: '3px 10px',
+                            borderRadius: '12px',
+                            backgroundColor: selectedCandidate.uiTechnology?.includes('HTML') ? '#FEF3C7' : '#DCFCE7',
+                            color: selectedCandidate.uiTechnology?.includes('HTML') ? '#92400E' : '#166534',
+                            border: selectedCandidate.uiTechnology?.includes('HTML') ? '1px solid #FDE68A' : '1px solid #BBF7D0',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          {selectedCandidate.uiTechnology || 'SAP Fiori elements'}
+                        </span>
                       </div>
 
-                      <span
-                        style={{
-                          fontSize: '10px',
-                          fontWeight: 700,
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          backgroundColor: selectedCandidate.uiTechnology?.includes('HTML') ? '#FEF3C7' : '#DCFCE7',
-                          color: selectedCandidate.uiTechnology?.includes('HTML') ? '#92400E' : '#166534',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        {selectedCandidate.uiTechnology || 'SAP Fiori elements'}
-                      </span>
-                    </div>
+                      {/* Target Business Roles Section (Compact & Collapsible) */}
+                      {roles.length > 0 && (
+                        <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: 700, color: '#475569', letterSpacing: '0.3px' }}>
+                              <UserCheck size={13} style={{ color: '#0A6ED1' }} />
+                              <span>TARGET BUSINESS ROLES ({roles.length})</span>
+                            </div>
+                            {roles.length > 3 && (
+                              <button
+                                type="button"
+                                onClick={() => setIsRolesExpanded(!isRolesExpanded)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  padding: '2px 6px',
+                                  fontSize: '11px',
+                                  fontWeight: 600,
+                                  color: '#0A6ED1',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '3px',
+                                  borderRadius: '4px'
+                                }}
+                              >
+                                <span>{isRolesExpanded ? 'Show less' : `+${roles.length - 3} more`}</span>
+                                {isRolesExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                              </button>
+                            )}
+                          </div>
 
-                    <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '11px', color: '#64748B' }}>
-                      <span>Component: <strong style={{ color: '#102A43' }}>{selectedCandidate.technicalComponent || 'N/A'}</strong></span>
-                      <span>Release: <strong style={{ color: '#102A43' }}>{selectedCandidate.supportedProductRelease || targetRelease}</strong></span>
-                      {selectedCandidate.odataServices && selectedCandidate.odataServices.length > 0 && (
-                        <span>OData: <strong style={{ color: '#0A6ED1' }}>{selectedCandidate.odataServices[0]}</strong></span>
+                          {!isRolesExpanded ? (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                              {roles.slice(0, 3).map((role, idx) => (
+                                <span
+                                  key={idx}
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 500,
+                                    padding: '2px 8px',
+                                    borderRadius: '10px',
+                                    backgroundColor: '#F1F5F9',
+                                    border: '1px solid #E2E8F0',
+                                    color: '#334155',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                  }}
+                                >
+                                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#0A6ED1' }} />
+                                  {role}
+                                </span>
+                              ))}
+                              {roles.length > 3 && (
+                                <span
+                                  onClick={() => setIsRolesExpanded(true)}
+                                  style={{
+                                    fontSize: '11px',
+                                    color: '#64748B',
+                                    cursor: 'pointer',
+                                    padding: '2px 6px',
+                                    borderRadius: '10px',
+                                    backgroundColor: '#F8FAFC'
+                                  }}
+                                >
+                                  +{roles.length - 3} more roles
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                maxHeight: '130px',
+                                overflowY: 'auto',
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '6px',
+                                padding: '8px',
+                                backgroundColor: '#F8FAFC',
+                                borderRadius: '6px',
+                                border: '1px solid #E2E8F0'
+                              }}
+                            >
+                              {roles.map((role, idx) => (
+                                <span
+                                  key={idx}
+                                  style={{
+                                    fontSize: '11px',
+                                    fontWeight: 500,
+                                    padding: '2px 8px',
+                                    borderRadius: '10px',
+                                    backgroundColor: '#FFFFFF',
+                                    border: '1px solid #CBD5E1',
+                                    color: '#334155',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                  }}
+                                >
+                                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#0A6ED1' }} />
+                                  {role}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  </div>
 
-                  {/* Candidate Switcher if multiple */}
-                  {candidates.length > 1 && (
-                    <div>
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '6px', display: 'block' }}>
-                        All Mapped Candidates ({candidates.length}):
-                      </span>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                        {candidates.map((c) => (
-                          <button
-                            key={c.appId}
-                            type="button"
-                            onClick={() => setSelectedCandidate(c)}
-                            style={{
-                              padding: '4px 10px',
-                              fontSize: '11px',
-                              fontWeight: selectedCandidate.appId === c.appId ? 700 : 500,
-                              backgroundColor: selectedCandidate.appId === c.appId ? '#E1EFFD' : '#FFFFFF',
-                              color: selectedCandidate.appId === c.appId ? '#0A6ED1' : '#475569',
-                              border: selectedCandidate.appId === c.appId ? '1px solid #0A6ED1' : '1px solid #CBD5E1',
-                              borderRadius: '4px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            {c.appId} ({c.uiTechnology?.includes('HTML') ? 'WebGUI' : 'Native'})
-                          </button>
-                        ))}
+                      <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: '14px', fontSize: '11px', color: '#64748B' }}>
+                        <span>Component: <strong style={{ color: '#102A43' }}>{selectedCandidate.technicalComponent || 'N/A'}</strong></span>
+                        <span>Release: <strong style={{ color: '#102A43' }}>{selectedCandidate.supportedProductRelease || targetRelease}</strong></span>
+                        {selectedCandidate.odataServices && selectedCandidate.odataServices.length > 0 && (
+                          <span>OData: <strong style={{ color: '#0A6ED1', fontFamily: 'var(--font-mono, monospace)' }}>{selectedCandidate.odataServices[0]}</strong></span>
+                        )}
                       </div>
                     </div>
-                  )}
-                </div>
-              ) : (
+
+                    {/* Candidate Switcher if multiple */}
+                    {candidates.length > 1 && (
+                      <div>
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748B', marginBottom: '6px', display: 'block' }}>
+                          All Mapped Candidates ({candidates.length}):
+                        </span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                          {candidates.map((c) => (
+                            <button
+                              key={c.appId}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCandidate(c);
+                                setIsRolesExpanded(false);
+                              }}
+                              style={{
+                                padding: '4px 10px',
+                                fontSize: '11px',
+                                fontWeight: selectedCandidate.appId === c.appId ? 700 : 500,
+                                backgroundColor: selectedCandidate.appId === c.appId ? '#E1EFFD' : '#FFFFFF',
+                                color: selectedCandidate.appId === c.appId ? '#0A6ED1' : '#475569',
+                                border: selectedCandidate.appId === c.appId ? '1px solid #0A6ED1' : '1px solid #CBD5E1',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {c.appId} ({c.uiTechnology?.includes('HTML') ? 'WebGUI' : 'Native'})
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })() : (
                 <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#F8FAFC', borderRadius: '4px', border: '1px dashed #CBD5E1', fontSize: '12px', color: '#8A5800' }}>
                   No standard SAP Fiori application exists for this transaction in the official catalogue. Custom RAP modernization required.
                 </div>

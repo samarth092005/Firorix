@@ -332,7 +332,7 @@ export const STANDARD_TRANSACTION_CATALOG = {
     softwareComponent: 'S4CORE 108',
     screenNumber: '0100',
     primaryFioriAppId: 'F0773',
-    fioriSuccessors: ['F0773', 'F1367', 'F-53'],
+    fioriSuccessors: ['F0773', 'F1612', 'F1367', 'F-53'],
     lineOfBusiness: 'Finance'
   },
   'F-28': {
