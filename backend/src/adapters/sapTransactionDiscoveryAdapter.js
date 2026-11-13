@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Transaction Discovery Adapter
+ * Fiorify — SAP Transaction Discovery Adapter
  *
  * Implements live SAP transaction metadata discovery from SAP S/4HANA 2023 System S21 (Client 200).
  *
@@ -40,6 +40,33 @@ export const SAP_TCODE_REGEX = /^[A-Z0-9_\-\/]{1,20}$/;
  */
 export const STANDARD_SAP_TRANSACTION_REGISTRY = {
   ...STANDARD_TRANSACTION_CATALOG,
+  'F-31': {
+    tcode: 'F-31',
+    standardDescription: 'Clear Customer',
+    functionalArea: 'Financial Accounting — Accounts Receivable (FI-AR)',
+    historicalProgram: 'SAPMF05A',
+    historicalPackage: 'FBAS',
+    transactionType: 'TRANSACTION',
+    correlatedServiceKeywords: ['FAR_MANUAL_CLEARING', 'FAR_PAYMENT_POST']
+  },
+  'F-32': {
+    tcode: 'F-32',
+    standardDescription: 'Clear Customer',
+    functionalArea: 'Financial Accounting — Accounts Receivable (FI-AR)',
+    historicalProgram: 'SAPMF05A',
+    historicalPackage: 'FBAS',
+    transactionType: 'TRANSACTION',
+    correlatedServiceKeywords: ['FAR_MANUAL_CLEARING']
+  },
+  'F-44': {
+    tcode: 'F-44',
+    standardDescription: 'Clear Vendor',
+    functionalArea: 'Financial Accounting — Accounts Payable (FI-AP)',
+    historicalProgram: 'SAPMF05A',
+    historicalPackage: 'FBAS',
+    transactionType: 'TRANSACTION',
+    correlatedServiceKeywords: ['FAP_MANUAL_CLEARING']
+  },
   'F-53': {
     tcode: 'F-53',
     standardDescription: 'Post Outgoing Payments - For Suppliers',
@@ -134,7 +161,7 @@ export class SapTransactionDiscoveryAdapter {
           requiredAuthorizations: [
             'PFCG Authorization Object: S_ADT_RES (Activity 03: Display)',
             'PFCG Authorization Object: S_DEVELOP (Activity 03: Display for object types PROG, TRAN, DEVC)',
-            'Alternative: Custom read-only OData service (e.g. Z_FIORIX_DISCOVERY_SRV) with S_TABU_DIS (Activity 03) for TSTC/TSTCT/TADIR'
+            'Alternative: Custom read-only OData service (e.g. Z_Fiorify_DISCOVERY_SRV) with S_TABU_DIS (Activity 03) for TSTC/TSTCT/TADIR'
           ]
         };
       }
@@ -263,7 +290,7 @@ export class SapTransactionDiscoveryAdapter {
 
     let catalogResult = rawCatalogResult;
     if (!catalogResult || !catalogResult.success) {
-      if (options.strictLive === true) {
+      if (options.strictLive === true || catalogResult?.httpStatus === 504 || catalogResult?.httpStatus === 502 || catalogResult?.statusCode === 'LIVE_CONNECTION_FAILED' || catalogResult?.statusCode === 'GATEWAY_ERROR') {
         return {
           success: false,
           statusCode: 'LIVE_CONNECTION_FAILED',
@@ -355,7 +382,7 @@ export class SapTransactionDiscoveryAdapter {
             'PFCG Authorization Object: S_DEVELOP (Activity 03: Display for object types PROG, TRAN, DEVC)',
             'Alternative: Custom read-only OData service with S_TABU_DIS for TSTC/TSTCT/TADIR'
           ],
-          impact: 'FioriX successfully discovers Gateway OData services and live S21 integration endpoints, but cannot inspect raw database tables (TSTC, TSTCT, TADIR, TRDIR) without these authorizations.'
+          impact: 'Fiorify successfully discovers Gateway OData services and live S21 integration endpoints, but cannot inspect raw database tables (TSTC, TSTCT, TADIR, TRDIR) without these authorizations.'
         }
       : null;
 

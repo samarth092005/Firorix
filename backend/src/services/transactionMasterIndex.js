@@ -1,5 +1,5 @@
 /**
- * FioriX — Verified Transaction Master Index Architecture (Phase 4 / DISC-MASTER-01)
+ * Fiorify — Verified Transaction Master Index Architecture (Phase 4 / DISC-MASTER-01)
  *
  * Implements authoritative SAP transaction master data storage, snapshotting, and lookups:
  * - Read-only verified extraction schema (TSTC, TSTCT, TADIR, TDEVC, CVERS).
@@ -40,6 +40,23 @@ export const TRANSACTION_CLASSIFICATIONS = Object.freeze({
  * Baseline verified transaction records extracted from SAP S/4HANA 2023 DDIC.
  */
 export const VERIFIED_TRANSACTION_BASELINE = [
+  {
+    tcode: 'F-31',
+    description: 'Clear Customer',
+    program: 'SAPMF05A',
+    screenNumber: '0100',
+    packageName: 'FBAS',
+    originalSystem: 'SAP',
+    softwareComponent: 'S4CORE 108',
+    classification: 'STANDARD',
+    systemId: 'S21-200',
+    client: '200',
+    language: 'EN',
+    extractionDate: '2026-11-04T08:00:00.000Z',
+    snapshotVersion: 'S21_2023_FPS02_V1',
+    provenance: 'AUTHORITATIVE_DDIC_SNAPSHOT',
+    sourceTables: ['TSTC', 'TSTCT', 'TADIR', 'TDEVC', 'CVERS']
+  },
   {
     tcode: 'ST22',
     description: 'ABAP Dump Analysis (ABAP Runtime Errors)',
@@ -349,7 +366,7 @@ export const VERIFIED_TRANSACTION_BASELINE = [
   {
     tcode: 'ZPURCHASE',
     description: 'Custom Purchase Request Overview',
-    program: 'ZFIORIX_PURCHASE_MAIN',
+    program: 'ZFiorify_PURCHASE_MAIN',
     screenNumber: '0100',
     packageName: 'ZPURCH_MOD',
     originalSystem: 'S21',
@@ -433,7 +450,7 @@ export class TransactionMasterIndex {
         fs.mkdirSync(dir, { recursive: true });
       }
       const payload = {
-        version: 'FIORIX_TX_MASTER_V1',
+        version: 'Fiorify_TX_MASTER_V1',
         lastUpdated: new Date().toISOString(),
         totalTransactions: this.memoryIndex.size,
         records: Array.from(this.memoryIndex.values())

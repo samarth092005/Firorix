@@ -19,6 +19,7 @@ import { defaultGenerationProjectStore } from './generationProjectStore.js';
 import { defaultAssessmentStore, LIFECYCLE_STATES } from '../../services/assessmentStore.js';
 import { defaultGenerationHandoffStore } from '../../services/generationHandoffStore.js';
 import { semanticArchetypeEngine } from '../datamodel/semanticArchetypeEngine.js';
+import { STANDARD_TRANSACTION_CATALOG } from '../../services/standardTransactionKnowledge.js';
 
 export class GenerationProjectService {
   constructor(options = {}) {
@@ -191,7 +192,18 @@ export class GenerationProjectService {
       justification: assessment.leadArchitectApproval?.justification || payload.cleanCoreJustification || 'Custom RAP Managed build approved under Clean Core Tier 2.'
     };
 
-    const projectName = payload.projectName || `${sourceTCode} — ${assessment.description || 'Custom RAP Modernization'}`;
+    // Resolve authentic transaction name / description (avoid generic "Assessment for <TCode>")
+    let cleanDesc = (payload.description || assessment.description || '').trim();
+    if (!cleanDesc || cleanDesc.startsWith('Assessment for ') || cleanDesc === sourceTCode) {
+      cleanDesc = STANDARD_TRANSACTION_CATALOG[sourceTCode]?.description ||
+                  assessment.discoveryMetadata?.description ||
+                  `Custom RAP Modernization`;
+    }
+
+    const projectName = payload.projectName && !payload.projectName.includes('Assessment for ')
+      ? payload.projectName
+      : `${sourceTCode} — ${cleanDesc}`;
+    const projectDescription = cleanDesc || `Clean Core custom RAP Modernization for ${sourceTCode}.`;
     const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     const projectId = payload.projectId || `GEN-${sourceTCode}-${randSuffix}`;
 
@@ -200,7 +212,7 @@ export class GenerationProjectService {
     // Intelligently synthesize authentic enterprise domain archetype
     const archetype = semanticArchetypeEngine.synthesizeArchetype({
       tcode: sourceTCode,
-      description: assessment.description || payload.description || '',
+      description: cleanDesc,
       businessArea: businessDomain || assessment.businessArea || '',
       targetRelease
     });
@@ -247,7 +259,7 @@ export class GenerationProjectService {
       projectId,
       tenantId: payload.tenantId || assessment.tenantId || userContext?.tenantId || 'DEFAULT-TENANT-S21',
       projectName,
-      description: payload.description || assessment.description || `Modernization project for SAP transaction ${sourceTCode}`,
+      description: projectDescription,
       origin: PROJECT_ORIGINS.DISCOVERY_BUILD,
       sourceAssessmentId: assessment.id,
       handoffId: effectiveHandoffId,
@@ -257,13 +269,22 @@ export class GenerationProjectService {
       targetProduct: 'SAP S/4HANA',
       targetRelease,
       targetDeploymentModel: payload.targetDeploymentModel || TARGET_DEPLOYMENT_MODELS.ON_PREMISE,
-      requirementsSpec: {
+      requirementsSpec: payload.requirementsSpec || (payload.useArchetype ? {
         specVersion: 1,
         items: initialRequirements,
         status: 'IN_PROGRESS'
-      },
-      dataModelSpec: starterDataModel,
-      architectureSpec: starterArchitecture,
+      } : {
+        specVersion: 1,
+        items: [],
+        status: 'EMPTY'
+      }),
+      dataModelSpec: payload.dataModelSpec || (payload.useArchetype ? starterDataModel : {
+        specVersion: 1,
+        entities: [],
+        relationships: [],
+        status: 'EMPTY'
+      }),
+      architectureSpec: payload.architectureSpec || starterArchitecture,
       assessmentContext: {
         handoffId: effectiveHandoffId,
         businessDomain,

@@ -1,5 +1,5 @@
 /**
- * FioriX — Authoritative Standard SAP Transaction & Modern Fiori Successor Knowledge Base
+ * Fiorify — Authoritative Standard SAP Transaction & Modern Fiori Successor Knowledge Base
  *
  * Provides comprehensive reference data and dynamic synthesis for all standard SAP transactions
  * and modern SAP Fiori applications (SAP Fiori Elements, SAPUI5, and SAP GUI for HTML).
@@ -323,6 +323,54 @@ export const STANDARD_TRANSACTION_CATALOG = {
   },
 
   // --- Financial Accounting (FI) ---
+  'F-31': {
+    tcode: 'F-31',
+    description: 'Clear Customer',
+    functionalArea: 'Financial Accounting — Accounts Receivable (FI-AR)',
+    program: 'SAPMF05A',
+    packageName: 'FBAS',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Finance'
+  },
+  'F-32': {
+    tcode: 'F-32',
+    description: 'Clear Customer',
+    functionalArea: 'Financial Accounting — Accounts Receivable (FI-AR)',
+    program: 'SAPMF05A',
+    packageName: 'FBAS',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Finance'
+  },
+  'F-44': {
+    tcode: 'F-44',
+    description: 'Clear Vendor',
+    functionalArea: 'Financial Accounting — Accounts Payable (FI-AP)',
+    program: 'SAPMF05A',
+    packageName: 'FBAS',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Finance'
+  },
+  'F-03': {
+    tcode: 'F-03',
+    description: 'Clear G/L Account',
+    functionalArea: 'Financial Accounting — General Ledger (FI-GL)',
+    program: 'SAPMF05A',
+    packageName: 'FBAS',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Finance'
+  },
   'F-53': {
     tcode: 'F-53',
     description: 'Post Outgoing Payments - For Suppliers',
@@ -425,6 +473,138 @@ export const STANDARD_TRANSACTION_CATALOG = {
     functionalArea: 'Basis — System Administration & Diagnostics (BC-ABA)',
     program: 'SAPMS380',
     packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SM50': {
+    tcode: 'SM50',
+    description: 'Work Process Overview',
+    functionalArea: 'Basis — System Administration & Diagnostics (BC-ABA)',
+    program: 'SAPMSM50',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SM66': {
+    tcode: 'SM66',
+    description: 'System-Wide Work Process Overview',
+    functionalArea: 'Basis — System Administration & Diagnostics (BC-ABA)',
+    program: 'SAPMSM66',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SM21': {
+    tcode: 'SM21',
+    description: 'System Log Analysis',
+    functionalArea: 'Basis — System Administration & Diagnostics (BC-ABA)',
+    program: 'SAPMSM21',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SM12': {
+    tcode: 'SM12',
+    description: 'Display and Delete Locks',
+    functionalArea: 'Basis — System Administration & Diagnostics (BC-ABA)',
+    program: 'SAPMSM12',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SE11': {
+    tcode: 'SE11',
+    description: 'ABAP Dictionary Maintenance',
+    functionalArea: 'Basis — ABAP Workbench & Repository (BC-DWB)',
+    program: 'SAPMSRD0',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SE16N': {
+    tcode: 'SE16N',
+    description: 'General Table Display',
+    functionalArea: 'Basis — ABAP Workbench & Repository (BC-DWB)',
+    program: 'SAPLSE16N',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SE24': {
+    tcode: 'SE24',
+    description: 'Class Builder',
+    functionalArea: 'Basis — ABAP Workbench & Repository (BC-DWB)',
+    program: 'SAPMSEO4',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SE38': {
+    tcode: 'SE38',
+    description: 'ABAP Editor',
+    functionalArea: 'Basis — ABAP Workbench & Repository (BC-DWB)',
+    program: 'SAPMS380',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SE80': {
+    tcode: 'SE80',
+    description: 'Object Navigator',
+    functionalArea: 'Basis — ABAP Workbench & Repository (BC-DWB)',
+    program: 'SAPMSE80',
+    packageName: 'SABP',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'SU01': {
+    tcode: 'SU01',
+    description: 'User Maintenance',
+    functionalArea: 'Basis — Security & Authorization (BC-SEC)',
+    program: 'SAPMSU01',
+    packageName: 'SUSR',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Technology & System Operations'
+  },
+  'PFCG': {
+    tcode: 'PFCG',
+    description: 'Role Maintenance',
+    functionalArea: 'Basis — Security & Authorization (BC-SEC)',
+    program: 'SAPLPFCG',
+    packageName: 'SUSR',
     softwareComponent: 'SAP_BASIS',
     screenNumber: '0100',
     primaryFioriAppId: null,
@@ -1343,7 +1523,7 @@ export function synthesizeCustomApp(rawTcode) {
   return {
     appId: clean,
     appName: `${clean} (Custom Transaction — Generation Studio Target)`,
-    description: `Customer proprietary transaction ${clean}. Standard SAP Fiori catalog contains public standard applications only. Modernise this transaction using FioriX Generation Studio with ABAP RAP and SAP Fiori Elements.`,
+    description: `Customer proprietary transaction ${clean}. Standard SAP Fiori catalog contains public standard applications only. Modernise this transaction using Fiorify Generation Studio with ABAP RAP and SAP Fiori Elements.`,
     appType: 'Custom Transaction',
     uiTechnology: 'SAP Fiori elements (Custom RAP)',
     businessProcess: 'Custom Modernization',

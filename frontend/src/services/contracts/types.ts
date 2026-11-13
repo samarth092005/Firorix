@@ -1,5 +1,5 @@
 /**
- * FioriX Enterprise API & Service Contracts
+ * Fiorify Enterprise API & Service Contracts
  * Prepared for SAP BTP CAP OData V4 integration.
  * In Demo Mode, served by isolated DemoDataProvider.
  */
@@ -134,7 +134,7 @@ export interface HealthIndicatorItem {
 }
 
 export interface LandscapeHealthIndicators {
-  backendHealth: HealthIndicatorItem;        // 1. FioriX backend health
+  backendHealth: HealthIndicatorItem;        // 1. Fiorify backend health
   configuredSystem: HealthIndicatorItem;     // 2. Configured SAP system status
   sapHostReachability: HealthIndicatorItem;  // 3. SAP host reachability
   cloudConnector: HealthIndicatorItem;       // 4. Cloud Connector availability (where measurable)
@@ -286,6 +286,7 @@ export interface TransactionDiscoveryResponse {
 
 export interface AssessmentCreationRequest {
   tcode: string;
+  description?: string;
   systemId: string;
   client: string;
   targetRelease: string;

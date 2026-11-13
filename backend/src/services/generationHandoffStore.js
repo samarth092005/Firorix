@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Handoff Persistence Store (MW-03)
+ * Fiorify — Generation Handoff Persistence Store (MW-03)
  *
  * Implements server-side authoritative persistence for Generation Studio handoffs.
  * Ensures project context survives page refreshes, enforces Clean Core standard-first guardrails,
@@ -11,6 +11,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { defaultAssessmentStore } from './assessmentStore.js';
+import { STANDARD_TRANSACTION_CATALOG } from './standardTransactionKnowledge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,12 +115,9 @@ export class GenerationHandoffStore {
     );
 
     const isArchitectApproved = Boolean(
-      payload.architectApproved ||
-      payload.leadArchitectApproval?.approved ||
-      payload.approvalStatus === 'APPROVED' ||
-      userContext?.role === 'ENTERPRISE_ARCHITECT' ||
-      userContext?.role === 'APPROVER' ||
-      userContext?.role === 'ADMIN'
+      payload.architectApproved === true ||
+      payload.leadArchitectApproval?.approved === true ||
+      payload.approvalStatus === 'APPROVED'
     );
 
     const justification = String(
@@ -163,7 +161,13 @@ export class GenerationHandoffStore {
         handoffId,
         sourceAssessmentId: assessment.id,
         tcode: assessment.tcode,
-        transactionDescription: payload.transactionDescription || assessment.description || `Transaction ${assessment.tcode}`,
+        transactionDescription: (
+          (payload.transactionDescription && !payload.transactionDescription.startsWith('Assessment for '))
+            ? payload.transactionDescription
+            : (assessment.description && !assessment.description.startsWith('Assessment for '))
+            ? assessment.description
+            : STANDARD_TRANSACTION_CATALOG[assessment.tcode]?.description || `Transaction ${assessment.tcode}`
+        ),
         targetRelease: payload.targetRelease || assessment.targetRelease || 'SAP S/4HANA 2023 Private Edition',
         systemId: payload.systemId || assessment.systemId || 'S21',
         client: payload.client || assessment.client || '200',

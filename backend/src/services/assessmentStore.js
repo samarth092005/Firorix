@@ -1,5 +1,5 @@
 /**
- * FioriX — Hardened Assessment Persistence & Governance Store (PERSIST-01/02 + GOV-01)
+ * Fiorify — Hardened Assessment Persistence & Governance Store (PERSIST-01/02 + GOV-01)
  *
  * Implements:
  * - Canonical Assessment schema with server-authoritative fields
@@ -15,6 +15,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fitGapAssessmentEngine } from '../engine/fitGapAssessmentEngine.js';
 import { AssessmentRepository } from '../infrastructure/db/repositories/assessmentRepository.js';
+import { STANDARD_TRANSACTION_CATALOG } from './standardTransactionKnowledge.js';
 
 export const LIFECYCLE_STATES = Object.freeze({
   DRAFT: 'DRAFT',
@@ -317,7 +318,7 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
   const provenance = String(
     input.provenance ||
     assessmentObj.provenance ||
-    'FIORIX_FIT_GAP_ASSESSMENT_ENGINE'
+    'Fiorify_FIT_GAP_ASSESSMENT_ENGINE'
   );
 
   const actorName = userContext?.name || input.author || 'Lead SAP Architect';
@@ -409,8 +410,24 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
       lastUpdated: now
     },
 
-    // Additional metadata
-    description: input.description || reqObj.title || reqObj.statement || `Assessment for ${tcode}`,
+    // Additional metadata — determine canonical transaction description (never default to generic "Assessment for <TCode>")
+    description: (
+      (input.description && typeof input.description === 'string' && !input.description.trim().startsWith('Assessment for ') && input.description.trim() !== tcode)
+        ? input.description.trim()
+        : (input.discoveryMetadata?.description && typeof input.discoveryMetadata.description === 'string' && !input.discoveryMetadata.description.trim().startsWith('Assessment for ') && input.discoveryMetadata.description.trim() !== tcode)
+        ? input.discoveryMetadata.description.trim()
+        : (input.transactionDescription && typeof input.transactionDescription === 'string' && !input.transactionDescription.trim().startsWith('Assessment for ') && input.transactionDescription.trim() !== tcode)
+        ? input.transactionDescription.trim()
+        : (input.transactionText && typeof input.transactionText === 'string')
+        ? input.transactionText.trim()
+        : (input.tcodeDescription && typeof input.tcodeDescription === 'string')
+        ? input.tcodeDescription.trim()
+        : (STANDARD_TRANSACTION_CATALOG[tcode]?.description)
+        ? STANDARD_TRANSACTION_CATALOG[tcode].description
+        : (reqObj.title && !reqObj.title.startsWith('Assessment for '))
+        ? reqObj.title
+        : STANDARD_TRANSACTION_CATALOG[tcode]?.description || `Transaction ${tcode}`
+    ),
     subArea: input.subArea || '',
     programName: input.programName || input.discoveryMetadata?.programName || '',
     screenNumber: input.screenNumber || input.discoveryMetadata?.screenNumber || '',
@@ -453,7 +470,7 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
     candidate: Object.keys(candObj).length > 0 ? candObj : null,
     context: Object.keys(ctxObj).length > 0 ? ctxObj : null,
 
-    // Frontend wizard context
+    // Frontend wizard contextFiorify
     businessContext: input.businessContext || null,
     applicationRequirements: input.applicationRequirements || null,
     discoveryMetadata: input.discoveryMetadata || null,
@@ -694,18 +711,10 @@ export class AssessmentStore {
 
       if (newLifecycle === LIFECYCLE_STATES.APPROVED) {
         const isCreator = existing.createdBy && existing.createdBy === actorId;
-        const isAdmin = actorRole === 'ADMIN';
-        const isApprover = actorRole === 'APPROVER' || actorName.includes('Board') || actorName.includes('Approver');
         const isOverride = updates.isOverride === true;
 
-        if (isCreator && !isAdmin && !isApprover && !isOverride) {
+        if (isCreator && !isOverride) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
-          err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
-          throw err;
-        }
-
-        if (isCreator && isAdmin && !isOverride && !isApprover) {
-          const err = new Error('Separation of duties policy violation: Creator self-approval requires explicit administrative override flag.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
         }
@@ -770,18 +779,10 @@ export class AssessmentStore {
       // Separation of duties check when transitioning to APPROVED (GOV-01)
       if (newLifecycle === LIFECYCLE_STATES.APPROVED) {
         const isCreator = existing.createdBy && existing.createdBy === actorId;
-        const isAdmin = actorRole === 'ADMIN';
-        const isApprover = actorRole === 'APPROVER' || actorName.includes('Board') || actorName.includes('Approver');
         const isOverride = updates.isOverride === true;
 
-        if (isCreator && !isAdmin && !isApprover && !isOverride) {
+        if (isCreator && !isOverride) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
-          err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
-          throw err;
-        }
-
-        if (isCreator && isAdmin && !isOverride && !isApprover) {
-          const err = new Error('Separation of duties policy violation: Creator self-approval requires explicit administrative override flag.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
         }
@@ -1308,13 +1309,10 @@ export class AssessmentStore {
         );
 
         const isArchitectApproved = Boolean(
-          details.leadArchitectApproval ||
-          details.architectApproved ||
-          actionPayload.leadArchitectApproval ||
-          actionPayload.architectApproved ||
-          userContext?.role === 'ENTERPRISE_ARCHITECT' ||
-          userContext?.role === 'APPROVER' ||
-          userContext?.role === 'ADMIN'
+          details.leadArchitectApproval === true ||
+          details.architectApproved === true ||
+          actionPayload.leadArchitectApproval === true ||
+          actionPayload.architectApproved === true
         );
 
         const justification = String(

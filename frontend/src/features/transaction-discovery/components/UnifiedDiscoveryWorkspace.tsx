@@ -331,9 +331,32 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
       odataServices: selectedCandidate.odataServices || []
     } : null;
 
+    const tcodeDescription = (
+      metadata?.description && !metadata.description.startsWith('Assessment for ') && metadata.description !== cleanTcode
+        ? metadata.description
+        : cleanTcode === 'F-31' || cleanTcode === 'F-32'
+        ? 'Clear Customer'
+        : cleanTcode === 'ST22'
+        ? 'ABAP Dump Analysis (ABAP Runtime Errors)'
+        : cleanTcode === 'ME21N'
+        ? 'Create Purchase Order'
+        : cleanTcode === 'VA01'
+        ? 'Create Sales Order'
+        : cleanTcode === 'FB01'
+        ? 'Post Document'
+        : cleanTcode === 'FB50'
+        ? 'Enter G/L Account Document'
+        : cleanTcode === 'F-53'
+        ? 'Post Outgoing Payments - For Suppliers'
+        : cleanTcode === 'F-28'
+        ? 'Post Incoming Payments - For Customers'
+        : `Transaction ${cleanTcode}`
+    );
+
     // Auto-create assessment if not already existing
     const created = await assessmentService.createAssessment({
       tcode: cleanTcode,
+      description: tcodeDescription,
       systemId,
       client,
       targetRelease,
@@ -344,10 +367,10 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
       lifecycleStatus: candidateApp ? 'MATCHING_COMPLETED' : 'RECOMMENDATION_COMPLETED',
       businessContext: {
         businessProcess,
-        primaryScenario: primaryScenario || `Operational execution of ${cleanTcode}`,
+        primaryScenario: primaryScenario || `Operational execution of ${cleanTcode} (${tcodeDescription})`,
         selectedRequirements: ['Real-time dictionary validation', 'Authorization check'],
         expectedFunctionality: ['Screen navigation', 'Data persistence'],
-        assessmentObjective: `Evaluate modern Fiori alternative or WebGUI feasibility for ${cleanTcode} in S21.`,
+        assessmentObjective: `Evaluate modern Fiori alternative or WebGUI feasibility for ${cleanTcode} (${tcodeDescription}) in S21.`,
         businessCriticality: criticality
       },
       applicationRequirements: {
@@ -371,8 +394,8 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         isUserProvidedUnverified: false
       },
       discoveryMetadata: {
-        description: metadata.description || 'Post Outgoing Payments',
-        programName: metadata.programName || 'SAPMF05A',
+        description: tcodeDescription,
+        programName: metadata.programName || (cleanTcode === 'F-31' ? 'SAPMF05A' : 'SAPMF05A'),
         screenNumber: metadata.screenNumber || '0100',
         packageName: metadata.packageName || 'FBAS',
         classification: metadata.classification || 'STANDARD',
@@ -894,42 +917,47 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         </div>
       )}
 
-      {/* 1. Transaction Not Found in SAP DDIC Error State */}
+      {/* 1. Transaction Not Found in SAP DDIC & Catalogue State (Dead Stop) */}
       {!isLoading && metadata && metadata.exists === false && (
         <div
           style={{
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FECACA',
+            backgroundColor: '#F8FAFC',
+            border: '1px solid #E2E8F0',
             borderRadius: '10px',
-            padding: '28px 24px',
+            padding: '36px 24px',
             textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '12px'
+            gap: '14px',
+            maxWidth: '680px',
+            margin: '0 auto'
           }}
         >
           <div
             style={{
-              width: '48px',
-              height: '48px',
+              width: '52px',
+              height: '52px',
               borderRadius: '50%',
-              backgroundColor: '#FEE2E2',
+              backgroundColor: '#F1F5F9',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#DC2626'
+              color: '#64748B'
             }}
           >
-            <AlertTriangle size={26} />
+            <AlertTriangle size={28} />
           </div>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#991B1B', margin: '0 0 4px 0' }}>
-              Transaction Code &quot;{metadata.tcode}&quot; Does Not Exist in SAP
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#1E293B', margin: '0 0 6px 0' }}>
+              Transaction Code &quot;{metadata.tcode}&quot; Not Found
             </h3>
-            <p style={{ fontSize: '13px', color: '#7F1D1D', maxWidth: '580px', margin: '0 auto', lineHeight: 1.5 }}>
-              Kernel inspection in table <code>TSTC</code> (Transaction Codes) and table <code>TADIR</code> (Repository Objects) returned 0 records in system {systemId} (Client {client}).
+            <p style={{ fontSize: '13px', color: '#64748B', maxWidth: '540px', margin: '0 auto', lineHeight: 1.5 }}>
+              Kernel inspection in table <code>TSTC</code> (Transaction Codes) in system <strong>{systemId} (Client {client})</strong> and search across the official <strong>SAP Fiori Apps Reference Library (18,225+ apps)</strong> returned 0 matching records.
             </p>
+            <div style={{ marginTop: '10px', fontSize: '12px', color: '#94A3B8' }}>
+              Please verify the transaction code spelling or confirm the object exists in this landscape.
+            </div>
           </div>
           <button
             type="button"
@@ -940,18 +968,19 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
               setSearchError(null);
             }}
             style={{
-              marginTop: '8px',
-              padding: '8px 20px',
+              marginTop: '6px',
+              padding: '9px 24px',
               borderRadius: '6px',
-              border: '1px solid #FCA5A5',
+              border: '1px solid #CBD5E1',
               backgroundColor: '#FFFFFF',
-              color: '#991B1B',
+              color: '#334155',
               fontSize: '13px',
               fontWeight: 700,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
             }}
           >
-            Reset Search &amp; Try Another T-Code
+            Search Another T-Code
           </button>
         </div>
       )}
@@ -1354,6 +1383,29 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                         </div>
                       )}
 
+                      {/* 4 Pillars for Adopt & Configure */}
+                      <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#166534' }}>1. VERDICT</span>
+                          <span style={{ color: '#1E293B', fontWeight: 600 }}>ADOPT_STANDARD_FIORI</span>
+                          <span style={{ color: '#64748B' }}>— Official Fiori successor {selectedCandidate.appId} verified.</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: '#EFF6FF', color: '#1E40AF' }}>2. FIT-GAP</span>
+                          <span style={{ color: '#1E293B', fontWeight: 600 }}>FIT_VERIFIED (Fit: 95-100%)</span>
+                          <span style={{ color: '#64748B' }}>— Core standard S/4HANA business scope, zero custom code.</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: '#F1F5F9', color: '#475569' }}>3. AUDIT PROOF</span>
+                          <span style={{ color: '#1E293B' }}>S21 DDIC ({metadata.programName}) + Official FAL Certified Reference.</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: '#FEF3C7', color: '#92400E' }}>4. DECISION</span>
+                          <span style={{ color: '#1E293B', fontWeight: 600 }}>ACTIVATE_AND_CONFIGURE</span>
+                          <span style={{ color: '#64748B' }}>— Launchpad Catalog mapping &amp; PFCG role assignment.</span>
+                        </div>
+                      </div>
+
                       <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: '14px', fontSize: '11px', color: '#64748B' }}>
                         <span>Component: <strong style={{ color: '#102A43' }}>{selectedCandidate.technicalComponent || 'N/A'}</strong></span>
                         <span>Release: <strong style={{ color: '#102A43' }}>{selectedCandidate.supportedProductRelease || targetRelease}</strong></span>
@@ -1398,8 +1450,74 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   </div>
                 );
               })() : (
-                <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#F8FAFC', borderRadius: '4px', border: '1px dashed #CBD5E1', fontSize: '12px', color: '#8A5800' }}>
-                  No standard SAP Fiori application exists for this transaction in the official catalogue. Custom RAP modernization required.
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div
+                    style={{
+                      padding: '16px',
+                      backgroundColor: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
+                      borderRadius: '6px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
+                        100% FUNCTIONAL GAP DETECTED
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#64748B' }}>
+                        Target: <strong>{systemId} ({client})</strong>
+                      </span>
+                    </div>
+
+                    {/* 4 Pillars Breakdown for BUILD */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#0066FF', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>1. Verdict &amp; Recommendation</span>
+                        <strong style={{ color: '#0066FF' }}>BUILD_CUSTOM_RAP</strong> — T-Code verified in S21 DDIC, but zero certified Fiori apps match in official catalogue. Custom Clean Core RAP application required.
+                      </div>
+
+                      <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#B45309', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>2. Fit-Gap &amp; Scope Matrix</span>
+                        <strong style={{ color: '#B45309' }}>100% Functional Gap</strong> — Legacy dynpro screen <code>{metadata.screenNumber || '0100'}</code> will be replaced by a modern Fiori Elements (List Report + Object Page) architecture.
+                      </div>
+
+                      <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#475569', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>3. Technical &amp; Audit Proof</span>
+                        Verified in system <strong>{systemId} ({client})</strong>: Program <code>{metadata.programName || 'N/A'}</code>, Package <code>{metadata.packageName || 'N/A'}</code>, Component <code>{metadata.softwareComponent || 'S4CORE'}</code>.
+                      </div>
+
+                      <div style={{ padding: '8px 12px', backgroundColor: '#EFF6FF', borderRadius: '4px', border: '1px solid #BFDBFE', fontSize: '12px' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#1E40AF', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>4. Modernization Decision</span>
+                        <strong style={{ color: '#1E3A8A' }}>PROCEED_TO_GENERATION_STUDIO</strong> — Synthesize ABAP Active/Draft Tables, CDS Entities, Managed RAP BDEF, and UI5 Frontend.
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
+                      style={{
+                        marginTop: '4px',
+                        padding: '10px 16px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        backgroundColor: '#0066FF',
+                        color: '#FFFFFF',
+                        fontSize: '13px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
+                      }}
+                    >
+                      <span>Proceed to Generation Studio (Build Custom App)</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

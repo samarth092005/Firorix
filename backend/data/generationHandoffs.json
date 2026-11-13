@@ -15,7 +15,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T04:54:40.368Z",
       "justification": "Approved custom RAP application due to proprietary procurement flow."
@@ -46,7 +46,7 @@
     "createdAt": "2026-11-13T04:54:40.368Z",
     "updatedAt": "2026-11-13T04:54:40.368Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Admin"
   },
   {
     "handoffId": "HND-GEN-ME21N-68F17D",
@@ -64,7 +64,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T04:54:41.458Z",
       "justification": "Approved custom RAP application due to proprietary purchasing extensions."
@@ -95,13 +95,13 @@
     "createdAt": "2026-11-13T04:54:41.458Z",
     "updatedAt": "2026-11-13T04:54:41.458Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Admin"
   },
   {
     "handoffId": "HND-1794547666452-E9576D",
     "sourceAssessmentId": "ASM-1794547631363-ST22-9U6Y",
     "tcode": "ST22",
-    "transactionDescription": "Assessment for ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
     "targetRelease": "SAP S/4HANA 2023 Private Edition",
     "systemId": "S21-200",
     "client": "200",
@@ -113,7 +113,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T05:27:46.452Z",
       "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
@@ -142,13 +142,13 @@
     "createdAt": "2026-11-13T05:27:46.452Z",
     "updatedAt": "2026-11-13T05:27:46.452Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Admin"
   },
   {
     "handoffId": "HND-GEN-ST22-22FC56",
     "sourceAssessmentId": "ASM-1794547631363-ST22-9U6Y",
     "tcode": "ST22",
-    "transactionDescription": "Assessment for ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
     "targetRelease": "SAP S/4HANA 2023 Private Edition",
     "systemId": "S21",
     "client": "200",
@@ -160,7 +160,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T05:34:19.223Z",
       "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
@@ -191,13 +191,13 @@
     "createdAt": "2026-11-13T05:34:19.223Z",
     "updatedAt": "2026-11-13T05:34:19.223Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Admin"
   },
   {
     "handoffId": "HND-1794548577115-C02F87",
     "sourceAssessmentId": "ASM-1794547631363-ST22-9U6Y",
     "tcode": "ST22",
-    "transactionDescription": "Assessment for ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
     "targetRelease": "SAP S/4HANA 2023 Private Edition",
     "systemId": "S21-200",
     "client": "200",
@@ -209,7 +209,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T05:42:57.115Z",
       "justification": "Proprietary transaction ST22 with 0 standard Fiori successor coverage. Custom RAP List Report required."
@@ -238,7 +238,7 @@
     "createdAt": "2026-11-13T05:42:57.115Z",
     "updatedAt": "2026-11-13T05:42:57.115Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Admin"
   },
   {
     "handoffId": "HND-GEN-ME21N-FE1470",
@@ -256,7 +256,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T06:33:06.275Z",
       "justification": "Approved custom RAP application due to proprietary procurement flow."
@@ -287,7 +287,7 @@
     "createdAt": "2026-11-13T06:33:06.275Z",
     "updatedAt": "2026-11-13T06:33:06.275Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Admin"
   },
   {
     "handoffId": "HND-GEN-ME21N-84DDD9",
@@ -305,7 +305,7 @@
     "approvalStatus": "APPROVED",
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
+      "approver": "Admin",
       "approverId": "USR-ADMIN-01",
       "timestamp": "2026-11-13T06:33:07.208Z",
       "justification": "Approved custom RAP application due to proprietary purchasing extensions."
@@ -336,6 +336,686 @@
     "createdAt": "2026-11-13T06:33:07.208Z",
     "updatedAt": "2026-11-13T06:33:07.208Z",
     "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-C6E646",
+    "sourceAssessmentId": "ASM-BUILD-TEST-001",
+    "tcode": "ME21N",
+    "transactionDescription": "Create Purchase Order Modernization",
+    "targetRelease": "SAP S/4HANA 2023 On-Premise",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMM06E",
+    "packageName": "ME",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:05:46.634Z",
+      "justification": "Approved custom RAP application due to proprietary purchasing extensions."
+    },
+    "cleanCoreJustification": "Approved custom RAP application due to proprietary purchasing extensions.",
+    "businessRequirements": {
+      "process": "Sourcing and Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMM06E",
+      "screenNumber": "0100",
+      "packageName": "ME",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T07:05:46.634Z",
+    "updatedAt": "2026-11-13T07:05:46.634Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-FF3EC0",
+    "sourceAssessmentId": "ASM-BUILD-PO-2023",
+    "tcode": "ME21N",
+    "transactionDescription": "Custom RAP application required to modernize ME21N procurement flow.",
+    "targetRelease": "SAP S/4HANA 2023 On-Premise",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:16:07.385Z",
+      "justification": "Approved custom RAP application due to proprietary procurement flow."
+    },
+    "cleanCoreJustification": "Approved custom RAP application due to proprietary procurement flow.",
+    "businessRequirements": {
+      "process": "Sourcing and Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T07:16:07.385Z",
+    "updatedAt": "2026-11-13T07:16:07.385Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-DA5D21",
+    "sourceAssessmentId": "ASM-BUILD-PO-2023",
+    "tcode": "ME21N",
+    "transactionDescription": "Custom RAP application required to modernize ME21N procurement flow.",
+    "targetRelease": "SAP S/4HANA 2023 On-Premise",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:16:53.794Z",
+      "justification": "Approved custom RAP application due to proprietary procurement flow."
+    },
+    "cleanCoreJustification": "Approved custom RAP application due to proprietary procurement flow.",
+    "businessRequirements": {
+      "process": "Sourcing and Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T07:16:53.794Z",
+    "updatedAt": "2026-11-13T07:16:53.794Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794554216426-109990",
+    "sourceAssessmentId": "ASM-1794554210132-ST22-DCU9",
+    "tcode": "ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMS380",
+    "packageName": "SABP",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:16:56.426Z",
+      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Architect-approved custom RAP development under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "General Core Processing",
+      "scenario": "Core Operations",
+      "criticality": "HIGH",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMS380",
+      "screenNumber": "0100",
+      "packageName": "SABP",
+      "softwareComponent": "SAP_BASIS"
+    },
+    "createdAt": "2026-11-13T07:16:56.426Z",
+    "updatedAt": "2026-11-13T07:16:56.426Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ST22-6C6674",
+    "sourceAssessmentId": "ASM-1794554210132-ST22-DCU9",
+    "tcode": "ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMS380",
+    "packageName": "SABP",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:16:56.645Z",
+      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Architect-approved custom RAP development under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "General Core Processing",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMS380",
+      "screenNumber": "0100",
+      "packageName": "SABP",
+      "softwareComponent": "SAP_BASIS"
+    },
+    "createdAt": "2026-11-13T07:16:56.645Z",
+    "updatedAt": "2026-11-13T07:16:56.645Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ST22-322121",
+    "sourceAssessmentId": "ASM-1794554210132-ST22-DCU9",
+    "tcode": "ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMS380",
+    "packageName": "SABP",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:16:56.738Z",
+      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Architect-approved custom RAP development under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "General Core Processing",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMS380",
+      "screenNumber": "0100",
+      "packageName": "SABP",
+      "softwareComponent": "SAP_BASIS"
+    },
+    "createdAt": "2026-11-13T07:16:56.738Z",
+    "updatedAt": "2026-11-13T07:16:56.738Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794556206709-39140E",
+    "sourceAssessmentId": "ASM-1794554210132-ST22-DCU9",
+    "tcode": "ST22",
+    "transactionDescription": "ABAP Dump Analysis (ABAP Runtime Errors)",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMS380",
+    "packageName": "SABP",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:50:06.709Z",
+      "justification": "Proprietary transaction ST22 with 0 standard Fiori successor coverage. Custom RAP List Report required."
+    },
+    "cleanCoreJustification": "Proprietary transaction ST22 with 0 standard Fiori successor coverage. Custom RAP List Report required.",
+    "businessRequirements": {
+      "process": "General Core Processing",
+      "scenario": "Core Operations",
+      "criticality": "HIGH",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMS380",
+      "screenNumber": "0100",
+      "packageName": "SABP",
+      "softwareComponent": "SAP_BASIS"
+    },
+    "createdAt": "2026-11-13T07:50:06.709Z",
+    "updatedAt": "2026-11-13T07:50:06.709Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-F14682",
+    "sourceAssessmentId": "ASM-BUILD-TEST-001",
+    "tcode": "ME21N",
+    "transactionDescription": "Create Purchase Order Modernization",
+    "targetRelease": "SAP S/4HANA 2023 On-Premise",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMM06E",
+    "packageName": "ME",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T07:53:40.132Z",
+      "justification": "Approved custom RAP application due to proprietary purchasing extensions."
+    },
+    "cleanCoreJustification": "Approved custom RAP application due to proprietary purchasing extensions.",
+    "businessRequirements": {
+      "process": "Sourcing and Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMM06E",
+      "screenNumber": "0100",
+      "packageName": "ME",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T07:53:40.132Z",
+    "updatedAt": "2026-11-13T07:53:40.132Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-9073C8",
+    "sourceAssessmentId": "ASM-BUILD-PO-2023",
+    "tcode": "ME21N",
+    "transactionDescription": "Custom RAP application required to modernize ME21N procurement flow.",
+    "targetRelease": "SAP S/4HANA 2023 On-Premise",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T08:36:26.607Z",
+      "justification": "Approved custom RAP application due to proprietary procurement flow."
+    },
+    "cleanCoreJustification": "Approved custom RAP application due to proprietary procurement flow.",
+    "businessRequirements": {
+      "process": "Sourcing and Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T08:36:26.607Z",
+    "updatedAt": "2026-11-13T08:36:26.607Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794564693231-C9E7F4",
+    "sourceAssessmentId": "ASM-E2E-9406",
+    "tcode": "ME21N",
+    "transactionDescription": "Create Purchase Order",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPLMEGUI",
+    "packageName": "ME",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T10:11:33.231Z",
+      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Architect-approved custom RAP development under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sourcing & Procurement",
+      "scenario": "Core Operations",
+      "criticality": "HIGH",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPLMEGUI",
+      "screenNumber": "1000",
+      "packageName": "ME",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T10:11:33.231Z",
+    "updatedAt": "2026-11-13T10:11:33.231Z",
+    "createdBy": "USR-ADMIN-01",
     "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-FE8A70",
+    "sourceAssessmentId": "ASM-E2E-9406",
+    "tcode": "ME21N",
+    "transactionDescription": "Create Purchase Order",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPLMEGUI",
+    "packageName": "ME",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T10:11:33.614Z",
+      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Architect-approved custom RAP development under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sourcing & Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPLMEGUI",
+      "screenNumber": "1000",
+      "packageName": "ME",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T10:11:33.614Z",
+    "updatedAt": "2026-11-13T10:11:33.614Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-GEN-ME21N-2D8A56",
+    "sourceAssessmentId": "ASM-E2E-9406",
+    "tcode": "ME21N",
+    "transactionDescription": "Create Purchase Order",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPLMEGUI",
+    "packageName": "ME",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T10:11:33.653Z",
+      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Architect-approved custom RAP development under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sourcing & Procurement",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPLMEGUI",
+      "screenNumber": "1000",
+      "packageName": "ME",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T10:11:33.653Z",
+    "updatedAt": "2026-11-13T10:11:33.653Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-1794565869686-A49709",
+    "sourceAssessmentId": "ASM-1794565835901-F_31-DLCO",
+    "tcode": "F-31",
+    "transactionDescription": "Clear Customer",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T10:31:09.686Z",
+      "justification": "Custom RAP Managed Application approved by Lead Architect."
+    },
+    "cleanCoreJustification": "",
+    "businessRequirements": {
+      "process": "General Business Area",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T10:31:09.686Z",
+    "updatedAt": "2026-11-13T10:31:09.686Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-F-31-978B17",
+    "sourceAssessmentId": "ASM-1794565835901-F_31-DLCO",
+    "tcode": "F-31",
+    "transactionDescription": "Clear Customer",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T10:31:09.785Z",
+      "justification": "Custom RAP Managed Application approved by Lead Architect."
+    },
+    "cleanCoreJustification": "Custom RAP Managed Application approved by Lead Architect.",
+    "businessRequirements": {
+      "process": "General Business Area",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108"
+    },
+    "createdAt": "2026-11-13T10:31:09.785Z",
+    "updatedAt": "2026-11-13T10:31:09.785Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
   }
 ]
