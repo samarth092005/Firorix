@@ -1,0 +1,493 @@
+[
+  {
+    "id": "ASM-LIVE-F53",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-ASM-000001",
+    "tcode": "F-53",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "release": "SAP S/4HANA 2023 Private Edition",
+    "classification": "STANDARD",
+    "businessArea": "Financial Accounting",
+    "status": "PENDING_VERIFICATION",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+    "assessmentResult": "EXPLICIT_SUCCESSOR",
+    "fitGapScore": 88,
+    "scoreCoverage": 75,
+    "matchingFioriApp": {
+      "appId": "F0773",
+      "appName": "Manage Outgoing Payments",
+      "appType": "SAP Fiori elements (Transactional)",
+      "uiTechnology": "SAP Fiori elements",
+      "releaseCompatibility": "COMPATIBLE",
+      "sourceLabel": "Official SAP Fiori Apps Reference Library",
+      "businessRoles": [
+        "Accounts Payable Accountant (SAP_BR_AP_ACCOUNTANT)"
+      ],
+      "odataServices": [
+        "FAR_OUTGOING_PAYMENT_SRV (OData V2)",
+        "C_OUTGOINGPAYMENT_CDS (OData V4)"
+      ]
+    },
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-06T07:58:43.599Z",
+    "updatedAt": "2026-11-13T03:33:50.672Z",
+    "createdBy": "USR-BAEBA8D1",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-10T12:30:00.000Z"
+    },
+    "description": "Post Outgoing Payments",
+    "subArea": "Accounts Payable",
+    "programName": "SAPMF05A",
+    "screenNumber": "0100",
+    "packageName": "FBAS",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108 SP0003",
+    "rationale": "F0773 (Manage Outgoing Payments) is the verified official SAP Fiori successor for F-53. Recommendation recalculated to CONFIGURE because business requirements match standard capabilities, but S21 live Gateway service registration and PFCG role assignment require Basis enablement.",
+    "dimensionResults": null,
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": {
+      "outcome": "CONFIGURE",
+      "recommendedAction": "Deploy and configure standard SAP Fiori application F0773 (Manage Outgoing Payments). Complete Basis service activation and PFCG role assignment.",
+      "supportingEvidence": [
+        "F0773 is the official standard successor for F-53 in SAP Fiori Apps Reference Library.",
+        "Target release SAP S/4HANA 2023 satisfies minimum component baselines (S4CORE 108 SP0003, SAP_BASIS 758 SP0003).",
+        "Provides native Fiori Horizon UX and payment approval workflows."
+      ],
+      "knownLimitations": [
+        "BDC batch input recording not supported; transition to standard OData services required.",
+        "Dynpro custom user exits require migration to Key User Extensibility."
+      ],
+      "outstandingChecks": [
+        "Verify service registration for FAR_OUTGOING_PAYMENT_SRV in S21 /IWFND/MAINT_SERVICE.",
+        "Assign role SAP_BR_AP_ACCOUNTANT in PFCG to target users in client 200.",
+        "Activate ICF path /sap/opu/odata/sap/FAR_OUTGOING_PAYMENT_SRV in SICF."
+      ],
+      "requiredNextSteps": [
+        "1. Basis Team: Activate OData and ICF nodes in S21 client 200.",
+        "2. Security Team: Assign business catalogue in Fiori Launchpad Content Manager.",
+        "3. Functional Lead: Execute UAT testing for outgoing payments."
+      ]
+    },
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794124879014-6VCU",
+        "timestamp": "2026-11-06T07:58:43.599Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "F-53",
+          "fitGapScore": 88,
+          "assessmentResult": "EXPLICIT_SUCCESSOR"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "d39aec3993addfe79856bb74f2248b98408c85f3849fbcec2fe919a55c7d3bdf"
+      },
+      {
+        "eventId": "AUD-CORR-F53-01",
+        "timestamp": "2026-11-10T12:30:00.000Z",
+        "author": "FioriX Canonical Audit Engine",
+        "actorId": "SYS-AUDIT-ENGINE",
+        "actorRole": "SYSTEM_AUDITOR",
+        "previousState": "COMPLETED",
+        "newState": "PENDING_VERIFICATION",
+        "action": "CORRECTION",
+        "comment": "Auditable correction of F-53 assessment contradictions: (1) Re-verified DDIC metadata (SAPMF05A/FBAS); (2) Confirmed FAL match F0773; (3) Re-anchored release to S/4HANA 2023 Private Edition; (4) Reclassified OData services from ACTIVE to PENDING_BASIS_CHECK; (5) Recalculated verdict from unverified ADOPT to CONFIGURE pending S21 role and service enablement.",
+        "details": {
+          "resolvedContradictions": [
+            "Contradiction 1: Replaced unverified ADOPT verdict with CONFIGURE based on verified standard match F0773.",
+            "Contradiction 2: Confirmed catalogue match F0773 in FAL 2023 FPS02.",
+            "Contradiction 3: Aligned confidence (70/100) with evidence completeness score (71/100).",
+            "Contradiction 4: Explicitly specified target release as SAP S/4HANA 2023 Private Edition.",
+            "Contradiction 5: Reclassified OData service status from fabricated ACTIVE to PENDING_BASIS_CHECK.",
+            "Contradiction 6: Reclassified audit gate from COMPLETED to PENDING_VERIFICATION pending live S21 checks."
+          ]
+        },
+        "previousHash": "d39aec3993addfe79856bb74f2248b98408c85f3849fbcec2fe919a55c7d3bdf",
+        "integrityHash": "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-06T07:58:43.599Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 88,
+        "modifiedBy": "Lead SAP Architect"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [],
+    "leadArchitectApproval": null
+  },
+  {
+    "id": "ASM-1793964013891-FB50-HF72",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-ASM-000001",
+    "tcode": "FB50",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "General Business Area",
+    "status": "COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+    "assessmentResult": "PENDING_VERIFICATION",
+    "fitGapScore": 0,
+    "scoreCoverage": 50,
+    "matchingFioriApp": null,
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-06T11:20:13.891Z",
+    "updatedAt": "2026-11-13T03:33:50.672Z",
+    "createdBy": "USR-BAEBA8D1",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-08T08:01:19.015Z"
+    },
+    "description": "Assessment for FB50",
+    "subArea": "",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "FBAS",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "",
+    "dimensionResults": null,
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": null,
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794124879015-NPJI",
+        "timestamp": "2026-11-06T11:20:13.891Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "FB50",
+          "fitGapScore": 0,
+          "assessmentResult": "PENDING_VERIFICATION"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "fda9aa8515065a169729cf58ba6837cbc29c5b5958c6da5927865663c90c20c4"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-06T11:20:13.891Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 0,
+        "modifiedBy": "Lead SAP Architect"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [],
+    "leadArchitectApproval": null
+  },
+  {
+    "id": "ASM-E2E-9406",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-ASM-000066",
+    "tcode": "ME21N",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "Sourcing & Procurement",
+    "status": "COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+    "assessmentResult": "EXPLICIT_SUCCESSOR",
+    "fitGapScore": 92,
+    "scoreCoverage": 90,
+    "matchingFioriApp": {
+      "appId": "F0842A",
+      "appName": "Manage Purchase Orders",
+      "appType": "SAP Fiori elements",
+      "uiTechnology": "SAP Fiori elements",
+      "releaseCompatibility": "COMPATIBLE",
+      "sourceLabel": "Official SAP Fiori Apps Reference Library (MCP Assisted)",
+      "businessRoles": [
+        "SAP_BR_PURCHASER"
+      ],
+      "odataServices": [
+        "MM_PUR_PO_MAINT_V2_SRV"
+      ]
+    },
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-08T07:51:19.402Z",
+    "updatedAt": "2026-11-13T03:33:50.672Z",
+    "createdBy": "USR-BAEBA8D1",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-08T08:01:19.016Z"
+    },
+    "description": "Create Purchase Order",
+    "subArea": "",
+    "programName": "SAPLMEGUI",
+    "screenNumber": "1000",
+    "packageName": "ME",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "Verified standard S/4HANA procurement successor",
+    "dimensionResults": null,
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": {
+      "outcome": "ADOPT",
+      "recommendedAction": "Deploy standard Fiori app Manage Purchase Orders"
+    },
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794124879016-N724",
+        "timestamp": "2026-11-08T07:51:19.402Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "DRAFT",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "ME21N",
+          "fitGapScore": 0,
+          "assessmentResult": "EXPLICIT_SUCCESSOR"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "891bc5cb58360930daa3e55e418d0fffc1edbe2da939af3e35a4db40bb5a93de"
+      },
+      {
+        "eventId": "AUD-1794313675459-RECON",
+        "timestamp": "2026-11-10T12:27:55.459Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "DRAFT",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "EVALUATION_COMPLETED",
+        "comment": "Reconciled assessment state: Standard Fiori application F0842A (Manage Purchase Orders) matched with 92% fit score.",
+        "details": {
+          "tcode": "ME21N",
+          "matchingAppId": "F0842A",
+          "fitGapScore": 92
+        },
+        "previousHash": "891bc5cb58360930daa3e55e418d0fffc1edbe2da939af3e35a4db40bb5a93de",
+        "integrityHash": "e703e062602a827908dbc472b75f3d6cbe8483bb1994fab4d14e25d670eedb94"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-08T07:51:19.402Z",
+        "lifecycleStatus": "DRAFT",
+        "fitGapScore": 0,
+        "modifiedBy": "Lead SAP Architect"
+      },
+      {
+        "version": 2,
+        "savedAt": "2026-11-10T12:27:55.459Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 92,
+        "modifiedBy": "Lead SAP Architect"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [
+      "TSTC ME21N verified",
+      "Official FAL candidate matched"
+    ],
+    "leadArchitectApproval": null
+  },
+  {
+    "id": "TEST-1",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-ASM-344381",
+    "tcode": "VA01",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "General Business Area",
+    "status": "COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+    "assessmentResult": "PENDING_VERIFICATION",
+    "fitGapScore": 0,
+    "scoreCoverage": 50,
+    "matchingFioriApp": null,
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-11T07:49:04.382Z",
+    "updatedAt": "2026-11-13T03:33:50.673Z",
+    "createdBy": "USR-BAEBA8D1",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-11T07:49:04.382Z"
+    },
+    "description": "Assessment for VA01",
+    "subArea": "",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "FBAS",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "",
+    "dimensionResults": null,
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": null,
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794383344382-QT6E",
+        "timestamp": "2026-11-11T07:49:04.382Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "VA01",
+          "fitGapScore": 0,
+          "assessmentResult": "PENDING_VERIFICATION"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "c66831e865838d676be00be3e984cfe34d7df3633cf42ae37c5fe99899b24c52"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-11T07:49:04.382Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 0,
+        "modifiedBy": "Lead SAP Architect"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [],
+    "leadArchitectApproval": null
+  }
+]

@@ -82,25 +82,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 
         {/* Local-First Indicator Pill */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '4px 10px',
-              backgroundColor: '#F8FAFC',
-              border: '1px solid #CBD5E1',
-              borderRadius: '16px',
-              fontSize: '11px',
-              fontWeight: 700,
-              color: '#475569',
-              letterSpacing: '0.4px'
-            }}
-            title="Local-first development mode. All project metadata and artifacts are stored locally. No SAP deployments or remote activation."
-          >
-            <HardDrive size={13} color="#0284C7" />
-            <span>LOCAL-FIRST WORKSPACE • NO SAP DEPLOYMENT</span>
-          </div>
+ 
 
           <button
             type="button"

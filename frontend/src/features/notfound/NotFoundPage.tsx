@@ -12,7 +12,7 @@ export const NotFoundPage: React.FC = () => {
       </div>
       <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>404 — Page Not Found</h1>
       <p style={{ color: 'var(--fiori-text-secondary)', fontSize: '14px', marginBottom: '24px', lineHeight: 1.5 }}>
-        The requested navigation endpoint does not exist in the FioriX platform or the resource has been relocated.
+        The requested navigation endpoint does not exist in the Fiorify platform or the resource has been relocated.
       </p>
       <button
         type="button"

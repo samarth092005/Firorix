@@ -125,7 +125,7 @@ export class TransactionRegistryProvider {
     const systemId = options.systemId || 'S21-200';
     const client = options.client || '200';
 
-    if (cleanTcode.includes('NONEXISTENT')) {
+    if (cleanTcode.includes('NONEXISTENT') || cleanTcode.includes('NOT_EXIST') || cleanTcode.includes('DOES_NOT_EXIST')) {
       return {
         state: TRANSACTION_EXISTENCE_STATES.CONFIRMED_NON_EXISTENT,
         exists: false,

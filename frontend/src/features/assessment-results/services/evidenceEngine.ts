@@ -697,6 +697,18 @@ export class EvidenceEngine {
     const documentedServiceStatus = isLiveConnected ? 'REGISTERED_ACTIVE' : 'PENDING_BASIS_CHECK';
 
     // Specific Finance Pilot Discrepancy Scenarios
+    if (cleanTcode === 'FB03' || candidate?.uiTechnology === 'SAP GUI for HTML' || assessment.matchingFioriApp?.uiTechnology === 'SAP GUI for HTML') {
+      list.push({
+        serviceName: 'None (Classic WebGUI / ITS)',
+        version: 'N/A',
+        provenance: 'OFFICIAL_CATALOGUE',
+        registrationStatus: 'REGISTERED_ACTIVE',
+        icfPath: '/sap/bc/gui/sap/its/webgui',
+        notes: 'Classic SAP GUI transaction embedded in Fiori Launchpad via WebGUI runtime; does not require custom OData service.'
+      });
+      return list;
+    }
+
     if (cleanTcode === 'F-53') {
       list.push({
         serviceName: 'FAR_OUTGOING_PAYMENT_SRV',

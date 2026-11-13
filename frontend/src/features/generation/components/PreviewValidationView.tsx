@@ -13,18 +13,21 @@ import {
   Clock,
   Server,
   RefreshCw,
-  Eye
+  Eye,
+  ArrowRight
 } from 'lucide-react';
-import { GenerationProject, PreviewSessionInfo, PreviewRequestLog } from '../types';
+import { GenerationProject, PreviewSessionInfo, PreviewRequestLog, StudioInternalView } from '../types';
 import { defaultFrontendGenerationProjectService } from '../services/generationProjectService';
 
 interface PreviewValidationViewProps {
   project: GenerationProject;
   onProjectUpdated?: (updatedProject: GenerationProject) => void;
+  onNavigateView?: (view: StudioInternalView) => void;
 }
 
 export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
-  project
+  project,
+  onNavigateView
 }) => {
   const [session, setSession] = useState<PreviewSessionInfo | null>(null);
   const [requests, setRequests] = useState<PreviewRequestLog[]>([]);
@@ -238,6 +241,30 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
               style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', backgroundColor: '#0066FF' }}
             >
               <Play size={14} /> Launch Local Preview
+            </button>
+          )}
+
+          {onNavigateView && (
+            <button
+              type="button"
+              onClick={() => onNavigateView('review-export')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                backgroundColor: '#10B981',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#FFFFFF',
+                cursor: 'pointer'
+              }}
+              title="Proceed to export packaging and governance certificate"
+            >
+              <span>Next: Review &amp; Export</span>
+              <ArrowRight size={14} />
             </button>
           )}
         </div>

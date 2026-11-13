@@ -63,8 +63,8 @@ export class GenerationProjectService {
       assessment.approvalStatus === 'APPROVED'
     );
 
-    // If not marked on assessment directly, check if a valid approved handoff exists for this assessment
-    if (!isApproved && this.handoffStore && typeof this.handoffStore.listHandoffs === 'function') {
+    // If not marked on assessment directly and not explicitly rejected/unapproved, check if a valid approved handoff exists for this assessment
+    if (!isApproved && assessment.leadArchitectApproval?.approved !== false && this.handoffStore && typeof this.handoffStore.listHandoffs === 'function') {
       try {
         const handoffs = await this.handoffStore.listHandoffs({ assessmentId: assessment.id });
         const approvedHandoff = handoffs.find((h) => h.approvalStatus === 'APPROVED' || h.leadArchitectApproval?.approved === true);
@@ -181,9 +181,9 @@ export class GenerationProjectService {
         title: `Modernize ${sourceTCode} (${assessment.description || 'Core Business Transaction'})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'ASSESSMENT_IMPORT',
-        source: 'ASSESSMENT_IMPORT',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
+        source: 'DISCOVERY_ASSESSMENT',
         description: `Replace legacy SAP GUI transaction ${sourceTCode} with modern SAP Fiori Elements List Report and Object Page application.`,
         acceptanceCriteria: [
           `User can search and filter ${sourceTCode} records responsively.`,
@@ -198,9 +198,9 @@ export class GenerationProjectService {
         title: 'Clean Core RAP Managed Architecture',
         category: 'TECHNICAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'ASSESSMENT_IMPORT',
-        source: 'ASSESSMENT_IMPORT',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
+        source: 'DISCOVERY_ASSESSMENT',
         description: 'Implement ABAP RESTful Application Programming Model (RAP) Managed Scenario under Clean Core Tier 2 Cloud developer contract.',
         acceptanceCriteria: [
           'Root CDS view entity with standard audit fields (CreatedBy, CreatedAt, LastChangedAt).',
@@ -220,9 +220,9 @@ export class GenerationProjectService {
           title: `Custom Requirement: ${gapTitle.slice(0, 60)}`,
           category: 'BUSINESS',
           priority: 'SHOULD_HAVE',
-          status: 'CONFIRMED',
-          sourceType: 'ASSESSMENT_IMPORT',
-          source: 'ASSESSMENT_IMPORT',
+          status: 'DRAFT',
+          sourceType: 'FIT_GAP_FINDING',
+          source: 'FIT_GAP_FINDING',
           description: gapTitle,
           acceptanceCriteria: [
             `Verify custom business rule for "${gapTitle.slice(0, 40)}" in RAP validation/action.`

@@ -207,6 +207,29 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
             <RefreshCw size={14} className={isGenerating ? 'animate-spin' : ''} />
             {isGenerating ? 'Synthesizing...' : 'Generate Fiori Application'}
           </button>
+          {artifacts.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onNavigateView('preview-validation')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                backgroundColor: '#10B981',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#FFFFFF',
+                cursor: 'pointer'
+              }}
+              title="Proceed to local mock server and preview"
+            >
+              <span>Next: Preview &amp; Validation</span>
+              <ArrowRight size={14} />
+            </button>
+          )}
         </div>
       </div>
 

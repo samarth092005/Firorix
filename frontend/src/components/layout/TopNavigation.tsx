@@ -20,8 +20,11 @@ import {
   Trash2,
   Inbox,
   FileText,
-  Zap
+  Zap,
+  RotateCcw
 } from 'lucide-react';
+import { useApp } from '../../app/providers';
+import { ConfirmDialog } from '../dialogs/ConfirmDialog';
 import { authService } from '../../services/authService';
 import { notificationService, AppNotification } from '../../services/notificationService';
 import { SystemStatusIndicator } from '../common/SystemStatusIndicator';
@@ -42,6 +45,19 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notifFilter, setNotifFilter] = useState<'ALL' | 'UNREAD'>('ALL');
+  const { resetDemoData } = useApp();
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleConfirmReset = async () => {
+    setIsResetting(true);
+    try {
+      await resetDemoData();
+    } finally {
+      setIsResetting(false);
+      setIsResetConfirmOpen(false);
+    }
+  };
 
   // Subscribe to live notifications & initialize store
   useEffect(() => {
@@ -164,7 +180,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
             <span style={{ fontWeight: 700, fontSize: '17px', letterSpacing: '-0.3px', color: '#0F172A' }}>
-              Fiori<span style={{ color: 'var(--fiori-primary, #0066FF)' }}>X</span>
+              Fiori<span style={{ color: 'var(--fiori-primary, #0066FF)' }}>fy</span>
             </span>
           </div>
         </div>
@@ -186,7 +202,39 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       </div>
 
       {/* Right: Actions, Notifications & User Persona */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        {/* Reset Demo Quick Action Button */}
+        <button
+          type="button"
+          onClick={() => setIsResetConfirmOpen(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 10px',
+            backgroundColor: '#FEF2F2',
+            border: '1px solid #FECACA',
+            borderRadius: 'var(--radius-sm, 6px)',
+            color: '#B91C1C',
+            fontSize: '12px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#FEE2E2';
+            e.currentTarget.style.borderColor = '#FCA5A5';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#FEF2F2';
+            e.currentTarget.style.borderColor = '#FECACA';
+          }}
+          title="Reset demo projects, assessments, and local cache to pristine baseline"
+        >
+          <RotateCcw size={13} color="#DC2626" />
+          <span>Reset Demo</span>
+        </button>
+
         {/* Notifications Popover */}
         <div ref={notifRef} style={{ position: 'relative' }}>
           <button
@@ -607,7 +655,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   {authService.getUser()?.name || 'SAP Lead Consultant'}
                 </div>
                 <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #475569)', marginTop: '2px' }}>
-                  {authService.getUser()?.email || 'consultant@fiorix.corp'}
+                  {authService.getUser()?.email || 'consultant@fiorify.corp'}
                 </div>
               </div>
 
@@ -744,6 +792,32 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   Governance &amp; Approvals
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setIsResetConfirmOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 14px',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '12px',
+                    color: '#B91C1C',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FEF2F2')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                >
+                  <RotateCcw size={14} color="#DC2626" />
+                  Reset Demo Environment
+                </button>
+
                 <div style={{ height: '1px', backgroundColor: 'var(--fiori-border, #E2E8F0)', margin: '4px 0' }} />
 
                 <button
@@ -777,6 +851,16 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isResetConfirmOpen}
+        onClose={() => setIsResetConfirmOpen(false)}
+        onConfirm={handleConfirmReset}
+        title="Reset Fiorify Demo Environment"
+        message="This will clear all generated Studio projects, drafts, assessment handoffs, and browser caches, restoring Fiorify to a clean Clean Core baseline. Are you sure you want to proceed?"
+        confirmLabel={isResetting ? "Resetting Environment..." : "Reset Everything"}
+        isDestructive={true}
+      />
     </header>
   );
 };

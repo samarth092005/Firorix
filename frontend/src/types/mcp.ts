@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Fiori MCP Subsystem Types (MCP-01 + MCP-02)
+ * Fiorify — SAP Fiori MCP Subsystem Types (MCP-01 + MCP-02)
  */
 
 export type McpConnectionState =

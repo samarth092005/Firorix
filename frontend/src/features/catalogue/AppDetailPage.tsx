@@ -44,7 +44,7 @@ export const AppDetailPage: React.FC = () => {
     } catch (err: any) {
       if (err instanceof ApiError && (err.isNetworkError || err.statusCode === 0)) {
         setIsOffline(true);
-        setError('Cannot reach FioriX backend service on port 4004.');
+        setError('Cannot reach Fiorify backend service on port 4004.');
       } else if (err instanceof ApiError && err.statusCode === 404) {
         setApp(null);
         setError(`Application "${id}" not found in canonical catalogue.`);
@@ -151,7 +151,7 @@ export const AppDetailPage: React.FC = () => {
             Backend Catalogue Service Offline
           </h2>
           <p style={{ fontSize: '13px', color: '#555', marginBottom: '16px' }}>
-            Could not communicate with the FioriX backend on port 4004 to retrieve application &ldquo;{id}&rdquo;.
+            Could not communicate with the Fiorify backend on port 4004 to retrieve application &ldquo;{id}&rdquo;.
           </p>
           <button type="button" className="fiori-btn fiori-btn-primary" onClick={loadApp}>
             <RefreshCw size={14} /> Retry Connection

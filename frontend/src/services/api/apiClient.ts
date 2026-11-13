@@ -23,7 +23,7 @@ import type {
   TCodeSearchRequest,
   TCodeSearchResponse,
   SapSystemRecord
-} from '../../features/transaction-checker/types';
+} from '../contracts/types';
 
 import type {
   McpStatusResponse,
@@ -409,6 +409,13 @@ export interface UnifiedDiscoveryMatchResult {
   bestMatch: FioriCandidate | null;
 }
 
+export function sanitizeClientErrorMessage(msg: string): string {
+  if (!msg || typeof msg !== 'string') return 'An unexpected error occurred.';
+  return msg
+    .replace(/[a-zA-Z]:\\[^\s:;,]+/g, '[internal path]')
+    .replace(/\/(?:[a-zA-Z0-9_\-.]+\/)+[a-zA-Z0-9_\-.]+/g, '[internal path]');
+}
+
 export class ApiError extends Error {
   public readonly statusCode: number;
   public readonly statusText: string;
@@ -456,9 +463,10 @@ export class ApiClient {
         ? import.meta.env.VITE_API_BASE_URL
         : '/api/v1';
 
+    const isTestEnv = typeof window === 'undefined' || (typeof (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process !== 'undefined' && (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV === 'test');
     this.config = {
       baseUrl: envBaseUrl,
-      timeoutMs: 15000,
+      timeoutMs: isTestEnv ? 3000 : 15000,
       ...config
     };
   }
@@ -643,7 +651,7 @@ export class ApiClient {
         }
 
         throw new ApiError({
-          message: errorMessage,
+          message: sanitizeClientErrorMessage(errorMessage),
           statusCode: response.status,
           statusText: response.statusText,
           correlationId: responseCorrelationId,

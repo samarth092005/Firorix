@@ -1,5 +1,5 @@
 /**
- * FioriX Enterprise Notification Service
+ * Fiorify Enterprise Notification Service
  * Manages reactive, real-time application notifications with persistence,
  * real backend event synchronization, and instant UI subscribers.
  */
@@ -21,7 +21,7 @@ export interface AppNotification {
 
 type NotificationListener = (notifications: AppNotification[]) => void;
 
-const STORAGE_KEY = 'fiorix_notifications_store_v1';
+const STORAGE_KEY = 'fiorify_notifications_store_v1';
 
 class NotificationService {
   private notifications: AppNotification[] = [];
@@ -47,7 +47,7 @@ class NotificationService {
 
   private loadFromStorage(): void {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('fiorix_notifications_store_v1');
       if (raw) {
         this.notifications = JSON.parse(raw);
       }

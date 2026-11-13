@@ -490,7 +490,7 @@ export const SystemConfigurationPage: React.FC = () => {
                   <WifiOff size={15} color="#DC2626" />
                   <span>Backend Offline</span>
                 </div>
-                <div>{catalogState.errorMessage || 'FioriX backend HTTP service is unreachable.'}</div>
+                <div>{catalogState.errorMessage || 'Fiorify backend HTTP service is unreachable.'}</div>
               </div>
             )}
 

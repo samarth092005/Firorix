@@ -322,6 +322,13 @@ export class DataModelService {
 
     const newEntity = createEntityRecord(entityPayload);
 
+    // If defining a new ROOT entity, replace any placeholder starter root entity
+    if (newEntity.entityType === ENTITY_TYPES.ROOT || newEntity.isRoot) {
+      if (entities.length === 1 && entities[0].id?.endsWith('-ROOT')) {
+        entities.splice(0, 1);
+      }
+    }
+
     // If no fields provided and entity is ROOT, provide standard key and admin fields
     if (newEntity.fields.length === 0) {
       if (newEntity.entityType === ENTITY_TYPES.ROOT) {

@@ -42,7 +42,7 @@ export const AppShell: React.FC = () => {
         />
 
         <main
-          id="fiorix-main-content"
+          id="fiorify-main-content"
           style={{
             flex: 1,
             overflowY: 'auto',
@@ -53,7 +53,34 @@ export const AppShell: React.FC = () => {
           }}
         >
           <div style={{ flex: 1, padding: '24px 32px', maxWidth: '1600px', width: '100%', margin: '0 auto' }}>
-            <Outlet />
+            <React.Suspense
+              fallback={
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '360px',
+                    gap: '12px'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      border: '3px solid #0070F2',
+                      borderTopColor: 'transparent',
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }}
+                  />
+                  <span style={{ fontSize: '14px', fontWeight: 500, color: '#64748B' }}>Loading view...</span>
+                </div>
+              }
+            >
+              <Outlet />
+            </React.Suspense>
           </div>
         </main>
       </div>

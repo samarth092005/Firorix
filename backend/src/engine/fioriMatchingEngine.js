@@ -188,12 +188,14 @@ export class FioriMatchingEngine {
       cand.rank = idx + 1;
     });
 
-    // Filter out candidates that have no verified relationship to the transaction code
+    // Filter out candidates that have no verified or functional relationship to the transaction code
     const verifiedCandidates = evaluatedCandidates.filter((c) =>
       c.tcodeRelationshipType === 'OFFICIAL_SUCCESSOR' ||
       c.tcodeRelationshipType === 'DIRECT_EQUIVALENT' ||
       c.matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_MATCH ||
-      c.matchClassification === MATCH_CLASSIFICATIONS.STRONG_CANDIDATE
+      c.matchClassification === MATCH_CLASSIFICATIONS.STRONG_CANDIDATE ||
+      c.matchClassification === MATCH_CLASSIFICATIONS.PARTIAL_FIT ||
+      c.matchClassification === MATCH_CLASSIFICATIONS.ALTERNATIVE_APPROACH
     );
 
     const hasVerifiedApp = verifiedCandidates.length > 0;

@@ -204,6 +204,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
         <PreviewValidationView
           project={project}
           onProjectUpdated={onProjectUpdated}
+          onNavigateView={onNavigateView}
         />
       </div>
     );

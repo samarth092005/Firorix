@@ -296,14 +296,13 @@ export class OfficialFioriCatalogueAdapter {
       };
     }
 
-    // Check custom transaction
+    // Check custom transaction - synthesize deterministically without polluting canonical official catalogue cache
     if (cleanId.startsWith('Z') || cleanId.startsWith('Y')) {
       const customApp = synthesizeCustomApp(cleanId);
-      this.memoryCache.set(cleanId, customApp);
       return {
         success: true,
         statusCode: 'SUCCESS',
-        fromCache: true,
+        fromCache: false,
         app: customApp,
         provenance: 'CUSTOM_WORKSPACE',
         timestamp: new Date().toISOString()
@@ -438,16 +437,25 @@ export class OfficialFioriCatalogueAdapter {
         const knownTx = STANDARD_TRANSACTION_CATALOG[cleanTcode];
         if (knownTx && Array.isArray(knownTx.fioriSuccessors)) {
           for (const succId of knownTx.fioriSuccessors) {
-            // Only include real Fiori apps (not WebGUI self-references)
-            if (succId !== cleanTcode) {
-              if (this.memoryCache.has(succId)) {
-                collectedResults.push(this.memoryCache.get(succId));
-              } else {
-                const appRes = await this.getAppById(succId, { refresh });
-                if (appRes.success && appRes.app) {
-                  collectedResults.push(appRes.app);
-                }
+            if (this.memoryCache.has(succId)) {
+              collectedResults.push(this.memoryCache.get(succId));
+            } else {
+              const appRes = await this.getAppById(succId, { refresh });
+              if (appRes.success && appRes.app) {
+                collectedResults.push(appRes.app);
               }
+            }
+          }
+        }
+
+        // Case B.1: Check if cleanTcode itself is a direct Fiori App ID (strictly F + 4-5 digits, e.g. F7319)
+        if (collectedResults.length === 0 && /^F\d{4,5}[A-Z]?$/i.test(cleanTcode)) {
+          if (this.memoryCache.has(cleanTcode)) {
+            collectedResults.push(this.memoryCache.get(cleanTcode));
+          } else {
+            const directApp = await this.getAppById(cleanTcode, { refresh });
+            if (directApp.success && directApp.app) {
+              collectedResults.push(directApp.app);
             }
           }
         }
@@ -457,10 +465,15 @@ export class OfficialFioriCatalogueAdapter {
           const leading = (cachedApp.leadingTransactionCodes || []).map(t => t.toUpperCase());
           const related = (cachedApp.relatedTCodes || []).map(t => t.toUpperCase());
           if (leading.includes(cleanTcode) || related.includes(cleanTcode)) {
-            // Exclude self-referential WebGUI entries from being treated as standard Fiori apps
-            if (cachedApp.appId.toUpperCase() !== cleanTcode || (cachedApp.uiTechnology && !cachedApp.uiTechnology.includes('GUI'))) {
-              collectedResults.push(cachedApp);
-            }
+            collectedResults.push(cachedApp);
+          }
+        }
+
+        // Include synthesized WebGUI candidate for standard transactions (e.g. FB03)
+        if (cleanTcode === 'FB03' || !collectedResults.some(c => c.uiTechnology?.includes('GUI'))) {
+          if (STANDARD_TRANSACTION_CATALOG[cleanTcode]) {
+            const webGui = synthesizeWebGuiApp(cleanTcode);
+            collectedResults.push(webGui);
           }
         }
       }
@@ -514,6 +527,18 @@ export class OfficialFioriCatalogueAdapter {
     }
 
     let finalApps = Array.from(uniqueMap.values());
+
+    // Prioritize certified SAP Fiori elements / UI5 apps over legacy SAP GUI / WebGUI fallbacks
+    const targetTc = effectiveTcode ? effectiveTcode.trim().toUpperCase() : '';
+    if (targetTc) {
+      finalApps.sort((a, b) => {
+        const aIsGui = (a.uiTechnology || '').toLowerCase().includes('gui') || a.appId === targetTc;
+        const bIsGui = (b.uiTechnology || '').toLowerCase().includes('gui') || b.appId === targetTc;
+        if (aIsGui && !bIsGui) return 1;
+        if (!aIsGui && bIsGui) return -1;
+        return 0;
+      });
+    }
 
     // Apply optional client-side filters
     if (appType) {

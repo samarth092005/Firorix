@@ -18,6 +18,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { GenerationProject, ProjectLifecycleStatus, ProjectOrigin } from '../types';
+import { useApp } from '../../../app/providers';
+import { ConfirmDialog } from '../../../components/dialogs/ConfirmDialog';
 
 interface ProjectsDashboardProps {
   projects: GenerationProject[];
@@ -48,6 +50,8 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [originFilter, setOriginFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'updatedAt' | 'projectName'>('updatedAt');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const { resetDemoData } = useApp();
 
   // Filter & Sort Projects
   const filteredProjects = useMemo(() => {
@@ -88,38 +92,91 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
   const getPhaseProgress = (project: GenerationProject) => {
     // 8 canonical phases:
     // 1. Workspace (always 1 if project exists)
-    // 2. Requirements (if items > 0)
-    // 3. Data Model (if entities > 0)
-    // 4. Architecture (if confirmed)
-    // 5. ABAP (if ABAP artifacts exist)
-    // 6. UI (if UI artifacts exist)
-    // 7. Validation (if report exists)
-    // 8. Export (if EXPORTED)
-    let count = 1; // Phase 1 complete
-    if (project.requirementsSpec && project.requirementsSpec.items && project.requirementsSpec.items.length > 0) {
-      if (project.lifecycleStatus === 'REQUIREMENTS_CONFIRMED' || project.requirementsSpec.status === 'CONFIRMED' || project.requirementsSpec.summary?.isGateSatisfied) {
+    // 2. Requirements (if confirmed items exist)
+    // 3. Data Model (if entities defined)
+    // 4. Architecture (if RAP profile confirmed)
+    // 5. ABAP (if ABAP/RAP artifacts exist)
+    // 6. UI (if Fiori UI5 artifacts exist)
+    // 7. Preview & Validation (if preview active or validation report exists)
+    // 8. Export (if exported or exportHistory exists)
+
+    const rawRegistry = project.artifactRegistry?.artifacts;
+    const artifacts: any[] = rawRegistry
+      ? (Array.isArray(rawRegistry) ? rawRegistry : Object.values(rawRegistry))
+      : [];
+
+    const hasAbap = artifacts.some((a) =>
+      a.language === 'ABAP' ||
+      a.artifactType?.startsWith('RAP_') ||
+      a.artifactType?.startsWith('CDS_') ||
+      a.artifactType === 'DDL_SOURCE' ||
+      a.filePath?.startsWith('src/')
+    );
+
+    const hasUi = artifacts.some((a) =>
+      a.filePath?.startsWith('webapp/') ||
+      a.artifactType?.startsWith('FIORI_') ||
+      a.filePath?.includes('ui5.yaml')
+    );
+
+    let count = 1; // Phase 1: Workspace ready
+
+    // Phase 2: Requirements
+    const reqItems = project.requirementsSpec?.items || [];
+    if (reqItems.length > 0) {
+      const hasConfirmed = reqItems.some((r) => r.status === 'CONFIRMED');
+      if (hasConfirmed || project.requirementsSpec?.status === 'CONFIRMED' || project.lifecycleStatus === 'REQUIREMENTS_CONFIRMED' || project.lifecycleStatus === 'GENERATED' || project.lifecycleStatus === 'VALIDATION_COMPLETED' || project.lifecycleStatus === 'EXPORTED') {
         count++;
       } else {
         count += 0.5;
       }
     }
-    if (project.dataModelSpec && ((project.dataModelSpec.entities && project.dataModelSpec.entities.length > 0) || project.dataModelSpec.rootEntity)) {
-      if (project.lifecycleStatus === 'DATA_MODEL_VALIDATED' || project.dataModelSpec.validationReport?.status === 'VALID' || project.dataModelSpec.validationReport?.status === 'VALID_WITH_WARNINGS') {
+
+    // Phase 3: Data Model
+    const entities = project.dataModelSpec?.entities || [];
+    if (entities.length > 0 || project.dataModelSpec?.rootEntity) {
+      if (hasAbap || project.lifecycleStatus === 'GENERATED' || project.lifecycleStatus === 'VALIDATION_COMPLETED' || project.lifecycleStatus === 'EXPORTED' || project.dataModelSpec?.status === 'VALIDATED') {
         count++;
       } else {
         count += 0.5;
       }
     }
-    if (project.architectureSpec && project.architectureSpec.status === 'CONFIRMED') count++;
-    if (project.artifactRegistry && Object.values(project.artifactRegistry).some((a: any) => a.layer === 'ABAP')) count++;
-    if (project.artifactRegistry && Object.values(project.artifactRegistry).some((a: any) => a.layer === 'UI5')) count++;
-    if (project.validationReport && (project.validationReport as any).completedAt) count++;
-    if (project.lifecycleStatus === 'EXPORTED') count++;
+
+    // Phase 4: Architecture
+    if (project.architectureSpec?.selectedProfile || project.architectureSpec?.status === 'CONFIRMED' || hasAbap) {
+      count++;
+    }
+
+    // Phase 5: ABAP Generation
+    if (hasAbap) {
+      count++;
+    }
+
+    // Phase 6: Fiori UI Generation
+    if (hasUi) {
+      count++;
+    }
+
+    // Phase 7: Preview & Validation
+    const hasPreviewOrValidation = (
+      (project.validationReport as any)?.status ||
+      ((project as any).previewSession as any)?.status === 'RUNNING' ||
+      (hasAbap && hasUi)
+    );
+    if (hasPreviewOrValidation) {
+      count++;
+    }
+
+    // Phase 8: Review & Export
+    const isExported = project.lifecycleStatus === 'EXPORTED' || Boolean((project as any).exportHistory && (project as any).exportHistory.length > 0);
+    if (isExported) {
+      count++;
+    }
 
     return {
-      completed: Math.floor(count),
+      completed: Math.min(8, Math.floor(count)),
       total: 8,
-      percentage: Math.min(100, Math.round((count / 8) * 100))
+      percentage: Math.min(100, Math.round((Math.min(8, Math.floor(count)) / 8) * 100))
     };
   };
 
@@ -198,6 +255,17 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
             title="Refresh projects list"
           >
             <RefreshCw size={14} className={isLoading ? 'spin' : ''} />
+          </button>
+
+          <button
+            type="button"
+            className="fiori-btn fiori-btn-subtle"
+            style={{ height: '36px', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '6px', color: '#B91C1C' }}
+            onClick={() => setIsResetDialogOpen(true)}
+            title="Reset demo projects and clear clutter"
+          >
+            <RotateCcw size={14} color="#DC2626" />
+            <span style={{ fontSize: '12px', fontWeight: 600 }}>Reset Demo</span>
           </button>
         </div>
 
@@ -573,6 +641,19 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={isResetDialogOpen}
+        onClose={() => setIsResetDialogOpen(false)}
+        onConfirm={async () => {
+          setIsResetDialogOpen(false);
+          await resetDemoData();
+        }}
+        title="Reset Fiorify Demo Projects"
+        message="This will clear all generated Studio projects, drafts, assessment handoffs, and browser caches, restoring Fiorify to a clean Clean Core baseline. Are you sure you want to proceed?"
+        confirmLabel="Reset Everything"
+        isDestructive={true}
+      />
     </div>
   );
 };

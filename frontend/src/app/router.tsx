@@ -1,36 +1,58 @@
 import React from 'react';
 import { createBrowserRouter, Navigate, useSearchParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
-
-// Sprint 1 & 2 Canonical Features
-import { LandingPage } from '../features/landing/LandingPage';
-import { LoginPage } from '../features/auth/LoginPage';
-import { OverviewPage } from '../features/overview/OverviewPage';
-import { TransactionDiscoveryPage } from '../features/transaction-discovery/TransactionDiscoveryPage';
-import { AssessmentResultsPage } from '../features/assessment-results/AssessmentResultsPage';
-import { AssessmentHistoryPage } from '../features/assessment-history/AssessmentHistoryPage';
-import { SystemConfigurationPage } from '../features/system-configuration/SystemConfigurationPage';
-import { McpManagementPage } from '../features/mcp/McpManagementPage';
-
-// Preserved Legacy Features (Non-destructive preservation)
-import { SystemsPage } from '../features/systems/SystemsPage';
-import { SystemDetailPage } from '../features/systems/SystemDetailPage';
-import { ExplorerPage } from '../features/explorer/ExplorerPage';
-import { TCodeDetailPage } from '../features/explorer/TCodeDetailPage';
-import { JobsPage } from '../features/jobs/JobsPage';
-import { AssessmentsPage } from '../features/assessments/AssessmentsPage';
-import { NewAssessmentPage } from '../features/assessments/NewAssessmentPage';
-import { AssessmentWorkspacePage } from '../features/assessments/AssessmentWorkspacePage';
-import { CataloguePage } from '../features/catalogue/CataloguePage';
-import { AppDetailPage } from '../features/catalogue/AppDetailPage';
-import { GenerationStudioPage } from '../features/generation/GenerationStudioPage';
-import { GeneratedArtifactsPage } from '../features/generation/GeneratedArtifactsPage';
-import { ValidationPage } from '../features/validation/ValidationPage';
-import { ApprovalsPage } from '../features/governance/ApprovalsPage';
-import { AuditPage } from '../features/audit/AuditPage';
-import { SettingsPage } from '../features/settings/SettingsPage';
-import { NotFoundPage } from '../features/notfound/NotFoundPage';
 import { localStore } from '../services/mock/localStore';
+
+// Top-level Suspense Fallback for standalone routes (Landing, Login)
+const TopLevelSuspenseFallback: React.FC = () => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw' }}>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{
+        width: '40px',
+        height: '40px',
+        border: '3px solid #E5E7EB',
+        borderTop: '3px solid #0070F2',
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite',
+        margin: '0 auto 12px auto'
+      }} />
+      <span style={{ fontSize: '13px', color: '#6B7280', fontFamily: '72, -apple-system, BlinkMacSystemFont, sans-serif' }}>
+        Loading Fiorify...
+      </span>
+    </div>
+  </div>
+);
+
+const withTopLevelSuspense = (Component: React.ComponentType) => (
+  <React.Suspense fallback={<TopLevelSuspenseFallback />}>
+    <Component />
+  </React.Suspense>
+);
+
+// Sprint 1 & 2 Canonical Features (Code-split via dynamic import)
+const LandingPage = React.lazy(() => import('../features/landing/LandingPage').then(m => ({ default: m.LandingPage })));
+const LoginPage = React.lazy(() => import('../features/auth/LoginPage').then(m => ({ default: m.LoginPage })));
+const OverviewPage = React.lazy(() => import('../features/overview/OverviewPage').then(m => ({ default: m.OverviewPage })));
+const TransactionDiscoveryPage = React.lazy(() => import('../features/transaction-discovery/TransactionDiscoveryPage').then(m => ({ default: m.TransactionDiscoveryPage })));
+const AssessmentResultsPage = React.lazy(() => import('../features/assessment-results/AssessmentResultsPage').then(m => ({ default: m.AssessmentResultsPage })));
+const AssessmentHistoryPage = React.lazy(() => import('../features/assessment-history/AssessmentHistoryPage').then(m => ({ default: m.AssessmentHistoryPage })));
+const SystemConfigurationPage = React.lazy(() => import('../features/system-configuration/SystemConfigurationPage').then(m => ({ default: m.SystemConfigurationPage })));
+const McpManagementPage = React.lazy(() => import('../features/mcp/McpManagementPage').then(m => ({ default: m.McpManagementPage })));
+
+// Preserved Legacy Features (Code-split via dynamic import)
+const SystemsPage = React.lazy(() => import('../features/systems/SystemsPage').then(m => ({ default: m.SystemsPage })));
+const SystemDetailPage = React.lazy(() => import('../features/systems/SystemDetailPage').then(m => ({ default: m.SystemDetailPage })));
+const ExplorerPage = React.lazy(() => import('../features/explorer/ExplorerPage').then(m => ({ default: m.ExplorerPage })));
+const TCodeDetailPage = React.lazy(() => import('../features/explorer/TCodeDetailPage').then(m => ({ default: m.TCodeDetailPage })));
+const JobsPage = React.lazy(() => import('../features/jobs/JobsPage').then(m => ({ default: m.JobsPage })));
+const AssessmentsPage = React.lazy(() => import('../features/assessments/AssessmentsPage').then(m => ({ default: m.AssessmentsPage })));
+const AssessmentWorkspacePage = React.lazy(() => import('../features/assessments/AssessmentWorkspacePage').then(m => ({ default: m.AssessmentWorkspacePage })));
+const CataloguePage = React.lazy(() => import('../features/catalogue/CataloguePage').then(m => ({ default: m.CataloguePage })));
+const AppDetailPage = React.lazy(() => import('../features/catalogue/AppDetailPage').then(m => ({ default: m.AppDetailPage })));
+const GenerationStudioPage = React.lazy(() => import('../features/generation/GenerationStudioPage').then(m => ({ default: m.GenerationStudioPage })));
+const GeneratedArtifactsPage = React.lazy(() => import('../features/generation/GeneratedArtifactsPage').then(m => ({ default: m.GeneratedArtifactsPage })));
+const SettingsPage = React.lazy(() => import('../features/settings/SettingsPage').then(m => ({ default: m.SettingsPage })));
+const NotFoundPage = React.lazy(() => import('../features/notfound/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 /**
  * Contextual Redirect for Legacy Routes
@@ -57,23 +79,23 @@ const ContextualAssessmentRedirect: React.FC<ContextualRedirectProps> = ({
     }
   }
 
-  return <Navigate to={`/assessments/${targetId}?tab=${targetTab}`} replace />;
+  return <Navigate to={`/assessment-results/${targetId}?tab=${targetTab}`} replace />;
 };
 
 export const router = createBrowserRouter([
   // Public Landing Page
   {
     path: '/',
-    element: <LandingPage />
+    element: withTopLevelSuspense(LandingPage)
   },
   {
     path: '/landing',
-    element: <LandingPage />
+    element: withTopLevelSuspense(LandingPage)
   },
   // Public Split Login Page
   {
     path: '/login',
-    element: <LoginPage />
+    element: withTopLevelSuspense(LoginPage)
   },
   // Enterprise Application Shell
   {
@@ -157,7 +179,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'assessments/new',
-        element: <NewAssessmentPage />
+        element: <Navigate to="/transaction-discovery" replace />
       },
       {
         path: 'assessments/:id',
@@ -189,7 +211,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'generation',
-        element: <GenerationStudioPage />
+        element: <Navigate to="/generation-studio" replace />
       },
       {
         path: 'generation/artifacts',
@@ -197,15 +219,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'validation',
-        element: <ValidationPage />
+        element: <Navigate to="/generation-studio?view=preview-validation" replace />
       },
       {
         path: 'approvals',
-        element: <ApprovalsPage />
+        element: <Navigate to="/assessment-history?status=PENDING_REVIEW" replace />
       },
       {
         path: 'audit',
-        element: <AuditPage />
+        element: <Navigate to="/assessment-history" replace />
       },
       {
         path: 'settings',

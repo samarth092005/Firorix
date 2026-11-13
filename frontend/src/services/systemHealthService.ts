@@ -92,12 +92,12 @@ class SystemHealthService implements ISystemHealthService {
       const offlineMsg =
         backendError instanceof ApiError
           ? backendError.message
-          : 'FioriX backend is offline or unreachable on http://localhost:4004.';
+          : 'Fiorify backend is offline or unreachable on http://localhost:4004.';
 
       const indicators: LandscapeHealthIndicators = {
         backendHealth: {
           id: 'backend',
-          label: 'FioriX Backend Service',
+          label: 'Fiorify Backend Service',
           status: 'OFFLINE',
           statusText: 'OFFLINE',
           badgeVariant: 'error',
@@ -175,10 +175,10 @@ class SystemHealthService implements ISystemHealthService {
     // Backend is UP! Derive separated indicators honestly per Step 4
     const { targetLandscape, btpDestinationStatus } = backendHealth;
 
-    // 1. FioriX Backend Health
+    // 1. Fiorify Backend Health
     const backendIndicator: HealthIndicatorItem = {
       id: 'backend',
-      label: 'FioriX Backend Service',
+      label: 'Fiorify Backend Service',
       status: 'ONLINE',
       statusText: 'UP (OPERATIONAL)',
       badgeVariant: 'success',
@@ -473,7 +473,7 @@ class SystemHealthService implements ISystemHealthService {
         };
       }
 
-      if (searchRes.mode === 'LIVE_SAP' && searchRes.overallStatus === 'MATCH_FOUND') {
+      if (searchRes.mode === 'LIVE_SAP' && searchRes.overallStatus === 'MATCH_FOUND' && (searchRes.transaction as any)?.isLiveVerified === true) {
         return {
           success: true,
           connectionState: 'CONNECTED',

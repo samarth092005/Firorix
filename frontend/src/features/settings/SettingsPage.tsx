@@ -38,7 +38,7 @@ export const SettingsPage: React.FC = () => {
               <code>{currentUser.email}</code>
 
               <span style={{ color: 'var(--fiori-text-secondary)', fontWeight: 500 }}>Security Context:</span>
-              <span>SAP BTP XSUAA Simulated Scope: <code>FioriX_Lead_Consultant</code></span>
+              <span>SAP BTP XSUAA Simulated Scope: <code>Fiorify_Lead_Consultant</code></span>
             </div>
           </div>
         </div>
@@ -84,14 +84,14 @@ export const SettingsPage: React.FC = () => {
           </div>
           <div className="fiori-card-body" style={{ fontSize: '13px' }}>
             <p style={{ color: 'var(--fiori-text-secondary)', marginBottom: '14px', lineHeight: 1.5 }}>
-              FioriX stores interactive changes (new systems, custom requirements, generated blueprints) in your browser's local storage. You can restore the pristine demonstration seed state at any time.
+              Fiorify maintains your active Generation Studio projects, assessment audits, and temporary caches. You can reset the environment back to a clean SAP Clean Core baseline at any time.
             </p>
             <button
               type="button"
               className="fiori-btn fiori-btn-danger"
               onClick={() => setIsResetConfirmOpen(true)}
             >
-              <RotateCcw size={14} /> Reset Local Demo Data
+              <RotateCcw size={14} /> Reset Demo Environment
             </button>
           </div>
         </div>
@@ -103,8 +103,8 @@ export const SettingsPage: React.FC = () => {
         isOpen={isResetConfirmOpen}
         onClose={() => setIsResetConfirmOpen(false)}
         onConfirm={resetDemoData}
-        title="Reset Local Demo Data"
-        message="This will clear all locally created assessments, requirements, and blueprints, restoring the original demonstration dataset. Are you sure you want to proceed?"
+        title="Reset Fiorify Demo Environment"
+        message="This will clear all generated Studio projects, drafts, assessment handoffs, and browser caches, restoring Fiorify to a clean baseline. Are you sure you want to proceed?"
         confirmLabel="Reset Everything"
         isDestructive={true}
       />

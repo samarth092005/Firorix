@@ -25,7 +25,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const currentUser = {
     name: 'Enterprise System Administrator',
     role: 'ADMIN',
-    email: 'admin@fiorix.corp'
+    email: 'admin@fiorify.corp'
   };
 
   const loadSystems = async () => {
@@ -40,9 +40,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadSystems();
   }, []);
 
-  const resetDemoData = () => {
+  const resetDemoData = async () => {
+    try {
+      await fetch('/api/v1/system/reset-demo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch((err) => {
+        console.warn('Backend reset call warning:', err);
+      });
+    } catch {
+      // Non-blocking
+    }
+
     localStore.resetAll();
-    window.location.reload();
+    try {
+      localStorage.removeItem('fiorix_notifications_store_v1');
+      localStorage.removeItem('fiorify_notifications_store_v1');
+      localStorage.removeItem('fiorix_auth_session_v1');
+      localStorage.removeItem('fiorify_auth_session_v1');
+      sessionStorage.clear();
+    } catch {}
+
+    window.location.href = '/overview';
   };
 
   return (

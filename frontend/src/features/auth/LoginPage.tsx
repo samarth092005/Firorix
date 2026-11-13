@@ -277,7 +277,7 @@ export const LoginPage: React.FC = () => {
 
         {/* Bottom Note */}
         <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '40px' }}>
-          FioriX Modernization Suite &bull; Secure Enterprise Environment
+          Fiorify Modernization Suite &bull; Secure Enterprise Environment
         </div>
       </div>
 
@@ -305,7 +305,7 @@ export const LoginPage: React.FC = () => {
           {/* Header */}
           <div style={{ marginBottom: '24px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.4px' }}>
-              Sign In to FioriX
+              Sign In to Fiorify
             </h2>
             <p style={{ fontSize: '14px', color: '#64748B', marginTop: '4px' }}>
               Access your SAP transformation workspace &amp; assessments.
@@ -329,7 +329,7 @@ export const LoginPage: React.FC = () => {
               </span>
             </div>
             <p style={{ fontSize: '12px', color: '#475569', marginBottom: '12px', lineHeight: 1.4 }}>
-              Explore all FioriX discovery features immediately with pre-configured architect credentials.
+              Explore all Fiorify discovery features immediately with pre-configured architect credentials.
             </p>
             <button
               type="button"
@@ -419,7 +419,7 @@ export const LoginPage: React.FC = () => {
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. consultant@fiorix.corp"
+                  placeholder="e.g. consultant@fiorify.corp"
                   style={{
                     width: '100%',
                     padding: '10px 12px 10px 38px',

@@ -222,10 +222,12 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
   if (!lifecycleStatus || !Object.values(LIFECYCLE_STATES).includes(lifecycleStatus)) {
     if (rawStatus === 'COMPLETED' || lifecycleStatus === 'EVALUATION_COMPLETED' || rawStatus === 'EVALUATION_COMPLETED') {
       lifecycleStatus = LIFECYCLE_STATES.RECOMMENDATION_COMPLETED;
-    } else if (rawStatus === 'IN_PROGRESS') {
+    } else if (rawStatus === 'IN_PROGRESS' || rawStatus === 'DRAFT') {
       lifecycleStatus = LIFECYCLE_STATES.DRAFT;
     } else if (rawStatus === 'FLAGGED') {
       lifecycleStatus = LIFECYCLE_STATES.PENDING_REVIEW;
+    } else if (Object.values(LIFECYCLE_STATES).includes(rawStatus)) {
+      lifecycleStatus = rawStatus;
     } else {
       lifecycleStatus = LIFECYCLE_STATES.RECOMMENDATION_COMPLETED;
     }
@@ -455,7 +457,8 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
     businessContext: input.businessContext || null,
     applicationRequirements: input.applicationRequirements || null,
     discoveryMetadata: input.discoveryMetadata || null,
-    evidenceNotes: Array.isArray(input.evidenceNotes) ? input.evidenceNotes : []
+    evidenceNotes: Array.isArray(input.evidenceNotes) ? input.evidenceNotes : [],
+    leadArchitectApproval: input.leadArchitectApproval || null
   };
 }
 
@@ -559,8 +562,46 @@ export class AssessmentStore {
     }
 
     const tempPath = `${this.storagePath}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
-    await fs.promises.writeFile(tempPath, json, 'utf8');
-    await fs.promises.rename(tempPath, this.storagePath);
+    try {
+      await fs.promises.writeFile(tempPath, json, 'utf8');
+      await fs.promises.rename(tempPath, this.storagePath);
+    } finally {
+      if (fs.existsSync(tempPath)) {
+        try {
+          await fs.promises.unlink(tempPath);
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }
+
+  /**
+   * Resets assessments storage back to the pristine baseline dataset.
+   */
+  async resetToBaseline() {
+    return await this._withWriteLock(async () => {
+      const baselinePath = path.resolve(path.dirname(this.storagePath), 'assessments_baseline.json');
+      let baselineRecords = [];
+      if (fs.existsSync(baselinePath)) {
+        try {
+          const raw = await fs.promises.readFile(baselinePath, 'utf8');
+          baselineRecords = JSON.parse(raw);
+        } catch {
+          baselineRecords = [];
+        }
+      }
+
+      this._records = new Map(
+        baselineRecords.map((item) => {
+          const normalized = normalizeAssessmentRecord(item);
+          return [normalized.id, normalized];
+        })
+      );
+      this._initialized = true;
+      await this._persist();
+      return { success: true, count: this._records.size };
+    });
   }
 
   /**
@@ -640,7 +681,7 @@ export class AssessmentStore {
       if (newLifecycle !== previousLifecycle) {
         const allowed = ALLOWED_TRANSITIONS[previousLifecycle] || [];
         const isPermittedApproval = (newLifecycle === LIFECYCLE_STATES.APPROVED || newLifecycle === LIFECYCLE_STATES.PENDING_REVIEW) &&
-          (updates.isOverride || updates.autoAdvance || actorRole === 'APPROVER' || actorRole === 'ADMIN' || actorName.includes('Board') || actorName.includes('Approver'));
+          (updates.isOverride || updates.autoAdvance);
 
         if (!allowed.includes(newLifecycle) && !isPermittedApproval) {
           const err = new Error(
@@ -715,7 +756,7 @@ export class AssessmentStore {
       if (newLifecycle !== previousLifecycle) {
         const allowed = ALLOWED_TRANSITIONS[previousLifecycle] || [];
         const isPermittedApproval = (newLifecycle === LIFECYCLE_STATES.APPROVED || newLifecycle === LIFECYCLE_STATES.PENDING_REVIEW) &&
-          (updates.isOverride || updates.autoAdvance || actorRole === 'APPROVER' || actorRole === 'ADMIN' || actorName.includes('Board') || actorName.includes('Approver'));
+          (updates.isOverride || updates.autoAdvance);
 
         if (!allowed.includes(newLifecycle) && !isPermittedApproval) {
           const err = new Error(

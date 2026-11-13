@@ -161,8 +161,9 @@ describe('FioriX Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recomm
     const compat = evidenceEngine.evaluateReleaseCompatibility(assessment, null);
     const avail = evidenceEngine.evaluateSystemAvailability(assessment, null);
     const rec = evidenceEngine.generateRecommendation(assessment, null, compat, avail);
-    expect(rec.outcome).toBe('TECHNICAL_ANALYSIS_REQUIRED');
-    expect(rec.recommendedAction).toContain('custom SAP BTP RAP');
+    expect(rec.outcome).toBe('BUILD');
+    expect(rec.canonicalOutcome).toBe('BUILD');
+    expect(rec.recommendedAction).toContain('RAP');
   });
 
   // 8. Evidence Scoring Engine Formula

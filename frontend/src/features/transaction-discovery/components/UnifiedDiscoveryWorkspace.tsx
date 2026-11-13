@@ -10,7 +10,7 @@ import { PRESET_SCENARIOS } from '../types';
 import { sapDiscoveryAdapter } from '../../../services/sap/sapDiscoveryAdapter';
 import { fioriCatalogueAdapter } from '../../../services/catalogue/catalogueAdapter';
 import { assessmentService } from '../../../services/assessmentService';
-import { mockSapAdapter } from '../../transaction-checker/adapters/mockSapAdapter';
+import { mockSapAdapter } from '../../../services/sap/mockSapAdapter';
 import { apiClient, UnifiedDiscoveryMatchResult } from '../../../services/api/apiClient';
 import { DiscoveryVerificationModal } from './DiscoveryVerificationModal';
 import {
@@ -143,17 +143,12 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
 
       setProgressState('SEARCHING_TRANSACTION');
 
-      const [discoRes, catCandidates, pipelineRes] = await Promise.all([
-        sapDiscoveryAdapter.inspectTransaction({
-          requestId,
-          tcode: cleanTcode,
-          systemId: sysId,
-          client,
-          targetRelease,
-          timestamp: new Date().toISOString()
-        }),
-        fioriCatalogueAdapter.getAppsByTCode(cleanTcode),
-        apiClient.discoverAndMatch({
+      let discoRes: TransactionDiscoveryResponse | null = null;
+      let catCandidates: CatalogueReference[] = [];
+      let pipelineRes: UnifiedDiscoveryMatchResult | null = null;
+
+      try {
+        pipelineRes = await apiClient.discoverAndMatch({
           tcode: cleanTcode,
           systemId: sysId,
           client,
@@ -162,11 +157,61 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           useLiveSap: isLiveSystem,
           mcpOptions: { enabled: false },
           useMcp: false
-        }).catch((pErr: any) => {
-          console.warn('[Discovery Workspace] Match pipeline fallback:', pErr?.message);
-          return null;
-        })
-      ]);
+        });
+
+        if (pipelineRes && pipelineRes.discovery) {
+          const disc = pipelineRes.discovery as any;
+          const isNotFound = disc.exists === false || disc.statusCode === 'NOT_FOUND' || disc.verificationStatus === 'NOT_FOUND' || disc.classification === 'NOT_FOUND';
+          discoRes = {
+            requestId,
+            tcode: cleanTcode,
+            systemId: sysId,
+            client,
+            targetRelease,
+            timestamp: new Date().toISOString(),
+            exists: !isNotFound,
+            verificationStatus: isNotFound ? 'NOT_FOUND' : 'VERIFIED',
+            classification: isNotFound ? 'NOT_FOUND' : (disc.classification || 'STANDARD'),
+            description: disc.description || disc.transactionDescription || (isNotFound ? 'Transaction Does Not Exist' : 'SAP Transaction'),
+            programName: disc.programName || disc.program || (isNotFound ? null : 'UNKNOWN'),
+            screenNumber: disc.screenNumber || '0100',
+            packageName: disc.packageName || 'FBAS',
+            originalSystem: disc.originalSystem || 'SAP',
+            softwareComponent: disc.softwareComponent || 'S4CORE 108',
+            metadataStatus: disc.metadataStatus || (isNotFound ? 'NOT_AVAILABLE' : 'COMPLETE'),
+            isLiveVerified: isLiveSystem,
+            provenance: isLiveSystem ? 'LIVE_SAP_S21' : 'CURATED_DEMO_FIXTURE',
+            catalogueCandidates: (pipelineRes.candidates || []) as any,
+            tadirEvidence: disc.tadirEvidence || {
+              pgmid: 'R3TR',
+              object: 'TRAN',
+              objName: cleanTcode,
+              devclass: disc.packageName || 'FBAS',
+              srcsystem: disc.originalSystem || 'SAP'
+            }
+          };
+          catCandidates = (pipelineRes.candidates || []) as any;
+        }
+      } catch (pipeErr: any) {
+        console.warn('[Discovery Workspace] Backend match pipeline fallback:', pipeErr?.message);
+      }
+
+      // If backend was unreachable or returned empty, graceful fallback to local adapters
+      if (!discoRes) {
+        const [localDisco, localCat] = await Promise.all([
+          sapDiscoveryAdapter.inspectTransaction({
+            requestId,
+            tcode: cleanTcode,
+            systemId: sysId,
+            client,
+            targetRelease,
+            timestamp: new Date().toISOString()
+          }),
+          fioriCatalogueAdapter.getAppsByTCode(cleanTcode)
+        ]);
+        discoRes = localDisco;
+        catCandidates = localCat;
+      }
 
       setMetadata(discoRes);
       setCandidates(catCandidates);
@@ -182,7 +227,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
       }
 
       // Automatically show Discovery Verification Popup Modal
-      if (discoRes && (discoRes.exists !== false || catCandidates.length > 0)) {
+      if (discoRes) {
         setIsVerificationModalOpen(true);
       }
 
@@ -220,8 +265,9 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   }, [initialTcode, initialSystemId]);
 
   // Navigate to full Assessment Workbench
-  const handleOpenAssessmentWorkbench = async () => {
-    if (!metadata) return;
+  const handleOpenAssessmentWorkbench = async (targetTab: string | React.MouseEvent = 'VERDICT') => {
+    if (!metadata || metadata.exists === false) return;
+    const effectiveTab = typeof targetTab === 'string' ? targetTab : 'VERDICT';
 
     // Persist or find existing assessment in persistent store
     const cleanTcode = metadata.tcode;
@@ -229,7 +275,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
     const existing = existingAssessments.find((a) => a.tcode.toUpperCase() === cleanTcode.toUpperCase());
 
     if (existing) {
-      navigate(`/assessment-results?id=${existing.id}&tcode=${cleanTcode}`);
+      navigate(`/assessment-results?id=${existing.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
       return;
     }
 
@@ -250,13 +296,6 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
       systemId,
       client,
       targetRelease,
-      release: targetRelease,
-      description: metadata.description,
-      packageName: metadata.packageName || 'FBAS',
-      programName: metadata.programName,
-      screenNumber: metadata.screenNumber,
-      classification: metadata.classification || 'STANDARD',
-      softwareComponent: metadata.softwareComponent || 'S4CORE 108',
       matchingFioriApp: candidateApp,
       fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
       assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : (metadata?.classification === 'CUSTOM' ? 'CUSTOM_RAP_REQUIRED' : 'PENDING_VERIFICATION'),
@@ -291,18 +330,18 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         isUserProvidedUnverified: false
       },
       discoveryMetadata: {
-        description: metadata.description,
-        programName: metadata.programName,
-        screenNumber: metadata.screenNumber,
-        packageName: metadata.packageName,
-        classification: metadata.classification,
-        originalSystem: metadata.originalSystem,
-        softwareComponent: metadata.softwareComponent
+        description: metadata.description || 'Post Outgoing Payments',
+        programName: metadata.programName || 'SAPMF05A',
+        screenNumber: metadata.screenNumber || '0100',
+        packageName: metadata.packageName || 'FBAS',
+        classification: metadata.classification || 'STANDARD',
+        originalSystem: metadata.originalSystem || 'SAP',
+        softwareComponent: metadata.softwareComponent || 'S4CORE 108'
       },
       catalogueReference: selectedCandidate
     });
 
-    navigate(`/assessment-results?id=${created.id}&tcode=${cleanTcode}`);
+    navigate(`/assessment-results?id=${created.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
   };
 
   return (
@@ -802,8 +841,70 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         </div>
       )}
 
-      {/* Discovery Results Workspace */}
-      {!isLoading && metadata && (
+      {/* 1. Transaction Not Found in SAP DDIC Error State */}
+      {!isLoading && metadata && metadata.exists === false && (
+        <div
+          style={{
+            backgroundColor: '#FEF2F2',
+            border: '1px solid #FECACA',
+            borderRadius: '10px',
+            padding: '28px 24px',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px'
+          }}
+        >
+          <div
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              backgroundColor: '#FEE2E2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#DC2626'
+            }}
+          >
+            <AlertTriangle size={26} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#991B1B', margin: '0 0 4px 0' }}>
+              Transaction Code &quot;{metadata.tcode}&quot; Does Not Exist in SAP
+            </h3>
+            <p style={{ fontSize: '13px', color: '#7F1D1D', maxWidth: '580px', margin: '0 auto', lineHeight: 1.5 }}>
+              Kernel inspection in table <code>TSTC</code> (Transaction Codes) and table <code>TADIR</code> (Repository Objects) returned 0 records in system {systemId} (Client {client}).
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setMetadata(null);
+              setCandidates([]);
+              setTcode('');
+              setSearchError(null);
+            }}
+            style={{
+              marginTop: '8px',
+              padding: '8px 20px',
+              borderRadius: '6px',
+              border: '1px solid #FCA5A5',
+              backgroundColor: '#FFFFFF',
+              color: '#991B1B',
+              fontSize: '13px',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            Reset Search &amp; Try Another T-Code
+          </button>
+        </div>
+      )}
+
+      {/* 2. Verified SAP Transaction Workspace */}
+      {!isLoading && metadata && metadata.exists !== false && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Executive Discovery Summary Ribbon */}
           <div
@@ -897,6 +998,59 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
               </button>
             </div>
           </div>
+
+          {/* Custom Gap Alert Banner (when no standard app exists in catalogue) */}
+          {candidates.length === 0 && (
+            <div
+              style={{
+                backgroundColor: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                borderRadius: '8px',
+                padding: '16px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '14px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', backgroundColor: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0066FF' }}>
+                  <Code2 size={22} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#1E3A8A' }}>
+                    No Standard SAP Fiori App Available &bull; 100% Functional Gap Detected
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#3B82F6', marginTop: '2px' }}>
+                    Transaction {metadata.tcode} ({metadata.programName}) has no certified standard Fiori app. Modernize via Clean Core RAP &amp; Fiori Elements.
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 18px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: '#0066FF',
+                  color: '#FFFFFF',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(0, 102, 255, 0.2)'
+                }}
+              >
+                <span>Proceed to Modernization &amp; Custom Build</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+          )}
 
           {/* Core Dual Architectural Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '20px' }}>
@@ -1196,6 +1350,12 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         client={client}
         targetRelease={targetRelease}
         onProceedToAssessment={handleOpenAssessmentWorkbench}
+        onResetSearch={() => {
+          setMetadata(null);
+          setCandidates([]);
+          setTcode('');
+          setSearchError(null);
+        }}
       />
     </div>
   );

@@ -175,7 +175,7 @@ export const OverviewPage: React.FC = () => {
     link.setAttribute('href', encodedUri);
     link.setAttribute(
       'download',
-      `FioriX_Assessments_${statusFilter !== 'ALL' ? statusFilter : 'All'}_${new Date().toISOString().slice(0, 10)}.csv`
+      `Fiorify_Assessments_${statusFilter !== 'ALL' ? statusFilter : 'All'}_${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();

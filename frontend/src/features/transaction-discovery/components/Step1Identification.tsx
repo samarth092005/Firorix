@@ -2,7 +2,7 @@ import React from 'react';
 import { PRESET_SCENARIOS } from '../types';
 import { InformationPanel } from '../../../components/common';
 import { Zap, AlertCircle, ArrowRight } from 'lucide-react';
-import { mockSapAdapter } from '../../transaction-checker/adapters/mockSapAdapter';
+import { mockSapAdapter } from '../../../services/sap/mockSapAdapter';
 
 export interface Step1IdentificationProps {
   tcode: string;

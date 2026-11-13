@@ -195,7 +195,7 @@ export const NewAssessmentPage: React.FC = () => {
           <div>
             <h2 style={{ fontSize: '16px', marginBottom: '8px' }}>Step 2: Enter Transaction Code (T-Code)</h2>
             <p style={{ fontSize: '13px', color: 'var(--fiori-text-secondary)', marginBottom: '16px' }}>
-              Specify the primary transaction to assess. FioriX will inspect the associated module pool, includes, and database tables.
+              Specify the primary transaction to assess. Fiorify will inspect the associated module pool, includes, and database tables.
             </p>
 
             <div className="fiori-form-group">
@@ -316,7 +316,7 @@ export const NewAssessmentPage: React.FC = () => {
                   style={{ marginTop: '3px' }}
                 />
                 <span>
-                  <strong>Strict Read-Only Integration:</strong> I understand that discovery uses read-only queries. FioriX will never write to or modify standard SAP tables or create transport requests in this phase.
+                  <strong>Strict Read-Only Integration:</strong> I understand that discovery uses read-only queries. Fiorify will never write to or modify standard SAP tables or create transport requests in this phase.
                 </span>
               </label>
 

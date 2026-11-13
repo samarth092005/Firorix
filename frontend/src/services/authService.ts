@@ -7,11 +7,11 @@ export interface AuthUser {
   avatar?: string;
 }
 
-const STORAGE_KEY = 'fiorix_auth_session';
+const STORAGE_KEY = 'fiorify_auth_session';
 
 export const DEMO_USER: AuthUser = {
   id: 'usr-admin-001',
-  email: 'admin@fiorix.corp',
+  email: 'admin@fiorify.corp',
   name: 'Enterprise System Administrator',
   role: 'ADMIN',
   department: 'SAP Architecture & Platform Governance'
@@ -20,7 +20,7 @@ export const DEMO_USER: AuthUser = {
 export const authService = {
   getUser(): AuthUser | null {
     try {
-      const data = localStorage.getItem(STORAGE_KEY);
+      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('fiorix_auth_session');
       if (!data) return DEMO_USER;
       const parsed = JSON.parse(data) as AuthUser;
       if (parsed) {
@@ -40,7 +40,7 @@ export const authService = {
   login(email: string, _password?: string): AuthUser {
     const user: AuthUser = {
       id: 'usr-' + Date.now().toString(36),
-      email: email.trim() || 'admin@fiorix.corp',
+      email: email.trim() || 'admin@fiorify.corp',
       name: email ? email.split('@')[0].replace('.', ' ').replace(/\b\w/g, (l) => l.toUpperCase()) : 'Enterprise Administrator',
       role: 'ADMIN',
       department: 'SAP Architecture & Platform Governance'

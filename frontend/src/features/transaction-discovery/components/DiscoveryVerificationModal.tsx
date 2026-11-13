@@ -11,7 +11,11 @@ import {
   ShieldCheck,
   Sparkles,
   BookOpen,
-  Library
+  Library,
+  AlertCircle,
+  XCircle,
+  Wrench,
+  HelpCircle
 } from 'lucide-react';
 import {
   TransactionDiscoveryResponse,
@@ -26,7 +30,8 @@ export interface DiscoveryVerificationModalProps {
   systemId: string;
   client: string;
   targetRelease: string;
-  onProceedToAssessment?: () => void;
+  onProceedToAssessment?: (targetTab?: string) => void;
+  onResetSearch?: () => void;
 }
 
 export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProps> = ({
@@ -37,7 +42,8 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
   systemId,
   client,
   targetRelease,
-  onProceedToAssessment
+  onProceedToAssessment,
+  onResetSearch
 }) => {
   const navigate = useNavigate();
 
@@ -46,7 +52,8 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
   const tcode = metadata.tcode || 'TRANSACTION';
   const primaryCandidate = candidates[0] || null;
   const isCustom = tcode.startsWith('Z') || tcode.startsWith('Y') || metadata.classification === 'CUSTOM';
-  const s4Exists = metadata.exists !== false && metadata.verificationStatus !== 'NOT_FOUND';
+  const tcodeExists = metadata.exists !== false && metadata.verificationStatus !== 'NOT_FOUND';
+  const hasStandardApp = tcodeExists && Boolean(primaryCandidate);
 
   return (
     <div
@@ -56,7 +63,7 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(15, 23, 42, 0.65)',
+        backgroundColor: 'rgba(15, 23, 42, 0.7)',
         backdropFilter: 'blur(4px)',
         display: 'flex',
         alignItems: 'center',
@@ -69,7 +76,7 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
         style={{
           backgroundColor: '#FFFFFF',
           borderRadius: '12px',
-          boxShadow: '0 20px 40px -15px rgba(0, 0, 0, 0.3)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
           width: '100%',
           maxWidth: '680px',
           maxHeight: '90vh',
@@ -80,373 +87,589 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
           animation: 'fadeInScale 0.2s ease-out'
         }}
       >
-        {/* Modal Header */}
-        <div
-          style={{
-            padding: '20px 24px',
-            backgroundColor: '#F8FAFC',
-            borderBottom: '1px solid #E2E8F0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        {/* ===================================================================== */}
+        {/* CASE 1: T-CODE DOES NOT EXIST IN SAP DDIC                             */}
+        {/* ===================================================================== */}
+        {!tcodeExists && (
+          <>
+            {/* Header: Red Error */}
             <div
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '10px',
-                backgroundColor: s4Exists ? '#ECFDF5' : '#EFF6FF',
-                color: s4Exists ? '#059669' : '#2563EB',
+                padding: '20px 24px',
+                backgroundColor: '#FEF2F2',
+                borderBottom: '1px solid #FECACA',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: `1px solid ${s4Exists ? '#A7F3D0' : '#BFDBFE'}`
+                justifyContent: 'space-between'
               }}
             >
-              <ShieldCheck size={26} />
-            </div>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
                   style={{
-                    fontFamily: 'monospace',
-                    fontWeight: 700,
-                    fontSize: '18px',
-                    color: '#0F172A',
-                    backgroundColor: '#F1F5F9',
-                    padding: '2px 8px',
-                    borderRadius: '4px',
-                    border: '1px solid #CBD5E1'
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
+                    backgroundColor: '#FEE2E2',
+                    color: '#DC2626',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    border: '1px solid #FCA5A5'
                   }}
                 >
-                  {tcode}
-                </span>
-                <span style={{ fontSize: '15px', fontWeight: 600, color: '#334155' }}>
-                  {metadata.description || 'SAP Transaction'}
-                </span>
+                  <XCircle size={26} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontWeight: 800,
+                        fontSize: '17px',
+                        color: '#991B1B',
+                        backgroundColor: '#FFFFFF',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #FCA5A5'
+                      }}
+                    >
+                      {tcode}
+                    </span>
+                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#991B1B' }}>
+                      Transaction Code Does Not Exist
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#B91C1C' }}>
+                    SAP Data Dictionary (DDIC) Verification Failed
+                  </p>
+                </div>
               </div>
-              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#64748B' }}>
-                Instant SAP S/4HANA DDIC &amp; Fiori Catalogue Discovery Verification
-              </p>
-            </div>
-          </div>
 
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#94A3B8',
-              cursor: 'pointer',
-              padding: '6px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '18px' }}>
-
-          {/* Section 1: Live SAP S/4HANA Verification */}
-          <div
-            style={{
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '16px 18px',
-              backgroundColor: '#FFFFFF',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Server size={17} color="#2563EB" />
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#1E293B', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                  1. SAP S/4HANA Verification
-                </span>
-              </div>
-              <span
+              <button
+                type="button"
+                onClick={onClose}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  backgroundColor: s4Exists ? '#ECFDF5' : '#FEF3C7',
-                  color: s4Exists ? '#047857' : '#B45309',
-                  border: `1px solid ${s4Exists ? '#A7F3D0' : '#FDE68A'}`,
-                  borderRadius: '12px',
-                  padding: '3px 10px',
-                  fontSize: '11px',
-                  fontWeight: 700
+                  background: 'none',
+                  border: 'none',
+                  color: '#991B1B',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  borderRadius: '6px'
                 }}
               >
-                <CheckCircle2 size={13} />
-                {s4Exists ? `LIVE VERIFIED IN S21 (Client ${client})` : 'UNVERIFIED ENTRY'}
-              </span>
+                <X size={20} />
+              </button>
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                gap: '10px',
-                backgroundColor: '#F8FAFC',
-                padding: '12px 14px',
-                borderRadius: '6px',
-                border: '1px solid #EDF2F7',
-                fontSize: '12px'
-              }}
-            >
-              <div>
-                <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>ABAP Program</span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F172A' }}>
-                  {metadata.programName || 'N/A'}
-                </span>
-              </div>
-              <div>
-                <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>Dev Package</span>
-                <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F172A' }}>
-                  {metadata.packageName || (isCustom ? '$TMP' : 'BASIS')}
-                </span>
-              </div>
-              <div>
-                <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>Software Component</span>
-                <span style={{ fontWeight: 600, color: '#0F172A' }}>
-                  {metadata.softwareComponent || 'S4CORE 108'}
-                </span>
-              </div>
-              <div>
-                <span style={{ color: '#64748B', display: 'block', fontSize: '11px', fontWeight: 600 }}>Release Compatibility</span>
-                <span style={{ fontWeight: 600, color: '#059669' }}>
-                  {targetRelease} (Compatible)
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Section 2: Fiori Catalogue Matching */}
-          <div
-            style={{
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '16px 18px',
-              backgroundColor: '#FFFFFF',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Library size={17} color="#7C3AED" />
-                <span style={{ fontSize: '13px', fontWeight: 700, color: '#1E293B', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                  2. SAP Fiori Apps Reference Library
-                </span>
-              </div>
-              <span
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  backgroundColor: candidates.length > 0 ? '#F3E8FF' : '#F1F5F9',
-                  color: candidates.length > 0 ? '#6B21A8' : '#64748B',
-                  border: `1px solid ${candidates.length > 0 ? '#E9D5FF' : '#CBD5E1'}`,
-                  borderRadius: '12px',
-                  padding: '3px 10px',
-                  fontSize: '11px',
-                  fontWeight: 700
-                }}
-              >
-                <Sparkles size={13} />
-                {candidates.length > 0
-                  ? `${candidates.length} CANDIDATE APP${candidates.length > 1 ? 'S' : ''} IDENTIFIED`
-                  : 'SYNTHESIZED WORKSPACE CANDIDATE'}
-              </span>
-            </div>
-
-            {primaryCandidate ? (
+            {/* Body */}
+            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div
                 style={{
-                  backgroundColor: '#FAF5FF',
-                  border: '1px solid #E9D5FF',
-                  borderRadius: '6px',
-                  padding: '14px',
+                  backgroundColor: '#FFF5F5',
+                  border: '1px solid #FED7D7',
+                  borderRadius: '8px',
+                  padding: '16px 18px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px'
+                  gap: '12px'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <AlertCircle size={20} color="#E53E3E" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div style={{ fontSize: '13px', color: '#742A2A', lineHeight: 1.5 }}>
+                  <div style={{ fontWeight: 700, marginBottom: '4px' }}>
+                    No record found in SAP S/4HANA System {systemId} (Client {client})
+                  </div>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span
-                        style={{
-                          backgroundColor: '#7C3AED',
-                          color: '#FFFFFF',
-                          fontFamily: 'monospace',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                          padding: '2px 8px',
-                          borderRadius: '4px'
-                        }}
-                      >
-                        {primaryCandidate.appId}
-                      </span>
-                      <span style={{ fontSize: '14px', fontWeight: 700, color: '#1E1B4B' }}>
-                        {primaryCandidate.appName}
-                      </span>
-                    </div>
+                    Kernel inspection queried table <code>TSTC</code> (Transaction Codes) and table <code>TADIR</code> (R/3 Repository Directory) for object <code>TRAN {tcode}</code>, returning <strong>0 records</strong>.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
+                <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#1E293B', marginBottom: '8px' }}>
+                  What you can do:
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '12.5px', color: '#475569', lineHeight: 1.6 }}>
+                  <li>Check for typographical errors in the transaction code.</li>
+                  <li>Try standard SAP codes like <strong>ME21N</strong> (Procurement), <strong>F-53</strong> / <strong>FB50</strong> (Financials), or <strong>VA01</strong> (Sales).</li>
+                  <li>Or try custom demonstration transaction <strong>ZPURCHASE</strong>.</li>
+                  <li>Verify that the transaction exists in client {client} of target system {systemId}.</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div
+              style={{
+                padding: '16px 24px',
+                backgroundColor: '#F8FAFC',
+                borderTop: '1px solid #E2E8F0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '10px'
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  if (onResetSearch) onResetSearch();
+                }}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: '6px',
+                  border: '1px solid #CBD5E1',
+                  backgroundColor: '#FFFFFF',
+                  color: '#334155',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Close &amp; Try Another T-Code
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ===================================================================== */}
+        {/* CASE 2 & 3: T-CODE EXISTS (Standard App Found OR 100% Custom Gap)    */}
+        {/* ===================================================================== */}
+        {tcodeExists && (
+          <>
+            {/* Header: Verified */}
+            <div
+              style={{
+                padding: '20px 24px',
+                backgroundColor: hasStandardApp ? '#F0FDF4' : '#EFF6FF',
+                borderBottom: `1px solid ${hasStandardApp ? '#BBF7D0' : '#BFDBFE'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '10px',
+                    backgroundColor: hasStandardApp ? '#DCFCE7' : '#DBEAFE',
+                    color: hasStandardApp ? '#16A34A' : '#0066FF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    border: `1px solid ${hasStandardApp ? '#86EFAC' : '#93C5FD'}`
+                  }}
+                >
+                  {hasStandardApp ? <ShieldCheck size={26} /> : <Code2 size={26} />}
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontWeight: 800,
+                        fontSize: '17px',
+                        color: '#0F172A',
+                        backgroundColor: '#FFFFFF',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        border: '1px solid #CBD5E1'
+                      }}
+                    >
+                      {tcode}
+                    </span>
+                    <span style={{ fontSize: '15px', fontWeight: 700, color: '#1E293B' }}>
+                      {metadata.description || 'SAP Transaction'}
+                    </span>
+                  </div>
+                  <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: hasStandardApp ? '#15803D' : '#1E40AF' }}>
+                    {hasStandardApp
+                      ? '✓ Verified in SAP DDIC & Official Standard Fiori Application Found'
+                      : '✓ Verified in SAP DDIC • ⚠️ No Standard Fiori App (100% Functional Gap)'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748B',
+                  cursor: 'pointer',
+                  padding: '6px',
+                  borderRadius: '6px'
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+              {/* Step 1 Box: SAP DDIC Verification */}
+              <div
+                style={{
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '14px 16px',
+                  backgroundColor: '#FFFFFF'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Server size={16} color="#0066FF" />
+                    <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#1E293B', textTransform: 'uppercase' }}>
+                      1. SAP S/4HANA DDIC Inspection
+                    </span>
                   </div>
                   <span
                     style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      backgroundColor: '#FFFFFF',
-                      padding: '2px 8px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: '#ECFDF5',
+                      color: '#047857',
+                      border: '1px solid #A7F3D0',
                       borderRadius: '12px',
-                      border: '1px solid #DDD6FE',
-                      color: '#6B21A8'
+                      padding: '2px 8px',
+                      fontSize: '11px',
+                      fontWeight: 700
                     }}
                   >
-                    {primaryCandidate.uiTechnology}
+                    <CheckCircle2 size={12} />
+                    <span>ACTIVE IN {systemId} ({client})</span>
                   </span>
                 </div>
-
-                <p style={{ margin: 0, fontSize: '12px', color: '#4C1D95', lineHeight: 1.4 }}>
-                  {primaryCandidate.description}
-                </p>
 
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: '8px',
-                    fontSize: '11px',
-                    marginTop: '4px',
-                    borderTop: '1px dashed #DDD6FE',
-                    paddingTop: '8px'
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                    gap: '10px',
+                    backgroundColor: '#F8FAFC',
+                    padding: '10px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #EDF2F7',
+                    fontSize: '12px'
                   }}
                 >
                   <div>
-                    <span style={{ color: '#6B21A8', fontWeight: 600 }}>OData Service: </span>
-                    <span style={{ fontFamily: 'monospace', color: '#1E1B4B' }}>
-                      {primaryCandidate.odataServices?.[0] || 'Standard OData V4 / RAP'}
+                    <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>ABAP Program</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F172A' }}>
+                      {metadata.programName || 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span style={{ color: '#6B21A8', fontWeight: 600 }}>Business Role: </span>
-                    <span style={{ color: '#1E1B4B' }}>
-                      {primaryCandidate.businessRoles?.[0] || 'SAP_BR_BUSINESS_PROCESS_SPECIALIST'}
+                    <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>Package</span>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F172A' }}>
+                      {metadata.packageName || (isCustom ? '$TMP' : 'BASIS')}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>Component</span>
+                    <span style={{ fontWeight: 600, color: '#0F172A' }}>
+                      {metadata.softwareComponent || 'S4CORE 108'}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: '#64748B', display: 'block', fontSize: '11px' }}>Classification</span>
+                    <span style={{ fontWeight: 700, color: isCustom ? '#D97706' : '#2563EB' }}>
+                      {isCustom ? 'CUSTOM DYNPRO' : 'STANDARD SAP'}
                     </span>
                   </div>
                 </div>
               </div>
-            ) : (
+
+              {/* Step 2 Box: Fiori Apps Catalogue Discovery */}
               <div
                 style={{
-                  backgroundColor: '#F8FAFC',
-                  border: '1px dashed #CBD5E1',
-                  borderRadius: '6px',
-                  padding: '14px',
-                  fontSize: '12px',
-                  color: '#475569'
+                  border: '1px solid #E2E8F0',
+                  borderRadius: '8px',
+                  padding: '14px 16px',
+                  backgroundColor: '#FFFFFF'
                 }}
               >
-                No direct standard successor found in static baseline. FioriX has prepared a modern custom RAP Fiori Elements modernization path for this transaction.
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Library size={16} color={hasStandardApp ? '#7C3AED' : '#D97706'} />
+                    <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#1E293B', textTransform: 'uppercase' }}>
+                      2. SAP Fiori Apps Reference Library
+                    </span>
+                  </div>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      backgroundColor: hasStandardApp ? '#F3E8FF' : '#FEF3C7',
+                      color: hasStandardApp ? '#6B21A8' : '#92400E',
+                      border: `1px solid ${hasStandardApp ? '#E9D5FF' : '#FDE68A'}`,
+                      borderRadius: '12px',
+                      padding: '2px 8px',
+                      fontSize: '11px',
+                      fontWeight: 700
+                    }}
+                  >
+                    {hasStandardApp ? (
+                      <>
+                        <Sparkles size={12} />
+                        <span>STANDARD APP MATCH FOUND</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle size={12} />
+                        <span>NO STANDARD APP (GAP)</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+
+                {/* Sub-scenario A: Standard Fiori App exists */}
+                {hasStandardApp && primaryCandidate && (
+                  <div
+                    style={{
+                      backgroundColor: '#FAF5FF',
+                      border: '1px solid #E9D5FF',
+                      borderRadius: '6px',
+                      padding: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            backgroundColor: '#7C3AED',
+                            color: '#FFFFFF',
+                            fontFamily: 'monospace',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            padding: '2px 8px',
+                            borderRadius: '4px'
+                          }}
+                        >
+                          {primaryCandidate.appId}
+                        </span>
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#1E1B4B' }}>
+                          {primaryCandidate.appName}
+                        </span>
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          backgroundColor: '#FFFFFF',
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          border: '1px solid #DDD6FE',
+                          color: '#6B21A8'
+                        }}
+                      >
+                        {primaryCandidate.uiTechnology || 'Fiori Elements'}
+                      </span>
+                    </div>
+
+                    <p style={{ margin: 0, fontSize: '12px', color: '#4C1D95', lineHeight: 1.4 }}>
+                      {primaryCandidate.description}
+                    </p>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: '8px',
+                        fontSize: '11.5px',
+                        marginTop: '4px',
+                        borderTop: '1px dashed #DDD6FE',
+                        paddingTop: '8px'
+                      }}
+                    >
+                      <div>
+                        <span style={{ color: '#6B21A8', fontWeight: 600 }}>OData Service: </span>
+                        <span style={{ fontFamily: 'monospace', color: '#1E1B4B' }}>
+                          {primaryCandidate.odataServices?.[0] || 'Standard OData V4 / RAP'}
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6B21A8', fontWeight: 600 }}>Business Role: </span>
+                        <span style={{ color: '#1E1B4B' }}>
+                          {primaryCandidate.businessRoles?.[0] || 'SAP_BR_BUSINESS_PROCESS_SPECIALIST'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-scenario B: No Standard Fiori App exists (Gap!) */}
+                {!hasStandardApp && (
+                  <div
+                    style={{
+                      backgroundColor: '#FFFBEB',
+                      border: '1px solid #FDE68A',
+                      borderRadius: '6px',
+                      padding: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400E' }}>
+                      Why Custom Fiori Generation is Required:
+                    </div>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#78350F', lineHeight: 1.5 }}>
+                      Transaction <strong>{tcode}</strong> is registered in your SAP system, but SAP has no standard Fiori application in the official catalogue.
+                      To enable modern browser access for users, a custom Fiori Elements application must be synthesized.
+                    </p>
+                    <div
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #FCD34D',
+                        borderRadius: '4px',
+                        padding: '10px 12px',
+                        fontSize: '11.5px',
+                        color: '#451A03'
+                      }}
+                    >
+                      <strong>Clean Core Architecture:</strong> FioriX will formulate CDS View Entities, RAP Managed Behavior with Draft, and Fiori Elements List Report / Object Page in Generation Studio.
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Modal Footer */}
-        <div
-          style={{
-            padding: '16px 24px',
-            backgroundColor: '#F8FAFC',
-            borderTop: '1px solid #E2E8F0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px'
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              onClose();
-              navigate(`/catalogue?search=${encodeURIComponent(tcode)}`);
-            }}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#FFFFFF',
-              color: '#334155',
-              fontSize: '13px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <Library size={15} />
-            <span>View in Fiori Catalogue</span>
-          </button>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              type="button"
-              onClick={onClose}
+            {/* Footer */}
+            <div
               style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                border: '1px solid #CBD5E1',
-                backgroundColor: '#FFFFFF',
-                color: '#64748B',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                onClose();
-                if (onProceedToAssessment) {
-                  onProceedToAssessment();
-                } else {
-                  navigate(`/transaction-discovery?tcode=${encodeURIComponent(tcode)}`);
-                }
-              }}
-              style={{
-                display: 'inline-flex',
+                padding: '16px 24px',
+                backgroundColor: '#F8FAFC',
+                borderTop: '1px solid #E2E8F0',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                padding: '8px 18px',
-                borderRadius: '6px',
-                border: 'none',
-                backgroundColor: '#0066FF',
-                color: '#FFFFFF',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(0, 102, 255, 0.2)'
+                justifyContent: 'space-between',
+                gap: '12px'
               }}
             >
-              <span>Proceed to Assessment</span>
-              <ArrowRight size={15} />
-            </button>
-          </div>
-        </div>
+              {hasStandardApp ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    navigate(`/catalogue?search=${encodeURIComponent(tcode)}`);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 14px',
+                    borderRadius: '6px',
+                    border: '1px solid #CBD5E1',
+                    backgroundColor: '#FFFFFF',
+                    color: '#334155',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Library size={14} />
+                  <span>View in Fiori Catalogue</span>
+                </button>
+              ) : (
+                <div style={{ fontSize: '12px', color: '#64748B' }}>
+                  Target: Clean Core RAP Modernization
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    border: '1px solid #CBD5E1',
+                    backgroundColor: '#FFFFFF',
+                    color: '#64748B',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close
+                </button>
+
+                {hasStandardApp ? (
+                  /* Standard App Exists -> Proceed to Assessment (Adopt / Configure) */
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      if (onProceedToAssessment) {
+                        onProceedToAssessment('VERDICT');
+                      } else {
+                        navigate(`/assessment-results?tcode=${encodeURIComponent(tcode)}&tab=VERDICT`);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 18px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: '#16A34A',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(22, 163, 74, 0.25)'
+                    }}
+                  >
+                    <span>Proceed to Assessment (Adopt / Configure)</span>
+                    <ArrowRight size={15} />
+                  </button>
+                ) : (
+                  /* No Standard App -> Proceed to Modernization & Custom Build */
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      if (onProceedToAssessment) {
+                        onProceedToAssessment('MODERNIZATION_DECISION');
+                      } else {
+                        navigate(`/assessment-results?tcode=${encodeURIComponent(tcode)}&tab=MODERNIZATION_DECISION`);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 18px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: '#0066FF',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
+                    }}
+                  >
+                    <span>Proceed to Modernization &amp; Build</span>
+                    <ArrowRight size={15} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

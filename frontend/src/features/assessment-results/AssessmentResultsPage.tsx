@@ -103,6 +103,19 @@ export const AssessmentResultsPage: React.FC = () => {
   const [recommendation, setRecommendation] = useState<AssessmentRecommendation | null>(null);
 
   const [activeTab, setActiveTab] = useState<'VERDICT' | 'FIT_GAP' | 'TECHNICAL_EVIDENCE' | 'MODERNIZATION_DECISION'>(initialTab);
+
+  // Keep activeTab in sync with URL search parameter
+  useEffect(() => {
+    if (tabQueryRaw === 'TECHNICAL_EVIDENCE' || tabQueryRaw === 'TECHNICAL_VALIDATION' || tabQueryRaw === 'EVIDENCE') {
+      setActiveTab('TECHNICAL_EVIDENCE');
+    } else if (tabQueryRaw === 'FIT_GAP' || tabQueryRaw === 'FITGAP' || tabQueryRaw === 'CANDIDATE_COMPARISON' || tabQueryRaw === 'COMPARISON') {
+      setActiveTab('FIT_GAP');
+    } else if (tabQueryRaw === 'MODERNIZATION_DECISION' || tabQueryRaw === 'DECISION' || tabQueryRaw === 'MODERNIZATION') {
+      setActiveTab('MODERNIZATION_DECISION');
+    } else if (tabQueryRaw === 'VERDICT') {
+      setActiveTab('VERDICT');
+    }
+  }, [tabQueryRaw]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const [isDiscoveryDetailsOpen, setIsDiscoveryDetailsOpen] = useState<boolean>(false);
@@ -138,6 +151,14 @@ export const AssessmentResultsPage: React.FC = () => {
 
         if (!target && records.length > 0) {
           target = records[0];
+        }
+
+        if (target) {
+          target = {
+            ...target,
+            release: target.release || (target as any).targetRelease || 'SAP S/4HANA 2023 Private Edition',
+            packageName: target.packageName || (target as any).discoveryMetadata?.packageName || (target.tcode === 'F-53' || target.tcode === 'F-28' || target.tcode === 'FB03' ? 'FBAS' : 'FBAS')
+          };
         }
 
         setAssessment(target);

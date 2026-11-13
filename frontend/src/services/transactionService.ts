@@ -1,5 +1,5 @@
-import { transactionSearchService } from '../features/transaction-checker/services/transactionSearchService';
-import { TCodeSearchResponse } from '../features/transaction-checker/types';
+import { transactionSearchService } from './sap/transactionSearchService';
+import { TCodeSearchResponse } from './contracts/types';
 
 export interface ITransactionService {
   verifyTransaction(systemId: string, tcode: string): Promise<TCodeSearchResponse>;

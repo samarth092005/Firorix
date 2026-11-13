@@ -182,6 +182,10 @@ export function hashPassword(password) {
 
 export class AuthService {
   constructor(options = {}) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction && !options.jwtSecret && (!process.env.FIORIX_JWT_SECRET || process.env.FIORIX_JWT_SECRET.length < 32)) {
+      throw new Error('[FioriX Security] Fatal: FIORIX_JWT_SECRET environment variable with at least 32 characters is required in production.');
+    }
     this.jwtSecret = options.jwtSecret || process.env.FIORIX_JWT_SECRET || 'fiorix-enterprise-auth-secret-key-2026';
     this.tokenTtlMs = options.tokenTtlMs || 24 * 60 * 60 * 1000; // 24 hours
     this.revokedTokens = new Set();
@@ -267,7 +271,9 @@ export class AuthService {
 
     // Support deterministic dev tokens strictly in non-production
     if (cleanToken.startsWith('fiorix_dev_token_')) {
-      if (process.env.NODE_ENV === 'production') {
+      const isProduction = process.env.NODE_ENV === 'production';
+      const allowDevTokens = process.env.FIORIX_ALLOW_DEV_TOKENS === 'true' || process.env.NODE_ENV === 'test' || (!isProduction && process.env.FIORIX_DISABLE_DEV_TOKENS !== 'true');
+      if (isProduction || !allowDevTokens) {
         return null;
       }
       const roleSuffix = cleanToken.replace('fiorix_dev_token_', '').toUpperCase();

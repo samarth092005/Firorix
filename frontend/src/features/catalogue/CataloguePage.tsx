@@ -114,7 +114,7 @@ export const CataloguePage: React.FC = () => {
     } catch (err: any) {
       if (err instanceof ApiError && (err.isNetworkError || err.statusCode === 0)) {
         setIsOffline(true);
-        setError('Cannot reach FioriX backend service on port 4004. Please verify the backend is running.');
+        setError('Cannot reach Fiorify backend service on port 4004. Please verify the backend is running.');
       } else {
         setError(err.message || 'Failed to load catalogue records from backend.');
       }
@@ -421,7 +421,7 @@ export const CataloguePage: React.FC = () => {
             Backend Catalogue Service Offline
           </h2>
           <p style={{ fontSize: '13px', color: '#555', maxWidth: '500px', margin: '0 auto 16px' }}>
-            Unable to connect to the FioriX backend API on port 4004. Please verify the backend service is running.
+            Unable to connect to the Fiorify backend API on port 4004. Please verify the backend service is running.
           </p>
           <button
             type="button"
@@ -519,7 +519,7 @@ export const CataloguePage: React.FC = () => {
               </div>
               <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.4 }}>
                 Customer-specific transactions (Z*/Y*) do not exist in SAP's public standard Fiori Apps Reference Library.
-                You can modernise this transaction directly using <strong>FioriX Generation Studio</strong> to build custom ABAP RAP CDS Views and SAP Fiori Elements UI.
+                You can modernise this transaction directly using <strong>Fiorify Generation Studio</strong> to build custom ABAP RAP CDS Views and SAP Fiori Elements UI.
               </div>
             </div>
           </div>

@@ -170,7 +170,7 @@ export class SapTransactionDiscoveryAdapter {
   async searchAdtTransaction(tcode) {
     try {
       const response = await this.btpAdapter.executeRequest({
-        path: `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeURIComponent(tcode)}&maxResults=5`,
+        path: `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeURIComponent(tcode)}&maxResults=10`,
         method: 'GET',
         headers: {
           Accept: 'application/xml, text/xml, */*'
@@ -178,13 +178,30 @@ export class SapTransactionDiscoveryAdapter {
       });
       if (response && response.success && response.data) {
         const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        const re = new RegExp('<adtcore:objectReference[^>]+adtcore:name="' + tcode + '"[^>]*/>', 'i');
-        const match = raw.match(re);
-        if (match) {
-          const tag = match[0];
-          const nameMatch = tag.match(/adtcore:name="([^"]+)"/);
-          const pkgMatch = tag.match(/adtcore:packageName="([^"]+)"/);
-          const descMatch = tag.match(/adtcore:description="([^"]+)"/);
+        const tagRegex = /<adtcore:objectReference\b[^>]*\/>/gi;
+        const tags = raw.match(tagRegex) || [];
+
+        let bestTag = null;
+        for (const tag of tags) {
+          const nameMatch = tag.match(/adtcore:name="([^"]+)"/i);
+          if (nameMatch && nameMatch[1].toUpperCase() === tcode.toUpperCase()) {
+            const typeMatch = tag.match(/adtcore:type="([^"]+)"/i);
+            const type = typeMatch ? typeMatch[1].toUpperCase() : '';
+            // Prioritize SAP Transaction Object (TRAN/T or TRAN) over Function Groups (FUGR), Programs, etc.
+            if (type.startsWith('TRAN')) {
+              bestTag = tag;
+              break;
+            }
+            if (!bestTag) {
+              bestTag = tag;
+            }
+          }
+        }
+
+        if (bestTag) {
+          const nameMatch = bestTag.match(/adtcore:name="([^"]+)"/i);
+          const pkgMatch = bestTag.match(/adtcore:packageName="([^"]+)"/i);
+          const descMatch = bestTag.match(/adtcore:description="([^"]+)"/i);
           return {
             found: true,
             tcode: nameMatch ? nameMatch[1] : tcode,

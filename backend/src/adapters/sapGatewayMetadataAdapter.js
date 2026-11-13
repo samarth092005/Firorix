@@ -118,6 +118,7 @@ export class SapGatewayMetadataAdapter {
     this.catalogCache = null;
     this.catalogCacheTime = 0;
     this.metadataCache = new Map();
+    this.maxCacheEntries = Number(options.maxCacheEntries) || 200;
   }
 
   /**
@@ -305,6 +306,10 @@ export class SapGatewayMetadataAdapter {
       timestamp: new Date().toISOString()
     };
 
+    if (this.metadataCache.size >= this.maxCacheEntries) {
+      const oldestKey = this.metadataCache.keys().next().value;
+      if (oldestKey) this.metadataCache.delete(oldestKey);
+    }
     this.metadataCache.set(cleanName, result);
     return result;
   }

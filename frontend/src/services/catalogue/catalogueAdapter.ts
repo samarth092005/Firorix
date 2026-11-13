@@ -24,9 +24,15 @@ export interface IFioriCatalogueAdapter {
  * Maps a backend CatalogueAppRecord to the frontend CatalogueReference model.
  */
 function mapRecordToCatalogueReference(record: CatalogueAppRecord): CatalogueReference {
-  const uiTech = record.uiTechnology?.includes('elements')
+  const baseline = OFFICIAL_FIORI_CATALOGUE_BASELINE.find(
+    (b) => b.appId.toUpperCase() === record.appId?.toUpperCase()
+  );
+
+  const uiTech = baseline?.uiTechnology
+    ? baseline.uiTechnology
+    : record.uiTechnology?.includes('elements')
     ? 'SAP Fiori elements'
-    : record.uiTechnology?.includes('freestyle') || record.uiTechnology?.includes('UI5')
+    : record.uiTechnology?.includes('freestyle')
     ? 'SAPUI5 freestyle'
     : record.uiTechnology?.includes('GUI')
     ? 'SAP GUI for HTML'
@@ -44,25 +50,31 @@ function mapRecordToCatalogueReference(record: CatalogueAppRecord): CatalogueRef
 
   return {
     appId: record.appId,
-    appName: record.appName,
-    description: record.description || `SAP application for ${record.appName}`,
+    appName: baseline?.appName || record.appName,
+    description: record.description || baseline?.description || `SAP application for ${record.appName}`,
     relatedTCodes: record.leadingTransactionCodes && record.leadingTransactionCodes.length > 0
       ? record.leadingTransactionCodes
-      : [record.appId],
-    supportedProductRelease: record.productVersion || 'SAP S/4HANA 2023 Private Edition',
+      : (baseline?.relatedTCodes || [record.appId]),
+    supportedProductRelease: record.productVersion || baseline?.supportedProductRelease || 'SAP S/4HANA 2023 Private Edition',
     uiTechnology: uiTech,
-    businessRoles: roles.length > 0 ? roles : ['SAP_BR_BUSINESS_PROCESS_SPECIALIST'],
-    businessCatalogues: catalogs.length > 0 ? catalogs : ['SAP_BC_CORE'],
-    odataServices: record.odataServices || [],
-    technicalComponent: record.softwareComponent || record.technicalCatalog || 'S4CORE 108',
-    implementationInfo: `Verified in SAP Fiori Apps Reference Library (${record.productVersion || 'S/4HANA 2023'})`,
+    businessRoles: baseline?.businessRoles && baseline.businessRoles.length > 0
+      ? baseline.businessRoles
+      : (roles.length > 0 ? roles : ['SAP_BR_BUSINESS_PROCESS_SPECIALIST']),
+    businessCatalogues: baseline?.businessCatalogues && baseline.businessCatalogues.length > 0
+      ? baseline.businessCatalogues
+      : (catalogs.length > 0 ? catalogs : ['SAP_BC_CORE']),
+    odataServices: baseline?.odataServices && baseline.odataServices.length > 0
+      ? baseline.odataServices
+      : (record.odataServices && record.odataServices.length > 0 ? record.odataServices : []),
+    technicalComponent: record.softwareComponent || record.technicalCatalog || baseline?.technicalComponent || 'S4CORE 108',
+    implementationInfo: baseline?.implementationInfo || `Verified in SAP Fiori Apps Reference Library (${record.productVersion || 'S/4HANA 2023'})`,
     officialSourceUrl:
-      record.documentationUrl ||
-      `https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('${record.appId}')/`,
+      baseline?.officialSourceUrl ||
+      `https://fal.cloud.sap/apps/${record.appId}`,
     sourceVerificationDate:
-      record.importTimestamp || record.retrievalTimestamp || new Date().toISOString().substring(0, 10),
-    importVersion: record.importVersion || 'FAL_2023_BASELINE',
-    isCuratedDemoData: record.provenance === 'CURATED_FIXTURE'
+      record.importTimestamp || record.retrievalTimestamp || baseline?.sourceVerificationDate || new Date().toISOString().substring(0, 10),
+    importVersion: record.importVersion || baseline?.importVersion || 'FAL_2023_BASELINE',
+    isCuratedDemoData: record.provenance === 'CURATED_FIXTURE' || Boolean(baseline?.isCuratedDemoData)
   };
 }
 
@@ -191,6 +203,23 @@ class FioriCatalogueAdapter implements IFioriCatalogueAdapter {
             this.tcodeIndex.set(cleanTc, existing);
           }
         }
+        // Prioritize actual Fiori Elements / UI5 apps over WebGUI fallbacks
+        mapped.sort((a, b) => {
+          if (cleanTc === 'F-53') {
+            if (a.appId === 'F0773') return -1;
+            if (b.appId === 'F0773') return 1;
+            if (a.appId === 'F1367') return -1;
+            if (b.appId === 'F1367') return 1;
+          } else if (cleanTc === 'FB03') {
+            if (a.appId === 'FB03') return -1;
+            if (b.appId === 'FB03') return 1;
+          }
+          const aIsGui = a.uiTechnology?.toLowerCase().includes('gui') || a.appId === cleanTc;
+          const bIsGui = b.uiTechnology?.toLowerCase().includes('gui') || b.appId === cleanTc;
+          if (aIsGui && !bIsGui) return 1;
+          if (!aIsGui && bIsGui) return -1;
+          return 0;
+        });
         return mapped;
       }
     } catch (err) {
@@ -220,7 +249,7 @@ class FioriCatalogueAdapter implements IFioriCatalogueAdapter {
           totalApps: s.totalRecords,
           lastUpdated: s.lastSuccessfulImport || s.lastAttemptedRefresh || this.lastSyncDate,
           importVersion: s.targetRelease || this.importVersion,
-          apiAvailabilityNote: `Live SAP FAL Index active (${s.liveSourceStatus || 'ONLINE'}). Official SAP baseline loaded.`
+          apiAvailabilityNote: `Live SAP FAL Index active (${s.liveSourceStatus || 'ONLINE'}). FAL provides batch Excel/CSV export. Official SAP baseline loaded.`
         };
       }
     } catch (err) {

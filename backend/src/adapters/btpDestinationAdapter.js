@@ -592,6 +592,7 @@ export class BtpDestinationAdapter {
 
     // 5. Gateway HTTP 502 / 503 / 504: Upstream / Cloud Connector / Proxy failures
     if (httpStatus === 502 || httpStatus === 503 || httpStatus === 504) {
+      this.lastFailureTime = Date.now();
       return {
         success: false,
         statusCode: 'CONNECTIVITY_FAILED',
@@ -604,6 +605,7 @@ export class BtpDestinationAdapter {
     // 6. Network socket errors (including local Windows unroutable virtual host)
     const networkErrorCodes = ['ECONNREFUSED', 'ENOTFOUND', 'EHOSTUNREACH', 'EAI_AGAIN'];
     if (networkErrorCodes.includes(err?.code) || cleanMessage.includes('ENOTFOUND') || cleanMessage.includes('ECONNREFUSED')) {
+      this.lastFailureTime = Date.now();
       const isVirtualHost = this.destinationName === 'S21';
       const remediation = isVirtualHost
         ? 'Target URL (http://kbl_fiori:8000) is an OnPremise virtual host mapped in SAP Cloud Connector. For local developer execution, an active tunnel to the BTP Connectivity proxy (e.g., port 20003) or corporate VPN line-of-sight is required.'

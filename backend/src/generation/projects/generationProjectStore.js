@@ -337,6 +337,7 @@ export class GenerationProjectStore {
       if (patch.validationReport !== undefined) existing.validationReport = patch.validationReport;
       if (patch.fioriConfig !== undefined) existing.fioriConfig = patch.fioriConfig;
       if (patch.reviewRecord !== undefined) existing.reviewRecord = patch.reviewRecord;
+      if (patch.exportHistory !== undefined) existing.exportHistory = patch.exportHistory;
 
       existing.specificationVersion = (existing.specificationVersion || 1) + 1;
       existing.updatedAt = now;
@@ -636,11 +637,11 @@ export class GenerationProjectStore {
           notes = 'Workspace and persistence initialized';
           break;
         case 'PHASE_2_REQUIREMENTS':
-          isCompleted = Boolean(project.requirementsSpec && project.requirementsSpec.items && project.requirementsSpec.items.length > 0);
+          isCompleted = Boolean(project.requirementsSpec && project.requirementsSpec.items && project.requirementsSpec.items.length > 0 && project.requirementsSpec.status === 'CONFIRMED');
           notes = isCompleted ? `${project.requirementsSpec.items.length} requirements documented` : 'Pending Phase 2 requirements definition';
           break;
         case 'PHASE_3_DATA_MODEL':
-          isCompleted = Boolean(project.dataModelSpec && project.dataModelSpec.rootEntity);
+          isCompleted = Boolean(project.dataModelSpec && project.dataModelSpec.rootEntity && project.dataModelSpec.status === 'CONFIRMED');
           notes = isCompleted ? 'CDS entity hierarchy modeled' : 'Pending Phase 3 CDS data model definition';
           break;
         case 'PHASE_4_ARCHITECTURE':
@@ -781,6 +782,39 @@ export class GenerationProjectStore {
       count: project.activityHistory?.length || 0,
       activityHistory: project.activityHistory || []
     };
+  }
+
+  /**
+   * Purges all generated studio projects and resets storage to a clean baseline.
+   */
+  async resetDemoProjects() {
+    if (this.repository && this.repository.pool) {
+      try {
+        await this.repository.pool.query(
+          'TRUNCATE TABLE generation_artifacts, generation_specifications, generation_projects CASCADE'
+        );
+      } catch (err) {
+        console.warn('[GenerationProjectStore] Postgres purge note:', err.message);
+      }
+    }
+
+    await this._ensureStorageDir();
+    let purgedCount = 0;
+    try {
+      const entries = await fs.promises.readdir(this.storageDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const dirPath = path.join(this.storageDir, entry.name);
+          await fs.promises.rm(dirPath, { recursive: true, force: true });
+          purgedCount++;
+        }
+      }
+    } catch (err) {
+      console.warn('[GenerationProjectStore] Reset demo files purge error:', err.message);
+    }
+
+    this._writeLocks.clear();
+    return { success: true, purgedCount };
   }
 }
 

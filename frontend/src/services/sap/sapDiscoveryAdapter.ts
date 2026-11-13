@@ -1,12 +1,12 @@
 import {
   TransactionDiscoveryRequest,
   TransactionDiscoveryResponse,
-  CatalogueReference
+  CatalogueReference,
+  SapSystemRecord
 } from '../contracts/types';
-import { transactionSearchService } from '../../features/transaction-checker/services/transactionSearchService';
-import { mockSapAdapter } from '../../features/transaction-checker/adapters/mockSapAdapter';
+import { transactionSearchService } from './transactionSearchService';
+import { mockSapAdapter } from './mockSapAdapter';
 import { fioriCatalogueAdapter } from '../catalogue/catalogueAdapter';
-import { SapSystemRecord } from '../../features/transaction-checker/types';
 
 export interface ISapDiscoveryAdapter {
   inspectTransaction(request: TransactionDiscoveryRequest): Promise<TransactionDiscoveryResponse>;
@@ -96,8 +96,8 @@ class SapDiscoveryAdapter implements ISapDiscoveryAdapter {
       originalSystem: tx?.originalSystem || (classification === 'CUSTOM' ? 'S21' : 'SAP'),
       softwareComponent: tx?.softwareComponent || 'S4CORE 108',
       metadataStatus: tx?.metadataStatus || (exists ? 'COMPLETE' : 'NOT_AVAILABLE'),
-      isLiveVerified: isLiveSystem,
-      provenance: isLiveSystem ? 'LIVE_SAP_S21' : 'CURATED_DEMO_FIXTURE',
+      isLiveVerified: Boolean(isLiveSystem && (tx as any)?.isLiveVerified === true),
+      provenance: Boolean(isLiveSystem && (tx as any)?.isLiveVerified === true) ? 'LIVE_SAP_S21' : 'CURATED_DEMO_FIXTURE',
       tadirEvidence: {
         pgmid: tx?.tadir?.pgmid || 'R3TR',
         object: tx?.tadir?.object || 'TRAN',

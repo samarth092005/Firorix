@@ -57,6 +57,11 @@ export class ArchitectureDecisionEngine {
       /legacy|bapi|idoc|custom function module|existing logic/i.test(`${r.title} ${r.description}`)
     );
 
+    const sourceTcode = (project.sourceTransactionCode || '').toUpperCase().trim();
+    const isMonitoringOrReporting =
+      /^(ST22|SM21|SM59|SM50|SM66|SLG1|AL08|ST03|DB02|STAT)/i.test(sourceTcode) ||
+      /dump|monitor|analysis|audit log|system trace|runtime error/i.test(`${project.projectName} ${project.description || ''}`);
+
     // Check evidence sufficiency
     const unresolvedDecisions = [];
     const evidenceReferences = [];
@@ -108,6 +113,11 @@ export class ArchitectureDecisionEngine {
       selectedProfile = RAP_PROFILES.UNMANAGED_RAP;
       rationale = 'Confirmed requirements require integration with existing legacy business logic / BAPIs. Unmanaged RAP profile selected to delegate transactional buffer and save execution.';
       persistenceApproach = PERSISTENCE_APPROACHES.UNMANAGED_LEGACY_API;
+      draftEnabled = false;
+    } else if (isMonitoringOrReporting && !hasCreate && !hasDelete) {
+      selectedProfile = RAP_PROFILES.READ_ONLY_QUERY;
+      rationale = `Administrative diagnostics / monitoring transaction (${sourceTcode || 'Report'}): Read-Only Query profile recommended to avoid unnecessary draft tables and mutation overhead under Clean Core.`;
+      persistenceApproach = PERSISTENCE_APPROACHES.CUSTOM_TABLES;
       draftEnabled = false;
     } else if (!isTransactional) {
       selectedProfile = RAP_PROFILES.READ_ONLY_QUERY;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Layers,
@@ -6,889 +6,439 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  Database,
-  ChevronRight,
   Code2,
   Sparkles,
+  Database,
   Cpu,
-  FileCode,
-  Terminal,
-  Eye,
-  Download,
-  Box,
-  GitBranch,
-  Play,
-  Workflow,
-  Rocket,
-  FileText,
-  FileArchive,
-  Compass,
-  FolderArchive,
-  RefreshCw,
-  ExternalLink
+  LayoutTemplate,
+  Zap,
+  Lock
 } from 'lucide-react';
 import './LandingPage.css';
 
-interface SampleTCode {
+interface QuickScenario {
   tcode: string;
   name: string;
   module: string;
-  program: string;
-  fioriAppId: string;
-  fioriTitle: string;
-  appType: string;
-  fitScore: number;
-  fitCategory: 'DIRECT_REPLACEMENT' | 'FIT_WITH_ENHANCEMENT' | 'CUSTOM_RAP_BUILD';
-  odataService: string;
-  cleanCore: boolean;
-  actionText: string;
-  targetRoute: string;
+  outcome: 'STANDARD_ADOPT' | 'CUSTOM_RAP_BUILD';
+  fioriAppId?: string;
+  description: string;
 }
 
-const SAMPLE_TCODES: SampleTCode[] = [
+const QUICK_SCENARIOS: QuickScenario[] = [
   {
     tcode: 'ME21N',
     name: 'Create Purchase Order',
-    module: 'Materials Management (MM-PUR)',
-    program: 'SAPLMEGUI',
+    module: 'Procurement (MM-PUR)',
+    outcome: 'STANDARD_ADOPT',
     fioriAppId: 'F0842A',
-    fioriTitle: 'Manage Purchase Orders',
-    appType: 'SAP Fiori Elements (List Report / Object Page)',
-    fitScore: 94,
-    fitCategory: 'DIRECT_REPLACEMENT',
-    odataService: 'MM_PUR_PO_MAINT_V2_SRV',
-    cleanCore: true,
-    actionText: 'Launch Assessment in FioriX',
-    targetRoute: '/transaction-discovery?tcode=ME21N'
+    description: 'Matches official SAP Fiori Elements app "Manage Purchase Orders" with full OData V4 support.'
   },
   {
-    tcode: 'FB50',
-    name: 'G/L Account Document Post',
-    module: 'Financial Accounting (FI-GL)',
-    program: 'SAPMF05A',
-    fioriAppId: 'F0718',
-    fioriTitle: 'Post General Journal Entries',
-    appType: 'SAP Fiori Elements (Analytical / Transactional)',
-    fitScore: 91,
-    fitCategory: 'DIRECT_REPLACEMENT',
-    odataService: 'FAC_FINANCIAL_DOCUMENT_POST_SRV',
-    cleanCore: true,
-    actionText: 'Launch Assessment in FioriX',
-    targetRoute: '/transaction-discovery?tcode=FB50'
+    tcode: 'F-53',
+    name: 'Post Outgoing Payments',
+    module: 'Financials (FI-AP)',
+    outcome: 'STANDARD_ADOPT',
+    fioriAppId: 'F0773',
+    description: 'Direct replacement with standard transactional Fiori app. PFCG role SAP_BR_AP_ACCOUNTANT.'
   },
   {
-    tcode: 'VA01',
-    name: 'Create Sales Order',
-    module: 'Sales & Distribution (SD-SLS)',
-    program: 'SAPMV45A',
-    fioriAppId: 'F3893',
-    fioriTitle: 'Create Sales Orders - Fast Entry',
-    appType: 'SAP Fiori (Freestyle UI5 / Flexible Programming)',
-    fitScore: 88,
-    fitCategory: 'FIT_WITH_ENHANCEMENT',
-    odataService: 'API_SALES_ORDER_SRV',
-    cleanCore: true,
-    actionText: 'Launch Assessment in FioriX',
-    targetRoute: '/transaction-discovery?tcode=VA01'
-  },
-  {
-    tcode: 'Z_VA02_EXT',
-    name: 'Custom Sales Order Maintenance',
-    module: 'Custom SD Extensions',
-    program: 'ZSAPMV45A_CUSTOM',
-    fioriAppId: 'NO_STD_FIT',
-    fioriTitle: 'Custom Sales Order Fiori App (RAP Managed)',
-    appType: 'RAP Business Object + Fiori Elements V4 (Generated)',
-    fitScore: 42,
-    fitCategory: 'CUSTOM_RAP_BUILD',
-    odataService: 'ZUI_SALESORDER_O4 (Generated)',
-    cleanCore: true,
-    actionText: 'Design & Generate in Generation Studio',
-    targetRoute: '/generation-studio'
-  },
-  {
-    tcode: 'MM01',
-    name: 'Create Material & Goods Master',
-    module: 'Materials Management (MM-MD)',
-    program: 'SAPLMG01',
-    fioriAppId: 'F1990',
-    fioriTitle: 'Manage Product Master Data',
-    appType: 'SAP Fiori Elements',
-    fitScore: 89,
-    fitCategory: 'DIRECT_REPLACEMENT',
-    odataService: 'CMD_PRODUCT_MAINT_SRV',
-    cleanCore: true,
-    actionText: 'Launch Assessment in FioriX',
-    targetRoute: '/transaction-discovery?tcode=MM01'
-  }
-];
-
-const CAPABILITIES = [
-  {
-    icon: SearchCode,
-    title: 'Automated T-Code Discovery',
-    description: 'Direct inspection of SAP kernel dictionary tables (TSTC, TSTCT, TADIR) to extract dynpros, screens, and custom user exits in real time.'
-  },
-  {
-    icon: Database,
-    title: '18,000+ App Fiori Catalog Intelligence',
-    description: 'Continuously synced with the official SAP Fiori Reference Library to match standard apps, verified OData APIs, and S/4HANA release versions.'
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Clean Core Fit-Gap Governance',
-    description: 'Evidence-based delta analysis assessing custom database tables, modifications, and extension hooks with Lead Architect approval gating.'
-  },
-  {
-    icon: Code2,
-    title: 'RAP Backend Generator (S/4HANA 2023)',
-    description: 'Synthesizes clean ABAP CDS View Entities, Behavior Definitions with strict ( 2 ), behavior pool classes, DCLs, and service definitions.'
-  },
-  {
-    icon: Box,
-    title: 'Fiori Elements V4 Application Generator',
-    description: 'Generates complete SAPUI5 applications conforming to Fiori Design Guidelines, with manifest.json, annotations.xml, and @ui5/cli tooling.'
-  },
-  {
-    icon: Play,
-    title: 'Ephemeral Mock OData V4 Preview',
-    description: 'Instant in-process local mock server with live query evaluation, synthetic records, and visual watermarking. No SAP connection required.'
-  }
-];
-
-const KPI_METRICS = [
-  {
-    value: '18,000+',
-    label: 'Official Fiori Apps Indexed',
-    description: 'Continuously synced with SAP Fiori Reference Library and S/4HANA 2023–2026 baselines.'
-  },
-  {
-    value: '80%+',
-    label: 'Boilerplate Code Reduction',
-    description: 'Automates CDS views, draft behavior definitions, and Fiori Elements XML annotations.'
-  },
-  {
-    value: '100%',
-    label: 'Clean Core RAP Compliance',
-    description: 'Generates modern ABAP Cloud syntax (define view entity, strict 2, no legacy direct DB updates).'
-  },
-  {
-    value: '< 3s',
-    label: 'Instant Local Mock Preview',
-    description: 'Ephemeral in-process OData V4 mock runtime allows testing UI without waiting for SAP transports.'
+    tcode: 'ZPURCHASE',
+    name: 'Custom Purchase Approval Dynpro',
+    module: 'Custom Extension (Z)',
+    outcome: 'CUSTOM_RAP_BUILD',
+    description: '100% Functional Gap. Accelerates custom CDS View Entities, RAP Managed with Draft & Fiori Elements synthesis.'
   }
 ];
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedTcode, setSelectedTcode] = useState<SampleTCode>(SAMPLE_TCODES[0]);
-  const [activeStudioTab, setActiveStudioTab] = useState<'abap' | 'fiori' | 'preview' | 'handover'>('abap');
+
+  const handleLaunchDemo = (targetUrl: string = '/overview') => {
+    navigate(`/login?mode=demo&redirect=${encodeURIComponent(targetUrl)}`);
+  };
 
   return (
-    <div className="landing-root">
-      {/* 1. Navigation Header */}
-      <header className="landing-nav">
-        <div className="landing-brand" onClick={() => navigate('/')}>
-          <div className="landing-brand-logo">
-            <Layers size={18} />
+    <div className="landing-root" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#F8FAFC' }}>
+      {/* 1. Header Navigation */}
+      <header
+        style={{
+          height: '64px',
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #E2E8F0',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 32px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: '#0066FF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF'
+            }}
+          >
+            <Layers size={20} />
           </div>
-          <span className="landing-brand-title">
-            Fiori<span className="landing-brand-accent">X</span>
-          </span>
-          <span className="nav-version-badge">2026 Enterprise</span>
+          <div>
+            <span style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px' }}>
+              Fiori<span style={{ color: '#0066FF' }}>X</span>
+            </span>
+            <span
+              style={{
+                marginLeft: '8px',
+                fontSize: '11px',
+                fontWeight: 700,
+                padding: '2px 6px',
+                borderRadius: '4px',
+                backgroundColor: '#EFF6FF',
+                color: '#1D4ED8'
+              }}
+            >
+              Enterprise 2026
+            </span>
+          </div>
         </div>
 
-        <nav className="landing-nav-links">
-          <a href="#sandbox" className="landing-nav-link">Discovery Console</a>
-          <a href="#generation-studio" className="landing-nav-link nav-link-highlight">
-            <Sparkles size={13} className="nav-sparkle-icon" />
-            <span>Generation Studio</span>
-            <span className="nav-new-pill">NEW</span>
-          </a>
-          <a href="#workflow" className="landing-nav-link">Modernization Flow</a>
-          <a href="#capabilities" className="landing-nav-link">Capabilities</a>
-          <a href="#clean-core" className="landing-nav-link">Clean Core</a>
-        </nav>
-
-        <div className="landing-nav-actions">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
             type="button"
-            className="btn-ghost"
             onClick={() => navigate('/login')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: '1px solid #CBD5E1',
+              backgroundColor: '#FFFFFF',
+              color: '#334155',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
           >
             Sign In
           </button>
           <button
             type="button"
-            className="btn-primary-compact"
-            onClick={() => navigate('/login?mode=demo')}
+            onClick={() => handleLaunchDemo('/overview')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 18px',
+              borderRadius: '6px',
+              border: 'none',
+              backgroundColor: '#0066FF',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0, 102, 255, 0.2)'
+            }}
           >
-            <span>Launch Platform</span>
-            <ArrowRight size={14} />
+            <span>Launch Demo Platform</span>
+            <ArrowRight size={15} />
           </button>
         </div>
       </header>
 
       {/* 2. Hero Section */}
-      <section className="landing-hero">
-        <div className="hero-pill-badge">
-          <span className="pulse-dot" />
-          <span>✨ GENERATION STUDIO NOW ACTIVE &bull; SAP S/4HANA 2023 RAP &amp; FIORI ELEMENTS SYNTHESIS</span>
+      <section
+        style={{
+          padding: '64px 32px 48px',
+          maxWidth: '1100px',
+          margin: '0 auto',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '20px'
+        }}
+      >
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '4px 14px',
+            borderRadius: '20px',
+            backgroundColor: '#EFF6FF',
+            border: '1px solid #BFDBFE',
+            fontSize: '12px',
+            fontWeight: 700,
+            color: '#1D4ED8'
+          }}
+        >
+          <Sparkles size={14} color="#0066FF" />
+          <span>SAP S/4HANA Clean Core &amp; Fiori Modernization Engine</span>
         </div>
 
-        <h1 className="hero-headline">
-          Modernize Legacy SAP GUI Transactions to Clean Core Fiori &amp; Automated RAP Backends
+        <h1
+          style={{
+            fontSize: '44px',
+            fontWeight: 800,
+            lineHeight: 1.15,
+            color: '#0F172A',
+            letterSpacing: '-1px',
+            maxWidth: '850px'
+          }}
+        >
+          Transform SAP GUI Transactions into Modern <span style={{ color: '#0066FF' }}>Fiori Applications</span>
         </h1>
 
-        <p className="hero-subheadline">
-          The end-to-end SAP modernization platform. Discover standard Fiori apps with kernel-grounded evidence,
-          or generate production-ready ABAP RAP CDS entities, behaviors, and SAP Fiori Elements apps with instant local mock previews.
+        <p
+          style={{
+            fontSize: '17px',
+            lineHeight: 1.6,
+            color: '#475569',
+            maxWidth: '720px'
+          }}
+        >
+          Inspect legacy SAP transaction codes, verify equivalent standard applications in the official SAP Fiori Reference Library,
+          and automatically generate Clean Core ABAP RAP &amp; Fiori Elements apps where genuine functional gaps exist.
         </p>
 
-        <div className="hero-cta-group">
+        {/* CTA Buttons */}
+        <div style={{ display: 'flex', gap: '14px', marginTop: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             type="button"
-            className="btn-hero-primary"
-            onClick={() => navigate('/login?mode=demo&redirect=/generation-studio')}
+            onClick={() => handleLaunchDemo('/overview')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '14px 28px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: '#0066FF',
+              color: '#FFFFFF',
+              fontSize: '15px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0, 102, 255, 0.25)'
+            }}
           >
-            <Code2 size={18} />
-            <span>Launch Generation Studio</span>
+            <Zap size={18} />
+            <span>Enter Demo Workspace</span>
             <ArrowRight size={16} />
           </button>
 
           <button
             type="button"
-            className="btn-hero-secondary"
-            onClick={() => navigate('/login?mode=demo&redirect=/transaction-discovery')}
+            onClick={() => handleLaunchDemo('/transaction-discovery')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '14px 24px',
+              borderRadius: '8px',
+              border: '1px solid #CBD5E1',
+              backgroundColor: '#FFFFFF',
+              color: '#0F172A',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
           >
-            <SearchCode size={18} />
-            <span>Explore T-Code Discovery</span>
+            <SearchCode size={18} color="#0066FF" />
+            <span>Inspect a Transaction Code</span>
           </button>
-
-          <a href="#generation-studio" className="btn-hero-ghost">
-            <span>See Generated Artifacts</span>
-            <ChevronRight size={16} />
-          </a>
         </div>
 
-        <div className="hero-trust-bar">
-          <div className="trust-item">
-            <CheckCircle2 size={15} color="#107e3e" />
-            <span>Standard SAP Fiori First</span>
+        {/* Trust Badges */}
+        <div style={{ display: 'flex', gap: '24px', marginTop: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#475569' }}>
+            <CheckCircle2 size={15} color="#16A34A" />
+            <span>Standard SAP Fiori Prioritization</span>
           </div>
-          <div className="trust-item">
-            <CheckCircle2 size={15} color="#107e3e" />
-            <span>S/4HANA 2023 RAP &amp; ABAP Cloud</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#475569' }}>
+            <CheckCircle2 size={15} color="#16A34A" />
+            <span>S/4HANA 2023 Clean Core Tier 2</span>
           </div>
-          <div className="trust-item">
-            <CheckCircle2 size={15} color="#107e3e" />
-            <span>Offline Ephemeral Mock OData V4</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#475569' }}>
+            <CheckCircle2 size={15} color="#16A34A" />
+            <span>RAP Managed with Draft</span>
           </div>
-          <div className="trust-item">
-            <CheckCircle2 size={15} color="#107e3e" />
-            <span>Zero-Dependency PKZIP Handover</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: '#475569' }}>
+            <CheckCircle2 size={15} color="#16A34A" />
+            <span>Instant In-Browser Mock Preview</span>
           </div>
         </div>
       </section>
 
-      {/* 3. Interactive Discovery & Decision Console Sandbox */}
-      <section id="sandbox" className="sandbox-section">
-        <div className="sandbox-container">
-          <div className="sandbox-header">
-            <span className="sandbox-kicker">Interactive Evaluation</span>
-            <h2 className="sandbox-title">Experience Grounded Transaction Matching &amp; Gap Resolution</h2>
-            <p className="sandbox-subtitle">
-              Select a standard SAP transaction or a custom legacy extension to preview how FioriX inspects technical dictionary tables,
-              matches official Fiori apps, or routes genuine gaps to Generation Studio.
-            </p>
+      {/* 3. Three-Pillar Process Flow */}
+      <section style={{ backgroundColor: '#FFFFFF', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0', padding: '48px 32px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px', color: '#0066FF' }}>
+              Standard-First Modernization Pipeline
+            </span>
+            <h2 style={{ fontSize: '26px', fontWeight: 800, color: '#0F172A', marginTop: '6px' }}>
+              How Fiorify Eliminates the S/4HANA Modernization Bottleneck
+            </h2>
           </div>
 
-          {/* Quick Selector Pills */}
-          <div className="tcode-pills">
-            {SAMPLE_TCODES.map((item) => {
-              const isSelected = selectedTcode.tcode === item.tcode;
-              const isCustom = item.fitCategory === 'CUSTOM_RAP_BUILD';
-              return (
-                <button
-                  key={item.tcode}
-                  type="button"
-                  className={`tcode-pill ${isSelected ? 'active' : ''} ${isCustom ? 'pill-custom' : ''}`}
-                  onClick={() => setSelectedTcode(item)}
-                >
-                  <span className="tcode-pill-code">{item.tcode}</span>
-                  <span className="tcode-pill-name">({item.name})</span>
-                  {isCustom && <span className="pill-badge-new">RAP BUILD</span>}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Discovery Console Card */}
-          <div className="console-card">
-            {/* System Status Header */}
-            <div className="console-system-bar">
-              <div className="system-status-indicator">
-                <span className="system-status-dot" />
-                <span>Active Target: S21 (Client 200) &bull; SAP_BASIS 7.58 &bull; SAP_UI 7.58</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+            {/* Step 1 */}
+            <div style={{ padding: '24px', borderRadius: '10px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0066FF', marginBottom: '14px' }}>
+                <SearchCode size={22} />
               </div>
-              <div className="system-meta-indicator">
-                <ShieldCheck size={14} color="#107e3e" />
-                <span>Verified DDIC Source: TSTC, TADIR &bull; Clean Core Governed</span>
-              </div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>STEP 1</div>
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0F172A', margin: '4px 0 8px' }}>
+                Transaction DDIC Inspection
+              </h3>
+              <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                Connects to SAP kernel dictionary tables (TSTC, TADIR, CVERS). Instantly validates transaction existence, executable programs, screens, and authorization requirements.
+              </p>
             </div>
 
-            {/* Console Content */}
-            <div className="console-body">
-              {/* Left Column: Legacy Transaction */}
-              <div className="console-col-left">
-                <div className="panel-label">Legacy SAP Dynpro Source</div>
-                <div className="tcode-title-row">
-                  <span className="tcode-display">{selectedTcode.tcode}</span>
-                  <span className="badge-tag">SAP TSTC</span>
-                </div>
-                <div className="tcode-name-display">{selectedTcode.name}</div>
-                <div className="meta-rows">
-                  <div><strong>Module:</strong> {selectedTcode.module}</div>
-                  <div><strong>ABAP Program:</strong> <code className="meta-code">{selectedTcode.program}</code></div>
-                  <div><strong>Classification:</strong> {selectedTcode.fitCategory.replace(/_/g, ' ')}</div>
-                </div>
+            {/* Step 2 */}
+            <div style={{ padding: '24px', borderRadius: '10px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669', marginBottom: '14px' }}>
+                <Database size={22} />
               </div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>STEP 2</div>
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0F172A', margin: '4px 0 8px' }}>
+                Fit-to-Standard Discovery
+              </h3>
+              <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                Searches the official SAP Fiori Apps Reference Library. Automatically determines whether an existing standard Fiori app satisfies the transaction (ADOPT / CONFIGURE) or if a gap exists.
+              </p>
+            </div>
 
-              {/* Middle Flow Indicator */}
-              <div className="console-flow">
-                <div className="flow-icon-circle">
-                  {selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD' ? <Code2 size={18} /> : <ArrowRight size={18} />}
-                </div>
-                <span className="flow-label">
-                  {selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD' ? 'GAP DETECTED' : 'MATCHED'}
-                </span>
+            {/* Step 3 */}
+            <div style={{ padding: '24px', borderRadius: '10px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#D97706', marginBottom: '14px' }}>
+                <Code2 size={22} />
               </div>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748B' }}>STEP 3</div>
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#0F172A', margin: '4px 0 8px' }}>
+                Clean Core App Generation
+              </h3>
+              <p style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+                When no standard app fits, 1-click generation creates modern CDS View Entities, RAP Managed Behaviors with Draft, OData V4 services, and Fiori Elements List Report / Object Pages.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-              {/* Right Column: Target Recommendation */}
-              <div className="console-col-right">
-                <div className="target-header-row">
-                  <span className="target-label">
-                    {selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD'
-                      ? 'Custom Modernization Path'
-                      : 'Recommended Fiori Target'}
+      {/* 4. Quick Scenario Demo Cards */}
+      <section style={{ padding: '48px 32px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#0F172A' }}>
+              Try Common Migration Scenarios
+            </h3>
+            <p style={{ fontSize: '13px', color: '#64748B', marginTop: '2px' }}>
+              Click any scenario to see instant discovery and recommendation in the live platform.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleLaunchDemo('/transaction-discovery')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              backgroundColor: '#EFF6FF',
+              border: '1px solid #BFDBFE',
+              color: '#0066FF',
+              fontSize: '12px',
+              fontWeight: 700,
+              cursor: 'pointer'
+            }}
+          >
+            <span>Open Transaction Discovery</span>
+            <ArrowRight size={14} />
+          </button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+          {QUICK_SCENARIOS.map((sc) => (
+            <div
+              key={sc.tcode}
+              onClick={() => handleLaunchDemo(`/transaction-discovery?tcode=${sc.tcode}`)}
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: '8px',
+                border: '1px solid #E2E8F0',
+                padding: '20px',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '12px',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s ease-in-out'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#0066FF';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#E2E8F0';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 800, fontFamily: 'monospace', color: '#0F172A' }}>
+                    {sc.tcode}
                   </span>
-                  <span className={`fit-badge ${selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD' ? 'badge-build' : ''}`}>
-                    {selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD'
-                      ? 'Custom Gap Build'
-                      : `${selectedTcode.fitScore}% Fit Score`}
+                  <span
+                    style={{
+                      fontSize: '10.5px',
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      backgroundColor: sc.outcome === 'STANDARD_ADOPT' ? '#DCFCE7' : '#FEF3C7',
+                      color: sc.outcome === 'STANDARD_ADOPT' ? '#166534' : '#92400E'
+                    }}
+                  >
+                    {sc.outcome === 'STANDARD_ADOPT' ? 'STANDARD SUCCESSOR' : 'CUSTOM RAP BUILD'}
                   </span>
                 </div>
-
-                <div className="target-title">{selectedTcode.fioriTitle}</div>
-                <div className="target-meta">
-                  {selectedTcode.fioriAppId !== 'NO_STD_FIT' ? (
-                    <>App ID: <strong>{selectedTcode.fioriAppId}</strong> &bull; {selectedTcode.appType}</>
-                  ) : (
-                    <>Technology: <strong>ABAP RAP Managed with Draft</strong> &bull; SAP Fiori Elements V4</>
-                  )}
-                </div>
-
-                <div className="target-details">
-                  <div><strong>Service:</strong> <code className="meta-code">{selectedTcode.odataService}</code></div>
-                  <div>
-                    <strong>Strategy:</strong>{' '}
-                    {selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD'
-                      ? 'Clean Core In-App RAP Synthesis (Generation Studio)'
-                      : 'Direct Standard Replacement (Clean Core Compliant)'}
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className={`btn-launch-assessment ${selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD' ? 'btn-launch-studio' : ''}`}
-                  onClick={() => navigate(`/login?mode=demo&redirect=${encodeURIComponent(selectedTcode.targetRoute)}`)}
-                >
-                  {selectedTcode.fitCategory === 'CUSTOM_RAP_BUILD' ? <Code2 size={15} /> : <Sparkles size={15} />}
-                  <span>{selectedTcode.actionText}</span>
-                  <ArrowRight size={14} />
-                </button>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#1E293B' }}>{sc.name}</div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>{sc.module}</div>
+                <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.4, marginTop: '8px' }}>
+                  {sc.description}
+                </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 4. Brand New Section: Generation Studio Showcase */}
-      <section id="generation-studio" className="studio-showcase-section">
-        <div className="studio-showcase-container">
-          <div className="section-intro">
-            <span className="section-kicker">Bridging the Gap Between Discovery and Execution</span>
-            <h2 className="section-headline">FioriX Generation Studio: Automated Code Synthesis</h2>
-            <p className="section-subheadline">
-              When standard SAP Fiori apps have genuine custom gaps, Generation Studio generates an end-to-end,
-              Clean Core ABAP RAP Business Object stack and SAP Fiori Elements application in seconds.
-            </p>
-          </div>
-
-          {/* Interactive Studio Artifact Explorer */}
-          <div className="studio-tabs-card">
-            {/* Tab Switcher */}
-            <div className="studio-tab-header">
-              <button
-                type="button"
-                className={`studio-tab-btn ${activeStudioTab === 'abap' ? 'active' : ''}`}
-                onClick={() => setActiveStudioTab('abap')}
-              >
-                <Cpu size={16} />
-                <span>1. ABAP RAP Backend</span>
-                <span className="tab-pill">CDS &amp; BDEF</span>
-              </button>
-              <button
-                type="button"
-                className={`studio-tab-btn ${activeStudioTab === 'fiori' ? 'active' : ''}`}
-                onClick={() => setActiveStudioTab('fiori')}
-              >
-                <Box size={16} />
-                <span>2. SAP Fiori Elements V4</span>
-                <span className="tab-pill">UI5 App</span>
-              </button>
-              <button
-                type="button"
-                className={`studio-tab-btn ${activeStudioTab === 'preview' ? 'active' : ''}`}
-                onClick={() => setActiveStudioTab('preview')}
-              >
-                <Play size={16} />
-                <span>3. Local Ephemeral Preview</span>
-                <span className="tab-pill-live">LIVE MOCK</span>
-              </button>
-              <button
-                type="button"
-                className={`studio-tab-btn ${activeStudioTab === 'handover' ? 'active' : ''}`}
-                onClick={() => setActiveStudioTab('handover')}
-              >
-                <FolderArchive size={16} />
-                <span>4. Developer Handover</span>
-                <span className="tab-pill">PKZIP &amp; ADT</span>
-              </button>
-            </div>
-
-            {/* Tab 1: ABAP RAP */}
-            {activeStudioTab === 'abap' && (
-              <div className="studio-tab-body">
-                <div className="studio-code-header">
-                  <div className="file-indicator">
-                    <FileCode size={15} color="#0070f2" />
-                    <span className="file-name">abap/cds/zi_customorder.ddls.asddls</span>
-                    <span className="file-tag">CDS View Entity (S/4HANA 2023)</span>
-                  </div>
-                  <div className="code-action-tag">Clean Core ABAP Cloud &bull; strict ( 2 )</div>
-                </div>
-                <div className="studio-code-preview">
-                  <pre className="code-block">
-{`@AccessControl.authorizationCheck: #CHECK
-@EndUserText.label: 'Custom Sales Order Interface Entity'
-@Metadata.allowExtensions: true
-@VDM.viewType: #BASIC
-define root view entity ZI_CustomOrder
-  as select from zcustom_order as Order
-  composition [0..*] of ZI_CustomOrderItem as _Items
-{
-  key Order.order_id            as OrderID,
-      Order.customer_id         as CustomerID,
-      @Semantics.amount.currencyCode: 'CurrencyCode'
-      Order.total_amount        as TotalAmount,
-      Order.currency_code       as CurrencyCode,
-      Order.order_status        as OrderStatus,
-      @Semantics.systemDateTime.lastChangedAt: true
-      Order.last_changed_at     as LastChangedAt,
-      _Items
-}`}
-                  </pre>
-                </div>
-                <div className="studio-tab-footer">
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Modern CDS View Entities (no obsolete DDIC views)</span>
-                  </div>
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Behavior Definition with Draft Actions, Total ETag, and Strict Mode 2</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-tab-action"
-                    onClick={() => navigate('/login?mode=demo&redirect=/generation-studio')}
-                  >
-                    <span>Inspect in Generation Studio</span>
-                    <ArrowRight size={13} />
-                  </button>
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, color: '#0066FF', paddingTop: '8px', borderTop: '1px solid #F1F5F9' }}>
+                <span>Inspect in Fiorify</span>
+                <ArrowRight size={14} />
               </div>
-            )}
-
-            {/* Tab 2: Fiori Elements */}
-            {activeStudioTab === 'fiori' && (
-              <div className="studio-tab-body">
-                <div className="studio-code-header">
-                  <div className="file-indicator">
-                    <FileCode size={15} color="#0070f2" />
-                    <span className="file-name">fiori/webapp/manifest.json</span>
-                    <span className="file-tag">SAP Fiori Elements V4 LROP</span>
-                  </div>
-                  <div className="code-action-tag">SAPUI5 1.120.0 LTS &bull; minUI5Version 1.114.0</div>
-                </div>
-                <div className="studio-code-preview">
-                  <pre className="code-block">
-{`{
-  "_version": "1.58.0",
-  "sap.app": {
-    "id": "customer.fiorix.customorder",
-    "type": "application",
-    "dataSources": {
-      "mainService": {
-        "uri": "/sap/opu/odata4/sap/zui_customorder_o4/srvd/sap/zui_customorder/0001/",
-        "type": "OData",
-        "settings": { "odataVersion": "4.0" }
-      }
-    }
-  },
-  "sap.ui5": {
-    "dependencies": {
-      "minUI5Version": "1.114.0",
-      "libs": { "sap.fe.core": {}, "sap.m": {} }
-    },
-    "routing": {
-      "routes": [{ "name": "CustomOrderList", "pattern": ":?query:", "target": "CustomOrderList" }],
-      "targets": {
-        "CustomOrderList": { "type": "Component", "id": "CustomOrderList", "name": "sap.fe.templates.ListReport" }
-      }
-    }
-  }
-}`}
-                  </pre>
-                </div>
-                <div className="studio-tab-footer">
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Complete List Report &amp; Object Page V4 Routing</span>
-                  </div>
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Local XML UI Annotations: LineItem, HeaderInfo, SelectionFields</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-tab-action"
-                    onClick={() => navigate('/login?mode=demo&redirect=/generation-studio')}
-                  >
-                    <span>Configure in Generation Studio</span>
-                    <ArrowRight size={13} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 3: Local Ephemeral Preview */}
-            {activeStudioTab === 'preview' && (
-              <div className="studio-tab-body">
-                <div className="studio-preview-simulation">
-                  {/* Watermark Banner */}
-                  <div className="mock-watermark-banner">
-                    <Terminal size={14} />
-                    <span>MOCK / DRAFT PREVIEW ONLY &bull; NOT CONNECTED TO SAP S21 &bull; LOOPBACK 127.0.0.1</span>
-                  </div>
-
-                  {/* Mock Fiori Toolbar */}
-                  <div className="mock-fiori-toolbar">
-                    <div className="mock-toolbar-title">Custom Sales Orders (4)</div>
-                    <div className="mock-toolbar-actions">
-                      <button type="button" className="mock-btn-sm">Filter</button>
-                      <button type="button" className="mock-btn-sm mock-btn-primary">+ Create</button>
-                    </div>
-                  </div>
-
-                  {/* Mock Table */}
-                  <div className="mock-table-wrapper">
-                    <table className="mock-table">
-                      <thead>
-                        <tr>
-                          <th>Order ID</th>
-                          <th>Customer</th>
-                          <th>Total Amount</th>
-                          <th>Status</th>
-                          <th>Draft State</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td><strong>ORD-2026-901</strong></td>
-                          <td>Industrial Dynamics AG</td>
-                          <td>$ 142,500.00 USD</td>
-                          <td><span className="mock-badge-success">Approved</span></td>
-                          <td><span className="mock-badge-active">Active</span></td>
-                        </tr>
-                        <tr>
-                          <td><strong>ORD-2026-902</strong></td>
-                          <td>Nordic Logistics GmbH</td>
-                          <td>$ 89,200.00 EUR</td>
-                          <td><span className="mock-badge-draft">In Review</span></td>
-                          <td><span className="mock-badge-draft-pill">Draft Saved</span></td>
-                        </tr>
-                        <tr>
-                          <td><strong>ORD-2026-903</strong></td>
-                          <td>Apex Manufacturing Corp</td>
-                          <td>$ 310,000.00 USD</td>
-                          <td><span className="mock-badge-pending">Pending Approval</span></td>
-                          <td><span className="mock-badge-active">Active</span></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="studio-tab-footer">
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>In-process native Node HTTP OData V4 mock runtime</span>
-                  </div>
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Evaluates $filter, $select, $expand, and RAP draft actions</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-tab-action"
-                    onClick={() => navigate('/login?mode=demo&redirect=/generation-studio')}
-                  >
-                    <span>Test Local Preview</span>
-                    <ArrowRight size={13} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Tab 4: Developer Handover */}
-            {activeStudioTab === 'handover' && (
-              <div className="studio-tab-body">
-                <div className="studio-handover-grid">
-                  <div className="handover-tree-col">
-                    <div className="handover-tree-title">
-                      <FolderArchive size={15} color="#0070f2" />
-                      <span>Zero-Dependency PKZIP Bundle</span>
-                    </div>
-                    <div className="handover-tree-content">
-                      <div className="tree-node tree-folder">📦 Project_Handover_Bundle.zip</div>
-                      <div className="tree-node tree-sub">📁 abap/tables/ (SQL DDL &amp; Draft Tables)</div>
-                      <div className="tree-node tree-sub">📁 abap/cds/ (ZI_* Interface &amp; ZC_* Projection)</div>
-                      <div className="tree-node tree-sub">📁 abap/behavior/ (ZR_* BDEF strict 2)</div>
-                      <div className="tree-node tree-sub">📁 abap/behavior_classes/ (ZBP_* Behavior Pool)</div>
-                      <div className="tree-node tree-sub">📁 abap/services/ (ZUI_* SRVD Service Def)</div>
-                      <div className="tree-node tree-sub">📁 fiori/webapp/ (manifest.json, annotations.xml)</div>
-                      <div className="tree-node tree-sub">📁 docs/ (TRACEABILITY_MATRIX.md, DEVELOPER_GUIDE.md)</div>
-                      <div className="tree-node tree-sub">📄 fiorix-export-manifest.json (SHA-256 Hashes)</div>
-                    </div>
-                  </div>
-
-                  <div className="handover-guide-col">
-                    <div className="guide-box-title">
-                      <Terminal size={15} color="#0070f2" />
-                      <span>Ready for Eclipse ADT &amp; SAP BAS</span>
-                    </div>
-                    <ol className="handover-steps-list">
-                      <li><strong>Eclipse ADT Connection:</strong> Connect to SAP S21 (Client 200) via ABAP Cloud project.</li>
-                      <li><strong>Create Database Tables:</strong> Execute transparent table DDL in <code>abap/tables/</code>.</li>
-                      <li><strong>Activate CDS Views:</strong> Import Interface &amp; Projection Views in dependency order.</li>
-                      <li><strong>Activate Behavior:</strong> Import Behavior Definition &amp; implement custom logic hooks.</li>
-                      <li><strong>Publish Service Binding:</strong> Publish OData V4 UI service binding in 1 click.</li>
-                    </ol>
-                  </div>
-                </div>
-
-                <div className="studio-tab-footer">
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Pure Node.js PKZIP archiver (zero external npm dependencies)</span>
-                  </div>
-                  <div className="footer-bullet">
-                    <CheckCircle2 size={14} color="#107e3e" />
-                    <span>Cryptographic SHA-256 verification and full audit provenance</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-tab-action"
-                    onClick={() => navigate('/login?mode=demo&redirect=/generation-studio')}
-                  >
-                    <span>Open Generation Studio</span>
-                    <ArrowRight size={13} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 4 RAP Architectural Profiles Strip */}
-          <div className="rap-profiles-grid">
-            <div className="rap-profile-card">
-              <div className="profile-badge">PROFILE 1</div>
-              <h4 className="profile-title">Managed with Draft</h4>
-              <p className="profile-desc">
-                Default for new transactional business objects. Optimistic locking, total ETag, draft staging, and clean core compliance.
-              </p>
-            </div>
-            <div className="rap-profile-card">
-              <div className="profile-badge">PROFILE 2</div>
-              <h4 className="profile-title">Managed Direct</h4>
-              <p className="profile-desc">
-                Master data and configuration entities requiring direct database persistence without intermediate draft tables.
-              </p>
-            </div>
-            <div className="rap-profile-card">
-              <div className="profile-badge">PROFILE 3</div>
-              <h4 className="profile-title">Unmanaged Wrapper</h4>
-              <p className="profile-desc">
-                Safely modernizes legacy BAPIs, function modules, and custom update tasks inside a governed RAP behavior handler.
-              </p>
-            </div>
-            <div className="rap-profile-card">
-              <div className="profile-badge">PROFILE 4</div>
-              <h4 className="profile-title">Read-Only Query</h4>
-              <p className="profile-desc">
-                High-performance analytical reporting, KPI dashboards, and read-only status monitoring views.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. End-to-End Modernization Journey */}
-      <section id="workflow" className="workflow-section">
-        <div className="section-intro">
-          <span className="section-kicker">Unified Lifecycle</span>
-          <h2 className="section-headline">The 4-Step Modernization Journey</h2>
-          <p className="section-subheadline">
-            From technical dictionary discovery to developer-ready ABAP RAP packages in one governed workflow.
-          </p>
-        </div>
-
-        <div className="workflow-steps-grid">
-          <div className="workflow-step-card">
-            <div className="step-number-badge">01</div>
-            <div className="step-icon-wrap">
-              <SearchCode size={20} />
-            </div>
-            <h3 className="step-title">Discover &amp; Inspect</h3>
-            <p className="step-desc">
-              Inspect legacy transactions in SAP TSTC, TADIR, and dynpros. Identify custom tables and extensions.
-            </p>
-          </div>
-
-          <div className="workflow-step-card">
-            <div className="step-number-badge">02</div>
-            <div className="step-icon-wrap">
-              <ShieldCheck size={20} />
-            </div>
-            <h3 className="step-title">Assess &amp; Govern</h3>
-            <p className="step-desc">
-              Evaluate against 18,000+ Fiori apps. Score Clean Core compatibility and enforce Lead Architect approval.
-            </p>
-          </div>
-
-          <div className="workflow-step-card step-card-highlight">
-            <div className="step-number-badge step-badge-highlight">03</div>
-            <div className="step-icon-wrap step-icon-highlight">
-              <Code2 size={20} />
-            </div>
-            <h3 className="step-title">Model &amp; Synthesize</h3>
-            <p className="step-desc">
-              Generation Studio designs the CDS data model and synthesizes RAP CDS, BDEF, behavior classes, and UI5 apps.
-            </p>
-          </div>
-
-          <div className="workflow-step-card">
-            <div className="step-number-badge">04</div>
-            <div className="step-icon-wrap">
-              <Download size={20} />
-            </div>
-            <h3 className="step-title">Preview &amp; Handover</h3>
-            <p className="step-desc">
-              Validate via local mock OData runtime, check Clean Core rules, and export PKZIP bundle for Eclipse ADT.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Core Platform Capabilities */}
-      <section id="capabilities" className="capabilities-section">
-        <div className="section-intro">
-          <span className="section-kicker">Enterprise Architecture</span>
-          <h2 className="section-headline">Engineered for Pragmatic SAP Modernization</h2>
-        </div>
-
-        <div className="capabilities-grid">
-          {CAPABILITIES.map((cap) => {
-            const Icon = cap.icon;
-            return (
-              <div key={cap.title} className="capability-card">
-                <div className="capability-icon-wrap">
-                  <Icon size={20} />
-                </div>
-                <h3 className="capability-title">{cap.title}</h3>
-                <p className="capability-desc">{cap.description}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 7. Clean Core Metric Strip */}
-      <section id="clean-core" className="clean-core-strip">
-        <div className="clean-core-inner">
-          {KPI_METRICS.map((kpi) => (
-            <div key={kpi.label} className="kpi-metric-card">
-              <span className="kpi-value">{kpi.value}</span>
-              <span className="kpi-label">{kpi.label}</span>
-              <p className="kpi-desc">{kpi.description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 8. Call to Action Banner */}
-      <section className="cta-banner-section">
-        <div className="cta-banner-card">
-          <div className="cta-content">
-            <span className="cta-kicker">Start Modernizing Now</span>
-            <h2 className="cta-title">Accelerate Your SAP S/4HANA Clean Core Journey</h2>
-            <p className="cta-desc">
-              Move from legacy Dynpro screens to production-grade ABAP RAP and SAP Fiori Elements in minutes.
-            </p>
+      {/* 5. Minimal Clean Footer */}
+      <footer style={{ marginTop: 'auto', borderTop: '1px solid #E2E8F0', backgroundColor: '#FFFFFF', padding: '24px 32px' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '12px', color: '#64748B' }}>
+          <div>
+            Fiorify &bull; Clean Core SAP S/4HANA Modernization &amp; Generation Workbench
           </div>
-          <div className="cta-actions">
-            <button
-              type="button"
-              className="btn-cta-primary"
-              onClick={() => navigate('/login?mode=demo&redirect=/generation-studio')}
-            >
-              <Code2 size={16} />
-              <span>Open Generation Studio</span>
-              <ArrowRight size={14} />
-            </button>
-            <button
-              type="button"
-              className="btn-cta-secondary"
-              onClick={() => navigate('/login?mode=demo&redirect=/transaction-discovery')}
-            >
-              <SearchCode size={16} />
-              <span>Explore T-Codes</span>
-            </button>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <span>SAP S/4HANA 2023 Clean Core</span>
+            <span>RAP Managed with Draft</span>
+            <span>Fiori Elements OData V4</span>
           </div>
-        </div>
-      </section>
-
-      {/* 9. Footer */}
-      <footer className="landing-footer">
-        <div className="footer-left">
-          <span className="footer-brand">FioriX</span>
-          <span>&bull; SAP S/4HANA Modernization Platform</span>
-          <span className="footer-system-tag">Target: S21 (Client 200) &bull; SAP_BASIS 7.58 &bull; SAP_UI 7.58</span>
-        </div>
-        <div className="footer-right">
-          <span>Official Fiori Catalog &bull; ABAP RAP Generator &bull; Fiori Elements V4</span>
         </div>
       </footer>
     </div>

@@ -71,8 +71,18 @@ export class GenerationHandoffStore {
     }
 
     const tempPath = `${this.storagePath}.${Date.now()}.${Math.random().toString(36).slice(2)}.tmp`;
-    await fs.promises.writeFile(tempPath, json, 'utf8');
-    await fs.promises.rename(tempPath, this.storagePath);
+    try {
+      await fs.promises.writeFile(tempPath, json, 'utf8');
+      await fs.promises.rename(tempPath, this.storagePath);
+    } finally {
+      if (fs.existsSync(tempPath)) {
+        try {
+          await fs.promises.unlink(tempPath);
+        } catch {
+          // ignore
+        }
+      }
+    }
   }
 
   /**
@@ -293,6 +303,18 @@ export class GenerationHandoffStore {
       records = records.filter((h) => h.tcode.toUpperCase() === filters.tcode.toUpperCase());
     }
     return records;
+  }
+
+  /**
+   * Clears all generation handoffs and resets storage.
+   */
+  async resetDemoHandoffs() {
+    return await this._withWriteLock(async () => {
+      this._handoffs.clear();
+      this._isLoaded = true;
+      await this._persist();
+      return { success: true };
+    });
   }
 }
 

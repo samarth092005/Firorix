@@ -272,6 +272,35 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
     }
   };
 
+  // Batch confirm all unconfirmed requirements
+  const handleConfirmAllRequirements = async () => {
+    const unconfirmed = requirements.filter((r) => r.status !== 'CONFIRMED');
+    if (unconfirmed.length === 0) {
+      setActionSuccess('All requirements are already confirmed!');
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      for (const req of unconfirmed) {
+        await defaultFrontendGenerationProjectService.confirmRequirement(
+          project.projectId,
+          req.requirementId,
+          'CONFIRM',
+          'Batch confirmed for architecture and code generation.'
+        );
+      }
+      await loadRequirements();
+      setActionSuccess(`Successfully confirmed all ${unconfirmed.length} requirements!`);
+      const updated = await defaultFrontendGenerationProjectService.getProject(project.projectId);
+      onProjectUpdated(updated);
+    } catch (err: any) {
+      setError(err.message || 'Failed to confirm all requirements.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Acceptance criteria helpers
   const handleAddCriterion = () => {
     if (!newCriterion.trim()) return;
@@ -430,24 +459,48 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
               <div style={{ fontWeight: 600, fontSize: '14px', color: '#1e293b' }}>
                 Requirements ({filteredRequirements.length})
               </div>
-              <button
-                onClick={handleAddNewRequirement}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 10px',
-                  background: '#0284c7',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  cursor: 'pointer'
-                }}
-              >
-                <Plus size={14} /> New
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {requirements.some((r) => r.status !== 'CONFIRMED') && (
+                  <button
+                    onClick={handleConfirmAllRequirements}
+                    disabled={isLoading}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 10px',
+                      background: '#10b981',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                    title="Confirm all unconfirmed requirements for code generation"
+                  >
+                    <CheckCircle2 size={13} /> Confirm All ({requirements.filter((r) => r.status !== 'CONFIRMED').length})
+                  </button>
+                )}
+                <button
+                  onClick={handleAddNewRequirement}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '4px 10px',
+                    background: '#0284c7',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Plus size={14} /> New
+                </button>
+              </div>
             </div>
 
             {/* Search */}

@@ -24,7 +24,7 @@ export interface NavItemConfig {
   badge?: string;
 }
 
-export const FIORIX_NAV_ITEMS: NavItemConfig[] = [
+export const FIORIFY_NAV_ITEMS: NavItemConfig[] = [
   {
     to: '/overview',
     label: 'Overview',
@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Navigation List */}
         <div style={{ padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            {FIORIX_NAV_ITEMS.map((item) => {
+            {FIORIFY_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive =
                 location.pathname === item.to ||

@@ -1,4 +1,4 @@
-// FioriX Domain Models & Type Definitions
+// Fiorify Domain Models & Type Definitions
 
 export type SystemEnvironment = 'DEVELOPMENT' | 'QUALITY' | 'SANDBOX' | 'PRODUCTION';
 export type ConnectionStatus = 'CONNECTED_SIMULATED' | 'OFFLINE' | 'AUTHENTICATION_REQUIRED' | 'CONFIG_ERROR';

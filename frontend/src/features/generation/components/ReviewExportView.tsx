@@ -160,6 +160,55 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
         </button>
       </div>
 
+      {/* Top Prominent Warning Acknowledgment Banner */}
+      {hasWarnings && !hasBlockingErrors && (
+        <div
+          style={{
+            padding: '14px 18px',
+            backgroundColor: acknowledgedWarnings ? '#ECFDF5' : '#FFFBEB',
+            border: `1px solid ${acknowledgedWarnings ? '#A7F3D0' : '#FDE68A'}`,
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '14px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertTriangle size={18} color={acknowledgedWarnings ? '#059669' : '#D97706'} />
+            <div style={{ fontSize: '13px', color: acknowledgedWarnings ? '#065F46' : '#92400E' }}>
+              <strong>Pre-Export Governance Notice:</strong> Project has {(readiness?.warnings || []).length} non-blocking warning(s).
+              {acknowledgedWarnings ? ' Warnings acknowledged. You may now package and download the ZIP.' : ' Acknowledgment is required to authorize ZIP package download.'}
+            </div>
+          </div>
+          <label
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 14px',
+              backgroundColor: acknowledgedWarnings ? '#D1FAE5' : '#FEF3C7',
+              borderRadius: '6px',
+              border: `1px solid ${acknowledgedWarnings ? '#6EE7B7' : '#FCD34D'}`,
+              fontSize: '12px',
+              fontWeight: 600,
+              color: acknowledgedWarnings ? '#065F46' : '#B45309',
+              cursor: 'pointer',
+              userSelect: 'none',
+              flexShrink: 0
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={acknowledgedWarnings}
+              onChange={(e) => setAcknowledgedWarnings(e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            {acknowledgedWarnings ? 'Warnings Acknowledged ✓' : 'Acknowledge Warnings & Authorize Export'}
+          </label>
+        </div>
+      )}
+
       {errorMsg && (
         <div
           style={{
