@@ -1,5 +1,5 @@
 /**
- * FioriX — Universal SAP Transaction Discovery Providers (Workstream D2)
+ * Fiorify — Universal SAP Transaction Discovery Providers (Workstream D2)
  *
  * Implements decoupled, provider-based architecture for authoritative SAP transaction discovery:
  * 1. TransactionRegistryProvider: TSTC existence check (DDIC snapshot or live SAP).
@@ -16,6 +16,7 @@
  */
 
 import { defaultTransactionMasterIndex } from './transactionMasterIndex.js';
+import { synthesizeTransactionTitle } from './standardTransactionKnowledge.js';
 
 export const TRANSACTION_EXISTENCE_STATES = Object.freeze({
   CONFIRMED_REGISTERED: 'CONFIRMED_REGISTERED',
@@ -276,9 +277,9 @@ export class TransactionDescriptionProvider {
     }
 
     return {
-      description: `Transaction ${cleanTcode}`,
+      description: synthesizeTransactionTitle(cleanTcode),
       language: lang,
-      provenance: 'FALLBACK_GENERIC'
+      provenance: 'DYNAMICALLY_SYNTHESIZED'
     };
   }
 }

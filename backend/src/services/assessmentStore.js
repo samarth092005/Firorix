@@ -15,7 +15,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fitGapAssessmentEngine } from '../engine/fitGapAssessmentEngine.js';
 import { AssessmentRepository } from '../infrastructure/db/repositories/assessmentRepository.js';
-import { STANDARD_TRANSACTION_CATALOG } from './standardTransactionKnowledge.js';
+import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from './standardTransactionKnowledge.js';
 
 export const LIFECYCLE_STATES = Object.freeze({
   DRAFT: 'DRAFT',
@@ -426,7 +426,7 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
         ? STANDARD_TRANSACTION_CATALOG[tcode].description
         : (reqObj.title && !reqObj.title.startsWith('Assessment for '))
         ? reqObj.title
-        : STANDARD_TRANSACTION_CATALOG[tcode]?.description || `Transaction ${tcode}`
+        : STANDARD_TRANSACTION_CATALOG[tcode]?.description || synthesizeTransactionTitle(tcode)
     ),
     subArea: input.subArea || '',
     programName: input.programName || input.discoveryMetadata?.programName || '',

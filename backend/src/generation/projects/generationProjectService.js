@@ -19,7 +19,7 @@ import { defaultGenerationProjectStore } from './generationProjectStore.js';
 import { defaultAssessmentStore, LIFECYCLE_STATES } from '../../services/assessmentStore.js';
 import { defaultGenerationHandoffStore } from '../../services/generationHandoffStore.js';
 import { semanticArchetypeEngine } from '../datamodel/semanticArchetypeEngine.js';
-import { STANDARD_TRANSACTION_CATALOG } from '../../services/standardTransactionKnowledge.js';
+import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from '../../services/standardTransactionKnowledge.js';
 
 export class GenerationProjectService {
   constructor(options = {}) {
@@ -197,7 +197,7 @@ export class GenerationProjectService {
     if (!cleanDesc || cleanDesc.startsWith('Assessment for ') || cleanDesc === sourceTCode) {
       cleanDesc = STANDARD_TRANSACTION_CATALOG[sourceTCode]?.description ||
                   assessment.discoveryMetadata?.description ||
-                  `Custom RAP Modernization`;
+                  synthesizeTransactionTitle(sourceTCode);
     }
 
     const projectName = payload.projectName && !payload.projectName.includes('Assessment for ')

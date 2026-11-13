@@ -5,6 +5,41 @@
  * and modern SAP Fiori applications (SAP Fiori Elements, SAPUI5, and SAP GUI for HTML).
  */
 
+/**
+ * Synthesizes an intelligent, authentic, and human-readable transaction description
+ * for any future or uncatalogued SAP transaction (custom Z/Y or standard prefix modules).
+ */
+export function synthesizeTransactionTitle(tcode) {
+  if (!tcode) return 'Custom Business Application';
+  const clean = String(tcode).trim().toUpperCase();
+
+  // Custom namespace (Z* / Y*) — tokenize into title-cased words
+  if (clean.startsWith('Z') || clean.startsWith('Y')) {
+    const raw = clean.replace(/^[ZY]_?/, '');
+    const tokens = raw.split('_').filter(Boolean);
+    if (tokens.length > 0) {
+      const formatted = tokens
+        .map((tok) => tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase())
+        .join(' ');
+      return `${formatted} Custom Application`;
+    }
+    return `Custom Modernization (${clean})`;
+  }
+
+  // Standard SAP Prefix Modules
+  if (/^ME/i.test(clean)) return `Purchasing & Sourcing Processing (${clean})`;
+  if (/^MM/i.test(clean)) return `Material Master Management (${clean})`;
+  if (/^VA/i.test(clean)) return `Sales Order Processing (${clean})`;
+  if (/^VF/i.test(clean)) return `Billing & Invoicing Processing (${clean})`;
+  if (/^VL/i.test(clean)) return `Outbound Delivery Processing (${clean})`;
+  if (/^(FB|F-|FS)/i.test(clean)) return `Financial Accounting & Posting (${clean})`;
+  if (/^(IW|PM)/i.test(clean)) return `Plant Maintenance Work Order (${clean})`;
+  if (/^(CO|MD|CR|CS)/i.test(clean)) return `Production Planning & Orders (${clean})`;
+  if (/^(ST|SM|SE|SU|PF)/i.test(clean)) return `System Administration & Diagnostics (${clean})`;
+
+  return `SAP Transaction ${clean}`;
+}
+
 export const STANDARD_TRANSACTION_CATALOG = {
   // --- Materials Management (MM) ---
   'MM01': {

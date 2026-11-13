@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Transaction Discovery Engine (DISC-01)
+ * Fiorify — SAP Transaction Discovery Engine (DISC-01)
  *
  * Implements authoritative SAP transaction discovery across live SAP S21 and mock landscapes:
  * - Normalizes input T-Codes and validates against SAP naming rules.
@@ -13,6 +13,7 @@ import { sapTransactionDiscoveryAdapter } from '../adapters/sapTransactionDiscov
 import { technicalEvidenceEngine, PROVENANCE_CATEGORIES, CONFIDENCE_LEVELS, EVIDENCE_CLASSIFICATIONS } from './technicalEvidenceEngine.js';
 import { EvidenceClassifier } from '../evidenceClassifier.js';
 import { defaultTransactionMasterIndex, TransactionMasterIndex } from '../services/transactionMasterIndex.js';
+import { synthesizeTransactionTitle } from '../services/standardTransactionKnowledge.js';
 
 // Standard SAP transaction naming: 1-20 uppercase alphanumeric, underscores, hyphens, or slashes (e.g. /UI2/FLP, ME21N)
 const SAP_TCODE_REGEX = /^[A-Z0-9_\-\/]{1,20}$/;
@@ -371,8 +372,8 @@ export class TransactionDiscoveryEngine {
         exists: false,
         verificationStatus: 'NOT_FOUND',
         transactionIdentity,
-        description: 'Custom or Unindexed Transaction',
-        transactionDescription: 'Custom or Unindexed Transaction',
+        description: synthesizeTransactionTitle(tcode),
+        transactionDescription: synthesizeTransactionTitle(tcode),
         isCustomOrUnknown: true,
         classification: 'CUSTOM',
         classificationDetails: { conflictsDetected: [], rulesApplied: ['DEFAULT_CUSTOM_UNINDEXED'] },
