@@ -1,5 +1,5 @@
-# FioriX Navigation Map & Route Hierarchy
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
+# Fiorify Navigation Map & Route Hierarchy
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
 **Document Version:** 1.0.0  
 **Phase:** Sprint 1 Frontend Implementation  
 

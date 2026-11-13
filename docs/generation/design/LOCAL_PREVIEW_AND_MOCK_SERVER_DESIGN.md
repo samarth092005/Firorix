@@ -1,7 +1,7 @@
-# FIORIX LOCAL PREVIEW & MOCK SERVER DESIGN
+# Fiorify LOCAL PREVIEW & MOCK SERVER DESIGN
 **Document ID:** SPEC-GEN-PREVIEW-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Release:** FioriX v2.0.0  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Release:** Fiorify v2.0.0  
 **Status:** COMPLETE ARCHITECTURAL SPECIFICATION  
 **Author:** Principal Full-Stack Architect & Runtime Engineer  
 
@@ -9,7 +9,7 @@
 
 ## 1. Architectural Overview & Objective
 
-The **FioriX Local Preview Subsystem** enables developers, functional leads, and enterprise architects to test, inspect, and interact with generated SAP Fiori Elements applications directly on their local workstation without requiring SAP deployment, Gateway activation, or live backend credentials.
+The **Fiorify Local Preview Subsystem** enables developers, functional leads, and enterprise architects to test, inspect, and interact with generated SAP Fiori Elements applications directly on their local workstation without requiring SAP deployment, Gateway activation, or live backend credentials.
 
 ### Key Architectural Pillars
 1. **Local-First & Offline:** Powered entirely by a lightweight, embedded Node.js HTTP mock service.
@@ -29,7 +29,7 @@ flowchart LR
         Banner[Permanent MOCK DATA Watermark Banner]
     end
 
-    subgraph BackendProcess["FioriX Backend Server (Node.js)"]
+    subgraph BackendProcess["Fiorify Backend Server (Node.js)"]
         PreviewMgr[Preview Manager Service]
         MockOData[Embedded Mock OData V4 Engine]
         PortMgr[Ephemeral Port Manager]
@@ -78,7 +78,7 @@ The embedded Mock OData engine is implemented as a lightweight protocol handler 
 To eliminate any risk of confusing local simulation with live S21 system data, the preview surface incorporates two strict visual guards:
 
 1. **Top Watermark Banner (Fixed Viewport Position):**
-   - High-contrast warning banner: `⚠️ FIORIX LOCAL PREVIEW — SYNTHETIC MOCK DATA — NOT CONNECTED TO SAP S21`.
+   - High-contrast warning banner: `⚠️ Fiorify LOCAL PREVIEW — SYNTHETIC MOCK DATA — NOT CONNECTED TO SAP S21`.
    - Displays simulated system profile: `Profile: S/4HANA 2023 Mock Sandbox | Memory-Only Store`.
 2. **Watermark Background Tile:**
    - Semi-transparent CSS watermark repeating `LOCAL MOCK DATA — DO NOT USE FOR LIVE DECISIONS` across the application canvas.

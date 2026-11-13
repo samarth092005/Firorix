@@ -1,4 +1,4 @@
-# FioriX — Complete API and Frontend Dependency Map (Phase S0)
+# Fiorify — Complete API and Frontend Dependency Map (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  
@@ -89,7 +89,7 @@ Communication between the React Vite frontend and the Node.js native HTTP backen
 ## 3. Findings & Security Observations
 
 1. **Authentication:**
-   - Write endpoints (`POST`, `PUT`, `PATCH`, `DELETE`) currently enforce timing-safe admin secret comparison using `X-FioriX-Admin-Secret` header or fall back to local dev allowances.
+   - Write endpoints (`POST`, `PUT`, `PATCH`, `DELETE`) currently enforce timing-safe admin secret comparison using `X-Fiorify-Admin-Secret` header or fall back to local dev allowances.
    - Read endpoints are currently unauthenticated.
 2. **Multi-Tenancy:**
    - None of the endpoints currently accept or enforce a `tenantId` query parameter or header. All data operations operate on a flat global namespace.

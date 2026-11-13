@@ -1,5 +1,5 @@
 /**
- * FioriX Backend Evidence Classifier
+ * Fiorify Backend Evidence Classifier
  * Evaluates standard vs custom vs unknown using multi-evidence repository rules.
  */
 export class EvidenceClassifier {

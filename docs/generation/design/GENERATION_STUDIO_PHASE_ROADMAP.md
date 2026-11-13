@@ -1,7 +1,7 @@
-# FIORIX GENERATION STUDIO — PHASE ROADMAP & 70% DEMONSTRATION SCORECARD
+# Fiorify GENERATION STUDIO — PHASE ROADMAP & 70% DEMONSTRATION SCORECARD
 **Document ID:** PLAN-GEN-ROADMAP-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Milestone:** FioriX v2.0.0 Generation Studio  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Milestone:** Fiorify v2.0.0 Generation Studio  
 **Status:** APPROVED STRATEGIC ROADMAP  
 **Author:** Principal Enterprise Solution Architect & Program Director  
 
@@ -15,7 +15,7 @@ A capability earns percentage credit **ONLY** when its automated unit, integrati
 
 ```
 +-----------------------------------------------------------------------------------+
-|               FIORIX GENERATION STUDIO — 70% TARGET SCORECARD                     |
+|               Fiorify GENERATION STUDIO — 70% TARGET SCORECARD                     |
 +------------------------------------+-----------+----------------------------------+
 | Functional Capability Area         | Weight    | Verification Evidence Required   |
 +------------------------------------+-----------+----------------------------------+

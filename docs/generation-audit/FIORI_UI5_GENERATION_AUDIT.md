@@ -35,8 +35,8 @@ The generated project complies with the SAP Fiori design guidelines and S/4HANA 
 ### 3.1 The 1.120.0 vs 1.114.0 Baseline Analysis
 - **SAP S/4HANA 2023 Initial Release (FPS00):** Ships with software component `SAP_UI 7.58 SP00`, which contains SAPUI5 runtime **1.114.xx**.
 - **SAP S/4HANA 2023 FPS01 / Long-Term Support (LTS):** Delivers `SAP_UI 7.58 SP01`, which contains SAPUI5 runtime **1.120.xx**.
-- **FioriX Generator Configuration:**
-  In `fioriArtifactContract.js`, FioriX defines:
+- **Fiorify Generator Configuration:**
+  In `fioriArtifactContract.js`, Fiorify defines:
   ```javascript
   export const UI5_BASELINES = Object.freeze({
     S4HANA_2023_FPS00_INITIAL: '1.114.0', // Initial SAP S/4HANA 2023 baseline (SAP_UI 7.58 SP00)

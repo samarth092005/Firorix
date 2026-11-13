@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { BtpDestinationAdapter } from '../src/adapters/btpDestinationAdapter.js';
 
-describe('FioriX Sprint 5.2 — Local BTP & Destination Adapter Unit Tests', () => {
+describe('Fiorify Sprint 5.2 — Local BTP & Destination Adapter Unit Tests', () => {
   it('resolves destination S21 via direct BTP Destination REST API when Cloud SDK lacks connectivity binding', async () => {
     const mockTokenResponse = {
       ok: true,

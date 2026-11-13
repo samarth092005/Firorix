@@ -1,6 +1,6 @@
-# FIORIX — DISCOVERY PRODUCT FINALIZATION REPORT
-**Document Reference:** FIORIX-DISC-FIN-2026-V1  
-**Project:** FioriX SAP Modernization Discovery Platform  
+# Fiorify — DISCOVERY PRODUCT FINALIZATION REPORT
+**Document Reference:** Fiorify-DISC-FIN-2026-V1  
+**Project:** Fiorify SAP Modernization Discovery Platform  
 **Target Landscape Context:** SAP S/4HANA 2023 Private Edition (S21 Client 200, S4CORE 108 SP0003, SAP_BASIS 758 SP0003)  
 **Verification Date:** November 8, 2026  
 **Status:** PRODUCTION READY / GOVERNED RELEASE ACCEPTANCE  
@@ -10,7 +10,7 @@
 ## 1. EXECUTIVE SUMMARY & ARCHITECTURE AUDIT FINDINGS
 
 ### 1.1 Mission & Scope
-The objective of this assignment was to finalize the existing FioriX Discovery platform into an authoritative, evidence-backed SAP transaction-to-Fiori modernization product without re-architecting from scratch. The core user journey now functions with strict evidence provenance and zero mock-pollution in the operational path:
+The objective of this assignment was to finalize the existing Fiorify Discovery platform into an authoritative, evidence-backed SAP transaction-to-Fiori modernization product without re-architecting from scratch. The core user journey now functions with strict evidence provenance and zero mock-pollution in the operational path:
 
 $$\text{SAP T-Code} \longrightarrow \text{Transaction Verification} \longrightarrow \text{Technical Evidence} \longrightarrow \text{Official Fiori Catalogue} \longrightarrow \text{Matching Engine} \longrightarrow \text{Comparison} \longrightarrow \text{Fit-Gap} \longrightarrow \text{Recommendation} \longrightarrow \text{Assessment Report / Build Handoff}$$
 
@@ -180,7 +180,7 @@ An automated browser verification suite was executed against headless Google Chr
 
 ## 11. KNOWN LIMITATIONS AND REMAINING BLOCKERS
 
-1. **Live SAP S21 RFC Connection:** Live table extraction from SAP S21 requires active network routing (corporate VPN / SAP Cloud Connector) and Basis user credentials with SU24 authorization for `Z_FIORIX_DISCOVERY_SRV`. When operating locally without active VPN, the system operates in offline mode utilizing verified DDIC snapshots (`AUTHORITATIVE_DDIC_SNAPSHOT`).
+1. **Live SAP S21 RFC Connection:** Live table extraction from SAP S21 requires active network routing (corporate VPN / SAP Cloud Connector) and Basis user credentials with SU24 authorization for `Z_Fiorify_DISCOVERY_SRV`. When operating locally without active VPN, the system operates in offline mode utilizing verified DDIC snapshots (`AUTHORITATIVE_DDIC_SNAPSHOT`).
 2. **Generation Studio Scope Boundary:** In accordance with milestone boundaries, approved BUILD decisions navigate to Generation Studio with the complete assessment context (T-Code, requirements, system release, gaps, and recommendation rationale); the automated ABAP code generation engine itself is outside the scope of this Discovery finalization milestone.
 3. **Chunk Size Minification Warning:** Vite emits an advisory warning that the production JavaScript bundle is 762 kB minified. This can be optimized in future sprints using `React.lazy()` dynamic imports for secondary routes without affecting functionality.
 
@@ -188,7 +188,7 @@ An automated browser verification suite was executed against headless Google Chr
 
 ## 12. CONCLUSION & GOVERNANCE SIGNOFF
 
-The FioriX Discovery platform is fully finalized and operational. It satisfies all 15 acceptance criteria:
+The Fiorify Discovery platform is fully finalized and operational. It satisfies all 15 acceptance criteria:
 - T-Code is the primary input without requiring ticket uploads.
 - The selected SAP system and client context are strictly respected.
 - Transaction verification is honest, traceable, and distinguishes live vs snapshot data.

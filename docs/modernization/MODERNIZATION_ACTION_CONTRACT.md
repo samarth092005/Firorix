@@ -1,8 +1,8 @@
-# FioriX Modernization Action Contract (MW-02)
+# Fiorify Modernization Action Contract (MW-02)
 
 ## 1. Scope & Protocol
 
-This contract governs the REST API endpoints and data payloads for recording, verifying, and persisting modernization decision actions within the FioriX backend.
+This contract governs the REST API endpoints and data payloads for recording, verifying, and persisting modernization decision actions within the Fiorify backend.
 
 All modernization actions:
 - Are submitted to authoritative backend persistence endpoints.

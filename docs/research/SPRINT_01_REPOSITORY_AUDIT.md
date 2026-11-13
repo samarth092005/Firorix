@@ -1,5 +1,5 @@
 # Sprint 01 Repository and Specification Audit Report
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Generation Platform  
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Generation Platform  
 **Role:** Principal Software Architect & SAP S/4HANA Technical Architect  
 **Audit Date:** November 2026  
 **Document Version:** 1.0.0  
@@ -9,10 +9,10 @@
 
 ## 1. Executive Summary
 
-A comprehensive architectural, technical, and specification audit of the FioriX repository was conducted, covering `README.md`, `FioriX_Master_Specification.md`, `docs/features.md`, and all 24 numbered specification documents (`docs/00-project-charter.md` through `docs/23-sap-references.md`).
+A comprehensive architectural, technical, and specification audit of the Fiorify repository was conducted, covering `README.md`, `Fiorify_Master_Specification.md`, `docs/features.md`, and all 24 numbered specification documents (`docs/00-project-charter.md` through `docs/23-sap-references.md`).
 
 ### Context and Baseline
-FioriX is designed as a governed, enterprise-grade workbench hosted on **SAP BTP Cloud Foundry** using **SAP CAP (Node.js/TypeScript)**, **SAP HANA Cloud**, and **SAPUI5 freestyle** frontend. Its objective is to inspect **SAP S/4HANA On-Premise** transactions, discover relevant standard SAP Fiori applications, perform requirement-level fit-gap analysis, recommend **Adopt / Extend / Build / Review**, and generate draft custom Fiori applications only when a Build decision is formally justified and approved.
+Fiorify is designed as a governed, enterprise-grade workbench hosted on **SAP BTP Cloud Foundry** using **SAP CAP (Node.js/TypeScript)**, **SAP HANA Cloud**, and **SAPUI5 freestyle** frontend. Its objective is to inspect **SAP S/4HANA On-Premise** transactions, discover relevant standard SAP Fiori applications, perform requirement-level fit-gap analysis, recommend **Adopt / Extend / Build / Review**, and generate draft custom Fiori applications only when a Build decision is formally justified and approved.
 
 ### Overall Assessment
 The specification demonstrates rigorous architectural restraint and strong enterprise principles:
@@ -33,7 +33,7 @@ The project is approved to proceed into Sprint 1 R&D and discovery spikes, provi
 
 ### 2.1 Scope of Inspection
 The audit examined 100% of repository markdown documentation:
-1. Root Specifications: `README.md`, `FioriX_Master_Specification.md`
+1. Root Specifications: `README.md`, `Fiorify_Master_Specification.md`
 2. Core Governance & Requirements: `docs/00-project-charter.md` to `docs/04-non-functional-requirements.md`, `docs/features.md`
 3. Architecture & Technical Stacks: `docs/05-sap-technology-stack.md` to `docs/08-sap-integration.md`
 4. Discovery, Analysis & Generation Engine: `docs/09-tcode-discovery.md` to `docs/13-ai-ml-design.md`
@@ -44,7 +44,7 @@ The audit examined 100% of repository markdown documentation:
 - **Zero Hallucination Standard:** No undocumented SAP APIs, proprietary SAP private interfaces, or unconfirmed BTP capabilities were assumed.
 - **Separation of Concepts:** Strict enforcement of boundaries:
   - *CAP CDS* (Node.js/HANA service modeling) vs. *ABAP CDS* (S/4HANA database views).
-  - *SAPUI5 Freestyle* (FioriX management console) vs. *SAP Fiori Elements* (generated application templates).
+  - *SAPUI5 Freestyle* (Fiorify management console) vs. *SAP Fiori Elements* (generated application templates).
   - *Network Connectivity* (Cloud Connector) vs. *Application Authorization* (S_TABU_DIS, S_DEVELOP, S_ADT_*).
   - *Static Metadata Discovery* vs. *Dynamic Runtime Call Graph Reconstruction*.
 
@@ -71,8 +71,8 @@ pie title Findings Distribution by Severity
 #### CRIT-01: Fiori Apps Reference Library Ingestion Mechanism Unverified
 - **Location:** `docs/11-fiori-catalogue-fit-gap.md`, `docs/19-rnd-plan.md`, `docs/23-sap-references.md`
 - **Issue:** The entire Fit-Gap engine (BR-02, BR-05) hinges on comparing customer requirements against the SAP Fiori Apps Reference Library (`fal.cloud.sap`). However, FAL has **no documented, publicly supported, authenticated REST API** for third-party automated harvesting.
-- **Impact:** If FioriX relies on unpermitted web scraping, it violates SAP terms of service and risks brittle runtime failures due to UI DOM changes.
-- **Mitigation / Condition:** For the initial pilot, FioriX must rely on a **curated, verified offline catalog extraction** (using official FAL Excel/JSON export features) seeded into HANA Cloud (`FIORI_APP`, `APP_RELEASE`), rather than building an autonomous live scraper. Automated synchronization must remain CONDITIONAL pending SAP API verification.
+- **Impact:** If Fiorify relies on unpermitted web scraping, it violates SAP terms of service and risks brittle runtime failures due to UI DOM changes.
+- **Mitigation / Condition:** For the initial pilot, Fiorify must rely on a **curated, verified offline catalog extraction** (using official FAL Excel/JSON export features) seeded into HANA Cloud (`FIORI_APP`, `APP_RELEASE`), rather than building an autonomous live scraper. Automated synchronization must remain CONDITIONAL pending SAP API verification.
 
 #### CRIT-02: Absence of Live S/4HANA and ABAP Release Target
 - **Location:** `docs/00-project-charter.md`, `docs/05-sap-technology-stack.md`, `docs/12-generation-design.md`
@@ -95,7 +95,7 @@ pie title Findings Distribution by Severity
 - **Location:** `docs/08-sap-integration.md`, `docs/09-tcode-discovery.md`, `docs/17-security-governance.md`
 - **Issue:** Discovering transaction metadata, ABAP code, and CDS view definitions requires technical user authorizations in S/4HANA (e.g., authorization object `S_DEVELOP` with activity 03 Display, `S_TABU_DIS` / `S_TABU_NAM` for table structures, and ADT authorizations `S_ADT_RES`). In regulated on-premise environments, SAP Security teams strictly restrict `S_DEVELOP` and read access to custom tables.
 - **Impact:** If the BTP technical communication user lacks required authorizations, discovery fails with HTTP 403 / RFC_NO_AUTHORITY. Conversely, over-provisioning grants the Cloud Connector access to proprietary business logic and sensitive table structures.
-- **Mitigation / Condition:** A formal, least-privilege SAP Authorization Role Specification (`Z_FIORIX_DISCOVERY_RO`) must be established in Sprint 1, explicitly scoped to metadata tables (TSTC, TADIR, DD02L, DD03L) and standard ADT endpoints, explicitly forbidding access to business application data tables.
+- **Mitigation / Condition:** A formal, least-privilege SAP Authorization Role Specification (`Z_Fiorify_DISCOVERY_RO`) must be established in Sprint 1, explicitly scoped to metadata tables (TSTC, TADIR, DD02L, DD03L) and standard ADT endpoints, explicitly forbidding access to business application data tables.
 
 ---
 
@@ -150,10 +150,10 @@ pie title Findings Distribution by Severity
 
 ### 3.3 Medium Findings
 
-#### MED-01: UI Framework Distinction: FioriX Workbench vs. Generated App Pattern
+#### MED-01: UI Framework Distinction: Fiorify Workbench vs. Generated App Pattern
 - **Location:** `docs/05-sap-technology-stack.md`, `docs/12-generation-design.md`, `docs/16-ui-ux-specification.md`
-- **Issue:** Potential confusion between the framework used to build FioriX itself (SAPUI5 Freestyle workbench) and the framework generated for customers (SAP Fiori Elements List Report / Object Page).
-- **Mitigation:** Reiterate in architectural guidelines that FioriX is a custom SAPUI5 Freestyle application, while generated custom drafts use SAP Fiori Elements metadata-driven floorplans consuming RAP OData V4 services.
+- **Issue:** Potential confusion between the framework used to build Fiorify itself (SAPUI5 Freestyle workbench) and the framework generated for customers (SAP Fiori Elements List Report / Object Page).
+- **Mitigation:** Reiterate in architectural guidelines that Fiorify is a custom SAPUI5 Freestyle application, while generated custom drafts use SAP Fiori Elements metadata-driven floorplans consuming RAP OData V4 services.
 
 #### MED-02: Scope Management: Single T-Code vs. System-Wide Scans
 - **Location:** `docs/00-project-charter.md`, `docs/03-functional-requirements.md`, `docs/features.md`, `docs/15-api-contracts.md`
@@ -163,7 +163,7 @@ pie title Findings Distribution by Severity
 #### MED-03: CAP CDS Domain Model vs. ABAP CDS Generated Model Terminology
 - **Location:** `docs/05-sap-technology-stack.md`, `docs/14-database-data-model.md`
 - **Issue:** The use of "CDS" in both backend persistence (`@sap/cds` in Node.js) and generated ABAP artifacts (`DEFINE VIEW ENTITY` in ABAP Core Data Services) creates semantic ambiguity for cross-functional teams.
-- **Mitigation:** Formally mandate prefixes: `CAP-CDS` for FioriX persistence definitions, and `ABAP-CDS` for S/4HANA Core Data Services.
+- **Mitigation:** Formally mandate prefixes: `CAP-CDS` for Fiorify persistence definitions, and `ABAP-CDS` for S/4HANA Core Data Services.
 
 #### MED-04: AI Architecture Boundary and Data Leakage Governance
 - **Location:** `docs/13-ai-ml-design.md`, `docs/17-security-governance.md`
@@ -177,7 +177,7 @@ pie title Findings Distribution by Severity
 
 #### MED-06: Audit Log Service vs. Custom HANA Domain Audit
 - **Location:** `docs/05-sap-technology-stack.md`, `docs/17-security-governance.md`
-- **Issue:** `docs/05` lists SAP BTP Audit Log Service as "Supplement domain audit in FioriX", while `docs/14` defines `AUDIT_EVENT`. Storing all audit trails in custom HANA tables requires custom retention and GDPR compliance mechanisms.
+- **Issue:** `docs/05` lists SAP BTP Audit Log Service as "Supplement domain audit in Fiorify", while `docs/14` defines `AUDIT_EVENT`. Storing all audit trails in custom HANA tables requires custom retention and GDPR compliance mechanisms.
 - **Mitigation:** Use custom HANA `AUDIT_EVENT` for domain-level user actions (decisions, approvals) and delegate security events (logins, role changes, authorization rejections) to BTP Audit Log Service where entitled.
 
 ---
@@ -221,7 +221,7 @@ pie title Findings Distribution by Severity
 | BTP Component | Specification Assumption | Verified BTP Architecture Reality | Feasibility Classification | Sprint 1 Required Evidence |
 |---|---|---|---|---|
 | **Cloud Foundry Runtime** | Hosts CAP backend and worker processes. | Standard CF Node.js buildpack supports CAP TypeScript compilation. HTTP timeout is 120s. | **CONFIRMED** | Verify CF memory quota (minimum 4 GB allocated to space). |
-| **SAP HANA Cloud** | Relational store for FioriX metadata and snapshots. | Fully supported via `@cap-js/hana` or `@sap/cds-hana`. Requires HDI container instance. | **CONFIRMED** | Verify active HANA Cloud instance and HDI container entitlement. |
+| **SAP HANA Cloud** | Relational store for Fiorify metadata and snapshots. | Fully supported via `@cap-js/hana` or `@sap/cds-hana`. Requires HDI container instance. | **CONFIRMED** | Verify active HANA Cloud instance and HDI container entitlement. |
 | **Destination Service** | Connects CAP to on-premise S/4HANA. | Destination type `OnPremise`, proxy type `OnPremise`, configured in BTP cockpit. | **CONFIRMED** | Destination connection test returning HTTP 200/401 (valid route). |
 | **Connectivity Service & SCC** | Secure tunnel to on-premise private network. | Cloud Connector installed on-premise, linked to BTP subaccount; virtual host mapped to internal host. | **CONFIRMED** | SCC administrator status showing active tunnel and resource whitelisting. |
 | **Identity / XSUAA** | Authentication and role-based access control. | Managed App Router + XSUAA service (`xs-security.json`) providing JWT validation. | **CONFIRMED** | Verify XSUAA instance creation and role collection binding in subaccount. |
@@ -274,7 +274,7 @@ sequenceDiagram
 
 ### 6.3 Security, Identity & Multi-Tenancy Architecture
 - Authentication must terminate at the **BTP Managed Application Router** using XSUAA tokens.
-- RBAC roles (`FioriX_Viewer`, `FioriX_Consultant`, `FioriX_Developer`, `FioriX_Architect`, `FioriX_Admin`) must be enforced at the CAP service layer using `@(requires: '...')` annotations.
+- RBAC roles (`Fiorify_Viewer`, `Fiorify_Consultant`, `Fiorify_Developer`, `Fiorify_Architect`, `Fiorify_Admin`) must be enforced at the CAP service layer using `@(requires: '...')` annotations.
 - Cloud Connector access must be strictly restricted to whitelisted paths (`/sap/bc/adt/*`, `/sap/opu/odata/*`) with no access to `/sap/bc/gui/*` or generic RFC gateways (`/sap/bc/rfc`).
 
 ---
@@ -304,7 +304,7 @@ To guarantee feasibility and avoid scope creep, the pilot project must be strict
 To exit Sprint 1 and proceed to Sprint 2, the following deliverables must be accepted by the Principal Software Architect and SAP Technical Architect:
 
 - [ ] **SEC-01:** Target S/4HANA On-Premise release, FPS level, and ABAP platform version formally documented.
-- [ ] **SEC-02:** Least-privilege communication user role (`Z_FIORIX_DISCOVERY_RO`) drafted and verified with SAP Security.
+- [ ] **SEC-02:** Least-privilege communication user role (`Z_Fiorify_DISCOVERY_RO`) drafted and verified with SAP Security.
 - [ ] **SEC-03:** Cloud Connector mapping verified from BTP trial/dev subaccount to S/4HANA sandbox (HTTP 200 on connection test).
 - [ ] **SEC-04:** Node.js ADT connectivity spike successfully executed against `/sap/bc/adt/discovery`.
 - [ ] **SEC-05:** BTP subaccount entitlement inventory exported, confirming HANA Cloud, Cloud Foundry, and Storage service availability.
@@ -330,4 +330,4 @@ To exit Sprint 1 and proceed to Sprint 2, the following deliverables must be acc
 
 **Sign-off:**  
 *Principal Software Architect & SAP S/4HANA Technical Architect*  
-*FioriX Architecture & Governance Board*
+*Fiorify Architecture & Governance Board*

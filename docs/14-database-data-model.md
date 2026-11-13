@@ -2,9 +2,9 @@
 **Document Version:** 2.0.0  
 **Status:** ARCHITECTURALLY CONFIRMED  
 
-## 1. Principles of Data Modeling in FioriX
+## 1. Principles of Data Modeling in Fiorify
 
-1. **No Duplication of Business Transactions:** FioriX stores metadata, assessment workflows, requirement comparisons, and audit evidence. It **never replicates SAP business transactions** (such as sales orders, purchase orders, or material master data).
+1. **No Duplication of Business Transactions:** Fiorify stores metadata, assessment workflows, requirement comparisons, and audit evidence. It **never replicates SAP business transactions** (such as sales orders, purchase orders, or material master data).
 2. **Relational Normalization over JSON Blobs:** Complex relationships (such as requirement-to-app fit-gap matches, technical object dependencies, and authorization objects) are modeled as **first-class relational entities with foreign keys and unique constraints**, not embedded JSON blobs.
 3. **Point-in-Time Snapshot Immutability:** Technical discovery data is captured in immutable `TRANSACTION_SNAPSHOT` and `REPOSITORY_OBJECT` records with verifiable checksums, preserving historical evidence even if the on-premise system changes.
 4. **Append-Only Auditability:** Audit events and stakeholder approvals are strictly append-only; update and delete operations are prohibited.

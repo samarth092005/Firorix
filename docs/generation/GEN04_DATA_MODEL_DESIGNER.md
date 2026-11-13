@@ -1,4 +1,4 @@
-# FIORIX GENERATION STUDIO — MILESTONE GEN-04 SPECIFICATION
+# Fiorify GENERATION STUDIO — MILESTONE GEN-04 SPECIFICATION
 ## Data Model Designer, ABAP CDS Typing, Composition vs Association & Multi-Category Validation
 
 **Version:** 1.0.0  

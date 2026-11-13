@@ -1,5 +1,5 @@
 /**
- * FioriX — Centralized Landscape Health and System Management Service
+ * Fiorify — Centralized Landscape Health and System Management Service
  *
  * Consumes real backend APIs via apiClient:
  * - GET /api/v1/health (backend status, target landscape, BTP destination bindings)
@@ -7,7 +7,7 @@
  * - GET /api/v1/gateway/services (live Gateway catalog query with search & pagination)
  *
  * Upholds Clean Core Governance & FX-003 Health Separation:
- * 1. FioriX backend health.
+ * 1. Fiorify backend health.
  * 2. Configured SAP system status.
  * 3. SAP host reachability (never assumed).
  * 4. Cloud Connector availability (never assumed from destination config alone).
@@ -146,7 +146,7 @@ class SystemHealthService implements ISystemHealthService {
           status: 'OFFLINE',
           statusText: 'BACKEND OFFLINE',
           badgeVariant: 'error',
-          details: 'Catalogue retrieval requires an active FioriX backend service.',
+          details: 'Catalogue retrieval requires an active Fiorify backend service.',
           lastChecked: timestamp
         }
       };
@@ -159,7 +159,7 @@ class SystemHealthService implements ISystemHealthService {
         systemId: 'S21',
         client: '200',
         platform: 'SAP S/4HANA 2023 Private Edition',
-        connectionState: 'DISCONNECTED',
+        connectionState: demoFallback.connectionState || 'DEMO_MODE',
         isLiveConnection: false,
         lastSyncTimestamp: timestamp,
         connectivityStatus: {
@@ -438,7 +438,7 @@ class SystemHealthService implements ISystemHealthService {
         return {
           success: false,
           connectionState: 'DEMO_MODE',
-          message: 'Cloud Connector tunnel not active; FioriX operating in demo mode.',
+          message: 'Cloud Connector tunnel not active; Fiorify operating in demo mode.',
           testedAt,
           details: 'Backend service returned non-UP status.'
         };

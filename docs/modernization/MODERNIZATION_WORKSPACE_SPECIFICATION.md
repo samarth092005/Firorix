@@ -1,8 +1,8 @@
-# FioriX Modernization Workspace Specification (MW-01)
+# Fiorify Modernization Workspace Specification (MW-01)
 
 ## 1. Overview & Purpose
 
-The **Modernization Workspace** (Stage 4 of the FioriX Assessment Results lifecycle) transforms static transaction assessment findings into an actionable, evidence-governed SAP decision workspace. It empowers SAP enterprise architects and functional leads to decide and commit the modernization strategy for any assessed SAP transaction:
+The **Modernization Workspace** (Stage 4 of the Fiorify Assessment Results lifecycle) transforms static transaction assessment findings into an actionable, evidence-governed SAP decision workspace. It empowers SAP enterprise architects and functional leads to decide and commit the modernization strategy for any assessed SAP transaction:
 
 1. **Card 1: ADD FOUND APPLICATION** — Save an officially matched standard SAP Fiori application.
 2. **Card 2: CONFIGURE / ADOPT** — Prepare standard applications for implementation with a 9-item independent readiness checklist.

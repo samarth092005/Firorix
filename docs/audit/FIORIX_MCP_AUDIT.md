@@ -1,4 +1,4 @@
-# FIORIX — MODEL CONTEXT PROTOCOL (MCP) ARCHITECTURE AUDIT
+# Fiorify — MODEL CONTEXT PROTOCOL (MCP) ARCHITECTURE AUDIT
 **Document ID:** AUDIT-MCP-2026-001  
 **Status:** COMPLETE  
 **Date:** 2026-11-08  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This audit assesses the Model Context Protocol (MCP) subsystem integrated into the FioriX backend:
+This audit assesses the Model Context Protocol (MCP) subsystem integrated into the Fiorify backend:
 - Client architecture: `@modelcontextprotocol/sdk` version `1.32.2`.
 - Server implementation: `@sap-ux/fiori-mcp-server` version `1.15.24`.
 - Transport: Standard Input/Output (`stdio`) child process management.
@@ -35,7 +35,7 @@ The audit verified the presence of the pinned server binary at:
 
 ## 3. Tool Policy & Allowlist Audit
 
-The FioriX tool execution policy (`backend/src/mcp/security/mcpToolPolicy.js`) enforces strict boundaries:
+The Fiorify tool execution policy (`backend/src/mcp/security/mcpToolPolicy.js`) enforces strict boundaries:
 
 | Tool Name | Category | Status | Operational Impact | Reason |
 |:---|:---|:---:|:---|:---|
@@ -68,4 +68,4 @@ The FioriX tool execution policy (`backend/src/mcp/security/mcpToolPolicy.js`) e
    If `mcpOptions.enabled=true` is requested but the MCP server is disconnected or no tools were executed, the response telemetry must report `mcpAssisted: false` and `reason: MCP_SERVER_DISCONNECTED` without fabricated assistance.
 
 5. **Security Isolation:**
-   All execution endpoints (`POST /api/v1/mcp/connect`, `POST /api/v1/mcp/tools/:name/execute`) require administrative authorization (`X-FioriX-Admin-Secret` or `ADMIN` Bearer role).
+   All execution endpoints (`POST /api/v1/mcp/connect`, `POST /api/v1/mcp/tools/:name/execute`) require administrative authorization (`X-Fiorify-Admin-Secret` or `ADMIN` Bearer role).

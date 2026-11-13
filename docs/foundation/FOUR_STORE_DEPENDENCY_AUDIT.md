@@ -1,4 +1,4 @@
-# FioriX — Four-Store Ownership and Dependency Audit (Phase S0)
+# Fiorify — Four-Store Ownership and Dependency Audit (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  
@@ -9,7 +9,7 @@
 
 ## 1. Overview of Persistence Stores
 
-FioriX currently operates on four discrete file-backed persistence stores in `backend/data/`. None of these stores rely on external databases or CAP/Express abstractions. Each store was implemented to fulfill a specific domain boundary:
+Fiorify currently operates on four discrete file-backed persistence stores in `backend/data/`. None of these stores rely on external databases or CAP/Express abstractions. Each store was implemented to fulfill a specific domain boundary:
 
 1. **Store 1: Assessment Store** (`backend/data/assessments.json`)
 2. **Store 2: Official Fiori Catalogue Cache** (`backend/data/fiori_app_catalog_cache.json` & `status.json`)
@@ -239,7 +239,7 @@ Canonical project contract defined in `backend/src/generation/contracts/generati
   "specification": {
     "revision": "v1",
     "appName": "Custom Purchase Order App",
-    "appNamespace": "com.fiorix.me21n",
+    "appNamespace": "com.Fiorify.me21n",
     "targetODataVersion": "v4",
     "rapModel": "UNMANAGED"
   },

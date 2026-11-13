@@ -14,7 +14,7 @@
 
 ```mermaid
 flowchart LR
-    CAP[FioriX CAP Backend] -->|1. Lookup Destination| Dest[BTP Destination Service]
+    CAP[Fiorify CAP Backend] -->|1. Lookup Destination| Dest[BTP Destination Service]
     Dest -->|2. Proxy Token| Conn[BTP Connectivity Service]
     Conn -->|3. Encrypted Tunnel| SCC[SAP Cloud Connector]
     SCC -->|4. Forward to Internal Host| S4[S/4HANA DEV Sandbox]

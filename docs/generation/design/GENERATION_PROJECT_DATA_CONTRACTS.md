@@ -1,7 +1,7 @@
-# FIORIX GENERATION STUDIO — DATA CONTRACTS & VERSIONED SCHEMAS
+# Fiorify GENERATION STUDIO — DATA CONTRACTS & VERSIONED SCHEMAS
 **Document ID:** CONTRACT-GEN-DATA-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Release:** FioriX v2.0.0  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Release:** Fiorify v2.0.0  
 **Status:** COMPLETE NORMATIVE SPECIFICATION  
 **Author:** Principal Data Architect & Security Lead  
 
@@ -35,7 +35,7 @@ export interface GenerationProject {
   targetRelease: string; // e.g. "SAP S/4HANA 2023 On-Premise"
   targetSystemId: string; // e.g. "S21"
   targetClient: string; // e.g. "200"
-  targetPackage: string; // e.g. "ZFIORIX_CORE"
+  targetPackage: string; // e.g. "ZFiorify_CORE"
   softwareComponent: string; // e.g. "HOME" or "ZLOCAL"
   lifecycleStage: ProjectLifecycleStage;
   requirementsSpec: RequirementSpecification;
@@ -216,7 +216,7 @@ export interface ArtifactRecord {
   contentHash: string; // SHA-256 of current content
   baseGenerationHash: string; // SHA-256 at time of template generation
   isManuallyEdited: boolean; // Flagged true if user edited code in studio
-  generatorVersion: string; // e.g. "fiorix-abap-gen-1.0.0"
+  generatorVersion: string; // e.g. "Fiorify-abap-gen-1.0.0"
   inputSpecVersion: number;
   dependentArtifactIds: string[];
   generatedTimestamp: string;
@@ -325,7 +325,7 @@ Included in root of generated ZIP bundle for verification and tooling import.
 ```typescript
 export interface ExportManifest {
   manifestVersion: '1.0.0';
-  generator: 'FioriX Generation Studio';
+  generator: 'Fiorify Generation Studio';
   exportTimestamp: string;
   projectMetadata: {
     projectId: string;

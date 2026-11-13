@@ -1,4 +1,4 @@
-# FioriX Generation Studio — Project API Reference (Phase 1)
+# Fiorify Generation Studio — Project API Reference (Phase 1)
 
 **Module:** Generation Studio  
 **Target:** SAP S/4HANA 2023 On-Premise (Clean Core Tier 2)  

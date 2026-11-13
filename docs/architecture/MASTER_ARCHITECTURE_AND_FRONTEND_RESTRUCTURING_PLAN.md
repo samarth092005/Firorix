@@ -1,4 +1,4 @@
-# FioriX Master Architecture Finalisation & Frontend Restructuring Plan
+# Fiorify Master Architecture Finalisation & Frontend Restructuring Plan
 **Document Version:** 2.0.0  
 **Phase:** Architecture Finalisation & Implementation Roadmap  
 **Date:** November 2026  
@@ -10,13 +10,13 @@
 ## 1. Executive Summary & Existing Repository Audit
 
 ### 1.1 Existing Project Condition
-An exhaustive technical audit of the FioriX repository was performed across both documentation and source code:
-- **Root & Documentation Pack:** Contains `README.md`, `FioriX_Master_Specification.md`, and 24 numbered specification documents (`docs/00` to `docs/23`), alongside research reports and initial ADRs (`ADR-0001`, `ADR-0002`).
+An exhaustive technical audit of the Fiorify repository was performed across both documentation and source code:
+- **Root & Documentation Pack:** Contains `README.md`, `Fiorify_Master_Specification.md`, and 24 numbered specification documents (`docs/00` to `docs/23`), alongside research reports and initial ADRs (`ADR-0001`, `ADR-0002`).
 - **Frontend Stack:** Implemented in `frontend/` using **React 18.3.1**, **TypeScript 5.5.3**, **Vite 5.4.1**, **React Router 6.28.0**, and **Lucide React 0.460.0**. The build passes cleanly (`tsc && vite build`) transforming 1623 modules with zero errors.
 - **Backend Directory:** `backend/` currently contains an architectural readiness specification (`backend/README.md`) detailing future SAP CAP Node.js / HANA Cloud service boundaries. No application code has been scaffolded.
 
 ### 1.2 Identified Architectural Inconsistencies & Deficiencies
-1. **Legacy Framework Mismatch in Documentation:** Older documents (`docs/05`, `docs/06`) previously stated "SAPUI5 freestyle; React not selected". However, the project's actual, verified codebase is built with React + TypeScript + Vite using an authentic SAP Fiori Horizon design system. The architecture must formally reconcile this: FioriX uses React + TypeScript + Vite with SAP Fiori design standards and UI5 Web Components where appropriate.
+1. **Legacy Framework Mismatch in Documentation:** Older documents (`docs/05`, `docs/06`) previously stated "SAPUI5 freestyle; React not selected". However, the project's actual, verified codebase is built with React + TypeScript + Vite using an authentic SAP Fiori Horizon design system. The architecture must formally reconcile this: Fiorify uses React + TypeScript + Vite with SAP Fiori design standards and UI5 Web Components where appropriate.
 2. **Navigation Proliferation:** The existing frontend sidebar exposed 9 primary navigation groups (Overview, Landscape, Discovery, Assessments, Fiori Applications, Analysis, Development, Governance, Administration), creating visual clutter and violating the confirmed product decision of **six primary navigation areas**.
 3. **Workflow Fragmentation:** Core assessment stages (Business Requirements, Fit-Gap Analysis, Recommendations, and Generation Studio) were exposed as disconnected top-level sidebar items. In SAP enterprise architecture, requirements, fit-gap matrices, and generation blueprints are child entities owned by an Assessment; exposing them as standalone top-level pages breaks domain encapsulation and encourages orphaned records.
 4. **Settings Placement:** Settings was positioned as a 9th primary navigation group in the sidebar, whereas enterprise UX standards dictate placement in the application top bar/header.
@@ -70,7 +70,7 @@ The application shell is organized strictly into **six primary navigation areas*
 
 ```mermaid
 flowchart TD
-    Shell[FioriX Enterprise Shell]
+    Shell[Fiorify Enterprise Shell]
     TopBar[TopBar: Brand + Environment Badge + Global Search + Notifications + User Menu / Settings]
     Sidebar[Primary Left Sidebar - 6 Confirmed Areas]
 
@@ -131,7 +131,7 @@ flowchart TD
 sequenceDiagram
     autonumber
     actor C as Functional Consultant / Architect
-    participant W as FioriX Assessment Workspace
+    participant W as Fiorify Assessment Workspace
     participant S as CAP / Local Mock Service
     actor D as ABAP / Lead Developer
     actor A as Architecture Signatory
@@ -201,7 +201,7 @@ stateDiagram-v2
     ADOPT_REVIEW --> ARCHIVED: Recommendation Signed Off (Activation is executed manually in S/4HANA by SAP Administrator)
 
     EXTEND --> EXTEND_REVIEW: Submit Extension Architecture
-    EXTEND_REVIEW --> ARCHIVED: Extension Architecture Signed Off (Transport is executed manually via standard CTS outside FioriX)
+    EXTEND_REVIEW --> ARCHIVED: Extension Architecture Signed Off (Transport is executed manually via standard CTS outside Fiorify)
 
     BUILD --> BUILD_APPROVAL_PENDING: Build Recommended (Custom Justification Required)
     BUILD_APPROVAL_PENDING --> BUILD_APPROVED: Lead Architect Approves Build Justification
@@ -223,7 +223,7 @@ stateDiagram-v2
 ```
 
 > [!IMPORTANT]
-> **No Automated SAP Activation or Transport:** FioriX is an assessment, fit-gap analysis, and controlled draft generation platform. It **never** automatically activates Fiori apps, catalogues, or ICF nodes in S/4HANA, nor does it release or import CTS transport requests. All standard app activations and custom code deployments remain strictly manual activities executed by authorized SAP Basis and ABAP administrators through standard SAP tooling.
+> **No Automated SAP Activation or Transport:** Fiorify is an assessment, fit-gap analysis, and controlled draft generation platform. It **never** automatically activates Fiori apps, catalogues, or ICF nodes in S/4HANA, nor does it release or import CTS transport requests. All standard app activations and custom code deployments remain strictly manual activities executed by authorized SAP Basis and ABAP administrators through standard SAP tooling.
 >
 > **Two-Stage Independent Governance:**
 > 1. **BUILD Recommendation Approval:** An authoritative architect must review the fit-gap rationale and formally approve the decision to build custom before Generation Studio is unlocked.
@@ -250,7 +250,7 @@ stateDiagram-v2
 ```mermaid
 flowchart TB
     subgraph ClientTier ["Client Tier (Browser - React 18 / Fiori Workbench)"]
-        UI[FioriX Frontend: React 18 + TypeScript + Vite]
+        UI[Fiorify Frontend: React 18 + TypeScript + Vite]
         UI5Tokens[SAP Fiori Horizon Design System & Tokens]
         Router[React Router 6: 6 Primary Navigation Areas]
         ClientStore[Typed Service Abstraction & State Cache]
@@ -311,7 +311,7 @@ flowchart TB
 
 ### 6.1 Integration Topology & Call Chain
 ```
-FioriX CAP Backend (BTP CF)
+Fiorify CAP Backend (BTP CF)
   │
   ├── 1. Query Destination ("S4H_DEV_ONPREM") via BTP Destination Service
   │
@@ -341,8 +341,8 @@ FioriX CAP Backend (BTP CF)
 > **Capability- and Permission-Dependent Technical Discovery:**
 > All SAP discovery capabilities are strictly conditional upon:
 > 1. **Target S/4HANA Release & Kernel:** e.g. CDS View Entities (`DEFINE ROOT VIEW ENTITY`) require S/4HANA 2020+; earlier releases fall back to legacy DDIC-based views (`DEFINE VIEW`).
-> 2. **Technical User Roles & Authorizations:** Communication user requires assigned role `Z_FIORIX_DISCOVERY_RO` granting display-only authorizations (`S_ADT_RES`, `S_DEVELOP` ACTVT 03, `S_TABU_DIS` display for TSTC/TADIR/USOBX_C).
-> 3. **Endpoint Activation:** If an ADT or Gateway catalog service is inactive in transaction `SICF` / `/IWFND/MAINT_SERVICE` or blocked by Cloud Connector access control, FioriX records the status as `NOT_AUTHORIZED` or `UNKNOWN` with full diagnostic error provenance, **never** assuming unsupported or fabricating results.
+> 2. **Technical User Roles & Authorizations:** Communication user requires assigned role `Z_Fiorify_DISCOVERY_RO` granting display-only authorizations (`S_ADT_RES`, `S_DEVELOP` ACTVT 03, `S_TABU_DIS` display for TSTC/TADIR/USOBX_C).
+> 3. **Endpoint Activation:** If an ADT or Gateway catalog service is inactive in transaction `SICF` / `/IWFND/MAINT_SERVICE` or blocked by Cloud Connector access control, Fiorify records the status as `NOT_AUTHORIZED` or `UNKNOWN` with full diagnostic error provenance, **never** assuming unsupported or fabricating results.
 
 ---
 
@@ -608,7 +608,7 @@ erDiagram
 
 ## 9. Backend Architecture & CAP Service Design
 
-FioriX uses a **modular SAP CAP application** on Node.js/TypeScript with standard CAP CDS definitions. It avoids premature microservices while enforcing clear domain boundaries across 7 core services:
+Fiorify uses a **modular SAP CAP application** on Node.js/TypeScript with standard CAP CDS definitions. It avoids premature microservices while enforcing clear domain boundaries across 7 core services:
 
 ```mermaid
 flowchart TD
@@ -639,21 +639,21 @@ flowchart TD
 - **Entities Exposed:** `Systems`, `Releases`, `Capabilities`.
 - **Actions:**
   - `action testConnection(systemId: UUID) returns ConnectionTestResult;`
-- **Security:** `@(requires: ['FioriX_Viewer', 'FioriX_Admin'])`. Creation requires `FioriX_Admin`.
+- **Security:** `@(requires: ['Fiorify_Viewer', 'Fiorify_Admin'])`. Creation requires `Fiorify_Admin`.
 
 #### 2. `DiscoveryService` (`/odata/v4/discovery`)
 - **Entities Exposed:** `Transactions`, `ScanJobs`, `Snapshots`, `RepositoryObjects`, `Evidence`.
 - **Actions:**
   - `action scheduleScan(systemId: UUID, tcode: String, scope: ScanScope) returns JobReference;`
   - `action cancelScan(jobId: UUID) returns Boolean;`
-- **Security:** `@(requires: ['FioriX_Consultant', 'FioriX_Developer', 'FioriX_Architect'])`.
+- **Security:** `@(requires: ['Fiorify_Consultant', 'Fiorify_Developer', 'Fiorify_Architect'])`.
 
 #### 3. `AssessmentService` (`/odata/v4/assessment`)
 - **Entities Exposed:** `Assessments`, `BusinessContexts`, `Requirements`, `BusinessRules`.
 - **Actions:**
   - `action confirmRequirement(reqId: UUID, rationale: String) returns Requirement;`
   - `action reopenRequirement(reqId: UUID, justification: String) returns Requirement;`
-- **Security:** Requirement confirmation restricted to `FioriX_Consultant` and `FioriX_Architect`.
+- **Security:** Requirement confirmation restricted to `Fiorify_Consultant` and `Fiorify_Architect`.
 
 #### 4. `CatalogueService` (`/odata/v4/catalogue`)
 - **Entities Exposed:** `FioriApps`, `AppReleases`, `Prerequisites`, `Capabilities`.
@@ -679,7 +679,7 @@ flowchart TD
 - **Actions:**
   - `action runValidation(projectId: UUID) returns ValidationSummary;`
   - `action recordApproval(assessmentId: UUID, stage: ApprovalStage, decision: ApprovalDecision, rationale: String) returns Approval;`
-- **Security:** Approvals restricted strictly to `FioriX_Architect` and `FioriX_Lead`.
+- **Security:** Approvals restricted strictly to `Fiorify_Architect` and `Fiorify_Lead`.
 
 ---
 
@@ -687,11 +687,11 @@ flowchart TD
 
 | User Role (XSUAA Scope) | Target Persona | Systems & Landscape | T-Code Discovery | Requirements Capture | Confirm Requirements | Fit-Gap Evaluation | Approve BUILD Decision | Generate Draft Files | Run Validation | Export Draft Archive |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `FioriX_Viewer` | Business Stakeholder | Read Only | Read Only | Read Only | ❌ | Read Only | ❌ | ❌ | Read Only | ❌ |
-| `FioriX_Consultant` | SAP Functional Consultant| Read Only | Execute Scan | Create / Edit | **Yes** | Execute | Review Only | ❌ | Read Only | ❌ |
-| `FioriX_Developer` | Senior ABAP / UI5 Dev | Read Only | Execute Scan | Read Only | ❌ | Read Only | ❌ | **Yes (if approved)**| Execute | **Yes** |
-| `FioriX_Architect` | Enterprise / Lead Arch | Create / Test | Deep Scan | Create / Edit | **Yes** | Execute | **Yes (Authoritative)**| Execute | Execute | **Yes** |
-| `FioriX_Admin` | BTP / Platform Admin | Full Admin | Full Admin | Full Admin | Full Admin | Full Admin | ❌ | ❌ | Full Admin | Full Admin |
+| `Fiorify_Viewer` | Business Stakeholder | Read Only | Read Only | Read Only | ❌ | Read Only | ❌ | ❌ | Read Only | ❌ |
+| `Fiorify_Consultant` | SAP Functional Consultant| Read Only | Execute Scan | Create / Edit | **Yes** | Execute | Review Only | ❌ | Read Only | ❌ |
+| `Fiorify_Developer` | Senior ABAP / UI5 Dev | Read Only | Execute Scan | Read Only | ❌ | Read Only | ❌ | **Yes (if approved)**| Execute | **Yes** |
+| `Fiorify_Architect` | Enterprise / Lead Arch | Create / Test | Deep Scan | Create / Edit | **Yes** | Execute | **Yes (Authoritative)**| Execute | Execute | **Yes** |
+| `Fiorify_Admin` | BTP / Platform Admin | Full Admin | Full Admin | Full Admin | Full Admin | Full Admin | ❌ | ❌ | Full Admin | Full Admin |
 
 ---
 
@@ -802,7 +802,7 @@ flowchart LR
 |---|---|---|---|---|
 | **RSK-01** | SAP Landscape | Target S/4HANA release is older than 2020, lacking modern CDS View Entity syntax. | **REQUIRES R&D** | Query `SPAM` in Sprint 1. If < 2020, fall back to legacy `DEFINE VIEW` DDIC-based templates. |
 | **RSK-02** | Connectivity | Cloud Connector rejects `/sap/bc/adt` path due to corporate security policy. | **BLOCKED BY ACCESS** | Request narrow URL mapping for `/sap/bc/adt/discovery` and `/sap/bc/adt/programs/*` strictly for DEV. |
-| **RSK-03** | Authorization | Technical user lacks `S_DEVELOP` 03 or table display `S_TABU_DIS`. | **BLOCKED BY ACCESS** | Provision custom role `Z_FIORIX_DISCOVERY_RO` strictly scoped to metadata tables (TSTC, TADIR). |
+| **RSK-03** | Authorization | Technical user lacks `S_DEVELOP` 03 or table display `S_TABU_DIS`. | **BLOCKED BY ACCESS** | Provision custom role `Z_Fiorify_DISCOVERY_RO` strictly scoped to metadata tables (TSTC, TADIR). |
 | **RSK-04** | Catalog | Lack of official REST API on `fal.cloud.sap` blocks automated sync. | **CONFIRMED MITIGATION** | Abandon live scraping. Use official FAL curated export (Excel/JSON) seeded into HANA Cloud. |
 | **RSK-05** | BTP Quota | SAP Document Management Service (DMS) unentitled in BTP subaccount. | **PROPOSED FALLBACK** | Use HANA Cloud LOB persistence fallback for draft text artifacts (< 10 MB per project). |
 | **RSK-06** | Performance | ADT cross-reference where-used search times out on large programs. | **REQUIRES R&D** | Asynchronous execution with bounded depth limit (max 2 levels); tag dynamic calls as `UNKNOWN`. |

@@ -1,4 +1,4 @@
-# FioriX — Discovery Verification & Acceptance Test Matrix
+# Fiorify — Discovery Verification & Acceptance Test Matrix
 
 ## 1. Test Suite Coverage Summary
 
@@ -33,7 +33,7 @@
 - **Fit-Gap Verdict**: `ADOPT` for `F1612`; `CONFIGURE` (`WEBGUI_BRIDGE`) for `F-53`.
 
 ### Scenario 3: Custom Transaction Discovery (`ZPURCHASE`)
-- **Discovery**: Discovered as `CUSTOM` transaction (`ZFIORIX_PURCHASE_MAIN`, package `ZPURCH_MOD`, component `HOME`).
+- **Discovery**: Discovered as `CUSTOM` transaction (`ZFiorify_PURCHASE_MAIN`, package `ZPURCH_MOD`, component `HOME`).
 - **Authorization Check**: ADT 403 honestly handled with `PARTIALLY_AVAILABLE` and Basis authorization requirements.
 
 ### Scenario 4: Non-existent / Un-snapshotted Transaction (`ZNONEXISTENT999`)

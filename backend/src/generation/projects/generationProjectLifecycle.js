@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Project Lifecycle State Machine (P1-B)
+ * Fiorify — Generation Project Lifecycle State Machine (P1-B)
  *
  * Enforces controlled state transitions for Generation Projects:
  * - DRAFT (Initial)
@@ -164,6 +164,9 @@ export function validateLifecycleTransition(currentStatus, targetStatus, isEngin
 
   const allowed = ALLOWED_PROJECT_TRANSITIONS[currentStatus] || [];
   if (!allowed.includes(targetStatus)) {
+    if (isEngineOperation && targetStatus === LIFECYCLE_STATUSES.EXPORTED) {
+      return { isValid: true };
+    }
     return {
       isValid: false,
       error: `Illegal lifecycle transition: cannot move project from "${currentStatus}" to "${targetStatus}". Allowed next states: [${allowed.join(', ')}].`

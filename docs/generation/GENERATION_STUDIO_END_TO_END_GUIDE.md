@@ -1,16 +1,16 @@
-# FioriX Generation Studio — End-to-End Operational Guide
+# Fiorify Generation Studio — End-to-End Operational Guide
 
-**Platform:** FioriX — SAP Modernization Platform  
+**Platform:** Fiorify — SAP Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
 **Baseline:** SAP_BASIS 7.58, SAP_UI 7.58, SAPUI5 1.120.0 (FPS01 LTS) / 1.114.0 (FPS00)  
-**Access Model:** Authenticated FioriX Administrator  
+**Access Model:** Authenticated Fiorify Administrator  
 **Deployment Policy:** STRICTLY OFFLINE — Zero Remote Repository Writes, Zero CTS Transports  
 
 ---
 
 ## 1. Introduction
 
-FioriX Generation Studio is an enterprise workbench that transforms confirmed SAP business requirements and discovery assessments into clean, production-grade ABAP RESTful Application Programming Model (RAP) backend code and SAP Fiori Elements (OData V4) user interfaces.
+Fiorify Generation Studio is an enterprise workbench that transforms confirmed SAP business requirements and discovery assessments into clean, production-grade ABAP RESTful Application Programming Model (RAP) backend code and SAP Fiori Elements (OData V4) user interfaces.
 
 The Studio operates entirely local-first. All generated artifacts are preserved as reviewable drafts in the canonical project repository, verified via in-process local mock preview, audited via an end-to-end Traceability Matrix, and packaged into standard PKZIP archives for developer review in Eclipse ADT.
 
@@ -20,7 +20,7 @@ The Studio operates entirely local-first. All generated artifacts are preserved 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                       FIORIX GENERATION STUDIO LIFECYCLE                     │
+│                       Fiorify GENERATION STUDIO LIFECYCLE                     │
 │                                                                             │
 │  Phase 1: Project Foundation (GEN-02)                                       │
 │  Create Project from BUILD Assessment ───► Canonical Persistence Store      │
@@ -125,7 +125,7 @@ The Studio operates entirely local-first. All generated artifacts are preserved 
    - Verify requirement-to-code mapping and coverage percentages.
    - Confirm the composite Traceability Index.
 4. Click **Package & Download Project ZIP**.
-5. The system deterministically packages all ABAP, Fiori, and documentation files into `FioriX_<projectId>_<timestamp>.zip` along with `fiorix-export-manifest.json` containing SHA-256 checksums.
+5. The system deterministically packages all ABAP, Fiori, and documentation files into `Fiorify_<projectId>_<timestamp>.zip` along with `Fiorify-export-manifest.json` containing SHA-256 checksums.
 
 ### Developer Handover & Workstation Toolchain (GEN-09)
 1. Navigate to the **Environment & Toolchain** tab.

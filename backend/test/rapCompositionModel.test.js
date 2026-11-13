@@ -1,5 +1,5 @@
 /**
- * FioriX — QA-02: RAP Composition Model Completeness & Validation Test Suite
+ * Fiorify — QA-02: RAP Composition Model Completeness & Validation Test Suite
  *
  * Verifies:
  * 1. Root Entity with key and semantic fields

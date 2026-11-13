@@ -1,4 +1,4 @@
-# FioriX Generation Studio — Project Lifecycle State Machine (Phase 1)
+# Fiorify Generation Studio — Project Lifecycle State Machine (Phase 1)
 
 **Module:** Generation Studio  
 **Target:** SAP S/4HANA 2023 On-Premise  

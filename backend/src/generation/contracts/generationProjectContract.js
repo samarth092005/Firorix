@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Project Data Contract & Schemas (P1-B)
+ * Fiorify — Generation Project Data Contract & Schemas (P1-B)
  *
  * Defines the canonical, versioned GenerationProject contract for Generation Studio.
  * Complies with S/4HANA 2023 On-Premise Clean Core guidelines.

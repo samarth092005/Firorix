@@ -1,5 +1,5 @@
-# FioriX Page Specifications & Screen Contracts
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
+# Fiorify Page Specifications & Screen Contracts
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
 **Document Version:** 1.0.0  
 **Phase:** Sprint 1 Frontend Implementation  
 
@@ -46,7 +46,7 @@ The frontend release implements 13 comprehensive primary pages and workspaces:
 - **Table Columns:** System Alias, Environment (`DEV`, `QAS`, `PRD`), Destination Name, Host/URL, Target Release (`S/4HANA 2022 FPS02`), Connection Status (`CONNECTED_SIMULATED`, `OFFLINE`), Last Verified Date, Actions (`Inspect`, `Test`, `Edit`).
 - **Toolbar:** Filter by Environment, Search by Alias, "Add SAP System" button (opens Modal).
 - **Test Connection Feedback:** Triggers simulated network handshake with BTP Destination Service, displaying a prominent badge: `SIMULATED LOCAL TEST — NO REAL CONNECTION`.
-- **System Detail View (`/systems/:id`):** Displays Cloud Connector Subaccount mapping, ADT endpoint URL (`/sap/bc/adt`), active Gateway OData services catalog, and assigned technical communication user (`FIORIX_COMM_USR`).
+- **System Detail View (`/systems/:id`):** Displays Cloud Connector Subaccount mapping, ADT endpoint URL (`/sap/bc/adt`), active Gateway OData services catalog, and assigned technical communication user (`Fiorify_COMM_USR`).
 
 ### Page 3: Transaction Explorer (`/explorer` & `/explorer/:tcode`)
 - **Filter Bar:** Multi-combobox for SAP Module (`SD`, `MM`, `FI`, `PP`), Type filter (`Standard`, `Custom Z/Y`), Text search input.
@@ -120,4 +120,4 @@ The frontend release implements 13 comprehensive primary pages and workspaces:
 - **Sections:**
   - *User Persona Switcher:* Toggle active role (`SAP Functional Consultant`, `ABAP Developer`, `Solution Architect`, `Administrator`) to simulate role-based navigation.
   - *Demo Mode Controls:* "Reset Local Demo Data" button with confirmation.
-  - *Environment Telemetry:* BTP Subaccount details, Node.js runtime version, UI5 Web Components version, FioriX platform build hash.
+  - *Environment Telemetry:* BTP Subaccount details, Node.js runtime version, UI5 Web Components version, Fiorify platform build hash.

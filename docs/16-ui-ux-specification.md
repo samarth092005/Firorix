@@ -4,7 +4,7 @@
 
 ## 1. Enterprise UX Philosophy & Visual Identity
 
-FioriX is engineered as a calm, high-density, professional enterprise workbench. It follows the **SAP Fiori Horizon** enterprise design system:
+Fiorify is engineered as a calm, high-density, professional enterprise workbench. It follows the **SAP Fiori Horizon** enterprise design system:
 - **No AI Hype Clichés:** No robot illustrations, no glowing borders, no pulsating gradients, and no conversational chatbot sidecars.
 - **High Information Density with Visual Restraint:** Clean typography, compact data tables, clear visual hierarchy, and restrained padding.
 - **Semantic Color Usage:** Color strictly indicates system health, lifecycle status, test results, and governance decisions.
@@ -15,7 +15,7 @@ FioriX is engineered as a calm, high-density, professional enterprise workbench.
 
 ```
 +----------------------------------------------------------------------------------------------------+
-| [=] FioriX  [ LOCAL DEMO ]        (Global Search)              [🔔] [⚙️ Settings] [👤 Elena (Lead)]|
+| [=] Fiorify  [ LOCAL DEMO ]        (Global Search)              [🔔] [⚙️ Settings] [👤 Elena (Lead)]|
 +------------------+---------------------------------------------------------------------------------+
 | 1. Dashboard     | Breadcrumbs: Home > Assessments > ASMT-0001 (ME21N)                             |
 | 2. SAP Landscape |---------------------------------------------------------------------------------|

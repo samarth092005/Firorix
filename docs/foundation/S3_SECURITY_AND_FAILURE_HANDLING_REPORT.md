@@ -1,10 +1,10 @@
-# FioriX — Stage S3: Security & Failure Handling Report
+# Fiorify — Stage S3: Security & Failure Handling Report
 
 ## 1. Safety Invariants & Guardrails
 The Stage S3 SAP Connectivity Foundation implements strict safeguards to protect enterprise systems, credentials, and data integrity:
 
 ### Invariant 1: Zero Write Exposure
-Under no circumstance will FioriX execute a mutating write (`POST`, `PUT`, `DELETE`, `PATCH`) against an on-premise SAP S/4HANA instance.
+Under no circumstance will Fiorify execute a mutating write (`POST`, `PUT`, `DELETE`, `PATCH`) against an on-premise SAP S/4HANA instance.
 - **Enforcement**: `SapHttpClient.assertReadOnly(method)` throws `WRITE_OPERATION_BLOCKED` before network dispatch.
 - **Test Evidence**: Verified by unit test in `backend/test/s3SapConnectivity.test.js`.
 
@@ -14,13 +14,13 @@ Under no circumstance will FioriX execute a mutating write (`POST`, `PUT`, `DELE
 
 ### Invariant 3: Failure Disambiguation
 - An infrastructure or connectivity error is never treated as a business or discovery finding.
-- If an SAP system fails to respond, returns HTTP 504, or blocks with HTTP 403, FioriX records the specific failure category (`NETWORK_UNAVAILABLE`, `AUTHORIZATION_BLOCKED`, `CLOUD_CONNECTOR_UNAVAILABLE`) and refuses to recommend `BUILD`.
+- If an SAP system fails to respond, returns HTTP 504, or blocks with HTTP 403, Fiorify records the specific failure category (`NETWORK_UNAVAILABLE`, `AUTHORIZATION_BLOCKED`, `CLOUD_CONNECTOR_UNAVAILABLE`) and refuses to recommend `BUILD`.
 
 ---
 
 ## 2. Failure Handling Taxonomy
 
-| Failure Mode | HTTP Status Code | FioriX Internal Status | Downstream Impact | Recommended Basis Action |
+| Failure Mode | HTTP Status Code | Fiorify Internal Status | Downstream Impact | Recommended Basis Action |
 |---|:---:|---|---|---|
 | Cloud Connector Disconnected | 502 / 503 | `CLOUD_CONNECTOR_UNAVAILABLE` | Discovery halted with diagnostic warning; transaction not marked missing. | Check Cloud Connector process and subaccount tunnel status. |
 | Target Host Timeout | 504 | `TIMEOUT` | Request retried twice with backoff; then returns diagnostic error. | Check SAP ICM availability and network route to host. |

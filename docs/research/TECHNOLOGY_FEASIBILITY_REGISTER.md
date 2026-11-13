@@ -1,5 +1,5 @@
-# FioriX Technology Feasibility Register & Platform Evaluation
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Generation Platform  
+# Fiorify Technology Feasibility Register & Platform Evaluation
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Generation Platform  
 **Document Version:** 1.0.0  
 **Phase:** Pre-Development / R&D Governance Phase  
 
@@ -7,7 +7,7 @@
 
 ## 1. Classification Methodology
 
-Every technology, service, framework, protocol, and interface identified across the FioriX specification pack is categorized and evaluated against established SAP documentation and enterprise platform standards.
+Every technology, service, framework, protocol, and interface identified across the Fiorify specification pack is categorized and evaluated against established SAP documentation and enterprise platform standards.
 
 Each item is assigned one of four definitive feasibility classifications:
 
@@ -36,8 +36,8 @@ pie title Technology Classification Breakdown
 |---|---|---|---|---|---|---|
 | **SAP BTP Cloud Foundry** | Runtime | **CONFIRMED** | Primary container runtime hosting CAP backend and UI approuter. | Standard multi-tenant CF environment. Reliable standard runtime. | Memory limits per space, 120s HTTP routing timeout, container restarts wipe local storage. | Confirm CF organization, space quota (min. 4 GB RAM), and region. |
 | **SAP CAP (Node.js/TypeScript)** | Backend Framework | **CONFIRMED** | Core business logic, domain APIs, persistence orchestration, authorization. | `@sap/cds` provides mature support for TypeScript, HANA DB, and XSUAA integration. | Async workers require careful process separation to avoid event loop starvation. | Successful execution of basic `@sap/cds` local and CF build. |
-| **CAP CDS (`@sap/cds`)** | Data Modeling | **CONFIRMED** | FioriX metadata domain model definition and compilation to HANA DDL. | Highly standardized, reliable DDL compiler for HANA Cloud. | Distinct from ABAP CDS; cannot be used interchangeably. | Compile `docs/14` schema definitions using `cds compile`. |
-| **SAP HANA Cloud** | Database | **CONFIRMED** | Persistent relational storage for FioriX metadata, assessments, and audit logs. | Native backing database for CAP via HDI containers. | Sizing costs; JSON column querying limits; memory consumption for large snapshots. | Confirm provisioned HDI container instance and subaccount binding. |
+| **CAP CDS (`@sap/cds`)** | Data Modeling | **CONFIRMED** | Fiorify metadata domain model definition and compilation to HANA DDL. | Highly standardized, reliable DDL compiler for HANA Cloud. | Distinct from ABAP CDS; cannot be used interchangeably. | Compile `docs/14` schema definitions using `cds compile`. |
+| **SAP HANA Cloud** | Database | **CONFIRMED** | Persistent relational storage for Fiorify metadata, assessments, and audit logs. | Native backing database for CAP via HDI containers. | Sizing costs; JSON column querying limits; memory consumption for large snapshots. | Confirm provisioned HDI container instance and subaccount binding. |
 | **TypeScript / Node.js 20 LTS** | Language & Runtime | **CONFIRMED** | Type-safe development for backend services and generator templates. | Standard LTS runtime supported by CF Node.js buildpack. | Build step required (`tsc`); potential buildpack version mismatches. | Check buildpack compatibility in target BTP CF landscape. |
 | **BTP Managed App Router** | Ingress & Security | **CONFIRMED** | Authentication entry point, route forwarding, CSRF handling. | Standard SAP BTP ingress pattern; eliminates custom router container maintenance. | Limited custom middleware support compared to standalone approuter. | Test managed approuter routing to mock CAP service in CF. |
 
@@ -47,9 +47,9 @@ pie title Technology Classification Breakdown
 
 | Technology / Component | Category | Classification | Architectural Purpose | Feasibility Assessment & Assumptions | Constraints, Dependencies & Risks | Sprint 1 Required Evidence |
 |---|---|---|---|---|---|---|
-| **SAPUI5 Freestyle** | Frontend Framework | **CONFIRMED** | FioriX platform workbench interface (Explorer, Studio, Validation). | Mature UI library with comprehensive enterprise controls and accessibility. | Requires custom MVC controllers and models; higher dev effort than Fiori Elements. | Verify UI5 library version (min. 1.120 LTS) in HTML5 repository. |
+| **SAPUI5 Freestyle** | Frontend Framework | **CONFIRMED** | Fiorify platform workbench interface (Explorer, Studio, Validation). | Mature UI library with comprehensive enterprise controls and accessibility. | Requires custom MVC controllers and models; higher dev effort than Fiori Elements. | Verify UI5 library version (min. 1.120 LTS) in HTML5 repository. |
 | **SAP Fiori Elements (Draft App)** | Generated Target | **PROPOSED** | Target architecture for generated custom draft applications. | Standard floorplans (List Report & Object Page) driven by OData annotations. | Generated annotations must match target S/4HANA release and UI5 version exactly. | Offline generation test of List Report manifest and annotations. |
-| **HTML5 Application Repository** | UI Hosting | **CONFIRMED** | Storage and versioning of FioriX frontend static UI assets. | Standard BTP service (`html5-apps-repo`) integrating with App Router. | Deployment requires MTA or UI5 Tooling Cloud Foundry deployment plugin. | Verify service plan entitlements (`app-host`, `app-runtime`). |
+| **HTML5 Application Repository** | UI Hosting | **CONFIRMED** | Storage and versioning of Fiorify frontend static UI assets. | Standard BTP service (`html5-apps-repo`) integrating with App Router. | Deployment requires MTA or UI5 Tooling Cloud Foundry deployment plugin. | Verify service plan entitlements (`app-host`, `app-runtime`). |
 | **UI5 Tooling (`@ui5/cli`)** | Build Tooling | **CONFIRMED** | Building, bundling, and linting SAPUI5 applications. | Standard build toolchain maintained by SAP open-source community. | Package dependencies and custom build tasks must be maintained. | Execute sample `ui5 build` and `ui5 lint`. |
 
 ---
@@ -79,7 +79,7 @@ pie title Technology Classification Breakdown
 | **Service Definition (SRVD)** | Target Artifact | **CONFIRMED** | Exposes specific ABAP CDS entities for consumption in a service. | Standard RAP artifact; clean, simple DDL syntax. | Requires matching CDS entities; must adhere to Clean Core naming. | Generate sample SRVD text artifact and verify syntax against release docs. |
 | **Service Binding (SRVB)** | Target Artifact | **PROPOSED** | Binds Service Definition to protocol (OData V4 - UI or Web API). | Standard RAP mechanism for publishing endpoints. | Automatic generation of SRVB is complex; activation requires SAP Gateway. | Document manual activation steps for customer developers in draft README. |
 | **ABAP Test Cockpit (ATC)** | Quality Gate | **CONDITIONAL** | Verifying Clean Core compliance, syntax errors, and naming conventions. | Standard ABAP code analysis tool in S/4HANA. | Requires target system ATC variant configuration; requires SAP-side execution. | Inspect ATC baseline rules and available check variants on target system. |
-| **SAP Transport / CTS / abapGit** | Lifecycle / Transport | **CONDITIONAL** | Importing generated draft artifacts into S/4HANA developer sandbox. | Standard transport management (`SE09`/`SE10`) or open-source abapGit. | FioriX explicitly does NOT automate transport creation; requires human dev. | Define draft export format (abapGit repository layout vs. plain text ZIP). |
+| **SAP Transport / CTS / abapGit** | Lifecycle / Transport | **CONDITIONAL** | Importing generated draft artifacts into S/4HANA developer sandbox. | Standard transport management (`SE09`/`SE10`) or open-source abapGit. | Fiorify explicitly does NOT automate transport creation; requires human dev. | Define draft export format (abapGit repository layout vs. plain text ZIP). |
 
 ---
 
@@ -117,7 +117,7 @@ pie title Technology Classification Breakdown
 | -> Execute technical spike in Sprint 1 to negotiate /sap/bc/adt/discovery            |
 +---------------------------------------------------------------------------------------+
 | GATING ACTION 3: FORMAL LEAST-PRIVILEGE SAP ROLE SPECIFICATION                        |
-| -> Deliver Z_FIORIX_DISCOVERY_RO specifying exact authorization objects               |
+| -> Deliver Z_Fiorify_DISCOVERY_RO specifying exact authorization objects               |
 +---------------------------------------------------------------------------------------+
 | GATING ACTION 4: CONFIRM STORAGE FALLBACK ARCHITECTURE                                |
 | -> Verify DMS entitlement; configure CAP HANA LOB fallback adapter                   |

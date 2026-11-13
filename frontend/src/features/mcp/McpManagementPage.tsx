@@ -44,7 +44,7 @@ export const McpManagementPage: React.FC = () => {
   const [executionResult, setExecutionResult] = useState<McpExecutionResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [adminSecret, setAdminSecret] = useState<string>(() => {
-    return sessionStorage.getItem('fiorix_admin_secret') || '';
+    return sessionStorage.getItem('Fiorify_admin_secret') || '';
   });
   const [showAdminSecretInput, setShowAdminSecretInput] = useState<boolean>(false);
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
@@ -569,7 +569,7 @@ export const McpManagementPage: React.FC = () => {
                   {showAdminSecretInput && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       <label style={{ fontSize: '11px', color: '#64748B', fontWeight: 600 }}>
-                        Administrative Secret (X-FioriX-Admin-Secret):
+                        Administrative Secret (X-Fiorify-Admin-Secret):
                       </label>
                       <input
                         type="password"
@@ -577,9 +577,9 @@ export const McpManagementPage: React.FC = () => {
                         onChange={(e) => {
                           setAdminSecret(e.target.value);
                           if (e.target.value) {
-                            sessionStorage.setItem('fiorix_admin_secret', e.target.value);
+                            sessionStorage.setItem('Fiorify_admin_secret', e.target.value);
                           } else {
-                            sessionStorage.removeItem('fiorix_admin_secret');
+                            sessionStorage.removeItem('Fiorify_admin_secret');
                           }
                         }}
                         placeholder="Enter admin secret..."

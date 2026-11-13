@@ -141,7 +141,7 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
   });
 
   await t.test('4. POST /api/v1/mcp/connect requires admin authentication', async () => {
-    process.env.FIORIX_ADMIN_SECRET = 'test-secret-123';
+    process.env.Fiorify_ADMIN_SECRET = 'test-secret-123';
     // Unauthorized attempt
     const unauth = await makeRequest('/api/v1/mcp/connect', { method: 'POST' });
     assert.strictEqual(unauth.status, 401);
@@ -150,20 +150,20 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
     // Authorized attempt
     const auth = await makeRequest('/api/v1/mcp/connect', {
       method: 'POST',
-      headers: { 'X-FioriX-Admin-Secret': 'test-secret-123' }
+      headers: { 'X-Fiorify-Admin-Secret': 'test-secret-123' }
     });
     assert.strictEqual(auth.status, 200);
     assert.strictEqual(auth.body.success, true);
   });
 
   await t.test('5. POST /api/v1/mcp/disconnect requires admin authentication', async () => {
-    process.env.FIORIX_ADMIN_SECRET = 'test-secret-123';
+    process.env.Fiorify_ADMIN_SECRET = 'test-secret-123';
     const unauth = await makeRequest('/api/v1/mcp/disconnect', { method: 'POST' });
     assert.strictEqual(unauth.status, 401);
 
     const auth = await makeRequest('/api/v1/mcp/disconnect', {
       method: 'POST',
-      headers: { 'X-FioriX-Admin-Secret': 'test-secret-123' }
+      headers: { 'X-Fiorify-Admin-Secret': 'test-secret-123' }
     });
     assert.strictEqual(auth.status, 200);
     assert.strictEqual(auth.body.success, true);
@@ -174,7 +174,7 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
   });
 
   await t.test('6. POST /api/v1/mcp/tools/:toolName/execute requires admin authentication', async () => {
-    process.env.FIORIX_ADMIN_SECRET = 'test-secret-123';
+    process.env.Fiorify_ADMIN_SECRET = 'test-secret-123';
     const unauth = await makeRequest('/api/v1/mcp/tools/search_docs/execute', {
       method: 'POST',
       body: { arguments: { query: 'List Report' } }
@@ -186,7 +186,7 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
   await t.test('7. POST /api/v1/mcp/tools/:toolName/execute executes permitted tool with HTTP 200 when authenticated', async () => {
     const res = await makeRequest('/api/v1/mcp/tools/search_docs/execute', {
       method: 'POST',
-      headers: { 'X-FioriX-Admin-Secret': 'test-secret-123' },
+      headers: { 'X-Fiorify-Admin-Secret': 'test-secret-123' },
       body: { arguments: { query: 'List Report' } }
     });
     assert.strictEqual(res.status, 200);
@@ -198,7 +198,7 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
   await t.test('8. POST /api/v1/mcp/tools/:toolName/execute rejects blocked tool with HTTP 403', async () => {
     const res = await makeRequest('/api/v1/mcp/tools/generate_fiori_app_odata/execute', {
       method: 'POST',
-      headers: { 'X-FioriX-Admin-Secret': 'test-secret-123' },
+      headers: { 'X-Fiorify-Admin-Secret': 'test-secret-123' },
       body: { arguments: { appPath: '/some/dir' } }
     });
     assert.strictEqual(res.status, 403);
@@ -210,7 +210,7 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
   await t.test('9. POST /api/v1/mcp/tools/:toolName/execute rejects missing required arguments with HTTP 400', async () => {
     const res = await makeRequest('/api/v1/mcp/tools/search_docs/execute', {
       method: 'POST',
-      headers: { 'X-FioriX-Admin-Secret': 'test-secret-123' },
+      headers: { 'X-Fiorify-Admin-Secret': 'test-secret-123' },
       body: { arguments: {} } // missing query
     });
     assert.strictEqual(res.status, 400);
@@ -221,7 +221,7 @@ test('MCP REST API Routes — Status, Inventory, Auth & Execution', async (t) =>
   await t.test('10. POST /api/v1/mcp/tools/:toolName/execute returns HTTP 404 for non-existent tools', async () => {
     const res = await makeRequest('/api/v1/mcp/tools/fake_tool/execute', {
       method: 'POST',
-      headers: { 'X-FioriX-Admin-Secret': 'test-secret-123' },
+      headers: { 'X-Fiorify-Admin-Secret': 'test-secret-123' },
       body: { arguments: {} }
     });
     assert.strictEqual(res.status, 404);

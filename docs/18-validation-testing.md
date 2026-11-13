@@ -42,5 +42,5 @@ The Validation Centre evaluates generated draft artifacts against four mandatory
 
 ## 3. Client-Side vs. SAP-Side Verification Boundary
 
-- **Client-Side Verification (Sprints 1–13):** Executed by FioriX offline using AST parsers, schema validators, and linter engines. Returns `PASS`, `WARNING`, `FAIL`, or `NOT_RUN`.
-- **SAP-Side Verification (Post-Export / Manual Dev Sandbox):** Executed manually by ABAP developers in an isolated S/4HANA DEV sandbox via ADT or abapGit. FioriX does not perform automated activation or CTS transport creation.
+- **Client-Side Verification (Sprints 1–13):** Executed by Fiorify offline using AST parsers, schema validators, and linter engines. Returns `PASS`, `WARNING`, `FAIL`, or `NOT_RUN`.
+- **SAP-Side Verification (Post-Export / Manual Dev Sandbox):** Executed manually by ABAP developers in an isolated S/4HANA DEV sandbox via ADT or abapGit. Fiorify does not perform automated activation or CTS transport creation.

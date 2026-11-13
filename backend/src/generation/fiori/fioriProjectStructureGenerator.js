@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-06: SAP Fiori Application Project Scaffolding
+ * Fiorify — GEN-06: SAP Fiori Application Project Scaffolding
  *
  * Synthesizes Component.js, index.html, i18n.properties, package.json,
  * and ui5.yaml for the SAP Fiori Elements project.
@@ -12,7 +12,7 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
   if (!rootEntity) return [];
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-  const appId = uiConfig.appId || `com.fiorix.custom.${prefix}`;
+  const appId = uiConfig.appId || `com.Fiorify.custom.${prefix}`;
   const appTitle = uiConfig.pageTitle || project.projectName || `${rootEntity.businessName || rootEntity.name} Application`;
   const artifacts = [];
 
@@ -67,8 +67,8 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
     }, 7000);
     function showCdnFallback() {
       var c = document.getElementById('content');
-      if (c && !document.getElementById('fiorix-fallback-banner')) {
-        c.innerHTML = '<div id="fiorix-fallback-banner" style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:32px 24px;max-width:750px;margin:40px auto;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.05);">' +
+      if (c && !document.getElementById('Fiorify-fallback-banner')) {
+        c.innerHTML = '<div id="Fiorify-fallback-banner" style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:32px 24px;max-width:750px;margin:40px auto;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.05);">' +
           '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' +
           '<span style="font-size:24px;">🌐</span>' +
           '<h2 style="font-size:18px;font-weight:700;color:#0f172a;margin:0;">Interactive Fiori Elements Preview</h2>' +
@@ -110,7 +110,7 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
   }));
 
   // 3. webapp/i18n/i18n.properties
-  let i18n = `# FioriX Generated i18n Bundle for ${project.projectName}\n`;
+  let i18n = `# Fiorify Generated i18n Bundle for ${project.projectName}\n`;
   i18n += `appTitle=${appTitle}\n`;
   i18n += `appDescription=${project.description || 'SAP S/4HANA 2023 Modernization Application'}\n`;
   i18n += `\n# Entity Labels\n`;
@@ -133,7 +133,7 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
 
   // 4. package.json
   const packageJson = {
-    name: `fiorix-${prefix}-ui`,
+    name: `Fiorify-${prefix}-ui`,
     version: '1.0.0',
     description: project.description || `SAP Fiori Elements Application for ${project.projectName}`,
     scripts: {
@@ -162,7 +162,7 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
   // 5. ui5.yaml
   const ui5Yaml = `specVersion: "3.0"
 metadata:
-  name: fiorix-${prefix}-ui
+  name: Fiorify-${prefix}-ui
 type: application
 framework:
   name: SAPUI5

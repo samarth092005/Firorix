@@ -47,7 +47,7 @@ const MOCK_DESTINATION_OBJECT = {
   authentication: 'BasicAuthentication'
 };
 
-describe('FioriX Sprint 5.1 — BTP Destination Adapter Unit Tests', () => {
+describe('Fiorify Sprint 5.1 — BTP Destination Adapter Unit Tests', () => {
   // 1. Missing destination binding
   it('correctly flags missing destination service binding', async () => {
     const vcapWithoutDest = {
@@ -372,13 +372,13 @@ describe('FioriX Sprint 5.1 — BTP Destination Adapter Unit Tests', () => {
     // Test sanitizeHeaders utility
     const sanitized = sanitizeHeaders({
       Authorization: `Bearer ${SENSITIVE_BEARER_TOKEN}`,
-      'X-FioriX-Admin-Secret': 'admin-secret',
+      'X-Fiorify-Admin-Secret': 'admin-secret',
       'sap-client': '200',
       'X-CSRF-Token': 'csrf-token-abc'
     });
 
     assert.strictEqual(sanitized.Authorization, '[REDACTED]');
-    assert.strictEqual(sanitized['X-FioriX-Admin-Secret'], '[REDACTED]');
+    assert.strictEqual(sanitized['X-Fiorify-Admin-Secret'], '[REDACTED]');
     assert.strictEqual(sanitized['X-CSRF-Token'], '[REDACTED]');
     assert.strictEqual(sanitized['sap-client'], '200');
 

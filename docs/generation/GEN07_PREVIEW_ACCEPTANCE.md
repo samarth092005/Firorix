@@ -1,4 +1,4 @@
-# FioriX — GEN-07: Local Preview Acceptance Report
+# Fiorify — GEN-07: Local Preview Acceptance Report
 
 **Date of Execution:** November 11, 2026  
 **Test Suite:** `backend/test/gen07LocalPreviewOData.test.js`  
@@ -26,7 +26,7 @@
 
 Inspection of the served `webapp/index.html` verified that the watermark is permanently injected into the DOM:
 ```html
-<div id="fiorix-preview-banner" ...>
+<div id="Fiorify-preview-banner" ...>
   &#9888; LOCAL MOCK PREVIEW — SYNTHETIC DATA ONLY — NOT CONNECTED TO SAP S21
 </div>
 ```

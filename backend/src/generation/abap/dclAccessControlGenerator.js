@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: DCL Access Control Generator
+ * Fiorify — GEN-05: DCL Access Control Generator
  *
  * Generates ABAP CDS Access Control (DCL) for Root Interface View
  * enforcing Clean Core PFCG authorization checks.

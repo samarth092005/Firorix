@@ -28,16 +28,16 @@ import {
 } from './demoData';
 
 const STORAGE_KEYS = {
-  SYSTEMS: 'fiorix_systems',
-  TRANSACTIONS: 'fiorix_transactions',
-  ASSESSMENTS: 'fiorix_assessments',
-  REQUIREMENTS: 'fiorix_requirements',
-  CATALOGUE: 'fiorix_catalogue',
-  FIT_GAP: 'fiorix_fit_gap',
-  RECOMMENDATIONS: 'fiorix_recommendations',
-  BLUEPRINTS: 'fiorix_blueprints',
-  JOBS: 'fiorix_jobs',
-  AUDIT: 'fiorix_audit'
+  SYSTEMS: 'Fiorify_systems',
+  TRANSACTIONS: 'Fiorify_transactions',
+  ASSESSMENTS: 'Fiorify_assessments',
+  REQUIREMENTS: 'Fiorify_requirements',
+  CATALOGUE: 'Fiorify_catalogue',
+  FIT_GAP: 'Fiorify_fit_gap',
+  RECOMMENDATIONS: 'Fiorify_recommendations',
+  BLUEPRINTS: 'Fiorify_blueprints',
+  JOBS: 'Fiorify_jobs',
+  AUDIT: 'Fiorify_audit'
 };
 
 function getItem<T>(key: string, defaultValue: T): T {

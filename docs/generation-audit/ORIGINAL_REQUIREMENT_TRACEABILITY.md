@@ -8,7 +8,7 @@
 
 ## 1. Executive Traceability Framework Overview
 
-FioriX Generation Studio implements full bi-directional traceability bridging the initial Discovery Assessment (Phase 1) to the final generated RAP backend and Fiori Elements frontend (Phase 2).
+Fiorify Generation Studio implements full bi-directional traceability bridging the initial Discovery Assessment (Phase 1) to the final generated RAP backend and Fiori Elements frontend (Phase 2).
 
 ### The Traceability Chain
 ```text

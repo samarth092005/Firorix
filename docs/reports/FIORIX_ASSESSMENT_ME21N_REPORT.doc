@@ -2,7 +2,7 @@
 <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
   <meta charset='utf-8'>
-  <title>FioriX Assessment Report - ME21N</title>
+  <title>Fiorify Assessment Report - ME21N</title>
   <style>
     body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 11pt; color: #1B2838; line-height: 1.5; margin: 30px; }
     h1 { color: #003A8C; font-size: 20pt; border-bottom: 2pt solid #0066FF; padding-bottom: 6px; }
@@ -15,7 +15,7 @@
 </head>
 <body>
   <h1>SAP Transaction Modernization Assessment — ME21N</h1>
-  <p><strong>Platform:</strong> FioriX Enterprise Discovery Platform &nbsp;|&nbsp; <strong>Target Landscape:</strong> S21 Client 200 (SAP S/4HANA 2023 Private Edition)</p>
+  <p><strong>Platform:</strong> Fiorify Enterprise Discovery Platform &nbsp;|&nbsp; <strong>Target Landscape:</strong> S21 Client 200 (SAP S/4HANA 2023 Private Edition)</p>
   <p><strong>Report Date:</strong> 2026-11-08 &nbsp;|&nbsp; <strong>Assessment ID:</strong> ASM-S21-ME21N &nbsp;|&nbsp; <strong>Status:</strong> <span class="badge">APPROVED</span></p>
 
   <h2>1. Executive Summary</h2>

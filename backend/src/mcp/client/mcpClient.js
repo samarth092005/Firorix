@@ -7,7 +7,7 @@ import { mcpLogger } from '../utils/mcpLogger.js';
  * Low-level MCP Client wrapper integrating with @modelcontextprotocol/sdk.
  */
 export class McpClientWrapper {
-  constructor(clientInfo = { name: 'fiorix-backend', version: '1.0.0' }) {
+  constructor(clientInfo = { name: 'Fiorify-backend', version: '1.0.0' }) {
     this.clientInfo = clientInfo;
     this.client = null;
     this.transport = null;

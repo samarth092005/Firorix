@@ -1,5 +1,5 @@
 /**
- * FioriX — Shared GEN-05 / GEN-06 Artifact Registry
+ * Fiorify — Shared GEN-05 / GEN-06 Artifact Registry
  *
  * Provides authoritative persistence, SHA-256 checksum tracking,
  * manual-edit preservation, diff detection, and generation-run auditing

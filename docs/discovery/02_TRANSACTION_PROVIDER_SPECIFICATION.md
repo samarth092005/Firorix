@@ -1,4 +1,4 @@
-# FioriX — Transaction Discovery Provider Specification (Workstream D2)
+# Fiorify — Transaction Discovery Provider Specification (Workstream D2)
 
 ## 1. Provider Pattern Overview
 The Transaction Discovery subsystem decouples transaction fact retrieval from single-source registries through six specialized providers implemented in `backend/src/services/transactionDiscoveryProviders.js`:

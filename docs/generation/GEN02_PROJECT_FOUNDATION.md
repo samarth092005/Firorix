@@ -1,4 +1,4 @@
-# FIORIX GENERATION STUDIO — MILESTONE GEN-02 SPECIFICATION
+# Fiorify GENERATION STUDIO — MILESTONE GEN-02 SPECIFICATION
 ## Project Foundation, Assessment Context & Lifecycle Gating
 
 **Version:** 1.0.0  
@@ -31,7 +31,7 @@ An assessment is strictly eligible for Generation Project instantiation if and o
 ### 2.2 Endpoint Specification
 - **Method:** `GET`
 - **Route:** `/api/v1/generation/context/:assessmentId`
-- **Security:** Requires `fiorix.generation.manage` permission (`x-fiorix-admin-secret` or authenticated admin session).
+- **Security:** Requires `Fiorify.generation.manage` permission (`x-Fiorify-admin-secret` or authenticated admin session).
 - **Payload Schema:**
 ```json
 {

@@ -1,8 +1,8 @@
 /**
- * FioriX — Central Production API Client
+ * Fiorify — Central Production API Client
  *
- * Implements centralized HTTP client for FioriX frontend communicating with
- * the FioriX SAP Finance Discovery API backend (Node.js HTTP & SAP CAP ready).
+ * Implements centralized HTTP client for Fiorify frontend communicating with
+ * the Fiorify SAP Finance Discovery API backend (Node.js HTTP & SAP CAP ready).
  *
  * Key Capabilities:
  * - GET and POST requests with full TypeScript typing.
@@ -14,7 +14,7 @@
  * - Full Correlation ID support (auto-generation and response header extraction).
  * - Safe handling of empty bodies (204 No Content, Content-Length: 0) and non-JSON payloads.
  * - Strict adherence to Clean Core security: Privileged administrative credentials
- *   (e.g. FIORIX_ADMIN_SECRET) are never stored in client-side code, VITE_ environment
+ *   (e.g. Fiorify_ADMIN_SECRET) are never stored in client-side code, VITE_ environment
  *   variables, or dispatched from untrusted browser user-agents.
  * - Native fetch API with zero external dependencies.
  */
@@ -929,7 +929,7 @@ export class ApiClient {
   ): Promise<any> {
     const headers = { ...options?.headers };
     if (adminSecret) {
-      headers['X-FioriX-Admin-Secret'] = adminSecret;
+      headers['X-Fiorify-Admin-Secret'] = adminSecret;
     }
     return this.post<any>('/mcp/connect', {}, { ...options, headers });
   }
@@ -944,7 +944,7 @@ export class ApiClient {
   ): Promise<any> {
     const headers = { ...options?.headers };
     if (adminSecret) {
-      headers['X-FioriX-Admin-Secret'] = adminSecret;
+      headers['X-Fiorify-Admin-Secret'] = adminSecret;
     }
     return this.post<any>('/mcp/disconnect', {}, { ...options, headers });
   }
@@ -960,7 +960,7 @@ export class ApiClient {
   ): Promise<McpExecutionResponse> {
     const headers = { ...options?.headers };
     if (options?.adminSecret) {
-      headers['X-FioriX-Admin-Secret'] = options.adminSecret;
+      headers['X-Fiorify-Admin-Secret'] = options.adminSecret;
     }
     return this.post<McpExecutionResponse>(
       `/mcp/tools/${encodeURIComponent(toolName)}/execute`,

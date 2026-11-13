@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Combined Milestone Test Suite (GEN-02, GEN-03, GEN-04)
+ * Fiorify — Generation Studio Combined Milestone Test Suite (GEN-02, GEN-03, GEN-04)
  *
  * Verifies:
  * - GEN-02: Server-authoritative BUILD context resolution & Project creation
@@ -37,7 +37,7 @@ describe('Generation Studio Milestones 2–4: Foundation, Requirements & Data Mo
   const TEST_ADMIN_SECRET = 'TEST_ADMIN_SECRET_KEY';
   const adminHeaders = {
     'Content-Type': 'application/json',
-    'x-fiorix-admin-secret': TEST_ADMIN_SECRET
+    'x-Fiorify-admin-secret': TEST_ADMIN_SECRET
   };
 
   const buildAssessment = {
@@ -104,9 +104,9 @@ describe('Generation Studio Milestones 2–4: Foundation, Requirements & Data Mo
   };
 
   before(async () => {
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
-    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-gen24-test-'));
+    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-gen24-test-'));
     testAssessmentPath = path.join(testDir, 'assessments.json');
     testProjectsDir = path.join(testDir, 'projects');
     fs.mkdirSync(testProjectsDir, { recursive: true });

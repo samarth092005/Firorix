@@ -1,7 +1,7 @@
-# FioriX Sprint 7.5: Integrated Validation & Evidence Quality Audit Report
+# Fiorify Sprint 7.5: Integrated Validation & Evidence Quality Audit Report
 **Date:** November 5, 2026  
-**Auditor:** FioriX Technical & Quality Assurance Team  
-**System Under Test:** FioriX Discovery Platform (Local Node.js 20 LTS + React 19 / Vite)  
+**Auditor:** Fiorify Technical & Quality Assurance Team  
+**System Under Test:** Fiorify Discovery Platform (Local Node.js 20 LTS + React 19 / Vite)  
 **Target Landscape:** SAP S/4HANA 2023 Private Edition (SID: `S21`, Client: `200`, `192.168.1.55:8000`)  
 **External Integration:** Official SAP Fiori Apps Reference Library (`SingleApp.xsodata`)  
 **Readiness Decision:** **READY FOR SPRINT 8** (with documented caveats)
@@ -23,7 +23,7 @@ Sprint 7.5 performed a comprehensive, rigorous quality and evidence audit across
 
 ## 2. Actual Runtime Architecture
 
-FioriX operates as a pair of decoupled local applications on the developer's Windows workstation:
+Fiorify operates as a pair of decoupled local applications on the developer's Windows workstation:
 
 ```mermaid
 flowchart TD
@@ -53,7 +53,7 @@ flowchart TD
 
 ### Reality vs. Historical Specifications:
 - **No CAP Server:** The runtime backend is a lightweight native Node.js HTTP server (`backend/src/server.js`) utilizing Node 20 built-ins (`node:http`, `fetch`, `AbortController`). CAP documentation in `docs/` is preserved as historical target architecture.
-- **Direct LAN Routing:** The official BTP Destination `S21` configures virtual host `kbl_fiori:8000` via Cloud Connector. Because Windows cannot resolve `kbl_fiori` without the standalone SAP Connectivity Proxy container, FioriX routes directly to the verified office IP `192.168.1.55:8000` using `SAP_URL_OVERRIDE` in `backend/.env`.
+- **Direct LAN Routing:** The official BTP Destination `S21` configures virtual host `kbl_fiori:8000` via Cloud Connector. Because Windows cannot resolve `kbl_fiori` without the standalone SAP Connectivity Proxy container, Fiorify routes directly to the verified office IP `192.168.1.55:8000` using `SAP_URL_OVERRIDE` in `backend/.env`.
 - **Read-Only Invariant:** Every outbound SAP interaction is strictly limited to discovery queries (`GET /sap/opu/odata/...` and `GET /sap/bc/adt/...`).
 
 ---
@@ -113,7 +113,7 @@ The relationship between `F-53` and `F1612` was audited across both technical an
   - Special G/L transactions (down payments, bills of exchange).
   - Cross-company code clearing.
 - **F1612 Scope (SAPUI5 `fin.ap.payment.post`):** Modern SAP Fiori elements transactional application focused on standard outgoing payments to suppliers against open invoices.
-- **Audit Conclusion:** While `F1612` is a **Technically Verified Candidate** (`DIRECT_SUCCESSOR_ODATA_VERIFIED`), it is **NOT** a 100% functional drop-in replacement for complex, customized `F-53` Dynpro workflows. FioriX must classify `F1612` as a *technically verified successor candidate pending business process fit-gap assessment*.
+- **Audit Conclusion:** While `F1612` is a **Technically Verified Candidate** (`DIRECT_SUCCESSOR_ODATA_VERIFIED`), it is **NOT** a 100% functional drop-in replacement for complex, customized `F-53` Dynpro workflows. Fiorify must classify `F1612` as a *technically verified successor candidate pending business process fit-gap assessment*.
 
 ---
 
@@ -128,7 +128,7 @@ The relationship between `F-53` and `F1612` was audited across both technical an
 
 ## 7. Evidence and Provenance Matrix
 
-Every field presented in the FioriX discovery result carries explicit provenance:
+Every field presented in the Fiorify discovery result carries explicit provenance:
 
 | Data Field | Sample Value | Provenance Tag | Validation Method |
 | :--- | :--- | :--- | :--- |
@@ -188,15 +188,15 @@ Ten failure and edge-case scenarios were tested in `backend/test/sprint75Audit.t
 | **Frontend Unit & Workflow** | `frontend/src/**/__tests__/*.test.ts` | 61 | 61 | 0 | 0 | 1.69s |
 | **TypeScript Typecheck** | `tsc` | All files | All | 0 | 0 | Clean |
 | **Frontend Production Build**| `vite build` | 1,685 modules | 1,685 | 0 | 0 | 10.97s |
-| **Total Test Assertions** | **Entire FioriX Platform** | **113** | **113** | **0** | **0** | — |
+| **Total Test Assertions** | **Entire Fiorify Platform** | **113** | **113** | **0** | **0** | — |
 
 ---
 
 ## 11. Known Limitations
 
-1. **SAP ADT Authorization Gap:** Probing `/sap/bc/adt/discovery` returns `HTTP 403 Forbidden` (`SADT_RESOURCE_003`). User `int_samarth` lacks `S_ADT_RES` and `S_DEVELOP`. While FioriX accurately discovers Gateway services, it cannot read ABAP repository tables (`TSTC`, `TADIR`, `TRDIR`) directly without Basis authorization.
+1. **SAP ADT Authorization Gap:** Probing `/sap/bc/adt/discovery` returns `HTTP 403 Forbidden` (`SADT_RESOURCE_003`). User `int_samarth` lacks `S_ADT_RES` and `S_DEVELOP`. While Fiorify accurately discovers Gateway services, it cannot read ABAP repository tables (`TSTC`, `TADIR`, `TRDIR`) directly without Basis authorization.
 2. **Official Fiori Library API Status:** The endpoint `SingleApp.xsodata/InputFilterParam(InpFilterValue='1NA')/Results` is a public, unauthenticated OData v2 service powering SAP's web portal. While fully functional and reliable, SAP does not publish an official enterprise SLA for third-party tooling on this specific URI. Local snapshot caching mitigates this risk.
-3. **Office Network Direct Routing:** FioriX connects to S21 via direct workstation LAN route (`192.168.1.55:8000`). If the developer disconnects from the office network without an approved VPN, live S21 queries will return `CONNECTION_ERROR` (though offline demo fixtures remain accessible).
+3. **Office Network Direct Routing:** Fiorify connects to S21 via direct workstation LAN route (`192.168.1.55:8000`). If the developer disconnects from the office network without an approved VPN, live S21 queries will return `CONNECTION_ERROR` (though offline demo fixtures remain accessible).
 4. **Technical Viability vs Functional Parity:** Active backend OData services confirm that an application can run, but do not replace user-acceptance testing or fit-gap analysis for bespoke business logic.
 
 ---

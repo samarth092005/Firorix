@@ -269,7 +269,7 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
             <strong>SHA-256 Archive Digest:</strong> {exportResult.zipSha256}
           </div>
           <div style={{ fontSize: '11px', color: '#166534' }}>
-            ✓ Contains <code>/abap/</code>, <code>/fiori/</code>, <code>/docs/</code>, and <code>fiorix-export-manifest.json</code>. Strictly zero credentials or connection tokens.
+            ✓ Contains <code>/abap/</code>, <code>/fiori/</code>, <code>/docs/</code>, and <code>Fiorify-export-manifest.json</code>. Strictly zero credentials or connection tokens.
           </div>
         </div>
       )}

@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Phase 1 Live Verification Script
+ * Fiorify — Generation Studio Phase 1 Live Verification Script
  *
  * Executes the complete 10-step browser/runtime verification workflow:
  * 1. Open Generation Studio (GET /api/v1/generation/projects)
@@ -25,10 +25,10 @@ import os from 'node:os';
 
 async function runVerification() {
   console.log('===============================================================');
-  console.log('FIORIX GENERATION STUDIO — PHASE 1 LIVE RUNTIME VERIFICATION');
+  console.log('FIORIFY GENERATION STUDIO — PHASE 1 LIVE RUNTIME VERIFICATION');
   console.log('===============================================================');
 
-  const testDir = path.join(os.tmpdir(), `fiorix-live-verify-${Date.now()}`);
+  const testDir = path.join(os.tmpdir(), `fiorify-live-verify-${Date.now()}`);
   fs.mkdirSync(testDir, { recursive: true });
 
   const testAssessmentPath = path.join(testDir, 'assessments.json');

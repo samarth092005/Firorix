@@ -154,7 +154,7 @@ export const AuditPlanPanel: React.FC<AuditPlanPanelProps> = ({
           name: 'Downstream Handoff Gate',
           status: isApproved ? 'PASSED' : 'READY_FOR_APPROVAL',
           details: recommendation?.outcome === 'BUILD'
-            ? 'Eligible for FioriX Generation Studio (Clean Core RAP Managed BO)'
+            ? 'Eligible for Fiorify Generation Studio (Clean Core RAP Managed BO)'
             : 'Eligible for FLP Content Manager & PFCG catalog assignment'
         }
       ]

@@ -1,9 +1,9 @@
-# FIORIX — QA-02 FINAL ACCEPTANCE REPORT
+# Fiorify — QA-02 FINAL ACCEPTANCE REPORT
 ## GEN-02 to GEN-04 Acceptance Closure, Security Hardening & Browser Verification
 
 **Document Reference:** `docs/generation/QA02_FINAL_ACCEPTANCE_REPORT.md`  
 **Execution Date:** 2026-11-11  
-**Project:** FioriX — SAP S/4HANA Modernization Platform  
+**Project:** Fiorify — SAP S/4HANA Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (S21, Client 200)  
 **Evaluator:** Lead Enterprise Quality & Security Auditor  
 **Acceptance Status:** **ACCEPTED WITH LIMITATIONS**
@@ -74,9 +74,9 @@ npm --prefix frontend run build
 Previously, incoming requests could potentially supply an arbitrary `x-tenant-id` header to query or mutate project data belonging to another enterprise tenant. In QA-02, `backend/src/server.js` and `backend/src/generation/projects/generationProjectStore.js` were hardened:
 
 1. **Authoritative JWT Scoping:** If a request includes a Bearer JWT, the tenant ID inside the cryptographically signed token (`tokenTenantId`) is strictly authoritative.
-2. **Anti-Spoofing Gate:** If a caller provides an `x-tenant-id` header differing from their token claims without holding cross-tenant platform administration scope (`fiorix.tenant.manage`), the gateway immediately rejects the request with HTTP 401 (`TENANT_SPOOFING_FORBIDDEN`).
+2. **Anti-Spoofing Gate:** If a caller provides an `x-tenant-id` header differing from their token claims without holding cross-tenant platform administration scope (`Fiorify.tenant.manage`), the gateway immediately rejects the request with HTTP 401 (`TENANT_SPOOFING_FORBIDDEN`).
 3. **Unauthenticated Fallback Lockdown:** In local development mode without Bearer tokens, all unauthenticated requests are strictly bound to `DEFAULT-TENANT-S21`, preventing spoofing of external tenant spaces.
-4. **Master Admin Delegation:** Platform Administrators providing the master administrative secret (`x-fiorix-admin-secret`) are authorized to target specific tenants via `x-tenant-id` for governance operations.
+4. **Master Admin Delegation:** Platform Administrators providing the master administrative secret (`x-Fiorify-admin-secret`) are authorized to target specific tenants via `x-tenant-id` for governance operations.
 5. **Store-Level Isolation:** All storage operations (`getProject`, `updateProject`, `archiveProject`, `restoreProject`, `deleteProject`, and `listProjects`) enforce tenant predicate filtering at the storage layer.
 
 ### 3.2 Tenant Isolation Verification Matrix
@@ -130,7 +130,7 @@ In `backend/src/generation/datamodel/dataModelValidator.js`:
 1. **Connection Pool Abstraction:** Supports both `DatabasePool` wrappers (`.getClient()`) and raw `pg.Pool` instances (`.connect()`).
 2. **Type Safety:** Sanitized integer column parsing for `spec_version` (`parseInt(String(v).replace(/\D/g, ''), 10) || 1`), eliminating `invalid input syntax for type integer: "v1"` during project duplication.
 3. **Relational Schema Integrity:** Verified CRUD operations across `generation_projects`, `generation_specifications`, and `generation_activity_events` with foreign key cascade integrity.
-4. **Preservation of Filesystem Store:** By design, local development remains defaulted to the filesystem JSON store (`storageDir: backend/data/generation_projects`). PostgreSQL persistence is activated when `FIORIX_PERSISTENCE=postgres` is set.
+4. **Preservation of Filesystem Store:** By design, local development remains defaulted to the filesystem JSON store (`storageDir: backend/data/generation_projects`). PostgreSQL persistence is activated when `Fiorify_PERSISTENCE=postgres` is set.
 
 ---
 

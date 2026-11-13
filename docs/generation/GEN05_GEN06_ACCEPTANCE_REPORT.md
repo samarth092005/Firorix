@@ -71,6 +71,6 @@ REGRESSION VERIFICATION AUDIT
 
 ### 5. Final Acceptance Verdict
 
-The FioriX Generation Studio **GEN-05** and **GEN-06** implementations satisfy all technical, architectural, and governance criteria set forth in the Master Implementation Directive.
+The Fiorify Generation Studio **GEN-05** and **GEN-06** implementations satisfy all technical, architectural, and governance criteria set forth in the Master Implementation Directive.
 
 The platform is fully approved and stabilized to proceed to **GEN-07 (Review, Export & Packaging)** when authorized.

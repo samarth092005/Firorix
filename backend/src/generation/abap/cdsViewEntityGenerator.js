@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: CDS View Entity Generator
+ * Fiorify — GEN-05: CDS View Entity Generator
  *
  * Synthesizes Clean Core ABAP CDS View Entities (define view entity)
  * separating Interface views (ZI_*), Consumption projection views (ZC_*),
@@ -9,6 +9,35 @@
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
 import { RAP_PROFILES } from '../architecture/architectureContract.js';
 
+function formatCdsViewName(prefixTag, rawName) {
+  const clean = String(rawName || 'ENTITY')
+    .replace(/^Z_[IRC]_/i, '')
+    .replace(/^Z[IRC]_/i, '')
+    .replace(/[^a-zA-Z0-9_]/g, '');
+  const maxBody = 30 - prefixTag.length;
+  const body = clean.length > maxBody ? clean.slice(0, maxBody) : clean;
+  return `${prefixTag}${body}`;
+}
+
+function formatChildCdsViewName(prefixTag, rootName, childName) {
+  const cleanRoot = String(rootName || 'ROOT')
+    .replace(/^Z_[IRC]_/i, '')
+    .replace(/^Z[IRC]_/i, '')
+    .replace(/[^a-zA-Z0-9_]/g, '');
+  const cleanChild = String(childName || 'ITEM')
+    .replace(/^Z_[IRC]_/i, '')
+    .replace(/^Z[IRC]_/i, '')
+    .replace(/[^a-zA-Z0-9_]/g, '');
+  const candidate = `${prefixTag}${cleanRoot}_${cleanChild}`;
+  if (candidate.length <= 30) {
+    return candidate;
+  }
+  const maxBody = 30 - prefixTag.length;
+  const rPart = cleanRoot.slice(0, 14);
+  const cPart = cleanChild.slice(0, Math.max(1, maxBody - rPart.length - 1));
+  return `${prefixTag}${rPart}_${cPart}`;
+}
+
 export function generateCdsEntities(project, architecture) {
   const artifacts = [];
   const entities = project.dataModelSpec?.entities || [];
@@ -17,18 +46,17 @@ export function generateCdsEntities(project, architecture) {
   if (!rootEntity) return artifacts;
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '');
-  const rootInterfaceName = `ZI_${prefix}`;
-  const rootProjectionName = `ZC_${prefix}`;
+  const rootInterfaceName = formatCdsViewName('ZI_', prefix);
+  const rootProjectionName = formatCdsViewName('ZC_', prefix);
 
   // Helper map for entity interface and projection names
   const entityNames = new Map();
   for (const ent of entities) {
     const isRoot = ent.entityId === rootEntity.entityId;
-    const suffix = isRoot ? '' : `_${ent.name}`;
     entityNames.set(ent.entityId, {
-      interfaceName: isRoot ? rootInterfaceName : `ZI_${prefix}${suffix}`,
-      projectionName: isRoot ? rootProjectionName : `ZC_${prefix}${suffix}`,
-      tableName: (isRoot ? architecture.rootEntity?.tableName : architecture.childEntities?.find((c) => c.entityId === ent.entityId)?.tableName) || ent.tableName || `Z${ent.name.toUpperCase()}`
+      interfaceName: isRoot ? rootInterfaceName : formatChildCdsViewName('ZI_', prefix, ent.name),
+      projectionName: isRoot ? rootProjectionName : formatChildCdsViewName('ZC_', prefix, ent.name),
+      tableName: (isRoot ? architecture.rootEntity?.tableName : architecture.childEntities?.find((c) => c.entityId === ent.entityId)?.tableName) || ent.tableName || `Z${ent.name.toUpperCase().slice(0, 15)}`
     });
   }
 

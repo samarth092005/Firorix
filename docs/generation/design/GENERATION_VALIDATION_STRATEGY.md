@@ -1,7 +1,7 @@
-# FIORIX GENERATION VALIDATION STRATEGY & COMPLIANCE RULES
+# Fiorify GENERATION VALIDATION STRATEGY & COMPLIANCE RULES
 **Document ID:** STRAT-GEN-VAL-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Release:** FioriX v2.0.0  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Release:** Fiorify v2.0.0  
 **Status:** COMPLETE NORMATIVE SPECIFICATION  
 **Author:** Principal Quality & SAP Governance Architect  
 
@@ -9,7 +9,7 @@
 
 ## 1. Five-Tier Validation Taxonomy
 
-To prevent misleading claims and maintain rigorous engineering integrity, FioriX categorizes all verification activities into **five distinct tiers**.
+To prevent misleading claims and maintain rigorous engineering integrity, Fiorify categorizes all verification activities into **five distinct tiers**.
 
 ```mermaid
 flowchart TD

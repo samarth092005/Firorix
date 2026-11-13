@@ -6,7 +6,7 @@ import os from 'node:os';
 import { createServer } from '../src/server.js';
 import { AssessmentStore } from '../src/services/assessmentStore.js';
 
-describe('FioriX PERSIST-01 — Backend Assessment Persistence Store', () => {
+describe('Fiorify PERSIST-01 — Backend Assessment Persistence Store', () => {
   let server;
   let baseUrl;
   let testStoragePath;
@@ -102,7 +102,7 @@ describe('FioriX PERSIST-01 — Backend Assessment Persistence Store', () => {
     // Create an isolated temporary test storage file
     testStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-test-assessments-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-assessments-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
 
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
@@ -429,7 +429,7 @@ describe('FioriX PERSIST-01 — Backend Assessment Persistence Store', () => {
   it('12. does not silently wipe corrupted data and returns controlled error', async () => {
     const corruptPath = path.join(
       os.tmpdir(),
-      `fiorix-corrupt-test-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-corrupt-test-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
     // Write corrupted JSON to disk
     fs.writeFileSync(corruptPath, '{"brokenJson": true, unexpected_eof:');
@@ -469,7 +469,7 @@ describe('FioriX PERSIST-01 — Backend Assessment Persistence Store', () => {
   it('13. safely handles rapid concurrent writes without data loss', async () => {
     const concurrentPath = path.join(
       os.tmpdir(),
-      `fiorix-concurrent-test-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-concurrent-test-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
 
     const concurrentStore = new AssessmentStore({ storagePath: concurrentPath });

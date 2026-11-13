@@ -1,5 +1,5 @@
 /**
- * FioriX — QA-02: Real Headless Chrome Browser Regression Automation Script
+ * Fiorify — QA-02: Real Headless Chrome Browser Regression Automation Script
  *
  * Executes full browser regression testing via Chrome DevTools Protocol (CDP):
  * 1. Project list dashboard verification.
@@ -43,7 +43,7 @@ async function sleep(ms) {
 }
 
 async function runRegression() {
-  console.log('=== FioriX QA-02: Real Browser Regression Test Suite ===');
+  console.log('=== Fiorify QA-02: Real Browser Regression Test Suite ===');
   console.log(`Frontend URL: ${FRONTEND_URL}`);
   console.log(`Chrome Executable: ${CHROME_PATH}`);
 

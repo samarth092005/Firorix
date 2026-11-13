@@ -113,7 +113,7 @@ The Fiori Elements generator initially specified `"minUI5Version": "1.120.0"`. H
 
 ### 5. Boundary Disclaimer: Documentation vs. Activation
 
-| Dimension | FioriX Capability | Actual S21 Status |
+| Dimension | Fiorify Capability | Actual S21 Status |
 | :--- | :--- | :--- |
 | **Code Generation** | Generates 100% syntactically compliant Clean Core ABAP and Fiori code locally. | **VERIFIED (PASS)** |
 | **Static Verification** | Multi-stage static validation engine checks syntax, schemas, naming limits, and checksums. | **VERIFIED (PASS)** |

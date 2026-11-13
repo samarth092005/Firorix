@@ -12,6 +12,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import { authService, DEMO_USER } from '../../services/authService';
+import './LoginPage.css';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -77,45 +78,16 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        backgroundColor: '#F8FAFC',
-        fontFamily: 'inherit'
-      }}
-    >
+    <div className="login-root">
       {/* Left Column: Enterprise Field Text & Value Proposition */}
-      <div
-        style={{
-          flex: '1 1 45%',
-          backgroundColor: '#0A2540',
-          backgroundImage: 'radial-gradient(circle at 10% 20%, rgba(0, 102, 255, 0.25) 0%, transparent 60%), radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%)',
-          color: '#FFFFFF',
-          padding: '60px 48px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between'
-        }}
-      >
+      <div className="login-hero-col">
         {/* Top Brand */}
-        <div>
+        <div className="login-hero-content">
           <div
             onClick={() => navigate('/')}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '40px' }}
+            className="login-brand-logo"
           >
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
-                backgroundColor: '#0066FF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#FFFFFF'
-              }}
-            >
+            <div className="login-brand-icon">
               <Layers size={22} />
             </div>
             <span style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px' }}>
@@ -123,64 +95,28 @@ export const LoginPage: React.FC = () => {
             </span>
           </div>
 
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '4px 12px',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: '#93C5FD',
-              marginBottom: '20px'
-            }}
-          >
+          <div className="login-pill-badge">
             <Sparkles size={14} />
             <span>Next-Gen SAP Modernization</span>
           </div>
 
-          <h1
-            style={{
-              fontSize: '36px',
-              lineHeight: 1.2,
-              fontWeight: 800,
-              letterSpacing: '-0.8px',
-              color: '#FFFFFF',
-              marginBottom: '16px'
-            }}
-          >
+          <h1 className="login-hero-title">
             Enterprise SAP Transaction &amp; Fiori Application Discovery
           </h1>
 
-          <p
-            style={{
-              fontSize: '16px',
-              lineHeight: 1.6,
-              color: 'rgba(255, 255, 255, 0.75)',
-              maxWidth: '460px',
-              marginBottom: '36px'
-            }}
-          >
+          <p className="login-hero-subtitle">
             Streamline the transition from classical dynpro SAP transactions to SAP Fiori elements.
             Get instant architectural fit-gap insights and official SAP reference library matches.
           </p>
 
           {/* Feature Bullets */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '440px' }}>
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <div className="login-features-list">
+            <div className="login-feature-item">
               <div
+                className="login-feature-icon"
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '6px',
                   backgroundColor: 'rgba(0, 102, 255, 0.3)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#60A5FA',
-                  flexShrink: 0
+                  color: '#60A5FA'
                 }}
               >
                 <Zap size={18} />
@@ -195,18 +131,12 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+            <div className="login-feature-item">
               <div
+                className="login-feature-icon"
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '6px',
                   backgroundColor: 'rgba(16, 185, 129, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#34D399',
-                  flexShrink: 0
+                  color: '#34D399'
                 }}
               >
                 <ShieldCheck size={18} />
@@ -221,18 +151,12 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+            <div className="login-feature-item">
               <div
+                className="login-feature-icon"
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '6px',
                   backgroundColor: 'rgba(147, 51, 234, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#C084FC',
-                  flexShrink: 0
+                  color: '#C084FC'
                 }}
               >
                 <CheckCircle2 size={18} />
@@ -247,18 +171,12 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+            <div className="login-feature-item">
               <div
+                className="login-feature-icon"
                 style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '6px',
                   backgroundColor: 'rgba(59, 130, 246, 0.25)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#60A5FA',
-                  flexShrink: 0
+                  color: '#60A5FA'
                 }}
               >
                 <Sparkles size={18} />
@@ -276,32 +194,14 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Bottom Note */}
-        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginTop: '40px' }}>
+        <div className="login-hero-footer">
           Fiorify Modernization Suite &bull; Secure Enterprise Environment
         </div>
       </div>
 
       {/* Right Column: Proper Login Card / Modal */}
-      <div
-        style={{
-          flex: '1 1 55%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '40px 24px'
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '460px',
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            border: '1px solid #E2E8F0',
-            boxShadow: '0 12px 30px -10px rgba(15, 23, 42, 0.08)',
-            padding: '36px'
-          }}
-        >
+      <div className="login-form-col">
+        <div className="login-card">
           {/* Header */}
           <div style={{ marginBottom: '24px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#0F172A', letterSpacing: '-0.4px' }}>

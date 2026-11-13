@@ -1,4 +1,4 @@
-# FioriX Feature Register
+# Fiorify Feature Register
 
 ## Initial demo
 - Authentication and role-aware navigation.

@@ -3,7 +3,7 @@ import { demoDataProvider, DEMO_ASSESSMENT_RECORDS, DEMO_SYSTEM_HEALTH } from '.
 import { assessmentService } from '../../../services/assessmentService';
 import { systemHealthService } from '../../../services/systemHealthService';
 
-describe('FioriX Sprint 2 - Overview Dashboard Metric Calculations & Services', () => {
+describe('Fiorify Sprint 2 - Overview Dashboard Metric Calculations & Services', () => {
   it('derives all KPI metrics mathematically from the common assessment data source', async () => {
     const summary = await assessmentService.getAssessmentSummary();
     const rawRecords = DEMO_ASSESSMENT_RECORDS;

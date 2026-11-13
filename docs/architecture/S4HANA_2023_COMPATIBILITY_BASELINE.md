@@ -1,4 +1,4 @@
-# FIORIX — SAP S/4HANA 2023 COMPATIBILITY BASELINE (SPRINT S0)
+# Fiorify — SAP S/4HANA 2023 COMPATIBILITY BASELINE (SPRINT S0)
 
 **Document Identifier:** BASELINE-S4H-2023-S0  
 **Target Environment:** SAP S/4HANA 2023 On-Premise (Private Cloud Edition / On-Premise)  
@@ -11,9 +11,9 @@
 
 ## 1. Executive Summary & Baseline Objectives
 
-This document establishes the official technical baseline for the FioriX Modernization Platform when targeting **SAP S/4HANA 2023 On-Premise and Private Cloud Edition**.
+This document establishes the official technical baseline for the Fiorify Modernization Platform when targeting **SAP S/4HANA 2023 On-Premise and Private Cloud Edition**.
 
-FioriX delivers automated discovery, matching, fit-gap assessment, and governed recommendations for migrating legacy SAP GUI and Dynpro transactions into modern, clean-core SAP Fiori applications. Before FioriX generates any backend ABAP CDS, RAP business object behaviors, OData service bindings, or SAP Fiori Elements frontend projects (commencing in GEN-02), the target runtime capabilities of SAP S/4HANA 2023 must be rigorously documented from official SAP authorities and distinguished from live connected-system verifications.
+Fiorify delivers automated discovery, matching, fit-gap assessment, and governed recommendations for migrating legacy SAP GUI and Dynpro transactions into modern, clean-core SAP Fiori applications. Before Fiorify generates any backend ABAP CDS, RAP business object behaviors, OData service bindings, or SAP Fiori Elements frontend projects (commencing in GEN-02), the target runtime capabilities of SAP S/4HANA 2023 must be rigorously documented from official SAP authorities and distinguished from live connected-system verifications.
 
 ### Non-Negotiable Governance Principles
 1. **Repository Evidence Over Marketing Claims:** Compatibility is never inferred from general marketing brochures. Every supported feature must be verified against official SAP release documentation and subsequently validated on the connected landscape.
@@ -269,7 +269,7 @@ Status Values:
 
 ## 10. Summary of Restrictions & Unresolved Questions
 
-1. **Live ADT Access on S21:** The connected development system `S21-200` has ADT installed, but the service user is blocked with HTTP 403 (`S_ADT_RES`). Without Basis role assignment, FioriX cannot perform automated remote discovery or template deployment via ADT REST APIs.
+1. **Live ADT Access on S21:** The connected development system `S21-200` has ADT installed, but the service user is blocked with HTTP 403 (`S_ADT_RES`). Without Basis role assignment, Fiorify cannot perform automated remote discovery or template deployment via ADT REST APIs.
 2. **OData V4 Gateway Publication:** It is unverified whether the on-premise system `S21-200` has published service groups for OData V4 or if Web Dispatcher reverse proxy permits traffic on `/sap/opu/odata4/`.
-3. **ABAP Cloud Package Configuration:** It is unverified whether customer package `/FIORIX/` or `ZFIORIX` has been created with ABAP Language Version set to `ABAP for Cloud Development` or `Standard ABAP`.
-4. **Transport Request Allocation:** FioriX generation engine will require a designated transport request (`TRKORR`) and package (`DEVCLASS`) when manual import or ADT deployment is initiated.
+3. **ABAP Cloud Package Configuration:** It is unverified whether customer package `/Fiorify/` or `ZFiorify` has been created with ABAP Language Version set to `ABAP for Cloud Development` or `Standard ABAP`.
+4. **Transport Request Allocation:** Fiorify generation engine will require a designated transport request (`TRKORR`) and package (`DEVCLASS`) when manual import or ADT deployment is initiated.

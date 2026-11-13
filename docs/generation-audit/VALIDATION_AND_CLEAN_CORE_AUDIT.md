@@ -8,7 +8,7 @@
 
 ## 1. Executive Validation Architecture Overview
 
-Validation in FioriX Generation Studio operates across two complementary tiers:
+Validation in Fiorify Generation Studio operates across two complementary tiers:
 1. **Model-Level Validation (`dataModelValidator.js`):** Validates entities, fields, keys, data types, compositions, and cyclic dependency trees before any code is generated.
 2. **Artifact & Clean Core Static Validation (`staticValidationEngine.js`):** Validates generated ABAP CDS views, RAP Behavior Definitions, behavior pools, Fiori Elements manifests, annotations XML, and cryptographic checksums.
 

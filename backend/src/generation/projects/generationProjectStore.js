@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Project Persistence Store (P1-B)
+ * Fiorify — Generation Project Persistence Store (P1-B)
  *
  * Implements server-side canonical persistence for Generation Studio projects.
  * - One canonical directory per project: backend/data/generation-projects/<projectId>/project.json
@@ -47,7 +47,7 @@ export class GenerationProjectStore {
     this._writeLocks = new Map();
     this._globalLock = Promise.resolve();
     this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
-    this.useDatabase = options.useDatabase || (process.env.FIORIX_PERSISTENCE === 'postgres' && storageDir === DEFAULT_PROJECTS_DIR);
+    this.useDatabase = options.useDatabase || (process.env.Fiorify_PERSISTENCE === 'postgres' && storageDir === DEFAULT_PROJECTS_DIR);
     this.repository = options.repository || (this.useDatabase ? new GenerationProjectRepository() : null);
   }
 
@@ -264,7 +264,7 @@ export class GenerationProjectStore {
     }
     const project = await this._readProject(idCheck.sanitizedId);
     if (!project) return null;
-    const requestedTenant = userContext?.tenantId || this.tenantId;
+    const requestedTenant = userContext ? (userContext.tenantId || this.tenantId) : null;
     if (requestedTenant && project.tenantId && project.tenantId !== requestedTenant) {
       return null;
     }
@@ -295,7 +295,7 @@ export class GenerationProjectStore {
         throw err;
       }
 
-      const requestedTenant = userContext?.tenantId || this.tenantId;
+      const requestedTenant = userContext?.tenantId;
       if (requestedTenant && existing.tenantId && existing.tenantId !== requestedTenant) {
         const err = new Error(`Project "${projectId}" was not found.`);
         err.code = 'NOT_FOUND';
@@ -378,7 +378,7 @@ export class GenerationProjectStore {
         throw err;
       }
 
-      const requestedTenant = userContext?.tenantId || this.tenantId;
+      const requestedTenant = userContext?.tenantId;
       if (requestedTenant && existing.tenantId && existing.tenantId !== requestedTenant) {
         const err = new Error(`Project "${projectId}" was not found.`);
         err.code = 'NOT_FOUND';
@@ -412,7 +412,7 @@ export class GenerationProjectStore {
         throw err;
       }
 
-      const requestedTenant = userContext?.tenantId || this.tenantId;
+      const requestedTenant = userContext?.tenantId;
       if (requestedTenant && existing.tenantId && existing.tenantId !== requestedTenant) {
         const err = new Error(`Project "${projectId}" was not found.`);
         err.code = 'NOT_FOUND';
@@ -691,7 +691,7 @@ export class GenerationProjectStore {
     };
   }
 
-  async recordSpecification(projectId, specType, specContent) {
+  async recordSpecification(projectId, specType, specContent, userContext = null) {
     if (this.repository) {
       return await this.repository.saveSpecification(projectId, specType, specContent?.specVersion || specContent?.revision || 1, specContent);
     }
@@ -703,7 +703,7 @@ export class GenerationProjectStore {
         throw err;
       }
 
-      const requestedTenant = userContext?.tenantId || this.tenantId;
+      const requestedTenant = userContext?.tenantId;
       if (requestedTenant && existing.tenantId && existing.tenantId !== requestedTenant) {
         const err = new Error(`Project "${projectId}" was not found.`);
         err.code = 'NOT_FOUND';
@@ -731,7 +731,7 @@ export class GenerationProjectStore {
     return project.specification || null;
   }
 
-  async recordArtifact(projectId, artifact) {
+  async recordArtifact(projectId, artifact, userContext = null) {
     if (this.repository) {
       return await this.repository.saveArtifactRecord(projectId, artifact);
     }
@@ -743,7 +743,7 @@ export class GenerationProjectStore {
         throw err;
       }
 
-      const requestedTenant = userContext?.tenantId || this.tenantId;
+      const requestedTenant = userContext?.tenantId;
       if (requestedTenant && existing.tenantId && existing.tenantId !== requestedTenant) {
         const err = new Error(`Project "${projectId}" was not found.`);
         err.code = 'NOT_FOUND';

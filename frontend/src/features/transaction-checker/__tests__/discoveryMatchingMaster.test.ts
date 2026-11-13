@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { apiClient } from '../../../services/api/apiClient';
 
-describe('FioriX DISC-01 + DISC-02 + MATCH-01 + MATCH-02 Frontend API Integration', () => {
+describe('Fiorify DISC-01 + DISC-02 + MATCH-01 + MATCH-02 Frontend API Integration', () => {
   const originalFetch = globalThis.fetch;
 
   beforeAll(() => {

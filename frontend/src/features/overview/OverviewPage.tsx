@@ -319,7 +319,7 @@ export const OverviewPage: React.FC = () => {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(210px, 18vw, 280px), 1fr))',
           gap: '14px'
         }}
       >
@@ -433,7 +433,7 @@ export const OverviewPage: React.FC = () => {
         </div>
 
         {/* 3 Status Pillar Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(250px, 22vw, 340px), 1fr))', gap: '12px' }}>
           {/* Pillar 1: Target Landscape */}
           <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -654,8 +654,8 @@ export const OverviewPage: React.FC = () => {
               gap: '12px'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px' }}>
-              <div style={{ flex: 1, maxWidth: '360px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: '280px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '220px', maxWidth: 'clamp(320px, 30vw, 480px)' }}>
                 <SearchInput
                   value={tableSearch}
                   onChange={setTableSearch}
@@ -744,15 +744,15 @@ export const OverviewPage: React.FC = () => {
           />
         ) : (
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+            <table style={{ width: '100%', minWidth: '880px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
               <thead>
                 <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', color: '#64748B', fontSize: '12px', fontWeight: 600 }}>
-                  <th style={{ padding: '12px 16px' }}>Transaction (TSTC)</th>
-                  <th style={{ padding: '12px 16px' }}>Business Area</th>
-                  <th style={{ padding: '12px 16px' }}>Target Fiori App</th>
-                  <th style={{ padding: '12px 16px' }}>Readiness Score</th>
-                  <th style={{ padding: '12px 16px' }}>Fit Status</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>Action</th>
+                  <th style={{ padding: '12px 16px', minWidth: '180px' }}>Transaction (TSTC)</th>
+                  <th style={{ padding: '12px 16px', minWidth: '140px' }}>Business Area</th>
+                  <th style={{ padding: '12px 16px', minWidth: '240px' }}>Target Fiori App</th>
+                  <th style={{ padding: '12px 16px', minWidth: '140px' }}>Readiness Score</th>
+                  <th style={{ padding: '12px 16px', minWidth: '150px' }}>Fit Status</th>
+                  <th style={{ padding: '12px 16px', minWidth: '110px', textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,5 +1,5 @@
 /**
- * Normalizes MCP server responses into predictable FioriX API response structures
+ * Normalizes MCP server responses into predictable Fiorify API response structures
  * with complete provenance tracing and structural integrity.
  */
 
@@ -42,7 +42,7 @@ export function determineProvenance(toolName, success, category) {
 
 export class McpResponseNormalizer {
   /**
-   * Normalizes a raw tool execution output or error into standard FioriX API shape.
+   * Normalizes a raw tool execution output or error into standard Fiorify API shape.
    *
    * @param {object} params
    * @param {string} params.toolName

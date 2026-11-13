@@ -1,4 +1,4 @@
-# FioriX — Generation Studio Readiness Report (Phase S0)
+# Fiorify — Generation Studio Readiness Report (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  

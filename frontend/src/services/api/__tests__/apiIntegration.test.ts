@@ -3,7 +3,7 @@ import { ApiClient, ApiError } from '../apiClient';
 import { TransactionSearchService } from '../../../features/transaction-checker/services/transactionSearchService';
 import { searchHistoryStore } from '../../../features/transaction-checker/services/searchHistoryStore';
 
-describe('FioriX FX-002 — End-to-End API Integration & Offline Resilience', { timeout: 15000 }, () => {
+describe('Fiorify FX-002 — End-to-End API Integration & Offline Resilience', { timeout: 15000 }, () => {
   const backendBaseUrl = 'http://localhost:4004/api/v1';
 
   beforeEach(() => {

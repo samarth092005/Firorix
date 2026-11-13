@@ -25,5 +25,5 @@ The 16-sprint (32-week) plan establishes the execution sequence from local disco
 
 ### Environment Dependency Classification
 - **Local-Only Tasks (S4, S5, S6, S7):** Can proceed entirely on local developer workstations with Node.js, SQLite, and React.
-- **S/4HANA Sandbox Tasks (S1, S3, S8, S9):** Require Cloud Connector pairing to DEV sandbox and technical role `Z_FIORIX_DISCOVERY_RO`.
+- **S/4HANA Sandbox Tasks (S1, S3, S8, S9):** Require Cloud Connector pairing to DEV sandbox and technical role `Z_Fiorify_DISCOVERY_RO`.
 - **BTP Tenant Tasks (S15, S16):** Require BTP Subaccount entitlements for Cloud Foundry, HANA Cloud HDI, and XSUAA.

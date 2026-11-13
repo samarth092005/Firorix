@@ -1,5 +1,5 @@
 /**
- * FioriX — Standard SAP Fiori Application Matching & Ranking Engine (MATCH-01 + MATCH-02)
+ * Fiorify — Standard SAP Fiori Application Matching & Ranking Engine (MATCH-01 + MATCH-02)
  *
  * Implements evidence-based, deterministic matching and explainable ranking:
  * - Searches canonical Fiori catalogue (fiori_app_catalog_cache.json via officialFioriCatalogueAdapter).
@@ -18,6 +18,7 @@
 
 import { officialFioriCatalogueAdapter } from '../adapters/officialFioriCatalogueAdapter.js';
 import { CONFIDENCE_LEVELS } from './technicalEvidenceEngine.js';
+import { STANDARD_TRANSACTION_CATALOG } from '../services/standardTransactionKnowledge.js';
 
 export const MATCHING_WEIGHTS = {
   tcodeRelationship: 30,
@@ -165,7 +166,14 @@ export class FioriMatchingEngine {
     // 3. Deterministic Ranking
     // -------------------------------------------------------------------------
     evaluatedCandidates.sort((a, b) => {
-      // 0 priority: Direct equivalents and official successors precede indirect/related apps
+      // 0a priority: Designated primary successor from authoritative standard catalog
+      const primaryAppId = STANDARD_TRANSACTION_CATALOG[tcode]?.primaryFioriAppId;
+      if (primaryAppId) {
+        if (a.appId === primaryAppId && b.appId !== primaryAppId) return -1;
+        if (b.appId === primaryAppId && a.appId !== primaryAppId) return 1;
+      }
+
+      // 0b priority: Direct equivalents and official successors precede indirect/related apps
       const aIsDirectOrSuccessor = a.tcodeRelationshipType === 'OFFICIAL_SUCCESSOR' || a.tcodeRelationshipType === 'DIRECT_EQUIVALENT';
       const bIsDirectOrSuccessor = b.tcodeRelationshipType === 'OFFICIAL_SUCCESSOR' || b.tcodeRelationshipType === 'DIRECT_EQUIVALENT';
       if (aIsDirectOrSuccessor && !bIsDirectOrSuccessor) return -1;
@@ -541,6 +549,10 @@ export class FioriMatchingEngine {
       dimensionScores.releaseCompatibility = 0;
       negativeFactors.push(`Release incompatibility: target is ${targetRelease} (ECC), but candidate app requires ${app.productVersion || 'SAP S/4HANA'}.`);
       conflicts.push(`Target system release (${targetRelease}) does not support S/4HANA native Fiori app (${app.productVersion || 'SAP S/4HANA'}).`);
+    } else if ((isCanonicalSuccessor || isLeadingTcodeMatch) && (appRelease.includes('S/4HANA') || appRelease.includes('PUBLIC EDITION') || appRelease.includes('PRIVATE EDITION') || appRelease.includes('2025') || appRelease.includes('2023'))) {
+      releaseCompatibilityStatus = 'COMPATIBLE';
+      dimensionScores.releaseCompatibility = this.weights.releaseCompatibility;
+      positiveFactors.push(`Verified official successor compatible across S/4HANA deployment editions (${app.productVersion || 'SAP S/4HANA'}).`);
     } else if (appRelease.includes('PUBLIC EDITION') && targetRelUpper.includes('PRIVATE EDITION')) {
       releaseCompatibilityStatus = 'DIFFERENT_DEPLOYMENT_EDITION';
       dimensionScores.releaseCompatibility = 4;

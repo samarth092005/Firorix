@@ -135,7 +135,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing requirements and project is active, render RequirementsDesigner
   if (viewId === 'requirements' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <RequirementsDesigner
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
@@ -148,7 +148,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing data-model and project is active, render DataModelDesigner
   if (viewId === 'data-model' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <DataModelDesigner
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
@@ -161,7 +161,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing architecture and project is active, render ArchitectureDesigner (GEN-05)
   if (viewId === 'architecture' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <ArchitectureDesigner
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
@@ -174,7 +174,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing abap-generator and project is active, render AbapGenerator (GEN-05)
   if (viewId === 'abap-generator' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <AbapGenerator
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
@@ -187,7 +187,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing ui-generator and project is active, render FioriUiGenerator (GEN-06)
   if (viewId === 'ui-generator' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <FioriUiGenerator
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
@@ -200,7 +200,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing preview-validation and project is active, render PreviewValidationView (GEN-07)
   if (viewId === 'preview-validation' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <PreviewValidationView
           project={project}
           onProjectUpdated={onProjectUpdated}
@@ -213,7 +213,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing review-export and project is active, render ReviewExportView (GEN-08)
   if (viewId === 'review-export' && project) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <ReviewExportView
           project={project}
           onProjectUpdated={onProjectUpdated}
@@ -225,7 +225,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   // If viewing environment / toolchain, render ToolchainView (GEN-09)
   if (viewId === 'environment') {
     return (
-      <div style={{ padding: '24px' }}>
+      <div className="workspace-canvas">
         <ToolchainView project={project} />
       </div>
     );
@@ -249,195 +249,144 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   const Icon = meta.icon;
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="workspace-canvas">
       {/* Permanent Local Mock Watermark */}
       <div
         style={{
           padding: '12px 18px',
-          backgroundColor: '#F8FAFC',
-          border: '1px solid #CBD5E1',
-          borderRadius: '8px',
+          backgroundColor: 'var(--studio-surface-subtle)',
+          border: '1px solid var(--studio-border)',
+          borderRadius: 'var(--studio-radius-sm)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '12px'
+          gap: '12px',
+          marginBottom: '20px'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <HardDrive size={18} color="#0284C7" />
-          <div style={{ fontSize: '13px', color: '#1E293B', fontWeight: 600 }}>
+          <HardDrive size={18} color="var(--studio-primary)" />
+          <div style={{ fontSize: '13px', color: 'var(--studio-text-main)', fontWeight: 600 }}>
             Local-First Review Workspace — Local Mock Data Only (No Remote SAP Deployment)
           </div>
         </div>
-        <span
-          style={{
-            fontSize: '11px',
-            padding: '2px 8px',
-            backgroundColor: '#EDE9FE',
-            color: '#6D28D9',
-            borderRadius: '4px',
-            fontWeight: 700
-          }}
-        >
+        <span className="studio-chip primary">
           {meta.phaseName}
         </span>
       </div>
 
       {/* Structured Workspace Overview Card */}
-      <div
-        style={{
-          backgroundColor: '#FFFFFF',
-          border: '1px solid var(--fiori-border, #E2E8F0)',
-          borderRadius: '8px',
-          boxShadow: 'var(--fiori-shadow-card, 0 1px 3px rgba(0,0,0,0.06))',
-          overflow: 'hidden'
-        }}
-      >
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #E2E8F0',
-            backgroundColor: '#F8FAFC',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '6px',
-                backgroundColor: '#EFF6FF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#0066FF'
-              }}
-            >
-              <Icon size={20} />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0F172A' }}>
-                {meta.title}
-              </h2>
-              <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
-                {project ? `Project: ${project.projectName} (${project.projectId})` : 'No Active Project Selected'}
-              </div>
-            </div>
+      <div className="canvas-header-card">
+        <div className="canvas-title-group">
+          <div className="canvas-icon-wrap">
+            <Icon size={22} />
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span
-              style={{
-                fontSize: '11px',
-                padding: '4px 10px',
-                borderRadius: '4px',
-                backgroundColor: '#EFF6FF',
-                color: '#1D4ED8',
-                fontWeight: 700
-              }}
-            >
-              Scheduled Milestone: {meta.phaseName.split(':')[0]}
-            </span>
+          <div>
+            <h2 className="canvas-title">
+              {meta.title}
+            </h2>
+            <div className="canvas-desc">
+              {project ? `Project: ${project.projectName} (${project.projectId})` : 'No Active Project Selected'}
+            </div>
           </div>
         </div>
 
-        {/* View Purpose & Context */}
-        <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <h4 style={{ margin: '0 0 6px 0', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-              Workspace Purpose
-            </h4>
-            <p style={{ margin: 0, fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
-              {meta.purpose}
-            </p>
-          </div>
+        <span className="studio-chip primary">
+          Milestone: {meta.phaseName.split(':')[0]}
+        </span>
+      </div>
 
-          <div>
-            <h4 style={{ margin: '0 0 6px 0', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-              Milestone Dependencies
-            </h4>
-            <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#475569', lineHeight: 1.6 }}>
-              {meta.prerequisites.map((req, idx) => (
-                <li key={idx}>{req}</li>
-              ))}
-            </ul>
-          </div>
+      {/* View Purpose & Context */}
+      <div className="canvas-surface-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: '13px', fontWeight: 700, color: 'var(--studio-text-main)' }}>
+            Workspace Purpose
+          </h4>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--studio-text-muted)', lineHeight: 1.6 }}>
+            {meta.purpose}
+          </p>
+        </div>
 
-          {/* Meaningful Empty State Card */}
+        <div>
+          <h4 style={{ margin: '0 0 6px 0', fontSize: '13px', fontWeight: 700, color: 'var(--studio-text-main)' }}>
+            Milestone Dependencies
+          </h4>
+          <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: 'var(--studio-text-muted)', lineHeight: 1.6 }}>
+            {meta.prerequisites.map((req, idx) => (
+              <li key={idx}>{req}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Meaningful Empty State Card */}
+        <div
+          style={{
+            padding: '36px 24px',
+            backgroundColor: 'var(--studio-surface-subtle)',
+            border: '1px dashed var(--studio-border-hover)',
+            borderRadius: 'var(--studio-radius-md)',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px'
+          }}
+        >
           <div
             style={{
-              padding: '32px 24px',
-              backgroundColor: '#F8FAFC',
-              border: '1px dashed #CBD5E1',
-              borderRadius: '8px',
-              textAlign: 'center',
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--studio-surface)',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '12px'
+              justifyContent: 'center',
+              color: 'var(--studio-text-muted)',
+              boxShadow: 'var(--studio-shadow-sm)'
             }}
           >
+            <AlertCircle size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--studio-text-main)' }}>
+              {meta.emptyStateTitle}
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--studio-text-muted)', maxWidth: '520px', margin: '4px auto 0 auto' }}>
+              {meta.emptyStateDescription}
+            </div>
+          </div>
+
+          {project ? (
             <div
               style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                backgroundColor: '#F1F5F9',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: '#64748B'
+                gap: '8px',
+                marginTop: '8px',
+                padding: '8px 14px',
+                backgroundColor: 'var(--studio-surface)',
+                border: '1px solid var(--studio-border)',
+                borderRadius: 'var(--studio-radius-sm)',
+                fontSize: '12px',
+                color: 'var(--studio-text-muted)'
               }}
             >
-              <AlertCircle size={24} />
+              <Layers size={14} color="var(--studio-primary)" />
+              Active Project Context: <strong style={{ color: 'var(--studio-text-main)' }}>{project.projectName}</strong>
+              <span style={{ color: 'var(--studio-text-subtle)' }}>•</span>
+              Lifecycle: <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>{project.lifecycleStatus}</span>
             </div>
-            <div>
-              <div style={{ fontSize: '15px', fontWeight: 700, color: '#1E293B' }}>
-                {meta.emptyStateTitle}
-              </div>
-              <div style={{ fontSize: '13px', color: '#64748B', maxWidth: '520px', margin: '4px auto 0 auto' }}>
-                {meta.emptyStateDescription}
-              </div>
-            </div>
-
-            {project ? (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  marginTop: '8px',
-                  padding: '8px 14px',
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  color: '#475569'
-                }}
+          ) : (
+            <div style={{ marginTop: '8px' }}>
+              <button
+                className="btn-open-workspace"
+                onClick={() => onNavigateView('projects')}
               >
-                <Layers size={14} color="#0066FF" />
-                Active Project Context: <strong style={{ color: '#0F172A' }}>{project.projectName}</strong>
-                <span style={{ color: '#94A3B8' }}>•</span>
-                Lifecycle: <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{project.lifecycleStatus}</span>
-              </div>
-            ) : (
-              <div style={{ marginTop: '8px' }}>
-                <button
-                  className="fiori-btn-secondary"
-                  onClick={() => onNavigateView('projects')}
-                  style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                >
-                  Return to Projects Dashboard <ArrowRight size={14} />
-                </button>
-              </div>
-            )}
-          </div>
+                Return to Projects Dashboard <ArrowRight size={14} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

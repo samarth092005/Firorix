@@ -1,4 +1,4 @@
-# FioriX — Data Migration and Rollback Plan (Phase S1 Corrected)
+# Fiorify — Data Migration and Rollback Plan (Phase S1 Corrected)
 
 **Document Version:** 2.0  
 **Phase:** S1 — Persistence Foundation  
@@ -51,7 +51,7 @@
                                      │
                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ Stage 5: Shadow Reads (FIORIX_STORAGE_MODE=shadow)                      │
+│ Stage 5: Shadow Reads (Fiorify_STORAGE_MODE=shadow)                      │
 │ - Primary read from JSON, asynchronous shadow read from PostgreSQL      │
 │ - Assert field-level equality and log parity anomalies                  │
 └────────────────────────────────────┬────────────────────────────────────┘
@@ -66,7 +66,7 @@
                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ Stage 7: PostgreSQL Write Cutover & File Store Read-Only Deprecation    │
-│ - FIORIX_STORAGE_MODE=postgres                                          │
+│ - Fiorify_STORAGE_MODE=postgres                                          │
 │ - All writes committed to PostgreSQL transactionally                    │
 │ - Legacy JSON stores sealed as read-only historical archives            │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -77,7 +77,7 @@
 ## 3. Rollback Protocol
 
 If PostgreSQL experiences unrecoverable errors, connection drops, or reconciliation failure during verification:
-1. Revert `FIORIX_STORAGE_MODE=file`.
+1. Revert `Fiorify_STORAGE_MODE=file`.
 2. Execute down-migration: `npm --prefix backend run migrate:down`.
 3. Verify file store integrity against `pre-s1-snapshot-<timestamp>.tar.gz`.
 4. Re-run backend test suite (`npm --prefix backend test`).

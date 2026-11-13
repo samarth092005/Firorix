@@ -8,7 +8,7 @@ import { searchHistoryStore } from '../services/searchHistoryStore';
 import { SYNTHETIC_TRANSACTIONS } from '../fixtures/syntheticTransactions';
 import { EvidenceClassifier } from '../engine/evidenceClassifier';
 
-describe('FioriX Phase 1 - Transaction Checker Engine & Services', () => {
+describe('Fiorify Phase 1 - Transaction Checker Engine & Services', () => {
   const SYSTEM_DEV = 'S4H-DEV-200';
   const SYSTEM_QAS = 'S4H-QAS-200';
   const originalFetch = globalThis.fetch;
@@ -690,7 +690,7 @@ describe('FioriX Phase 1 - Transaction Checker Engine & Services', () => {
     expect(res.system.systemId).toBe('S21-200');
     expect(res.overallStatus).toBe('CONNECTION_ERROR');
     expect(res.errorMessage).toContain('INVARIANT ENFORCED');
-    expect(res.errorMessage).toContain('Z_FIORIX_DISCOVERY_SRV');
+    expect(res.errorMessage).toContain('Z_Fiorify_DISCOVERY_SRV');
     expect(res.matching.candidates.length).toBe(0);
     // Crucial: In mock mode FB03 would succeed with exists=true; in live mode it MUST NOT fall back to mock!
     expect(res.transaction).toBeUndefined();

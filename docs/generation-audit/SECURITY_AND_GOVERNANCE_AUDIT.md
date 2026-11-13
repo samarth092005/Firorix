@@ -8,7 +8,7 @@
 
 ## 1. Executive Security Evaluation
 
-FioriX Generation Studio adheres strictly to enterprise governance and security controls established in Programme Milestones S2 and QA-02:
+Fiorify Generation Studio adheres strictly to enterprise governance and security controls established in Programme Milestones S2 and QA-02:
 - **Strict Role-Based Access Control (RBAC):** Admin-only boundary enforced by `PERMISSIONS.GENERATION_MANAGE` and `PERMISSIONS.ARTIFACTS_EXPORT`.
 - **Tenant Isolation:** Derived cryptographically and server-side from authenticated session identity, prohibiting cross-tenant spoofing.
 - **Authoritative Approval Provenance:** Blocks unauthorized custom development by requiring an authoritative `APPROVED` state from Discovery BUILD assessments.

@@ -7,7 +7,7 @@
 ---
 
 ## 1. Context and Problem Statement
-FioriX requires a relational database to store landscape metadata, discovery snapshots, requirements, catalog data, fit-gap matrices, and audit logs. Developing locally against a cloud-hosted SAP HANA Cloud instance introduces network latency, credential sharing risks, and unnecessary capacity unit consumption during early sprints.
+Fiorify requires a relational database to store landscape metadata, discovery snapshots, requirements, catalog data, fit-gap matrices, and audit logs. Developing locally against a cloud-hosted SAP HANA Cloud instance introduces network latency, credential sharing risks, and unnecessary capacity unit consumption during early sprints.
 
 ## 2. Decision
 1. **Local Development:** Utilize **SQLite in-memory or file-based persistence** (`@cap-js/sqlite`) for local CAP development, automated unit tests, and CI/CD pipelines.

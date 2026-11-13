@@ -1,5 +1,5 @@
 /**
- * FioriX — Official SAP Fiori Apps Reference Library Adapter
+ * Fiorify — Official SAP Fiori Apps Reference Library Adapter
  *
  * Integrates directly with the official SAP Fiori Apps Reference Library
  * to retrieve real, machine-readable application catalogue information.
@@ -58,6 +58,11 @@ export const CATALOGUE_AVAILABILITY_STATES = Object.freeze({
 export const OFFICIAL_FIORI_LIBRARY_BASE_URL =
   'https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/services/SingleApp.xsodata/InputFilterParam(InpFilterValue=\'1NA\')/Results';
 
+export const OFFICIAL_FIORI_LIBRARY_ENDPOINTS = Object.freeze({
+  PRIVATE_AND_ON_PREMISE: 'https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/services/SingleApp.xsodata/InputFilterParam(InpFilterValue=\'1NA\')/Results',
+  PUBLIC_CLOUD: 'https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/services/SingleApp.xsodata/InputFilterParam(InpFilterValue=\'1NS\')/Results'
+});
+
 /**
  * Extracts and cleans OData service names from raw library string.
  * Example: "$$,$FAP_PAYMENT_POST_SRV$" -> ["FAP_PAYMENT_POST_SRV"]
@@ -69,7 +74,7 @@ export function extractODataServices(raw = '') {
 }
 
 /**
- * Normalizes raw Fiori Apps Library record into the FioriX catalogue data model.
+ * Normalizes raw Fiori Apps Library record into the Fiorify catalogue data model.
  */
 export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_LIVE') {
   if (!rawApp || typeof rawApp !== 'object') return null;
@@ -106,12 +111,26 @@ export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_L
   const productVersion = rawApp.PVBackend || rawApp.PVFrontend || 'SAP S/4HANA';
   const softwareComponent = rawApp.BackendSoftwareComponentVersions || rawApp.FrontendSoftwareComponent || undefined;
 
-  let cleanDesc = rawApp.RoleDescription;
+  let cleanDesc = rawApp.RoleDescription || rawApp.description;
   if (!cleanDesc || cleanDesc.includes(' : \n') || cleanDesc.length > 250) {
     if (rawApp.ApplicationComponentText) {
       cleanDesc = `${appName} — standard application for ${rawApp.ApplicationComponentText}.`;
     } else {
       cleanDesc = `Standard SAP Fiori successor application for ${appName}.`;
+    }
+  }
+
+  // Extract leading transaction codes from raw attributes or authoritative standard catalog
+  const leadingTransactionCodes = [];
+  const rawTcodes = rawApp.LeadingTransactionCodes || rawApp.leadingTransactionCodes || rawApp.OldTransactionCodes || rawApp.TransactionCodes;
+  if (Array.isArray(rawTcodes)) {
+    leadingTransactionCodes.push(...rawTcodes.map((t) => String(t).trim().toUpperCase()));
+  } else if (typeof rawTcodes === 'string' && rawTcodes.trim()) {
+    leadingTransactionCodes.push(...rawTcodes.split(/[\$,;|\s]+/).map((t) => t.trim().toUpperCase()).filter(Boolean));
+  }
+  for (const [tc, std] of Object.entries(STANDARD_TRANSACTION_CATALOG)) {
+    if (std.primaryFioriAppId === appId || (Array.isArray(std.fioriSuccessors) && std.fioriSuccessors.includes(appId))) {
+      if (!leadingTransactionCodes.includes(tc)) leadingTransactionCodes.push(tc);
     }
   }
 
@@ -131,6 +150,7 @@ export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_L
     technicalCatalog,
     odataServices,
     sapui5Component,
+    leadingTransactionCodes: [...new Set(leadingTransactionCodes)],
     bspApplicationUrl: rawApp.BSPApplicationURL || undefined,
     documentationUrl: `https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('${encodeURIComponent(appId)}')/`,
     provenance,
@@ -187,10 +207,45 @@ export class OfficialFioriCatalogueAdapter {
           }
         }
       }
-      // Preload verified standard modern Fiori Elements applications
+      // Preload and enrich verified standard modern Fiori Elements applications
       for (const stdApp of STANDARD_FIORI_APPLICATIONS) {
         if (!this.memoryCache.has(stdApp.appId)) {
           this.memoryCache.set(stdApp.appId, { ...stdApp });
+        } else {
+          const existing = this.memoryCache.get(stdApp.appId);
+          if (!existing.leadingTransactionCodes || existing.leadingTransactionCodes.length === 0) {
+            existing.leadingTransactionCodes = [...(stdApp.leadingTransactionCodes || [])];
+          }
+          if ((!existing.odataServices || existing.odataServices.length === 0) && stdApp.odataServices?.length > 0) {
+            existing.odataServices = [...stdApp.odataServices];
+          }
+        }
+      }
+
+      // Correlate and map standard SAP transactions to successor apps in catalogue
+      for (const [tcode, std] of Object.entries(STANDARD_TRANSACTION_CATALOG)) {
+        if (std.primaryFioriAppId && this.memoryCache.has(std.primaryFioriAppId)) {
+          const app = this.memoryCache.get(std.primaryFioriAppId);
+          if (!Array.isArray(app.leadingTransactionCodes)) {
+            app.leadingTransactionCodes = [];
+          }
+          if (!app.leadingTransactionCodes.includes(tcode)) {
+            app.leadingTransactionCodes.push(tcode);
+          }
+        }
+
+        if (Array.isArray(std.fioriSuccessors)) {
+          for (const succId of std.fioriSuccessors) {
+            if (succId !== std.primaryFioriAppId && this.memoryCache.has(succId)) {
+              const app = this.memoryCache.get(succId);
+              if (!Array.isArray(app.relatedTCodes)) {
+                app.relatedTCodes = [];
+              }
+              if (!app.relatedTCodes.includes(tcode)) {
+                app.relatedTCodes.push(tcode);
+              }
+            }
+          }
         }
       }
     } catch {
@@ -319,8 +374,14 @@ export class OfficialFioriCatalogueAdapter {
       };
     }
 
-    // Query live official library
-    const liveRes = await this.queryLibrary(`appId eq '${cleanId}'`, 1);
+    // Query live official library (Private Edition / On-Premise 1NA first, with Public Cloud 1NS fallback)
+    let liveRes = await this.queryLibrary(`appId eq '${cleanId}'`, 1, OFFICIAL_FIORI_LIBRARY_ENDPOINTS.PRIVATE_AND_ON_PREMISE);
+    if (liveRes.success && (!liveRes.results || liveRes.results.length === 0)) {
+      const pubRes = await this.queryLibrary(`appId eq '${cleanId}'`, 1, OFFICIAL_FIORI_LIBRARY_ENDPOINTS.PUBLIC_CLOUD);
+      if (pubRes.success && pubRes.results && pubRes.results.length > 0) {
+        liveRes = pubRes;
+      }
+    }
 
     if (liveRes.success && liveRes.results.length > 0) {
       const normalized = normalizeCatalogueApp(liveRes.results[0], 'OFFICIAL_CATALOGUE_LIVE');

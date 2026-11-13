@@ -36,7 +36,7 @@ export class TransactionMasterRepository {
       `, [
         tenantId,
         effectiveProfileId,
-        snapshotData.version || 'FIORIX_TX_MASTER_V1',
+        snapshotData.version || 'Fiorify_TX_MASTER_V1',
         snapshotData.provenance || 'AUTHORITATIVE_DDIC_SNAPSHOT',
         ['TSTC', 'TSTCT', 'TADIR', 'TDEVC', 'CVERS'],
         records.length

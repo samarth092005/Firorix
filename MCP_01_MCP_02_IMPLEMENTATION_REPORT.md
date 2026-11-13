@@ -1,32 +1,32 @@
-# FioriX — Combined MCP-01 + MCP-02 Implementation Report
+# Fiorify — Combined MCP-01 + MCP-02 Implementation Report
 ## SAP Fiori MCP Server Setup, Backend Integration, and Tool Execution
 
 ---
 
 ## 1. Executive Summary
 
-This report documents the completed implementation of milestones **MCP-01** (Setup and Connectivity) and **MCP-02** (Backend Tool Integration) for FioriX.
+This report documents the completed implementation of milestones **MCP-01** (Setup and Connectivity) and **MCP-02** (Backend Tool Integration) for Fiorify.
 
-FioriX now features a fully integrated, isolated Model Context Protocol (MCP) subsystem connecting to SAP's official `@sap-ux/fiori-mcp-server`. The backend implements standard stdio transport via `@modelcontextprotocol/sdk`, robust connection lifecycle state management, dynamic tool discovery, strict schema-based input validation, conservative read-only execution policy, provenance tagging, REST API endpoints, and a dedicated frontend management interface.
+Fiorify now features a fully integrated, isolated Model Context Protocol (MCP) subsystem connecting to SAP's official `@sap-ux/fiori-mcp-server`. The backend implements standard stdio transport via `@modelcontextprotocol/sdk`, robust connection lifecycle state management, dynamic tool discovery, strict schema-based input validation, conservative read-only execution policy, provenance tagging, REST API endpoints, and a dedicated frontend management interface.
 
-All existing FioriX capabilities (Transaction Discovery, Multi-Source Technical Evidence, Fiori Matching, Assessment Persistence, BTP Destination Connectivity, and Gateway Metadata Ingestion) remain intact and regression-free.
+All existing Fiorify capabilities (Transaction Discovery, Multi-Source Technical Evidence, Fiori Matching, Assessment Persistence, BTP Destination Connectivity, and Gateway Metadata Ingestion) remain intact and regression-free.
 
 ---
 
 ## 2. Existing Architecture Inspection
 
-Before implementation, an architectural inspection of the FioriX platform was conducted:
+Before implementation, an architectural inspection of the Fiorify platform was conducted:
 
 - **Runtime & Framework**: The backend is built on Node.js 20 LTS using native HTTP (`node:http`) and ES modules (`"type": "module"`). It is SAP Cloud Application Programming Model (CAP) ready.
 - **Route Dispatching**: Handled inside `createServer()` in `backend/src/server.js`, dispatching via URL pathname matching and guarded request stream parsers.
-- **Authentication**: Administrative endpoints are protected with timing-safe comparison of `X-FioriX-Admin-Secret` / Bearer token via `btpDestinationAdapter.verifyAdminSecret()`.
+- **Authentication**: Administrative endpoints are protected with timing-safe comparison of `X-Fiorify-Admin-Secret` / Bearer token via `btpDestinationAdapter.verifyAdminSecret()`.
 - **Existing Subsystems & Adapters**:
   - `btpDestinationAdapter.js`: BTP destination service and connectivity proxy.
   - `sapGatewayMetadataAdapter.js`: Live/mock Gateway OData Catalog query and EDMX parsing.
   - `sapTransactionDiscoveryAdapter.js`: ADT probing and transaction discovery.
   - `officialFioriCatalogueAdapter.js`: Standard Fiori Apps Reference Library cache and lookups.
   - `transactionDiscoveryEngine.js`, `technicalEvidenceEngine.js`, `fioriMatchingEngine.js`: Core intelligence engines.
-- **Independence & Isolation**: The MCP client adapter was designed as a self-contained subsystem under `backend/src/mcp/` so that failure, disconnection, or disablement of the MCP server does not impair core FioriX operations.
+- **Independence & Isolation**: The MCP client adapter was designed as a self-contained subsystem under `backend/src/mcp/` so that failure, disconnection, or disablement of the MCP server does not impair core Fiorify operations.
 
 ---
 
@@ -66,7 +66,7 @@ The official CLI invocation is:
 ```bash
 npx --yes @sap-ux/fiori-mcp-server@1.15.24 fiori-mcp
 ```
-Within the FioriX backend, process management launches the local pinned distribution directly:
+Within the Fiorify backend, process management launches the local pinned distribution directly:
 ```bash
 node ./node_modules/@sap-ux/fiori-mcp-server/dist/index.js
 ```
@@ -305,7 +305,7 @@ Live handshake was tested directly against the pinned SAP package:
 
 - The MCP process itself is verified and operational.
 - Tools that require a configured SAP system (such as `download_odata_service_metadata`) correctly report when an SAP connection is unconfigured or unreachable.
-- FioriX health diagnostics explicitly distinguish between **MCP Process Availability** (`RUNNING`), **MCP Handshake Status** (`SUCCESS`), and **SAP System Connectivity** (`NOT_TESTED_VIA_MCP`), preventing false claims of live SAP health.
+- Fiorify health diagnostics explicitly distinguish between **MCP Process Availability** (`RUNNING`), **MCP Handshake Status** (`SUCCESS`), and **SAP System Connectivity** (`NOT_TESTED_VIA_MCP`), preventing false claims of live SAP health.
 
 ---
 
@@ -360,7 +360,7 @@ Live handshake was tested directly against the pinned SAP package:
 
 - All 145 existing backend tests pass without modification.
 - Existing T-Code discovery (`DISC-01`), multi-source technical evidence collection (`DISC-02`), standard Fiori matching (`MATCH-01`/`02`), fit-gap assessment (`FITGAP-01`), and assessment persistence (`PERSIST-01`) remain 100% functional.
-- Running FioriX with `MCP_ENABLED=false` does not break any existing REST API or frontend feature.
+- Running Fiorify with `MCP_ENABLED=false` does not break any existing REST API or frontend feature.
 
 ---
 

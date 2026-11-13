@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from '../src/server.js';
 import { BtpDestinationAdapter } from '../src/adapters/btpDestinationAdapter.js';
 
-describe('FioriX Sprint 5.1 — HTTP Server & Gateway Smoke Test Endpoint Security', () => {
+describe('Fiorify Sprint 5.1 — HTTP Server & Gateway Smoke Test Endpoint Security', () => {
   let server;
   let baseUrl;
   let smokeTestInvoked = false;
@@ -91,7 +91,7 @@ describe('FioriX Sprint 5.1 — HTTP Server & Gateway Smoke Test Endpoint Securi
     const res = await fetch(`${baseUrl}/api/v1/gateway-smoke-test`, {
       method: 'GET',
       headers: {
-        'X-FioriX-Admin-Secret': 'IncorrectSecret_123'
+        'X-Fiorify-Admin-Secret': 'IncorrectSecret_123'
       }
     });
 
@@ -102,14 +102,14 @@ describe('FioriX Sprint 5.1 — HTTP Server & Gateway Smoke Test Endpoint Securi
     assert.strictEqual(smokeTestInvoked, false);
   });
 
-  // 3. Valid admin secret via X-FioriX-Admin-Secret header
-  it('allows GET /api/v1/gateway-smoke-test with HTTP 200 when valid X-FioriX-Admin-Secret is provided', async () => {
+  // 3. Valid admin secret via X-Fiorify-Admin-Secret header
+  it('allows GET /api/v1/gateway-smoke-test with HTTP 200 when valid X-Fiorify-Admin-Secret is provided', async () => {
     smokeTestInvoked = false;
 
     const res = await fetch(`${baseUrl}/api/v1/gateway-smoke-test`, {
       method: 'GET',
       headers: {
-        'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET
+        'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET
       }
     });
 
@@ -185,12 +185,12 @@ describe('FioriX Sprint 5.1 — HTTP Server & Gateway Smoke Test Endpoint Securi
       headers: {
         Origin: 'http://localhost:5173',
         'Access-Control-Request-Method': 'GET',
-        'Access-Control-Request-Headers': 'X-FioriX-Admin-Secret'
+        'Access-Control-Request-Headers': 'X-Fiorify-Admin-Secret'
       }
     });
 
     assert.strictEqual(res.status, 204);
-    assert.ok(res.headers.get('access-control-allow-headers').includes('X-FioriX-Admin-Secret'));
+    assert.ok(res.headers.get('access-control-allow-headers').includes('X-Fiorify-Admin-Secret'));
     assert.ok(res.headers.get('access-control-allow-methods').includes('GET'));
   });
 

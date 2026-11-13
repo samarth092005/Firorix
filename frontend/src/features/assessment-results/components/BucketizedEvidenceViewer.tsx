@@ -53,7 +53,7 @@ export const BucketizedEvidenceViewer: React.FC<BucketizedEvidenceViewerProps> =
       key: 'D_INFERRED',
       label: 'Bucket D: Inferred Evidence',
       shortLabel: 'Bucket D: Inferred',
-      desc: 'Clean Core tiering heuristics and architectural recommendations deduced by FioriX rule engine.',
+      desc: 'Clean Core tiering heuristics and architectural recommendations deduced by Fiorify rule engine.',
       icon: Cpu,
       color: '#4F46E5',
       count: evidence.filter(e => e.bucket === 'D_INFERRED').length

@@ -19,7 +19,13 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ap_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1612')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:27:55.565Z"
+    "retrievalTimestamp": "2026-11-12T05:27:55.565Z",
+    "leadingTransactionCodes": [
+      "F-53"
+    ],
+    "relatedTCodes": [
+      "F-53"
+    ]
   },
   {
     "appId": "F-53",
@@ -37,7 +43,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F-53')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:27:55.565Z"
+    "retrievalTimestamp": "2026-11-12T05:27:55.565Z",
+    "leadingTransactionCodes": [
+      "F-53"
+    ],
+    "relatedTCodes": [
+      "F-53"
+    ]
   },
   {
     "appId": "F1367",
@@ -62,7 +74,14 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_apmanclear",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1367')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:26:45.108Z"
+    "retrievalTimestamp": "2026-11-12T04:26:45.108Z",
+    "leadingTransactionCodes": [
+      "F-53",
+      "FBZ1"
+    ],
+    "relatedTCodes": [
+      "F-53"
+    ]
   },
   {
     "appId": "DMEEX_TRACE_CLOUD",
@@ -344,7 +363,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FB70')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-06T10:51:20.712Z"
+    "retrievalTimestamp": "2026-11-06T10:51:20.712Z",
+    "leadingTransactionCodes": [
+      "FB70"
+    ],
+    "relatedTCodes": [
+      "FB70"
+    ]
   },
   {
     "appId": "FF_3",
@@ -416,7 +441,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FB50')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-11T12:58:28.949Z"
+    "retrievalTimestamp": "2026-11-11T12:58:28.949Z",
+    "leadingTransactionCodes": [
+      "FB50"
+    ],
+    "relatedTCodes": [
+      "FB50"
+    ]
   },
   {
     "appId": "FB50L",
@@ -458,7 +489,10 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_gldocpost",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0718')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-11T12:58:28.288Z"
+    "retrievalTimestamp": "2026-11-11T12:58:28.288Z",
+    "leadingTransactionCodes": [
+      "FB50"
+    ]
   },
   {
     "appId": "F0842A",
@@ -480,7 +514,12 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/mm_po_manages1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0842A')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:41:48.251Z"
+    "retrievalTimestamp": "2026-11-12T04:41:48.251Z",
+    "leadingTransactionCodes": [
+      "ME21N",
+      "ME22N",
+      "ME23N"
+    ]
   },
   {
     "appId": "F1873",
@@ -503,7 +542,13 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/sd_so_manages1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1873')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-11T14:41:35.960Z"
+    "retrievalTimestamp": "2026-11-11T14:41:35.960Z",
+    "leadingTransactionCodes": [
+      "VA01",
+      "VA02",
+      "VA03",
+      "VA05"
+    ]
   },
   {
     "appId": "F1814",
@@ -708,10 +753,13 @@
       "FAR_PAYMENT_POST_SRV"
     ],
     "sapui5Component": "fin.ar.payment.post",
+    "leadingTransactionCodes": [
+      "F-28"
+    ],
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1345')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.757Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.904Z"
   },
   {
     "appId": "ME21N",
@@ -729,7 +777,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('ME21N')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:38:46.186Z"
+    "retrievalTimestamp": "2026-11-12T05:38:46.186Z",
+    "leadingTransactionCodes": [
+      "ME21N"
+    ],
+    "relatedTCodes": [
+      "ME21N"
+    ]
   },
   {
     "appId": "VA01",
@@ -747,7 +801,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('VA01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.889Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.889Z",
+    "leadingTransactionCodes": [
+      "VA01"
+    ],
+    "relatedTCodes": [
+      "VA01"
+    ]
   },
   {
     "appId": "FB03",
@@ -835,7 +895,10 @@
       "SpaceMultiLanguageCombined": "$Administração de estoques - Retail$ * $Administração de orçamento financeiro - responsável$ * $Administração de subsídios públicos - especialista$ * $Administração de subsídios públicos - responsável$ * $Administração do orçamento - especialista$ * $Akauntan Kos Pengeluaran$ * $Alapkezelés - szakértő$ * $Begrotingsmanagement - specialist$ * $Begrotingsmanagement - verantwoordelijke$ * $Beholdningsstyring - detailhandel$ * $Beholdningsstyring - detaljhandel$ * $Beholdningsstyring - handel$ * $Bestandsführung - Retail$ * $Bevillingsstyring - ansvarlig$ * $Bevillingsstyring - specialist$ * $Bidragsförvaltning - ansvarig$ * $Bidragsförvaltning - specialist$ * $Bidragsspecialist$ * $Bokförare produktionskostnader$ * $Budgetstyrning - ansvarig$ * $Budgetstyrning - specialist$ * $Comptabilité budgétaire - Responsable$ * $Comptabilité budgétaire - Spécialiste$ * $Comptable CO de production$ * $Comptable de costos de producció$ * $Contabil costuri producţie$ * $Contabilità - contabilità materiale$ * $Contable de costes de producción$ * $Control de projecte: Finances$ * $Control de proyecto - Finanzas$ * $Control pressupostari: Especialista$ * $Control pressupostari: Responsable$ * $Control proiecte - finanţe$ * $Controlador de produção$ * $Controle de projeto - Finanças$ * $Controller costi di produzione$ * $Controllo progetti - Contabilità$ * $Contrôle de projets - Gestion financière$ * $Disposisjonsregnskap - ansvarlig$ * $Disposisjonsregnskap - spesialist$ * $Dotāciju pārvaldība - atbildīgā persona$ * $Dotāciju pārvaldība - speciālists$ * $Eelarvehaldus - spetsialist$ * $Eelarvehaldus - vastutav$ * $Especialista de subvenciones$ * $Especialista de subvencions$ * $Especialista em subsídios públicos$ * $Finance – vodenje zaloge$ * $Finances: Comptabilitat d'estocs$ * $Financials - Vorratsbuchhaltung$ * $Financie - účtovníctvo zásob$ * $Financije - računovodstvo zaliha$ * $Financiële administratie - voorraadadministratie$ * $Finansai - atsargų apskaita$ * $Finansallar - stok muhasebesi$ * $Finanse - księgowość zapasów$ * $Finanses - krājumu uzskaite$ * $Finansije - računovodstvo zaliha$ * $Finansregnskab - Vareregnskab$ * $Finansregnskap - lagerregnskap$ * $Finantsasjad - varude arvestus$ * $Finanzas - Contabilidad de inventario$ * $Finanças - contabilidade de materiais$ * $Finanční účetnictví - evidence zásob$ * $Finanţe - contabilitate stocuri$ * $Fon yönetimi - sorumlu$ * $Fon yönetimi - uzman$ * $Fördermittelmanagement - Spezialist$ * $Fördermittelmanagement - Verantwortlicher$ * $Fördermittelspezialist$ * $Gamybos kaštų apskaitininkas$ * $Gestion des stocks - Distribution de détail$ * $Gestion des subventions - Responsable$ * $Gestion des subventions - Spécialiste$ * $Gestion financière - Comptabilité des stocks$ * $Gestione fondi - addetto$ * $Gestione fondi - responsabile$ * $Gestione sovvenzioni - addetto$ * $Gestione sovvezioni - responsabile$ * $Gestione stock - Retail$ * $Gestiune fonduri - responsabil$ * $Gestiune fonduri - specialist$ * $Gestiune stocuri - vânzare cu amănuntul$ * $Gestiune subvenţii - responsabil$ * $Gestiune subvenţii - specialist$ * $Gestió d'estocs - Comerç$ * $Gestió de subvencions: Especialista$ * $Gestió de subvencions: Responsable$ * $Gestión de inventario: Retail$ * $Gestión de subvenciones - Especialista$ * $Gestión de subvenciones - Responsable$ * $Gestión presupuestaria - Especialista$ * $Gestión presupuestaria - Responsable$ * $Gospodarka zapasami - sprzedaż detaliczna$ * $Grants Management - ansvarlig$ * $Grants Management - felelős$ * $Grants Management - specialist$ * $Grants Management - szakértő$ * $Grants Management - verantwoordelijke$ * $Gyártási költségek könyvelője$ * $Haushaltsmanagement - Spezialist$ * $Haushaltsmanagement - Verantwortlicher$ * $Inventorizacijos valdymas - mažmeninė prekyba$ * $Kawalan Projek - Kewangan$ * $Kewangan - Perakaunan Inventori$ * $Kiểm soát dự án - Tài chính$ * $Knjigovodja stroškov proizvodnje$ * $Kontrola projekta - financije$ * $Kontrola projekta - finansije$ * $Krājumu pārvaldība - mazumtirdzniecība$ * $Księgowy ds. kosztów produkcji$ * $Készletkezelés - kereskedelem$ * $Kế toán viên chi phí sản xuất$ * $Költségvetés-menedzsment - felelős$ * $Lagerhållning - Retail$ * $Lėšų valdymas - atsakingas asmuo$ * $Lėšų valdymas - specialistas$ * $Līdzekļu pārvaldība - atbildībā persona$ * $Līdzekļu pārvaldība - speciālists$ * $Manažment grantov - zodpovedná osoba$ * $Manažment grantov - špecialista$ * $Määrärahalaskenta - asiantuntija$ * $Määrärahalaskenta - vastuuhenkilö$ * $Nadzor projekta - finance$ * $Pengurusan Dana - Pakar$ * $Pengurusan Dana - Tanggungjawab$ * $Pengurusan Inventori - Runcit$ * $Pengurusan Pemberian - Pakar$ * $Pengurusan Pemberian - Tanggungjawab$ * $Poskytovateľ grantu - špecialista$ * $Productiekostenadministrateur$ * $Produksjonskostnadsregnskapsfører$ * $Produktionscontroller$ * $Proje kontrolü - finansallar$ * $Projectbesturing - financiële boekhouding$ * $Projektcontrolling - pénzügy$ * $Projektijuhtimine - finantsasjad$ * $Projektinohjaus - taloushallinto$ * $Projekto kontrolė - finansai$ * $Projektsteuerung - Finanz- und Rechnungswesen$ * $Projektstyring - økonomi og regnskab$ * $Projektstyrning - redovisning$ * $Projektu vadība - finanses$ * $Prosjektkontroll - finansregnskap$ * $Pénzügy - készletkönyvelés$ * $Quản lý hàng tồn - Bán lẻ$ * $Quản lý quỹ - Chuyên gia$ * $Quản lý quỹ - Trách nhiệm$ * $Quản lý quỹ tài trợ - Chuyên gia$ * $Quản lý quỹ tài trợ - Trách nhiệm$ * $Računovođa troškova proizvodnje$ * $Ražošanas izmaksu grāmatvedis$ * $Redovisning - lagerbokföring$ * $Riadenie projektu - finančné účtovníctvo$ * $Riadenie rozpočtu - zodpovedná osoba$ * $Riadenie rozpočtu - špecialista$ * $Riadenie zásob - Maloobchod$ * $Specialist subvenţionare$ * $Specialista in assegnazione sovvenzioni$ * $Specialista na udělování grantů$ * $Specjalista ds. grantów$ * $Spécialiste des subventions$ * $Sterowanie projektem - finanse$ * $Stok yönetimi - perakende$ * $Strokovnjak za subvencije$ * $Stručnjak za sponzore$ * $Stručnjak za subvencije$ * $Subsidiespecialist$ * $Subsidijų valdymas - atsakingas asmuo$ * $Subsidijų valdymas - specialistas$ * $Szponzorspecialista$ * $Taloushallinto - varastokirjanpito$ * $Tài chính - Kế toán tồn kho$ * $Teşvik yöneticisi$ * $Teşvik yönetimi - sorumlu$ * $Teşvik yönetimi - uzman$ * $Tilskuddsforvaltning - ansvarlig$ * $Tilskuddsforvaltning - spesialist$ * $Tilskuddsspesialist$ * $Toetuste haldus - spetsialist$ * $Toetuste haldus - vastutav$ * $Tootmiskulude arvestaja$ * $Tukien hallinta - asiantuntija$ * $Tukien hallinta - vastuuhenkilö$ * $Tukien myöntämisen asiantuntija$ * $Tuotantokustannusten kirjanpitäjä$ * $UISC ---SAP_PSM_SP_FM_BDGTRESP$ * $UISC ---SAP_PSM_SP_FM_BDGTSP$ * $UISC ---SAP_PSM_SP_GM_GRNTRESP$ * $UISC ---SAP_PSM_SP_GM_GRNTSP$ * $UISC ---SAP_PSM_SP_GTM_SPECIALIST$ * $UISC ---SAP_PS_SP_FIN_CONTROL$ * $UISC ---SAP_RFM_SP_INVTRY_MGMT$ * $UISC ---SAP_SFIN_SP_IA_ACC$ * $UISC ---SAP_SFIN_SP_PRODN_OVR$ * $Upravljanje finansijskim sredstvima - odgovorno lice$ * $Upravljanje finansijskim sredstvima - stručnjak$ * $Upravljanje grantovima - odgovorno lice$ * $Upravljanje grantovima - stručnjak$ * $Upravljanje inventarom - maloprodaja$ * $Upravljanje potporama - odgovorna osoba$ * $Upravljanje potporama - stručnjak$ * $Upravljanje sredstev - odgovorni$ * $Upravljanje sredstev - strokovnjak$ * $Upravljanje sredstvima - odgovorna osoba$ * $Upravljanje sredstvima - stručnjak$ * $Upravljanje subvencij - odgovorni$ * $Upravljanje subvencij - strokovnjak$ * $Upravljanje zalihama - maloprodaja$ * $Upravljanje zaloge - maloprodaja$ * $Varastonohjaus - kauppa$ * $Varude haldus – jaekaubandus$ * $Vedení zásob - maloobchod$ * $Voorraadbeheer - retail$ * $Zarządzanie funduszami - osoba odpowiedzialna$ * $Zarządzanie funduszami - specjalista$ * $Zarządzanie grantami - osoba odpowiedzialna$ * $Zarządzanie grantami - specjalista$ * $[Ģŗąŋţŏŗ∙Ŝρēċįąĺįşţ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ģŗąŋţş∙Μąŋąğēɱēŋţ∙-∙Řēşρŏŋşįƃĺē∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ģŗąŋţş∙Μąŋąğēɱēŋţ∙-∙Ŝρēċįąĺįşţ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ĭŋʋēŋţŏŗŷ∙Μąŋąğēɱēŋţ∙-∙Řēţąįĺ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ƒįŋąŋċįąĺş∙-∙Ĭŋʋēŋţŏŗŷ∙Āċċŏűŋţįŋğ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ƒűŋƌş∙Μąŋąğēɱēŋţ∙-∙Řēşρŏŋşįƃĺē∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ƒűŋƌş∙Μąŋąğēɱēŋţ∙-∙Ŝρēċįąĺįşţ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ƥŗŏĵēċţ∙Ĉŏŋţŗŏĺ∙-∙Ƒįŋąŋċįąĺş∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $[Ƥŗŏƌűċţįŏŋ∙Ĉŏşţ∙Āċċŏűŋţąŋţ∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙∙]$ * $Účetní výrobních nákladů$ * $Účtovník výrobných nákladov$ * $Üretim masrafları muhasebecisi$ * $Řízení grantů - odpovědnost$ * $Řízení grantů - specialista$ * $Řízení projektu - finance$ * $Řízení rozpočtu - odpovědnost$ * $Řízení rozpočtu - specialista$ * $Διαχείριση Αποθεμάτων - Λιανική$ * $Διαχείριση Επιχορηγήσεων - Ειδικός$ * $Διαχείριση Επιχορηγήσεων - Υπεύθυνος$ * $Διαχείριση Κεφαλαίων - Ειδικός$ * $Διαχείριση Κεφαλαίων - Υπεύθυνος$ * $Ειδικός Χορηγιών$ * $Ελεγχος Εργου - Χρηματοοικονομικά$ * $Λογιστής Κόστους Παραγωγής$ * $Οικονομικά Στοιχεία- Λογιστική Αποθεμάτων$ * $Бухгалтер по учету производственных затрат$ * $Бюджетті басқару - жауапты тұлға$ * $Бюджетті басқару - маман$ * $Гранттарды басқару - жауапты тұлға$ * $Гранттарды басқару - маман$ * $Жоба басқару - қаржы$ * $Керування бюджетом - відповідальний$ * $Керування бюджетом - спеціаліст$ * $Керування грантами - відповідальний$ * $Керування грантами - спеціаліст$ * $Керування запасами - роздрібна торгівля$ * $Керування проєктом - фінанси$ * $Контрол на проект - финанси$ * $Контролер виробництва$ * $Контроль проекта - финансы$ * $Контроль проєкту - фінанси$ * $Специалист на спонсор$ * $Специалист по грантам$ * $Счетоводител калкулация на продукт$ * $Управление грантами - ответственный$ * $Управление грантами - специалист$ * $Управление запасами - розничная торговля$ * $Управление на инвентаризацията – търговия на дребно$ * $Управление на субсидии - отговорно лице$ * $Управление на субсидии - специалист$ * $Управление на фондове - отговорно лице$ * $Управление на фондове - специалист$ * $Управление фондами - ответственный$ * $Управление фондами - специалист$ * $Фахівець зі спонсорської підтримки$ * $Финанси - Счетоводно отчитане на материални запаси$ * $Финансы - учет запасов$ * $Фінанси - облік запасів$ * $Қаржы - қорлар есебі$ * $Қорларды басқару - бөлшек сауда$ * $Өндірістік құн бойынша бухгалтер$ * $בקרה על פרויקט - פיננסים$ * $חשבונאי של עלות ייצור$ * $כספים - חשבונאות מלאי$ * $מומחה מענקים$ * $ניהול מלאי - קמעונאות$ * $ניהול מענקים - אחראי$ * $ניהול מענקים - מומחה$ * $ניהול קרנות - אחראי$ * $ניהול קרנות - מומחה$ * $إدارة التمويل - المتخصص$ * $إدارة التمويل - المسؤول$ * $إدارة المخزون - البيع بالتجزئة$ * $إدارة المِنح - المتخصص$ * $إدارة المِنح - المسؤول$ * $التحكم بالمشروع - الشؤون المالية$ * $الماليات - محاسبة المخزون$ * $متخصص الجهة المانحة$ * $متخهصص الجهات المانحة$ * $محاسب تكلفة الإنتاج$ * $مراقبة المشروعات - الماليات$ * $अनुदान प्रबंधन – विशेषज्ञ$ * $अनुदान प्रबंधन – ज़िम्मेदार$ * $इनवेंट्री प्रबंधन - खुदरा$ * $उत्पादन लागत लेखाकार$ * $निधि प्रबंधन – विशेषज्ञ$ * $निधि प्रबंधन – ज़िम्मेदार$ * $प्रोजेक्ट नियंत्रण - वित्तीय$ * $वित्तीय - इन्वेंट्री लेखांकन$ * $การควบคุมโครงการ - การเงิน$ * $การจัดการสินค้าคงคลัง - การค้าปลีก$ * $การจัดการเงินทุน - ผู้รับผิดชอบ$ * $การจัดการเงินทุน - ผู้เชี่ยวชาญ$ * $การจัดการเงินสนับสนุน - ผู้รับผิดชอบ$ * $การจัดการเงินสนับสนุน - ผู้เชี่ยวชาญ$ * $การเงิน - การบัญชีสินค้าคงคลัง$ * $นักบัญชีต้นทุนการผลิต$ * $ผู้เชี่ยวชาญด้านเงินสนับสนุน$ * $プロジェクト管理 - 財務会計$ * $予算管理 - スペシャリスト$ * $予算管理 - 責任$ * $在庫管理 - 小売$ * $基金管理 - 專員$ * $基金管理 - 負責人$ * $存貨管理 - 零售業$ * $專案控制 - 財務$ * $库存管理 - 零售$ * $拨款方专家$ * $拨款管理 - 专家$ * $拨款管理 - 负责人$ * $生产成本会计$ * $生產成本會計人員$ * $補助金スペシャリスト$ * $補助金管理 - スペシャリスト$ * $補助金管理 - 責任$ * $製造原価担当者$ * $財務 - 存貨會計$ * $財務会計 - 棚卸資産会計$ * $贊助人專員$ * $贊助金管理 - 專員$ * $贊助金管理 - 負責人$ * $财务 - 库存会计$ * $资金管理 - 专家$ * $资金管理 - 负责人$ * $项目控制 - 财务$ * $보조금 관리 - 전문가$ * $보조금 관리 - 책임자$ * $생산 원가 회계 담당자$ * $자금 관리 - 전문가$ * $자금 관리 - 책임자$ * $재고 관리 - 소매$ * $재무 관리 - 재고 회계$ * $출자자 전문가$ * $프로젝트 관리 - 재무 관리$",
       "scoreIndicator": "",
       "AppNameCombined": "$Display Document$ * $Display Journal Entries$"
-    }
+    },
+    "leadingTransactionCodes": [
+      "FB03"
+    ]
   },
   {
     "appId": "F8153",
@@ -3178,7 +3241,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FB60')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T11:58:28.253Z"
+    "retrievalTimestamp": "2026-11-08T11:58:28.253Z",
+    "leadingTransactionCodes": [
+      "FB60"
+    ],
+    "relatedTCodes": [
+      "FB60"
+    ]
   },
   {
     "appId": "FV60",
@@ -3217,7 +3286,12 @@
     "sapui5Component": "ui.ssuite.s2p.mm.pur.inv.manage.s1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0859A')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:00:22.211Z"
+    "retrievalTimestamp": "2026-11-08T12:00:22.211Z",
+    "leadingTransactionCodes": [
+      "MIRO",
+      "MIR7",
+      "FB60"
+    ]
   },
   {
     "appId": "F0859",
@@ -3312,7 +3386,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBL3N')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:31:00.964Z"
+    "retrievalTimestamp": "2026-11-12T04:31:00.964Z",
+    "leadingTransactionCodes": [
+      "FBL3N"
+    ],
+    "relatedTCodes": [
+      "FBL3N"
+    ]
   },
   {
     "appId": "FBL5N",
@@ -3330,7 +3410,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBL5N')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:19:56.977Z"
+    "retrievalTimestamp": "2026-11-08T12:19:56.977Z",
+    "leadingTransactionCodes": [
+      "FBL5N"
+    ],
+    "relatedTCodes": [
+      "FBL5N"
+    ]
   },
   {
     "appId": "FBO1C",
@@ -3477,7 +3563,10 @@
     "sapui5Component": "fin.numberrange.intervals.manage",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F3445')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:14:14.477Z"
+    "retrievalTimestamp": "2026-11-08T12:14:14.477Z",
+    "leadingTransactionCodes": [
+      "FBN1"
+    ]
   },
   {
     "appId": "FBN1",
@@ -3495,7 +3584,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBN1')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:14:14.490Z"
+    "retrievalTimestamp": "2026-11-08T12:14:14.490Z",
+    "leadingTransactionCodes": [
+      "FBN1"
+    ],
+    "relatedTCodes": [
+      "FBN1"
+    ]
   },
   {
     "appId": "F2059",
@@ -3516,7 +3611,10 @@
     "sapui5Component": "fin.gl.postingperiods.manage",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2059')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:14:14.490Z"
+    "retrievalTimestamp": "2026-11-08T12:14:14.490Z",
+    "leadingTransactionCodes": [
+      "OB52"
+    ]
   },
   {
     "appId": "F0731",
@@ -3555,7 +3653,10 @@
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1061')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:14:14.490Z"
+    "retrievalTimestamp": "2026-11-08T12:14:14.490Z",
+    "leadingTransactionCodes": [
+      "MIGO"
+    ]
   },
   {
     "appId": "F3163",
@@ -3575,7 +3676,10 @@
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F3163')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:14:14.490Z"
+    "retrievalTimestamp": "2026-11-08T12:14:14.490Z",
+    "leadingTransactionCodes": [
+      "BP"
+    ]
   },
   {
     "appId": "/CCEE/FISC_NR",
@@ -3683,7 +3787,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('OB52')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:17:33.575Z"
+    "retrievalTimestamp": "2026-11-08T12:17:33.575Z",
+    "leadingTransactionCodes": [
+      "OB52"
+    ],
+    "relatedTCodes": [
+      "OB52"
+    ]
   },
   {
     "appId": "/ATL/A17",
@@ -3807,7 +3917,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('BP')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:05:08.816Z"
+    "retrievalTimestamp": "2026-11-12T05:05:08.816Z",
+    "leadingTransactionCodes": [
+      "BP"
+    ],
+    "relatedTCodes": [
+      "BP"
+    ]
   },
   {
     "appId": "/SAPCE/FKGR_MYF_EXP",
@@ -4041,7 +4157,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('MIGO')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:05:06.120Z"
+    "retrievalTimestamp": "2026-11-12T05:05:06.120Z",
+    "leadingTransactionCodes": [
+      "MIGO"
+    ],
+    "relatedTCodes": [
+      "MIGO"
+    ]
   },
   {
     "appId": "/SCWM/GMBIN_DET",
@@ -4408,7 +4530,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FS00')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-08T12:18:07.434Z"
+    "retrievalTimestamp": "2026-11-08T12:18:07.434Z",
+    "leadingTransactionCodes": [
+      "FS00"
+    ],
+    "relatedTCodes": [
+      "FS00"
+    ]
   },
   {
     "appId": "F-02",
@@ -7069,7 +7197,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('VA02')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.953Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.953Z",
+    "leadingTransactionCodes": [
+      "VA02"
+    ],
+    "relatedTCodes": [
+      "VA02"
+    ]
   },
   {
     "appId": "VF01",
@@ -7087,7 +7221,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('VF01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.791Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.791Z",
+    "leadingTransactionCodes": [
+      "VF01"
+    ],
+    "relatedTCodes": [
+      "VF01"
+    ]
   },
   {
     "appId": "/CPD/PWS_MM02",
@@ -7141,7 +7281,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('MM01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:45:50.964Z"
+    "retrievalTimestamp": "2026-11-12T04:45:50.964Z",
+    "leadingTransactionCodes": [
+      "MM01"
+    ],
+    "relatedTCodes": [
+      "MM01"
+    ]
   },
   {
     "appId": "CO01",
@@ -7159,7 +7305,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('CO01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:46:01.955Z"
+    "retrievalTimestamp": "2026-11-12T04:46:01.955Z",
+    "leadingTransactionCodes": [
+      "CO01"
+    ],
+    "relatedTCodes": [
+      "CO01"
+    ]
   },
   {
     "appId": "F1602",
@@ -7305,10 +7457,14 @@
       "VF01",
       "VF02",
       "VF03",
-      "VF04"
+      "VF04",
+      "FB70"
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0798')/",
-    "provenance": "OFFICIAL_CATALOGUE_CACHED"
+    "provenance": "OFFICIAL_CATALOGUE_CACHED",
+    "relatedTCodes": [
+      "FB70"
+    ]
   },
   {
     "appId": "F2228",
@@ -7648,7 +7804,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('VL01N')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.712Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.712Z",
+    "leadingTransactionCodes": [
+      "VL01N"
+    ],
+    "relatedTCodes": [
+      "VL01N"
+    ]
   },
   {
     "appId": "SU01",
@@ -7669,7 +7831,10 @@
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('SU01')/",
     "provenance": "OFFICIAL_CATALOGUE_CACHED",
-    "isSynthesizedWebGui": true
+    "isSynthesizedWebGui": true,
+    "relatedTCodes": [
+      "SU01"
+    ]
   },
   {
     "appId": "SE38",
@@ -7690,7 +7855,10 @@
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('SE38')/",
     "provenance": "OFFICIAL_CATALOGUE_CACHED",
-    "isSynthesizedWebGui": true
+    "isSynthesizedWebGui": true,
+    "relatedTCodes": [
+      "SE38"
+    ]
   },
   {
     "appId": "QA01",
@@ -7708,7 +7876,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('QA01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.847Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.847Z",
+    "leadingTransactionCodes": [
+      "QA01"
+    ],
+    "relatedTCodes": [
+      "QA01"
+    ]
   },
   {
     "appId": "CS01",
@@ -7726,7 +7900,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('CS01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.865Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.865Z",
+    "leadingTransactionCodes": [
+      "CS01"
+    ],
+    "relatedTCodes": [
+      "CS01"
+    ]
   },
   {
     "appId": "VAX1_VBTYP",
@@ -7762,7 +7942,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('ME51N')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.911Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.911Z",
+    "leadingTransactionCodes": [
+      "ME51N"
+    ],
+    "relatedTCodes": [
+      "ME51N"
+    ]
   },
   {
     "appId": "MM03",
@@ -7780,7 +7966,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('MM03')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:20.930Z"
+    "retrievalTimestamp": "2026-11-12T04:56:20.930Z",
+    "leadingTransactionCodes": [
+      "MM03"
+    ],
+    "relatedTCodes": [
+      "MM03"
+    ]
   },
   {
     "appId": "MM02",
@@ -7798,7 +7990,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('MM02')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:21.429Z"
+    "retrievalTimestamp": "2026-11-12T04:56:21.429Z",
+    "leadingTransactionCodes": [
+      "MM02"
+    ],
+    "relatedTCodes": [
+      "MM02"
+    ]
   },
   {
     "appId": "IW31",
@@ -7816,7 +8014,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('IW31')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:22.074Z"
+    "retrievalTimestamp": "2026-11-12T04:56:22.074Z",
+    "leadingTransactionCodes": [
+      "IW31"
+    ],
+    "relatedTCodes": [
+      "IW31"
+    ]
   },
   {
     "appId": "F110",
@@ -7834,7 +8038,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F110')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:56:23.969Z"
+    "retrievalTimestamp": "2026-11-12T04:56:23.969Z",
+    "leadingTransactionCodes": [
+      "F110"
+    ],
+    "relatedTCodes": [
+      "F110"
+    ]
   },
   {
     "appId": "CJ20N",
@@ -7893,7 +8103,17 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_gldocdisp",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0717')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T04:57:51.523Z"
+    "retrievalTimestamp": "2026-11-12T04:57:51.523Z",
+    "leadingTransactionCodes": [
+      "FB50",
+      "FB01",
+      "FB02",
+      "FB03"
+    ],
+    "relatedTCodes": [
+      "FB50",
+      "FB03"
+    ]
   },
   {
     "appId": "F3389",
@@ -7915,7 +8135,13 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/cmh_schedtrips1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F3389')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:05:05.010Z"
+    "retrievalTimestamp": "2026-11-12T05:05:05.010Z",
+    "leadingTransactionCodes": [
+      "MIGO"
+    ],
+    "relatedTCodes": [
+      "MIGO"
+    ]
   },
   {
     "appId": "MMBE",
@@ -8087,7 +8313,13 @@
     "odataServices": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FB01')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T05:58:47.905Z"
+    "retrievalTimestamp": "2026-11-12T05:58:47.905Z",
+    "leadingTransactionCodes": [
+      "FB01"
+    ],
+    "relatedTCodes": [
+      "FB01"
+    ]
   },
   {
     "appId": "FPE1",
@@ -8230,7 +8462,13 @@
     "sapui5Component": "* WDA_FCLM_BAM_HIERARCHY (APP_CFG_FCLM_BAM_HIERARCHY)",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1366')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-12T15:45:23.317Z"
+    "retrievalTimestamp": "2026-11-12T15:45:23.317Z",
+    "leadingTransactionCodes": [
+      "F-28"
+    ],
+    "relatedTCodes": [
+      "F-28"
+    ]
   },
   {
     "appId": "F0773",
@@ -8253,10 +8491,13 @@
       "FAR_MANUAL_CLEARING_SRV"
     ],
     "sapui5Component": "* fin.ar.manualclearing",
+    "leadingTransactionCodes": [
+      "F-53"
+    ],
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_armanclear",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0773')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.757Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.904Z"
   },
   {
     "appId": "F0984A",
@@ -8303,10 +8544,11 @@
       "/SSB/SMART_BUSINESS_RUNTIME_SRV"
     ],
     "sapui5Component": "k1471521020694 * ssuite.smartbusiness.runtime.s1",
+    "leadingTransactionCodes": [],
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/sbrt_appss1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1619')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.904Z"
   },
   {
     "appId": "F2970",
@@ -8326,10 +8568,11 @@
       "GSFINCSIL_INCOM_PAYMENT_V2"
     ],
     "sapui5Component": "gs.fin.il.collect.incoming.payments",
+    "leadingTransactionCodes": [],
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_csilposting",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2970')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.905Z"
   },
   {
     "appId": "F5588",
@@ -8349,10 +8592,11 @@
       "UI_CAPAYMENTLOT_ANALYSIS"
     ],
     "sapui5Component": "cus.o2c.incgpayt.analyze.s1",
+    "leadingTransactionCodes": [],
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/caincgpay_anls1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F5588')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.905Z"
   },
   {
     "appId": "F9325",
@@ -8372,10 +8616,11 @@
       "FAR_PAYMENT_POST_SRV"
     ],
     "sapui5Component": "gs.fin.ar.payment.post",
+    "leadingTransactionCodes": [],
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F9325')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.905Z"
   },
   {
     "appId": "FBZ1",
@@ -8392,9 +8637,10 @@
     "businessCatalog": "SAP_SFIN_BC_APAR_PAYM,SAP_SFIN_BC_AR_INC_PAYM",
     "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
     "odataServices": [],
+    "leadingTransactionCodes": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ1')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.905Z"
   },
   {
     "appId": "FBZ3",
@@ -8410,9 +8656,10 @@
     "businessCatalog": "Without Catalog Assignment",
     "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
     "odataServices": [],
+    "leadingTransactionCodes": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ3')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.905Z"
   },
   {
     "appId": "FPCPL",
@@ -8429,9 +8676,10 @@
     "businessCatalog": "SAP_FICA_BC_PAY_CLRFC",
     "technicalCatalog": "SAP_TC_FICA_PY_BE_APPS:S4FICA",
     "odataServices": [],
+    "leadingTransactionCodes": [],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FPCPL')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T06:34:46.758Z"
+    "retrievalTimestamp": "2026-11-13T10:43:55.905Z"
   },
   {
     "appId": "F7319",
@@ -8475,7 +8723,10 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/pp_matshor_mrs1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0247')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T04:39:25.380Z"
+    "retrievalTimestamp": "2026-11-13T04:39:25.380Z",
+    "leadingTransactionCodes": [
+      "MD04"
+    ]
   },
   {
     "appId": "F-28",
@@ -8496,6 +8747,57 @@
     ],
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F-28')/",
     "provenance": "OFFICIAL_CATALOGUE_CACHED",
-    "isSynthesizedWebGui": true
+    "isSynthesizedWebGui": true,
+    "relatedTCodes": [
+      "F-28"
+    ]
+  },
+  {
+    "appId": "FBL1N",
+    "appName": "Manage Supplier Line Items",
+    "description": "Others : \r\nDummy Role\r\n\r\n",
+    "appType": "SAP GUI",
+    "uiTechnology": "SAP GUI for HTML",
+    "businessProcess": "",
+    "lineOfBusiness": "",
+    "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+    "softwareComponent": "S4CORE 109",
+    "businessRole": "Other",
+    "businessCatalog": "Without Catalog Assignment",
+    "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
+    "odataServices": [],
+    "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBL1N')/",
+    "provenance": "OFFICIAL_CATALOGUE_LIVE",
+    "retrievalTimestamp": "2026-11-13T07:05:05.977Z",
+    "leadingTransactionCodes": [
+      "FBL1N"
+    ],
+    "relatedTCodes": [
+      "FBL1N"
+    ]
+  },
+  {
+    "appId": "F2665",
+    "appName": "Schedule BOP Run",
+    "description": "Order Fulfillment Manager : \r\nIs responsible to configure and optimize the order fulfillment process according the company strategy.\r\n\r\n",
+    "appType": "Transactional",
+    "uiTechnology": "SAP Fiori: Generic Job Scheduling Framework",
+    "businessProcess": "Catering Production, Sales, Sales and Marketing, Sourcing and Procurement, Supply Chain",
+    "lineOfBusiness": "Catering Production, Sales, Sales and Marketing, Sourcing and Procurement, Supply Chain",
+    "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+    "softwareComponent": "SAP_BASIS 816",
+    "businessRole": "SAP_BR_ORDER_FULFILLMNT_MNGR",
+    "roleTooltips": "Order Fulfillment Manager : \r\nIs responsible to configure and optimize the order fulfillment process according the company strategy.",
+    "businessCatalog": "SAP_SCM_BC_ABOP_SCHED",
+    "technicalCatalog": "SAP_TC_SCM_ATP_COMMON",
+    "odataServices": [
+      "APJ_JOB_MANAGEMENT_SRV"
+    ],
+    "sapui5Component": "* nw.core.appjobs",
+    "leadingTransactionCodes": [],
+    "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/nw_aps_apj",
+    "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2665')/",
+    "provenance": "OFFICIAL_CATALOGUE_LIVE",
+    "retrievalTimestamp": "2026-11-13T09:32:35.117Z"
   }
 ]

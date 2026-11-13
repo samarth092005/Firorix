@@ -13,7 +13,7 @@ import GenerationProjectRepository from '../src/infrastructure/db/repositories/g
 import { migrateAllStores } from '../src/infrastructure/db/scripts/migrateStores.js';
 import { verifyReconciliation } from '../src/infrastructure/db/scripts/verifyReconciliation.js';
 
-describe('FioriX S1 — Persistence Foundation Verification Suite', () => {
+describe('Fiorify S1 — Persistence Foundation Verification Suite', () => {
   let migrator;
   let assessmentRepo;
   let catalogueRepo;
@@ -22,7 +22,7 @@ describe('FioriX S1 — Persistence Foundation Verification Suite', () => {
   let artifactStorage;
 
   before(async () => {
-    process.env.FIORIX_ALLOW_EMBEDDED_PG = 'true';
+    process.env.Fiorify_ALLOW_EMBEDDED_PG = 'true';
     await DatabasePool.getPool();
     migrator = new MigrationRunner();
     assessmentRepo = new AssessmentRepository();

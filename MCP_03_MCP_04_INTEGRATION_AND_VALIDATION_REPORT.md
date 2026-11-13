@@ -1,4 +1,4 @@
-# FioriX — Combined MCP-03 + MCP-04 Integration and Validation Report
+# Fiorify — Combined MCP-03 + MCP-04 Integration and Validation Report
 
 **Milestone:** MCP-03 (Discovery Workflow Integration) + MCP-04 (End-to-End Reliability, Validation & Regression Testing)  
 **Repository:** `C:\Users\samarth\firorix`  
@@ -12,14 +12,14 @@
 
 ## 1. Executive Summary
 
-This report documents the implementation and end-to-end validation of **MCP-03** and **MCP-04**, connecting SAP's official Fiori MCP server subsystem to the FioriX Transaction Discovery and Matching pipeline.
+This report documents the implementation and end-to-end validation of **MCP-03** and **MCP-04**, connecting SAP's official Fiori MCP server subsystem to the Fiorify Transaction Discovery and Matching pipeline.
 
 ### Core Achievements:
 1. **Dedicated Discovery Orchestration Subsystem:** Implemented modular orchestration in `backend/src/mcp/discovery/` (`mcpDiscoveryOrchestrator.js`, `mcpTransactionContext.js`, `mcpDiscoveryPolicy.js`, `mcpEvidenceMapper.js`, `mcpCandidateCollector.js`, `mcpDiscoveryResult.js`).
 2. **Authoritative Engine Preservation (Rule A):** Maintained `transactionDiscoveryEngine.js`, `technicalEvidenceEngine.js`, `fioriMatchingEngine.js`, and `officialFioriCatalogueAdapter.js` as the authoritative evaluation engines. Deterministic matching weights and governance guardrails remain strictly preserved.
-3. **Evidence Mapping & Provenance Rigor (Rule B & D):** Converted raw MCP responses into canonical FioriX evidence structures. Classified documentation responses as `PENDING_VERIFICATION` (never falsely claiming `LIVE_SAP_VERIFIED`). System listings are categorized as configuration metadata, not live connectivity proof.
+3. **Evidence Mapping & Provenance Rigor (Rule B & D):** Converted raw MCP responses into canonical Fiorify evidence structures. Classified documentation responses as `PENDING_VERIFICATION` (never falsely claiming `LIVE_SAP_VERIFIED`). System listings are categorized as configuration metadata, not live connectivity proof.
 4. **Candidate Collection & Deduplication (Phase D):** Merged MCP-discovered candidates with the local canonical 32-record FAL catalogue without overwriting trusted catalogue data or altering on-disk catalogue files. Conflicting metadata is tagged and tracked.
-5. **Circuit Protection & No Silent Fallback (Rule C & Phase I):** When the MCP server is disconnected, disabled, times out, or returns errors, the local FioriX discovery and matching pipeline completes normally without fabricating data or crashing.
+5. **Circuit Protection & No Silent Fallback (Rule C & Phase I):** When the MCP server is disconnected, disabled, times out, or returns errors, the local Fiorify discovery and matching pipeline completes normally without fabricating data or crashing.
 6. **Unified & Dedicated Discovery REST APIs (Phase G):** Extended `POST /api/v1/discovery/match` with optional `mcpOptions` and added dedicated `POST /api/v1/discovery/mcp-assisted`.
 7. **Frontend Discovery Integration (Phase H):** Updated `TransactionCheckerPage.tsx`, `SearchPanel.tsx`, `CandidateComparisonMatrix.tsx`, and `TechnicalEvidencePanel.tsx` with user controls for MCP assistance, visual status indicators, MCP source badges, and enriched metadata displays.
 8. **100% Test Suite Verification:** Achieved 224/224 passing tests across 27 backend test files (including 13 dedicated MCP test suites), 112/112 passing frontend tests across 9 test files, zero TypeScript errors (`tsc --noEmit`), and a clean production Vite build.
@@ -130,7 +130,7 @@ Implemented in `backend/src/mcp/discovery/mcpCandidateCollector.js`:
 
 Implemented in `backend/src/mcp/discovery/mcpEvidenceMapper.js`:
 
-Each MCP result produces an evidence record matching FioriX technical evidence standards:
+Each MCP result produces an evidence record matching Fiorify technical evidence standards:
 ```json
 {
   "evidenceId": "EVD-MCP-SEARCH_DOCS-DOC",
@@ -339,7 +339,7 @@ Duration:           ~2.3s
 
 - **Status:** **SIMULATED / SYNTHETIC VIA MCP**
 - **Explicit Disclosure:** The `@sap-ux/fiori-mcp-server` executes locally on the workstation and queries documentation indexes or user environment profiles. No live RFC or mutating ABAP calls were made to the target S21 SAP backend via MCP.
-- Real SAP Gateway catalog probing and BTP destination resolution continue to be governed by FioriX's authoritative adapters (`btpDestinationAdapter.js`, `sapGatewayMetadataAdapter.js`), maintaining absolute separation from MCP experimentation.
+- Real SAP Gateway catalog probing and BTP destination resolution continue to be governed by Fiorify's authoritative adapters (`btpDestinationAdapter.js`, `sapGatewayMetadataAdapter.js`), maintaining absolute separation from MCP experimentation.
 
 ---
 
@@ -348,7 +348,7 @@ Duration:           ~2.3s
 ### Created Files:
 1. `backend/src/mcp/discovery/mcpTransactionContext.js`: Normalized discovery input context.
 2. `backend/src/mcp/discovery/mcpDiscoveryPolicy.js`: Execution policy evaluating approved discovery tool invocations.
-3. `backend/src/mcp/discovery/mcpEvidenceMapper.js`: Maps MCP outputs to canonical FioriX technical evidence records.
+3. `backend/src/mcp/discovery/mcpEvidenceMapper.js`: Maps MCP outputs to canonical Fiorify technical evidence records.
 4. `backend/src/mcp/discovery/mcpCandidateCollector.js`: Normalizes candidates and handles deduplication against local FAL catalogue.
 5. `backend/src/mcp/discovery/mcpDiscoveryResult.js`: Structured response envelope for MCP discovery telemetry.
 6. `backend/src/mcp/discovery/mcpDiscoveryOrchestrator.js`: Core orchestrator managing bounded tool execution and evidence enrichment.

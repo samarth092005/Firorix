@@ -1,4 +1,4 @@
-# FioriX — Catalogue Provenance and Completeness Report (Phase S0/S1 Corrected Baseline)
+# Fiorify — Catalogue Provenance and Completeness Report (Phase S0/S1 Corrected Baseline)
 
 **Document Version:** 2.0 (Corrected from Actual Repository Files)  
 **Phase:** S1 — Persistence Foundation Baseline  

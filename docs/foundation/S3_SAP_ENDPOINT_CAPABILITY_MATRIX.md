@@ -1,4 +1,4 @@
-# FioriX — Stage S3: SAP Endpoint Capability Matrix (Corrected)
+# Fiorify — Stage S3: SAP Endpoint Capability Matrix (Corrected)
 
 > [!IMPORTANT]
 > This document has been revised to enforce strict status semantics: implementation readiness does **not** equate to live system verification.

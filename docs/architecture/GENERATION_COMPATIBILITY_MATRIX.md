@@ -1,4 +1,4 @@
-# FIORIX — GENERATION COMPATIBILITY MATRIX & PROFILE CONTRACT (SPRINT S0)
+# Fiorify — GENERATION COMPATIBILITY MATRIX & PROFILE CONTRACT (SPRINT S0)
 
 **Document Identifier:** MATRIX-S4H-2023-S0  
 **Target Architecture:** SAP S/4HANA 2023 Compatibility Profile Contract  
@@ -10,7 +10,7 @@
 
 ## 1. Compatibility Profile Contract Design
 
-The FioriX Generation Engine (commencing in GEN-02) requires a deterministic, version-aware **Compatibility Profile** for any target SAP landscape before compiling or outputting application blueprints.
+The Fiorify Generation Engine (commencing in GEN-02) requires a deterministic, version-aware **Compatibility Profile** for any target SAP landscape before compiling or outputting application blueprints.
 
 Generating code against generic "S/4HANA" assumptions leads to broken syntax (e.g., using deprecated DDIC SQL views in ABAP Cloud, emitting OData V4 annotations when only V2 Gateway is configured, or relying on RAP actions that require an uninstalled FPS).
 
@@ -149,9 +149,9 @@ Below is the definitive matrix comparing what is documented in official SAP S/4H
 
 ---
 
-## 3. Evaluation of Connected Landscapes in FioriX Repository
+## 3. Evaluation of Connected Landscapes in Fiorify Repository
 
-The FioriX repository contains configuration for three distinct landscape identifiers across `backend/src/adapters/systemRegistry.js` and `data/systems.csv`:
+The Fiorify repository contains configuration for three distinct landscape identifiers across `backend/src/adapters/systemRegistry.js` and `data/systems.csv`:
 
 ### 3.1 Landscape 1: `S21-200` (Primary Live SAP Target)
 - **Declared Configuration:** SAP S/4HANA 2023 Private Edition, Client 200, Virtual Host `http://kbl_fiori:8000`.

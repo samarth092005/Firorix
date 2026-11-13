@@ -7,10 +7,10 @@
  */
 
 const BASE_URL = 'http://localhost:4004';
-const ADMIN_SECRET = process.env.FIORIX_ADMIN_SECRET || '884b9471a61f40102561c3f766aee554052dfb70b47ca039';
+const ADMIN_SECRET = process.env.Fiorify_ADMIN_SECRET || '884b9471a61f40102561c3f766aee554052dfb70b47ca039';
 const authHeaders = {
   'Content-Type': 'application/json',
-  'x-fiorix-admin-secret': ADMIN_SECRET
+  'x-Fiorify-admin-secret': ADMIN_SECRET
 };
 
 async function run() {

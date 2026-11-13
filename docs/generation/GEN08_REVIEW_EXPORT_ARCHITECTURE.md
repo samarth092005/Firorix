@@ -1,4 +1,4 @@
-# FioriX — GEN-08: Review, Governance, Packaging & Export Architecture
+# Fiorify — GEN-08: Review, Governance, Packaging & Export Architecture
 
 **Milestone:** GEN-08 Review & Export  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
@@ -9,10 +9,10 @@
 
 ## 1. Executive Summary
 
-GEN-08 provides the governance review gates, requirement-to-code traceability engine, and archive packaging subsystem for FioriX projects. Before any code package can be downloaded for developer review in Eclipse ADT, it must satisfy strict static validation rules, verify complete traceability coverage, and be cryptographically fingerprinted with SHA-256 digests.
+GEN-08 provides the governance review gates, requirement-to-code traceability engine, and archive packaging subsystem for Fiorify projects. Before any code package can be downloaded for developer review in Eclipse ADT, it must satisfy strict static validation rules, verify complete traceability coverage, and be cryptographically fingerprinted with SHA-256 digests.
 
 ### Governance Guardrails
-1. **Admin-Only Authority:** Export packaging and readiness gates are strictly limited to authenticated FioriX Administrators.
+1. **Admin-Only Authority:** Export packaging and readiness gates are strictly limited to authenticated Fiorify Administrators.
 2. **Blocking vs Warning Gates:**
    - **Errors:** Hard block (HTTP 400). Cannot be bypassed.
    - **Warnings:** Require explicit acknowledgment (`acknowledgedWarnings: true`).
@@ -71,10 +71,10 @@ The `zipArchiver.js` implements a compliant PKZIP 2.0 archive builder and extrac
 
 ## 4. Package Structure
 
-Exported ZIP archives (`FioriX_<projectId>_<timestamp>.zip`) adhere to the following directory layout:
+Exported ZIP archives (`Fiorify_<projectId>_<timestamp>.zip`) adhere to the following directory layout:
 
 ```
-FioriX_Project_Archive/
+Fiorify_Project_Archive/
 ├── abap/
 │   ├── tables/              # Active and Draft database tables (.tabl.sql)
 │   ├── cds/                 # Interface & Consumption CDS View Entities (.ddls.asddls)
@@ -96,5 +96,5 @@ FioriX_Project_Archive/
 │   ├── ARCHITECTURE.md      # Target landscape & RAP profile specifications
 │   ├── TRACEABILITY.md      # Traceability Matrix markdown report
 │   └── DEVELOPER_HANDOVER.md # Step-by-step ADT activation guide
-└── fiorix-export-manifest.json # Complete SHA-256 cryptographic manifest
+└── Fiorify-export-manifest.json # Complete SHA-256 cryptographic manifest
 ```

@@ -43,5 +43,5 @@ generated-draft-project/
 ## 3. Template Versioning & Draft Storage
 
 - **Semantic Template Versioning:** Generator templates are tagged with semantic versioning (e.g. `TEMPLATE-LROP-V4-2022.1.0`) linked directly to target S/4HANA release profiles.
-- **Draft-Only Status:** All generated outputs are exported as reviewable draft files (ZIP archive). **Under no circumstances does FioriX execute automated CTS transport creation or activation on the S/4HANA host.**
+- **Draft-Only Status:** All generated outputs are exported as reviewable draft files (ZIP archive). **Under no circumstances does Fiorify execute automated CTS transport creation or activation on the S/4HANA host.**
 - **Developer Review Workflow:** Developers import the generated draft files into their isolated S/4HANA DEV sandbox using Eclipse ADT or abapGit, running local syntax checks and ATC variants before any transport request is assigned.

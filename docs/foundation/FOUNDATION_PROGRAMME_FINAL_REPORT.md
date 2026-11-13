@@ -1,6 +1,6 @@
-# FioriX — Foundation Programme S1–S3: Final Master Implementation & Acceptance Report
+# Fiorify — Foundation Programme S1–S3: Final Master Implementation & Acceptance Report
 
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Baseline:** SAP S/4HANA 2023 On-Premise, System S21 (Client 200)  
 **Execution Runtime:** Node.js 20 Native HTTP Backend + React/Vite  
 **Target Cloud Runtime:** SAP BTP Cloud Foundry (`eu30`, space `dev`)  
@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary
 
-The FioriX Foundation Programme (Stages S1–S3) has successfully established enterprise-grade durability, security governance, and SAP connectivity infrastructure for the FioriX platform.
+The Fiorify Foundation Programme (Stages S1–S3) has successfully established enterprise-grade durability, security governance, and SAP connectivity infrastructure for the Fiorify platform.
 
 ### Non-Negotiable Compliance Invariants Maintained:
 1. Native Node.js HTTP runtime preserved without introducing Express, CAP, Prisma, or TypeORM.
@@ -56,7 +56,7 @@ The FioriX Foundation Programme (Stages S1–S3) has successfully established en
 
 ## 4. Responsibility & Action Checklist
 
-### 4.1 What FioriX Can Do Right Now
+### 4.1 What Fiorify Can Do Right Now
 - Run locally with full PostgreSQL persistence, versioned migrations, and rollback support.
 - Authenticate administrators via RFC 7519 JWT verification with RBAC (9 enterprise permissions).
 - Enforce backend multi-tenant isolation across assessments, projects, artifacts, and systems.
@@ -72,12 +72,12 @@ The FioriX Foundation Programme (Stages S1–S3) has successfully established en
 - Map virtual host `kbl_fiori:8000` to internal host `192.168.1.55:8000`.
 - Configure the least-privilege resource allowlist (strictly `/sap/bc/echo`, `/sap/opu/odata/IWFND/CATALOGSERVICE;v=2`, and `/sap/bc/adt/discovery*`; no broad wildcards).
 - Activate SICF nodes `/sap/bc/echo`, `/sap/opu/odata/iwfnd/catalogservice`, and `/sap/bc/adt`.
-- Create technical communication user `BTP_FIORIX_SVC` in client `200` with least-privilege role `Z_FIORIX_DISCOVERY_READONLY` (strictly display authorizations).
+- Create technical communication user `BTP_Fiorify_SVC` in client `200` with least-privilege role `Z_Fiorify_DISCOVERY_READONLY` (strictly display authorizations).
 
 ### 4.3 What Requires a BTP Subaccount Administrator
-- Run `cf create-service connectivity lite fiorix-connectivity` in space `dev`.
-- Update Destination `S21`: replace personal account with `BTP_FIORIX_SVC`, remove `TrustAll=true`, and remove obsolete Web IDE properties.
-- Run `cf create-service xsuaa application fiorix-xsuaa -c xs-security.json` with the canonical FioriX security descriptor.
+- Run `cf create-service connectivity lite Fiorify-connectivity` in space `dev`.
+- Update Destination `S21`: replace personal account with `BTP_Fiorify_SVC`, remove `TrustAll=true`, and remove obsolete Web IDE properties.
+- Run `cf create-service xsuaa application Fiorify-xsuaa -c xs-security.json` with the canonical Fiorify security descriptor.
 - Resolve production database hosting: either add BTP `postgresql-db` service entitlement, provision external PostgreSQL with TLS egress, or authorize the SAP HANA Cloud adapter sprint.
 
 ### 4.4 What Requires a Developer
@@ -108,8 +108,8 @@ All documentation deliverables have been created and committed in [`docs/foundat
    - [`S3_CORRECTED_CAPABILITY_MATRIX.md`](file:///c:/Users/samarth/firorix/docs/foundation/S3_CORRECTED_CAPABILITY_MATRIX.md)
    - [`S3_LEAST_PRIVILEGE_BASIS_MATRIX.md`](file:///c:/Users/samarth/firorix/docs/foundation/S3_LEAST_PRIVILEGE_BASIS_MATRIX.md)
    - [`S3_CONNECTIVITY_SERVICE_PROVISIONING_GUIDE.md`](file:///c:/Users/samarth/firorix/docs/foundation/S3_CONNECTIVITY_SERVICE_PROVISIONING_GUIDE.md)
-   - [`FIORIX_PRODUCTION_DATABASE_DECISION.md`](file:///c:/Users/samarth/firorix/docs/foundation/FIORIX_PRODUCTION_DATABASE_DECISION.md)
-   - [`FIORIX_XSUAA_PRODUCTION_READINESS.md`](file:///c:/Users/samarth/firorix/docs/foundation/FIORIX_XSUAA_PRODUCTION_READINESS.md)
+   - [`Fiorify_PRODUCTION_DATABASE_DECISION.md`](file:///c:/Users/samarth/firorix/docs/foundation/Fiorify_PRODUCTION_DATABASE_DECISION.md)
+   - [`Fiorify_XSUAA_PRODUCTION_READINESS.md`](file:///c:/Users/samarth/firorix/docs/foundation/Fiorify_XSUAA_PRODUCTION_READINESS.md)
    - [`S3_SAP_CONNECTIVITY_ARCHITECTURE.md`](file:///c:/Users/samarth/firorix/docs/foundation/S3_SAP_CONNECTIVITY_ARCHITECTURE.md)
    - [`S3_BTP_DESTINATION_CONFIGURATION.md`](file:///c:/Users/samarth/firorix/docs/foundation/S3_BTP_DESTINATION_CONFIGURATION.md)
    - [`S3_CLOUD_CONNECTOR_BASIS_GUIDE.md`](file:///c:/Users/samarth/firorix/docs/foundation/S3_CLOUD_CONNECTOR_BASIS_GUIDE.md)

@@ -1,7 +1,7 @@
-# FioriX — Stage S3: BTP Cloud Foundry Deployment Configuration Guide
+# Fiorify — Stage S3: BTP Cloud Foundry Deployment Configuration Guide
 
 ## 1. Cloud Foundry Deployment Architecture
-In production deployment on SAP BTP Cloud Foundry, FioriX runs as a native Node.js application bound to SAP BTP backing services.
+In production deployment on SAP BTP Cloud Foundry, Fiorify runs as a native Node.js application bound to SAP BTP backing services.
 
 ### Bound Services:
 1. **`xsuaa`**: Application security and token validation.
@@ -16,7 +16,7 @@ In production deployment on SAP BTP Cloud Foundry, FioriX runs as a native Node.
 ```yaml
 ---
 applications:
-  - name: fiorix-platform
+  - name: Fiorify-platform
     memory: 1024M
     disk_quota: 2048M
     buildpacks:
@@ -24,16 +24,16 @@ applications:
     command: node backend/src/server.js
     env:
       NODE_ENV: production
-      FIORIX_PERSISTENCE: postgres
-      FIORIX_ENFORCE_AUTH: true
+      Fiorify_PERSISTENCE: postgres
+      Fiorify_ENFORCE_AUTH: true
       SAP_DESTINATION_NAME: S21
       SAP_CLIENT: "200"
       SAP_TIMEOUT_MS: "15000"
     services:
-      - fiorix-xsuaa
-      - fiorix-destination
-      - fiorix-connectivity
-      - fiorix-postgres
+      - Fiorify-xsuaa
+      - Fiorify-destination
+      - Fiorify-connectivity
+      - Fiorify-postgres
 ```
 
 ---
@@ -42,16 +42,16 @@ applications:
 
 ```bash
 # 1. Create XSUAA Service Instance
-cf create-service xsuaa application fiorix-xsuaa -c xs-security.json
+cf create-service xsuaa application Fiorify-xsuaa -c xs-security.json
 
 # 2. Create Destination Service Instance (Lite plan)
-cf create-service destination lite fiorix-destination
+cf create-service destination lite Fiorify-destination
 
 # 3. Create Connectivity Service Instance (Lite plan)
-cf create-service connectivity lite fiorix-connectivity
+cf create-service connectivity lite Fiorify-connectivity
 
 # 4. Create PostgreSQL Service Instance (Hyperscaler plan)
-cf create-service postgresql-db standard fiorix-postgres
+cf create-service postgresql-db standard Fiorify-postgres
 ```
 
 ---
@@ -59,8 +59,8 @@ cf create-service postgresql-db standard fiorix-postgres
 ## 4. Verification Steps Post-Deployment
 Once deployed via `cf push`:
 1. **Health Check**:
-   `curl https://<fiorix-route>/api/v1/health`
+   `curl https://<Fiorify-route>/api/v1/health`
    Verify destination and connectivity service bindings report `present: true`.
 2. **Diagnostic Probe**:
-   `curl -H "Authorization: Bearer <ADMIN_JWT>" https://<fiorix-route>/api/v1/systems/S21-200/diagnostics`
+   `curl -H "Authorization: Bearer <ADMIN_JWT>" https://<Fiorify-route>/api/v1/systems/S21-200/diagnostics`
    Confirm `destinationResolution: PASSED` and `networkReachability: PASSED`.

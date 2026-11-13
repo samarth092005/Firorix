@@ -1,6 +1,6 @@
-# FIORIX GENERATION STUDIO — COMPLETE SYSTEM DESIGN SPECIFICATION
+# Fiorify GENERATION STUDIO — COMPLETE SYSTEM DESIGN SPECIFICATION
 **Document ID:** SPEC-GEN-SYS-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Milestone:** Phase 0: System Design (70% Target Scope)  
 **Status:** ARCHITECTURALLY APPROVED — NORMATIVE DESIGN  
 **Date:** November 10, 2026  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Product Objective
 
-The **FioriX Generation Studio** is an integrated, local-first workbench designed to accelerate the modernization of legacy SAP ERP transactions into clean-core SAP Fiori applications for **SAP S/4HANA 2023 On-Premise**.
+The **Fiorify Generation Studio** is an integrated, local-first workbench designed to accelerate the modernization of legacy SAP ERP transactions into clean-core SAP Fiori applications for **SAP S/4HANA 2023 On-Premise**.
 
 ### Target Demonstration Scope (70% Product Target)
 The generation studio supports genuine developer capabilities without requiring live SAP deployment:
@@ -49,7 +49,7 @@ flowchart TB
         S9[9. Environment & Toolchain]
     end
 
-    subgraph Backend["FioriX Backend Subsystem (Node.js Native HTTP)"]
+    subgraph Backend["Fiorify Backend Subsystem (Node.js Native HTTP)"]
         Router[HTTP Request Dispatcher]
         PM[Project Management Service]
         HND[Handoff Resolver Store]

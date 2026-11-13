@@ -59,7 +59,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
           client: '200',
           release: 'SAP S/4HANA 2023 Private Edition',
           components: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
-          targetODataService: '/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV',
+          targetODataService: '/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV',
           gatewayCatalogService: '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection'
         },
         btpDestinationStatus: {
@@ -76,6 +76,12 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
 
   // 1b. Demo Environment Reset (Cleans generation projects, handoffs, test assessments, and artifacts)
   if (req.method === 'POST' && url.pathname === '/api/v1/system/reset-demo') {
+    if (process.env.NODE_ENV === 'production') {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'FORBIDDEN', errorMessage: 'Demo environment reset is disabled in production.' }));
+      return true;
+    }
+    if (!requireRole([USER_ROLES.ADMIN])) return true;
     try {
       let purgedProjectsCount = 0;
 
@@ -210,7 +216,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
 
   // 3. Security Audit Event Trail (S2.4)
   if (req.method === 'GET' && url.pathname === '/api/v1/security/audit') {
-    if (!requirePermission('fiorix.audit.read')) return true;
+    if (!requirePermission('Fiorify.audit.read')) return true;
     try {
       const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
       const events = await securityAuditLogger.listEvents({}, tenantId);
@@ -296,8 +302,8 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
   if (req.method === 'GET' && url.pathname === '/api/v1/gateway-smoke-test') {
     const authHeader = req.headers.authorization;
     const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-    const customHeaderSecret = req.headers['x-fiorix-admin-secret']
-      ? String(req.headers['x-fiorix-admin-secret']).trim()
+    const customHeaderSecret = req.headers['x-Fiorify-admin-secret']
+      ? String(req.headers['x-Fiorify-admin-secret']).trim()
       : null;
     const providedSecret = customHeaderSecret || bearerSecret;
 
@@ -307,7 +313,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
         JSON.stringify({
           success: false,
           statusCode: 'UNAUTHORIZED',
-          errorMessage: 'Access denied: Valid administrative secret required in X-FioriX-Admin-Secret or Authorization Bearer header.'
+          errorMessage: 'Access denied: Valid administrative secret required in X-Fiorify-Admin-Secret or Authorization Bearer header.'
         }, null, 2)
       );
       return true;

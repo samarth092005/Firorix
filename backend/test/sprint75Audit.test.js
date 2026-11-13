@@ -4,7 +4,7 @@ import { OfficialFioriCatalogueAdapter } from '../src/adapters/officialFioriCata
 import { SapGatewayMetadataAdapter } from '../src/adapters/sapGatewayMetadataAdapter.js';
 import { SapTransactionDiscoveryAdapter } from '../src/adapters/sapTransactionDiscoveryAdapter.js';
 
-describe('FioriX Sprint 7.5 — Failure and Cache Behavior Quality Audit', () => {
+describe('Fiorify Sprint 7.5 — Failure and Cache Behavior Quality Audit', () => {
   // Scenario 1: S21 unavailable (network error / connection refused)
   it('handles S21 unavailable by returning CONNECTION_ERROR without falling back to mock or cached data', async () => {
     const mockBtpAdapter = {

@@ -1,5 +1,5 @@
 /**
- * FioriX — Transaction Search Service
+ * Fiorify — Transaction Search Service
  *
  * Dispatches T-Code search and discovery to the central backend API:
  * POST /api/v1/tcode-search
@@ -98,7 +98,7 @@ export class TransactionSearchService {
         overallStatus,
         diagnostics: {
           provenance: [
-            isLiveMode ? `Live SAP Gateway endpoint (system ${systemId})` : 'FioriX Central API Client',
+            isLiveMode ? `Live SAP Gateway endpoint (system ${systemId})` : 'Fiorify Central API Client',
             'Backend connectivity layer'
           ],
           classificationEvidence: [],

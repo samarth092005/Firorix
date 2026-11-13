@@ -1,5 +1,5 @@
 /**
- * FioriX — QA-02: Tenant Isolation & Admin Identity Security Test Suite
+ * Fiorify — QA-02: Tenant Isolation & Admin Identity Security Test Suite
  *
  * Verifies:
  * 1. Tenant spoofing prevention: untrusted clients cannot spoof tenant via x-tenant-id.
@@ -47,9 +47,9 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
   let projectBetaId;
 
   before(async () => {
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
-    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-tenant-sec-'));
+    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-tenant-sec-'));
     const testAssessmentPath = path.join(testDir, 'assessments.json');
     const testProjectsDir = path.join(testDir, 'projects');
     fs.mkdirSync(testProjectsDir, { recursive: true });
@@ -126,7 +126,7 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
   });
 
   after(async () => {
-    delete process.env.FIORIX_ADMIN_SECRET;
+    delete process.env.Fiorify_ADMIN_SECRET;
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
@@ -167,7 +167,7 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
   it('3. Project listing strictly isolates tenants: Tenant Beta listing never includes Tenant Alpha projects', async () => {
     const res = await fetch(`${baseUrl}/api/v1/generation/projects`, {
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         'x-tenant-id': TENANT_BETA
       }
     });
@@ -185,7 +185,7 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
     const patchRes = await fetch(`${baseUrl}/api/v1/generation/projects/${projectAlphaId}`, {
       method: 'PATCH',
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         'x-tenant-id': TENANT_BETA,
         'Content-Type': 'application/json'
       },
@@ -197,7 +197,7 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
     const delRes = await fetch(`${baseUrl}/api/v1/generation/projects/${projectAlphaId}?confirmed=true`, {
       method: 'DELETE',
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         'x-tenant-id': TENANT_BETA
       }
     });
@@ -207,7 +207,7 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
   it('5. Platform Admin with master secret can administer target tenant via x-tenant-id', async () => {
     const res = await fetch(`${baseUrl}/api/v1/generation/projects/${projectAlphaId}`, {
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         'x-tenant-id': TENANT_ALPHA
       }
     });
@@ -229,7 +229,7 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
 
     const res = await fetch(`${baseUrl}/api/v1/generation/projects/${defaultProject.projectId}`, {
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET
       }
     });
 
@@ -243,10 +243,10 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
     const addRes = await fetch(`${baseUrl}/api/v1/generation/projects/${projectAlphaId}/requirements`, {
       method: 'POST',
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         'x-tenant-id': TENANT_ALPHA,
-        'x-fiorix-admin-user': 'USR-AUTH-ADMIN',
-        'x-fiorix-admin-name': 'Verified Enterprise Architect',
+        'x-Fiorify-admin-user': 'USR-AUTH-ADMIN',
+        'x-Fiorify-admin-name': 'Verified Enterprise Architect',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -266,10 +266,10 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
     const confirmRes = await fetch(`${baseUrl}/api/v1/generation/projects/${projectAlphaId}/requirements/${reqId}/confirm`, {
       method: 'POST',
       headers: {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         'x-tenant-id': TENANT_ALPHA,
-        'x-fiorix-admin-user': 'USR-AUTH-ADMIN',
-        'x-fiorix-admin-name': 'Verified Enterprise Architect',
+        'x-Fiorify-admin-user': 'USR-AUTH-ADMIN',
+        'x-Fiorify-admin-name': 'Verified Enterprise Architect',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({

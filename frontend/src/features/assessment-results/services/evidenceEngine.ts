@@ -388,12 +388,12 @@ export class EvidenceEngine {
       finding: assessment.classification === 'STANDARD'
         ? 'Clean Core Tier 1 (Key User Extensibility) or Tier 2 (Developer Extensibility via released BAdIs) applies for standard application enhancement.'
         : 'Clean Core Tier 2 (Custom RAP on ABAP Cloud) required for proprietary custom transaction.',
-      source: 'FioriX Architecture Rules Engine',
+      source: 'Fiorify Architecture Rules Engine',
       sourceTableOrService: 'Clean Core Extensibility Matrix',
       verificationStatus: 'VERIFIED',
       provenance: 'CURATED_DEMO_FIXTURE',
       timestamp: now,
-      systemClient: 'FIORIX-ENGINE',
+      systemClient: 'Fiorify-ENGINE',
       reference: 'SAP-CLEAN-CORE-2023',
       limitation: 'Algorithmic tiering heuristic; requires final sign-off by Enterprise Architecture board.',
       explanation: 'Evaluates customization risk and enforces zero-modification principles.'
@@ -1091,6 +1091,31 @@ export class EvidenceEngine {
       };
     }
 
+    // Outcome E: Missing Catalogue Information / Pending Verification
+    if (assessment.assessmentResult === 'PENDING_VERIFICATION') {
+      return {
+        outcome: 'INVESTIGATE_CATALOGUE_INFO',
+        canonicalOutcome: 'PENDING_VERIFICATION',
+        recommendedAction: `Conduct technical investigation in S21 client 200 to establish whether a specialized Fiori app or classic WebGUI tile is preferred for ${cleanTcode}.`,
+        supportingEvidence: [
+          `Transaction ${cleanTcode} exists in S21 dictionary (program ${assessment.programName}), but catalog matching remains unconfirmed.`,
+          `Candidate application exists in related modules but requires activation confirmation.`
+        ],
+        knownLimitations: [
+          'No verified standard Fiori mapping is currently locked into the baseline.',
+          'Operational dependency on classic transaction persists until verified.'
+        ],
+        outstandingChecks: [
+          `Query S21 Launchpad Content Manager for tiles referencing ${cleanTcode}.`,
+          `Inspect SAP Simplification List for specific migration guidance.`
+        ],
+        requiredNextSteps: [
+          'Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
+          'Determine whether classic WebGUI or Fiori elements reporting fits best.'
+        ]
+      };
+    }
+
     // Outcome D: Custom Transaction / No Standard Match -> AUTHORITATIVE BUILD DECISION
     if (
       assessment.classification === 'CUSTOM' ||
@@ -1119,31 +1144,6 @@ export class EvidenceEngine {
         requiredNextSteps: [
           'Proceed to Stage 4 (Modernization Decision) to review governance checks and approve the BUILD decision.',
           'Transition directly to Generation Studio to model CDS entities, evaluate RAP architecture, and generate ABAP/Fiori deliverables.'
-        ]
-      };
-    }
-
-    // Outcome E: Missing Catalogue Information / Pending Verification
-    if (assessment.assessmentResult === 'PENDING_VERIFICATION') {
-      return {
-        outcome: 'INVESTIGATE_CATALOGUE_INFO',
-        canonicalOutcome: 'PENDING_VERIFICATION',
-        recommendedAction: `Conduct technical investigation in S21 client 200 to establish whether a specialized Fiori app or classic WebGUI tile is preferred for ${cleanTcode}.`,
-        supportingEvidence: [
-          `Transaction ${cleanTcode} exists in S21 dictionary (program ${assessment.programName}), but catalog matching remains unconfirmed.`,
-          `Candidate application exists in related modules but requires activation confirmation.`
-        ],
-        knownLimitations: [
-          'No verified standard Fiori mapping is currently locked into the baseline.',
-          'Operational dependency on classic transaction persists until verified.'
-        ],
-        outstandingChecks: [
-          `Query S21 Launchpad Content Manager for tiles referencing ${cleanTcode}.`,
-          `Inspect SAP Simplification List for specific migration guidance.`
-        ],
-        requiredNextSteps: [
-          'Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
-          'Determine whether classic WebGUI or Fiori elements reporting fits best.'
         ]
       };
     }

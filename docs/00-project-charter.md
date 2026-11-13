@@ -1,6 +1,6 @@
 # Project Charter
 ## Product
-FioriX — SAP Fiori App Discovery, Assessment and Generation.
+Fiorify — SAP Fiori App Discovery, Assessment and Generation.
 
 ## Purpose
 A governed workbench for assessing SAP S/4HANA transactions, discovering suitable standard Fiori apps, comparing confirmed business requirements, recommending Adopt/Extend/Build/Review, and preparing controlled custom app drafts where justified.

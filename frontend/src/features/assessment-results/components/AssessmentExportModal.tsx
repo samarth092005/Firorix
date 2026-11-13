@@ -335,7 +335,7 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                 </h4>
                 <div style={{ fontSize: '12px', display: 'flex', gap: '20px' }}>
                   <div>Status: <strong>{assessment.status || 'PENDING_REVIEW'}</strong></div>
-                  <div>Platform: <strong>FioriX Workbench v1.0.0</strong></div>
+                  <div>Platform: <strong>Fiorify Workbench v1.0.0</strong></div>
                   <div>Handoff Gate: <strong>{recommendation.outcome === 'BUILD' ? 'Eligible for Generation Studio' : 'Standard FLP Activation'}</strong></div>
                 </div>
               </div>
@@ -365,7 +365,7 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
             color: 'var(--fiori-text-secondary, #64748B)'
           }}
         >
-          <span>FioriX Advisory Platform • SAP S/4HANA 2023 Private Edition</span>
+          <span>Fiorify Advisory Platform • SAP S/4HANA 2023 Private Edition</span>
           <button type="button" className="fiori-btn fiori-btn-secondary" onClick={onClose}>
             Close
           </button>

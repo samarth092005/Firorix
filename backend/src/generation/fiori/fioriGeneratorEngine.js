@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-06: SAP Fiori Elements Generator Engine
+ * Fiorify — GEN-06: SAP Fiori Elements Generator Engine
  *
  * Consumes the GEN-05 ABAP/RAP service contracts and synthesizes a complete,
  * reviewable SAP Fiori Elements (OData V4) application project.
@@ -60,7 +60,7 @@ export class FioriGeneratorEngine {
       activityDetails: {
         totalArtifacts: fioriArtifacts.length,
         runId: runRecord.runId,
-        appId: uiConfig.appId || `com.fiorix.custom.${project.projectId.toLowerCase()}`
+        appId: uiConfig.appId || `com.Fiorify.custom.${project.projectId.toLowerCase()}`
       }
     }, userContext);
 

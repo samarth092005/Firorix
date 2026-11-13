@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: ABAP Documentation Generator
+ * Fiorify — GEN-05: ABAP Documentation Generator
  *
  * Generates comprehensive developer documentation detailing the RAP model,
  * artifact catalog, requirement traceability, and step-by-step ADT activation guide.
@@ -64,7 +64,7 @@ export function generateAbapDocumentation(project, architecture, artifactsList) 
   md += `10. **Service Binding (SRVB):** Publish the OData V4 UI service binding.\n\n`;
 
   md += `> [!IMPORTANT]\n`;
-  md += `> FioriX does not perform automatic SAP deployment or activation. All objects must be imported via Git-enabled ABAP (abapGit) or created manually in Eclipse ADT under governance.\n`;
+  md += `> Fiorify does not perform automatic SAP deployment or activation. All objects must be imported via Git-enabled ABAP (abapGit) or created manually in Eclipse ADT under governance.\n`;
 
   return [
     createAbapArtifact({

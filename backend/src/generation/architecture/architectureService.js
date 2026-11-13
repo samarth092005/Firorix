@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: Architecture Service
+ * Fiorify — GEN-05: Architecture Service
  *
  * Provides service-layer methods for evaluating, persisting, and updating
  * RAP architecture decisions on a Generation Project.

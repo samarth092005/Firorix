@@ -1,0 +1,631 @@
+/* ==========================================================================
+   FioriX — Generation Studio Enterprise Stylesheet (SAP Horizon / Clean Core)
+   Eliminates clunky nested box borders; introduces soft surface elevations,
+   sleek segmented phase steppers, and modern code preview canvas cards.
+   ========================================================================== */
+
+:root {
+  --studio-bg: #F8FAFC;
+  --studio-surface: #FFFFFF;
+  --studio-surface-subtle: #F1F5F9;
+  --studio-border: #E2E8F0;
+  --studio-border-hover: #CBD5E1;
+  --studio-text-main: #0F172A;
+  --studio-text-muted: #64748B;
+  --studio-text-subtle: #94A3B8;
+  --studio-primary: #0066FF;
+  --studio-primary-hover: #0052CC;
+  --studio-primary-subtle: #EFF6FF;
+  --studio-success: #10B981;
+  --studio-success-bg: #ECFDF5;
+  --studio-warning: #F59E0B;
+  --studio-warning-bg: #FFFBEB;
+  --studio-danger: #EF4444;
+  --studio-danger-bg: #FEF2F2;
+  --studio-radius-sm: 6px;
+  --studio-radius-md: 10px;
+  --studio-radius-lg: 14px;
+  --studio-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --studio-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --studio-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+/* 1. Main Studio Layout */
+.studio-root {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 56px);
+  background-color: var(--studio-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--studio-text-main);
+}
+
+/* 2. Studio Header */
+.studio-header {
+  background-color: var(--studio-surface);
+  border-bottom: 1px solid var(--studio-border);
+  padding: 16px 28px;
+  box-shadow: var(--studio-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.studio-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.studio-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.studio-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--studio-text-muted);
+  background-color: var(--studio-surface-subtle);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.studio-btn-back:hover {
+  background-color: #E2E8F0;
+  color: var(--studio-text-main);
+}
+
+.studio-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--studio-text-main);
+  letter-spacing: -0.01em;
+}
+
+.studio-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.studio-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--studio-text-muted);
+  background-color: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.studio-btn-icon:hover {
+  background-color: var(--studio-surface-subtle);
+  border-color: var(--studio-border-hover);
+  color: var(--studio-text-main);
+}
+
+.studio-header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.studio-project-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.studio-project-heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--studio-text-main);
+  letter-spacing: -0.02em;
+}
+
+.studio-meta-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.studio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  background-color: var(--studio-surface-subtle);
+  color: var(--studio-text-muted);
+  border: 1px solid var(--studio-border);
+}
+
+.studio-chip.primary {
+  background-color: var(--studio-primary-subtle);
+  color: var(--studio-primary);
+  border-color: #BFDBFE;
+}
+
+.studio-chip.success {
+  background-color: var(--studio-success-bg);
+  color: var(--studio-success);
+  border-color: #A7F3D0;
+}
+
+/* 3. 9-Phase Stepper Navigation Bar */
+.studio-navigation-bar {
+  background-color: var(--studio-surface);
+  border-bottom: 1px solid var(--studio-border);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+.studio-navigation-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.studio-navigation-bar::-webkit-scrollbar-thumb {
+  background: var(--studio-border);
+  border-radius: 2px;
+}
+
+.studio-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  color: var(--studio-text-muted);
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  outline: none;
+}
+
+.studio-nav-btn:hover:not(:disabled) {
+  color: var(--studio-text-main);
+  background-color: var(--studio-surface-subtle);
+  border-radius: 6px 6px 0 0;
+}
+
+.studio-nav-btn.active {
+  color: var(--studio-primary);
+  font-weight: 700;
+  border-bottom-color: var(--studio-primary);
+}
+
+.studio-nav-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.studio-nav-tag {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 12px;
+  background-color: var(--studio-surface-subtle);
+  color: var(--studio-text-muted);
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.studio-nav-btn.active .studio-nav-tag {
+  background-color: var(--studio-primary-subtle);
+  color: var(--studio-primary);
+}
+
+.studio-nav-btn.completed .studio-nav-tag {
+  background-color: var(--studio-success-bg);
+  color: var(--studio-success);
+}
+
+/* 4. Projects Dashboard */
+.dashboard-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+}
+
+.dashboard-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  background-color: var(--studio-surface);
+  padding: 16px 20px;
+  border-radius: var(--studio-radius-md);
+  border: 1px solid var(--studio-border);
+  box-shadow: var(--studio-shadow-sm);
+}
+
+.dashboard-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  max-width: 420px;
+}
+
+.dashboard-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--studio-text-subtle);
+  pointer-events: none;
+}
+
+.dashboard-search-input {
+  width: 100%;
+  height: 38px;
+  padding-left: 38px;
+  padding-right: 12px;
+  font-size: 13px;
+  color: var(--studio-text-main);
+  background-color: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-sm);
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.dashboard-search-input:focus {
+  border-color: var(--studio-primary);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+}
+
+.dashboard-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-select {
+  height: 38px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: var(--studio-text-main);
+  background-color: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-sm);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dashboard-select:focus {
+  border-color: var(--studio-primary);
+}
+
+.dashboard-btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  background-color: var(--studio-primary);
+  border: none;
+  border-radius: var(--studio-radius-sm);
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 102, 255, 0.2);
+  transition: all 0.15s ease;
+}
+
+.dashboard-btn-create:hover {
+  background-color: var(--studio-primary-hover);
+  box-shadow: 0 4px 8px rgba(0, 102, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* 5. Modern Project Grid & Elevated Cards */
+.project-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  background-color: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-md);
+  box-shadow: var(--studio-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.project-card:hover {
+  border-color: #BFDBFE;
+  box-shadow: var(--studio-shadow-md);
+  transform: translateY(-2px);
+}
+
+.project-card-header {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.project-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--studio-text-main);
+  line-height: 1.3;
+}
+
+.project-card-code {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--studio-text-subtle);
+}
+
+.project-card-body {
+  padding: 16px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.project-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--studio-text-muted);
+}
+
+/* 6. Segmented Phase Progress Bar */
+.progress-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.progress-label {
+  color: var(--studio-text-muted);
+}
+
+.progress-fraction {
+  color: var(--studio-text-main);
+  font-family: monospace;
+}
+
+.progress-track {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+  width: 100%;
+  background-color: transparent;
+}
+
+.progress-segment {
+  flex: 1;
+  height: 100%;
+  border-radius: 2px;
+  background-color: #E2E8F0;
+  transition: background-color 0.3s ease;
+}
+
+.progress-segment.completed {
+  background-color: var(--studio-success);
+}
+
+.progress-segment.active {
+  background-color: var(--studio-primary);
+}
+
+/* 7. Card Footer & Action Buttons */
+.project-card-footer {
+  padding: 12px 20px;
+  background-color: #FAFBFD;
+  border-top: 1px solid #F1F5F9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-open-workspace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--studio-primary);
+  background-color: var(--studio-primary-subtle);
+  border: 1px solid #BFDBFE;
+  border-radius: var(--studio-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-open-workspace:hover {
+  background-color: var(--studio-primary);
+  color: #FFFFFF;
+}
+
+.project-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-card-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--studio-radius-sm);
+  color: var(--studio-text-subtle);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-card-icon:hover {
+  background-color: var(--studio-surface-subtle);
+  color: var(--studio-text-main);
+  border-color: var(--studio-border);
+}
+
+.btn-card-icon.danger:hover {
+  background-color: var(--studio-danger-bg);
+  color: var(--studio-danger);
+  border-color: #FCA5A5;
+}
+
+/* 8. Modern Workspace Canvases (Phases 2 to 8) */
+.workspace-canvas {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+}
+
+.canvas-header-card {
+  background-color: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-md);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--studio-shadow-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.canvas-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.canvas-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: var(--studio-primary-subtle);
+  color: var(--studio-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.canvas-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--studio-text-main);
+}
+
+.canvas-desc {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--studio-text-muted);
+}
+
+.canvas-surface-card {
+  background-color: var(--studio-surface);
+  border: 1px solid var(--studio-border);
+  border-radius: var(--studio-radius-md);
+  box-shadow: var(--studio-shadow-sm);
+  overflow: hidden;
+}
+
+/* 9. Code Viewer IDE-Grade Box */
+.code-viewer-deck {
+  background-color: #0F172A;
+  border-radius: var(--studio-radius-md);
+  overflow: hidden;
+  box-shadow: var(--studio-shadow-md);
+  border: 1px solid #1E293B;
+}
+
+.code-viewer-bar {
+  background-color: #1E293B;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #334155;
+}
+
+.code-viewer-title {
+  font-size: 12px;
+  font-family: monospace;
+  color: #94A3B8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-viewer-pre {
+  margin: 0;
+  padding: 20px;
+  color: #E2E8F0;
+  font-family: Consolas, Monaco, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: auto;
+  max-height: 600px;
+}

@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Requirements Data Contract & Schemas (GEN-03)
+ * Fiorify — Generation Studio Requirements Data Contract & Schemas (GEN-03)
  *
  * Implements canonical schemas, enumerations, and validation for
  * business and technical requirements in Generation Studio.

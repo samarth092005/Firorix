@@ -1,10 +1,10 @@
-# FioriX Master Specification & System Index
+# Fiorify Master Specification & System Index
 
 **Version:** 2.0.0  
 **Phase:** Architecture Finalisation & Implementation Roadmap  
 **Date:** November 2026  
 
-This is the master index for the FioriX platform definition and architecture pack. Detailed specifications reside in the `docs/` directory.
+This is the master index for the Fiorify platform definition and architecture pack. Detailed specifications reside in the `docs/` directory.
 
 ---
 
@@ -58,7 +58,7 @@ This is the master index for the FioriX platform definition and architecture pac
 | [docs/14-database-data-model.md](docs/14-database-data-model.md) | Database & Data Model | Relational CAP CDS model covering 28+ normalized entities |
 | [docs/15-api-contracts.md](docs/15-api-contracts.md) | API & Service Contracts | CAP OData V4 services, actions, and async job protocols |
 | [docs/16-ui-ux-specification.md](docs/16-ui-ux-specification.md) | UI/UX Specification | 6-area layout, 9-tab Assessment Workspace, and design tokens |
-| [docs/17-security-governance.md](docs/17-security-governance.md) | Security & Governance | Least-privilege role `Z_FIORIX_DISCOVERY_RO`, XSUAA, and audit |
+| [docs/17-security-governance.md](docs/17-security-governance.md) | Security & Governance | Least-privilege role `Z_Fiorify_DISCOVERY_RO`, XSUAA, and audit |
 | [docs/18-validation-testing.md](docs/18-validation-testing.md) | Validation & Testing | Multi-layer test strategy and Clean Core Tier 1 checks |
 | [docs/19-rnd-plan.md](docs/19-rnd-plan.md) | R&D Plan | Feasibility spikes for ADT, FAL catalog, and generation |
 | [docs/20-sprint-plan.md](docs/20-sprint-plan.md) | Detailed Sprint Plan | 16-sprint / 32-week execution schedule with dependencies |

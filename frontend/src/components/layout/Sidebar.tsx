@@ -221,11 +221,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 e.currentTarget.style.backgroundColor = 'transparent';
                 e.currentTarget.style.color = 'var(--fiori-text-muted, #94A3B8)';
               }}
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
-              {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-              {!isCollapsed && <span>Collapse Sidebar</span>}
             </button>
           </div>
         )}

@@ -1,5 +1,5 @@
 /**
- * FioriX — Enterprise Assessment & Modernization Planning Service (ENTERPRISE-01)
+ * Fiorify — Enterprise Assessment & Modernization Planning Service (ENTERPRISE-01)
  *
  * Implements:
  * - Multi-system assessment isolation and multi-level hierarchy (Transaction, Process, System).
@@ -331,7 +331,7 @@ export class EnterpriseService {
 
     return {
       reportType: String(reportType).toUpperCase(),
-      title: `FioriX Enterprise SAP Modernization Report: ${reportType}`,
+      title: `Fiorify Enterprise SAP Modernization Report: ${reportType}`,
       generatedAt: new Date().toISOString(),
       systemScope: filters.systemId || 'ALL_CONFIGURED_SYSTEMS',
       executiveSummary: {
@@ -364,7 +364,7 @@ export class EnterpriseService {
     const p = report.portfolio || {};
     const e = report.executiveSummary || {};
     return [
-      `# FioriX Enterprise Modernization Report — ${report.title || report.reportType}`,
+      `# Fiorify Enterprise Modernization Report — ${report.title || report.reportType}`,
       `**Generated At:** ${report.generatedAt}`,
       `**System Scope:** ${report.systemScope}`,
       '',
@@ -386,7 +386,7 @@ export class EnterpriseService {
       ...(report.records || []).map(r => `| ${r.id} | ${r.tcode} | ${r.systemId} | ${r.lifecycleStatus} | ${r.outcome} | ${r.fitGapScore}% | ${r.candidateAppId} |`),
       '',
       '---',
-      '*FioriX — Enterprise Architecture & SAP Modernization Intelligence Platform*'
+      '*Fiorify — Enterprise Architecture & SAP Modernization Intelligence Platform*'
     ].join('\n');
   }
 }

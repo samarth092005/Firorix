@@ -1,5 +1,5 @@
 /**
- * FioriX — BTP Destination Adapter
+ * Fiorify — BTP Destination Adapter
  *
  * Implements SAP BTP Destination and Connectivity service integration
  * using the official SAP Cloud SDK packages:
@@ -78,7 +78,7 @@ export function sanitizeHeaders(headers = {}) {
     'client_secret',
     'password',
     'token',
-    'x-fiorix-admin-secret'
+    'x-Fiorify-admin-secret'
   ];
 
   for (const [key, value] of Object.entries(headers)) {
@@ -123,7 +123,7 @@ export class BtpDestinationAdapter {
     this.destinationName = options.destinationName || process.env.SAP_DESTINATION_NAME || 'S21';
     this.sapClient = options.sapClient || process.env.SAP_CLIENT || '200';
     this.timeoutMs = Number(options.timeoutMs || process.env.SAP_TIMEOUT_MS) || 1500;
-    this.adminSecret = options.adminSecret || process.env.FIORIX_ADMIN_SECRET || '';
+    this.adminSecret = options.adminSecret || process.env.Fiorify_ADMIN_SECRET || '';
 
     // Fast circuit-breaker for unreachable SAP host to avoid 10-20s freezes
     this.lastFailureTime = 0;
@@ -142,7 +142,7 @@ export class BtpDestinationAdapter {
    * Timing-safe verification of the server-side administrative secret.
    */
   verifyAdminSecret(providedSecret) {
-    const configuredSecret = this.adminSecret || process.env.FIORIX_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : '');
+    const configuredSecret = this.adminSecret || process.env.Fiorify_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : '');
 
     if (!configuredSecret || typeof configuredSecret !== 'string') {
       return false;

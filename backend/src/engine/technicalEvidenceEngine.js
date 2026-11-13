@@ -1,5 +1,5 @@
 /**
- * FioriX — Technical Evidence Collection Engine (DISC-02)
+ * Fiorify — Technical Evidence Collection Engine (DISC-02)
  *
  * Collects, normalizes, and classifies technical evidence from multiple SAP sources:
  * 1. Transaction Repository Evidence (TSTC, TSTCT, TADIR, program, package, type)

@@ -1,9 +1,9 @@
-# FIORIX — GEN-05 & GEN-06 IMPLEMENTATION BASELINE REPORT
+# Fiorify — GEN-05 & GEN-06 IMPLEMENTATION BASELINE REPORT
 ## Pre-Implementation Audit, Reusability Analysis & Architecture Readiness
 
 **Document Reference:** `docs/generation/GEN05_GEN06_IMPLEMENTATION_BASELINE.md`  
 **Execution Date:** 2026-11-11  
-**Project:** FioriX — SAP S/4HANA Modernization Platform  
+**Project:** Fiorify — SAP S/4HANA Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (S21, Client 200)  
 **Programme:** Generation Studio — GEN-05 (RAP Backend Generator) & GEN-06 (Fiori Elements Generator)
 
@@ -11,7 +11,7 @@
 
 ## 1. Executive Baseline Summary
 
-This baseline report captures the operational, structural, and test-verified state of the FioriX platform immediately prior to the implementation of milestones **GEN-05** and **GEN-06**. It details the existing assets from GEN-01 through GEN-04 and QA-02, identifies gaps, specifies exact test command exit codes, and establishes the architectural baseline for the automated RAP and Fiori Elements generation pipeline.
+This baseline report captures the operational, structural, and test-verified state of the Fiorify platform immediately prior to the implementation of milestones **GEN-05** and **GEN-06**. It details the existing assets from GEN-01 through GEN-04 and QA-02, identifies gaps, specifies exact test command exit codes, and establishes the architectural baseline for the automated RAP and Fiori Elements generation pipeline.
 
 ---
 
@@ -38,7 +38,7 @@ The GEN-05/GEN-06 pipeline directly consumes and extends the following verified 
 5. **`backend/src/generation/datamodel/cdsReuseRegistry.js`:**
    - Pre-indexed standard SAP S/4HANA C1 released CDS view entities (`I_Currency`, `I_UnitOfMeasure`, `I_Country`, `I_Customer`, `I_Supplier`, etc.).
 6. **`backend/src/infrastructure/security/` & `server.js`:**
-   - Administrative permission checks (`fiorix.generation.manage`).
+   - Administrative permission checks (`Fiorify.generation.manage`).
    - Anti-spoofing tenant gateway assertions and server-derived actor identity.
 
 ### 2.2 Frontend Generation Studio

@@ -1,5 +1,5 @@
 /**
- * FioriX — Canonical Fiori Catalogue Service (CAT-02)
+ * Fiorify — Canonical Fiori Catalogue Service (CAT-02)
  *
  * Connects frontend views to the canonical backend catalogue endpoints via apiClient:
  * - GET /api/v1/fiori-catalogue/search

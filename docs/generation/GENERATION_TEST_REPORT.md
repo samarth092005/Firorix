@@ -1,4 +1,4 @@
-# FIORIX GENERATION STUDIO — MASTER TEST REPORT
+# Fiorify GENERATION STUDIO — MASTER TEST REPORT
 ## Verification Report for Milestones GEN-02, GEN-03 & GEN-04
 
 **Date:** November 11, 2026  

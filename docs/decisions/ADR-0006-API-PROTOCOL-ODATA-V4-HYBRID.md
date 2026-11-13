@@ -17,7 +17,7 @@ Earlier documentation exhibited a tension between standard CAP conventions (ODat
    ```json
    {
      "error": {
-       "code": "FIORIX_AUTH_DENIED",
+       "code": "Fiorify_AUTH_DENIED",
        "message": "Technical user lacks S_DEVELOP display authorization.",
        "target": "programs/SAPMV45A",
        "details": []

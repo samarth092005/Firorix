@@ -7,7 +7,7 @@ import { createServer } from '../src/server.js';
 import { FALIngestionService } from '../src/tools/ingestFAL.js';
 import { OfficialFioriCatalogueAdapter } from '../src/adapters/officialFioriCatalogueAdapter.js';
 
-describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion Tests', () => {
+describe('Fiorify CAT-01 — Official SAP Fiori Apps Reference Library Ingestion Tests', () => {
   let server;
   let baseUrl;
   let tempDir;
@@ -15,7 +15,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
   let tempStatusPath;
   let falIngestionService;
   let officialCatalogueAdapter;
-  const adminSecret = 'test-fiorix-admin-cat01';
+  const adminSecret = 'test-Fiorify-admin-cat01';
 
   const initialCatalogueData = [
     {
@@ -35,7 +35,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
   ];
 
   before(async () => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-cat01-test-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-cat01-test-'));
     tempCachePath = path.join(tempDir, 'fiori_app_catalog_cache.json');
     tempStatusPath = path.join(tempDir, 'fiori_app_catalog_status.json');
 
@@ -64,7 +64,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
     });
 
     // Set admin secret in environment for test authorization
-    process.env.FIORIX_ADMIN_SECRET = adminSecret;
+    process.env.Fiorify_ADMIN_SECRET = adminSecret;
 
     await new Promise((resolve) => {
       server.listen(0, () => {
@@ -76,7 +76,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
   });
 
   after(async () => {
-    delete process.env.FIORIX_ADMIN_SECRET;
+    delete process.env.Fiorify_ADMIN_SECRET;
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
@@ -101,7 +101,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'text/csv',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: csvContent
     });
@@ -141,7 +141,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: JSON.stringify(jsonRecords)
     });
@@ -170,7 +170,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'text/csv',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: csvWithMissingId
     });
@@ -190,7 +190,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: '{"brokenJson": [1, 2, '
     });
@@ -203,7 +203,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'text/csv',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: '   '
     });
@@ -222,7 +222,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'text/csv',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: batchWithDups
     });
@@ -244,7 +244,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'text/csv',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: batchWithConflict
     });
@@ -269,7 +269,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: JSON.stringify(minimalRecord)
     });
@@ -297,7 +297,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: JSON.stringify(customProvenanceRecord)
     });
@@ -330,7 +330,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: JSON.stringify(repeatData)
     });
@@ -353,7 +353,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': adminSecret
+        'X-Fiorify-Admin-Secret': adminSecret
       },
       body: 'INVALID_CORRUPT_STRING'
     });
@@ -371,7 +371,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
         method: 'POST',
         headers: {
           'Content-Type': 'text/csv',
-          'X-FioriX-Admin-Secret': adminSecret
+          'X-Fiorify-Admin-Secret': adminSecret
         },
         body: hugePayload
       });
@@ -388,7 +388,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': 'wrong-unauthorized-secret'
+        'X-Fiorify-Admin-Secret': 'wrong-unauthorized-secret'
       },
       body: JSON.stringify([{ appId: 'F9999' }])
     });
@@ -415,7 +415,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
   // 14. Existing catalogue search regression
   it('14. verifies existing catalogue search endpoint continues to work', async () => {
     const res = await fetch(`${baseUrl}/api/v1/fiori-catalogue/search?query=Outgoing`, {
-      headers: { 'X-FioriX-Admin-Secret': adminSecret }
+      headers: { 'X-Fiorify-Admin-Secret': adminSecret }
     });
     assert.strictEqual(res.status, 200);
     const body = await res.json();
@@ -428,7 +428,7 @@ describe('FioriX CAT-01 — Official SAP Fiori Apps Reference Library Ingestion 
   // 15. Existing application detail regression
   it('15. verifies existing application detail endpoint retrieves imported apps by ID', async () => {
     const res = await fetch(`${baseUrl}/api/v1/fiori-catalogue/apps/F0773`, {
-      headers: { 'X-FioriX-Admin-Secret': adminSecret }
+      headers: { 'X-Fiorify-Admin-Secret': adminSecret }
     });
     assert.strictEqual(res.status, 200);
     const body = await res.json();

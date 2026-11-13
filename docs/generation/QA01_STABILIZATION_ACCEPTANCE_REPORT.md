@@ -1,10 +1,10 @@
-# FIORIX — GEN-02 TO GEN-04 QA-01: STABILIZATION & FINAL ACCEPTANCE REPORT
+# Fiorify — GEN-02 TO GEN-04 QA-01: STABILIZATION & FINAL ACCEPTANCE REPORT
 
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target SAP System:** SAP S/4HANA 2023 On-Premise (S21, Client 200)  
 **Milestone Scope:** GEN-02 (Project Foundation) + GEN-03 (Requirements Designer) + GEN-04 (Data Model Designer)  
 **Verification Date:** 2026-11-11  
-**Operating Mode:** Admin-Only (`x-fiorix-admin-secret` / `fiorix.generation.manage`)  
+**Operating Mode:** Admin-Only (`x-Fiorify-admin-secret` / `Fiorify.generation.manage`)  
 **Final Status:** **ACCEPTED WITH LIMITATIONS**
 
 ---
@@ -29,12 +29,12 @@ The combined GEN-02 to GEN-04 implementation has undergone complete end-to-end s
 | :--- | :--- | :--- | :--- | :--- |
 | **QA-F01** | Test Suite | `s1PersistenceFoundation.test.js`: Hash chain verification failed with `expected: 11, actual: 12` because `assessments.json` contains 12 assessments. | Medium | **RESOLVED**: Replaced hardcoded count with dynamic `rec.stores.assessments.sourceCount`. |
 | **QA-F02** | Multi-Tenancy / Auth | `server.js` `resolveUser()` hardcoded `tenantId: 'DEFAULT-TENANT-S21'` for admin and consultant, overriding test tenant `TENANT-S1-LIVE-TEST` and header `x-tenant-id`. | High | **RESOLVED**: Updated `server.js` to honor request header `x-tenant-id` and server options `defaultTenantId`. |
-| **QA-F03** | Test Isolation | `s1LivePersistenceIntegration.test.js` failed 4 tests due to missing `process.env.FIORIX_ADMIN_SECRET` during the run. | High | **RESOLVED**: Explicitly configured and restored `process.env.FIORIX_ADMIN_SECRET` in test harness. |
+| **QA-F03** | Test Isolation | `s1LivePersistenceIntegration.test.js` failed 4 tests due to missing `process.env.Fiorify_ADMIN_SECRET` during the run. | High | **RESOLVED**: Explicitly configured and restored `process.env.Fiorify_ADMIN_SECRET` in test harness. |
 | **QA-F04** | API Parity | Route mismatch: frontend and tests used both `/data-model` and `/datamodel` intermittently; route only accepted `PATCH` while some clients used `PUT`. | Medium | **RESOLVED**: Updated regex routes in `generationRoutes.js` to match `/(?:data-model\|datamodel)/` and accept both `PUT` and `PATCH`. |
 | **QA-F05** | API Parity | `POST /action` endpoint on requirements returned 404 because route only recognized `/confirm`. | Medium | **RESOLVED**: Allowed `/(?:confirm\|action)$/` in `generationRoutes.js`. |
 | **QA-F06** | Access Control | `GET /api/v1/generation/projects` and project sub-routes lacked explicit `requirePermission(PERMISSIONS.GENERATION_MANAGE)` check in `server.js`. | High | **RESOLVED**: Added permission guard to all generation project routes. |
 | **QA-F07** | Governance Guardrail | `validateAssessmentForBuildHandoff` allowed bypassing architectural approval if caller role was `ADMIN`. | High | **RESOLVED**: Fixed `generationProjectService.js` to strictly enforce that the assessment itself must have received formal Enterprise Architect approval. |
-| **QA-F08** | Test Suite | `generationStudioPhase1.test.js` tests failed due to missing S2 admin credentials in test requests. | Medium | **RESOLVED**: Injected test admin secret and wrapped test fetch requests with `x-fiorix-admin-secret`. |
+| **QA-F08** | Test Suite | `generationStudioPhase1.test.js` tests failed due to missing S2 admin credentials in test requests. | Medium | **RESOLVED**: Injected test admin secret and wrapped test fetch requests with `x-Fiorify-admin-secret`. |
 | **QA-F09** | CDS Provenance | Standard SAP CDS views were presented as verified without live S21 reachability. | Medium | **RESOLVED**: Marked all 8 standard views in `cdsReuseRegistry.js` as `PENDING_S21_LIVE_CONNECTIVITY` with `isLiveVerified: false`. |
 
 ---
@@ -94,20 +94,20 @@ The end-to-end interactive workflow was validated against the running server ins
 
 | Method | Canonical Route | Alias / Supported Form | Status | Permission Guard |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/generation/projects` | — | 200 OK | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects` | — | 201 Created | `fiorix.generation.manage` |
-| `GET` | `/api/v1/generation/projects/:id` | — | 200 OK | `fiorix.generation.manage` |
-| `PATCH` | `/api/v1/generation/projects/:id` | `PUT` | 200 OK | `fiorix.generation.manage` |
-| `DELETE` | `/api/v1/generation/projects/:id` | — | 200 OK | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects/:id/requirements/import-assessment` | — | 200 OK | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects/:id/requirements` | — | 201 Created | `fiorix.generation.manage` |
-| `PUT` | `/api/v1/generation/projects/:id/requirements/:reqId` | `PATCH` | 200 OK | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects/:id/requirements/:reqId/confirm` | `.../action` | 200 OK | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects/:id/data-model/entities` | `/datamodel/entities` | 201 Created | `fiorix.generation.manage` |
-| `PUT` | `/api/v1/generation/projects/:id/data-model/entities/:entId` | `/datamodel/...`, `PATCH` | 200 OK | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects/:id/data-model/relationships` | `/datamodel/relationships` | 201 Created | `fiorix.generation.manage` |
-| `POST` | `/api/v1/generation/projects/:id/data-model/validate` | `/datamodel/validate` | 200 OK | `fiorix.generation.manage` |
-| `GET` | `/api/v1/generation/cds-views` | — | 200 OK | `fiorix.generation.manage` |
+| `GET` | `/api/v1/generation/projects` | — | 200 OK | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects` | — | 201 Created | `Fiorify.generation.manage` |
+| `GET` | `/api/v1/generation/projects/:id` | — | 200 OK | `Fiorify.generation.manage` |
+| `PATCH` | `/api/v1/generation/projects/:id` | `PUT` | 200 OK | `Fiorify.generation.manage` |
+| `DELETE` | `/api/v1/generation/projects/:id` | — | 200 OK | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects/:id/requirements/import-assessment` | — | 200 OK | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects/:id/requirements` | — | 201 Created | `Fiorify.generation.manage` |
+| `PUT` | `/api/v1/generation/projects/:id/requirements/:reqId` | `PATCH` | 200 OK | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects/:id/requirements/:reqId/confirm` | `.../action` | 200 OK | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects/:id/data-model/entities` | `/datamodel/entities` | 201 Created | `Fiorify.generation.manage` |
+| `PUT` | `/api/v1/generation/projects/:id/data-model/entities/:entId` | `/datamodel/...`, `PATCH` | 200 OK | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects/:id/data-model/relationships` | `/datamodel/relationships` | 201 Created | `Fiorify.generation.manage` |
+| `POST` | `/api/v1/generation/projects/:id/data-model/validate` | `/datamodel/validate` | 200 OK | `Fiorify.generation.manage` |
+| `GET` | `/api/v1/generation/cds-views` | — | 200 OK | `Fiorify.generation.manage` |
 
 ---
 
@@ -136,7 +136,7 @@ All standard SAP CDS views available in the Data Model Designer have been classi
 - **Authoritative Source of Truth:** Local atomic JSON store is the authoritative source for the running development server.
 
 ### Migration Roadmap to PostgreSQL
-1. When `FIORIX_PERSISTENCE=postgres` is enabled in staging/production, `GenerationProjectRepository` handles direct relational mapping.
+1. When `Fiorify_PERSISTENCE=postgres` is enabled in staging/production, `GenerationProjectRepository` handles direct relational mapping.
 2. The migration tool `scripts/migrateStores.js` will migrate all existing JSON projects into PostgreSQL without data loss.
 3. Dual-writing was avoided by design to prevent out-of-sync partial state corruption.
 
@@ -154,7 +154,7 @@ All standard SAP CDS views available in the Data Model Designer have been classi
 
 ## 9. Security & Access Boundary
 
-- **Admin Secret Header:** `x-fiorix-admin-secret` required on all `/api/v1/generation/*` routes. Unauthenticated requests return HTTP 403 Forbidden.
+- **Admin Secret Header:** `x-Fiorify-admin-secret` required on all `/api/v1/generation/*` routes. Unauthenticated requests return HTTP 403 Forbidden.
 - **Actor Provenance:** Server-authoritative resolution (`USR-ADMIN-01`, role `ADMIN`). Client-supplied actor fields are ignored during audit event generation.
 - **Client Artifacts:** No admin secrets or system passwords exist in the frontend client bundle or localStorage.
 

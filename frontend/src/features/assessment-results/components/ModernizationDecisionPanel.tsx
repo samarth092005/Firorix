@@ -347,8 +347,8 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
       const handoffId = createdHandoff?.handoffId || `HND-${Date.now()}`;
 
       try {
-        localStorage.setItem(`fiorix_handoff_${handoffId}`, JSON.stringify(createdHandoff));
-        sessionStorage.setItem('fiorix_current_handoff_id', handoffId);
+        localStorage.setItem(`Fiorify_handoff_${handoffId}`, JSON.stringify(createdHandoff));
+        sessionStorage.setItem('Fiorify_current_handoff_id', handoffId);
       } catch {
         // non-fatal
       }
@@ -761,7 +761,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
               </h4>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#FEF9F1', border: '1px solid #FFDCB0', color: '#A04E00', fontSize: '11px', fontWeight: 600 }}>
                 <ShieldAlert size={13} />
-                No SAP Writes Performed by FioriX
+                No SAP Writes Performed by Fiorify
               </span>
             </div>
 
@@ -1085,7 +1085,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
               <ShieldAlert size={18} style={{ flexShrink: 0, marginTop: '2px', color: '#C25E00' }} />
               <div>
                 <strong>Clean Core Standard-First Policy Active:</strong> Official standard SAP Fiori candidates exist for transaction <strong>{assessment.tcode}</strong>.
-                FioriX Clean Core governance strictly mandates adopting standard applications before custom code is justified.
+                Fiorify Clean Core governance strictly mandates adopting standard applications before custom code is justified.
                 Building a custom application is restricted and requires an explicit Lead Enterprise Architect override with signed justification.
               </div>
             </div>

@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: RAP Service Definition Generator
+ * Fiorify — GEN-05: RAP Service Definition Generator
  *
  * Synthesizes the ABAP RAP Service Definition (SRVD) exposing only projection views (ZC_*).
  */

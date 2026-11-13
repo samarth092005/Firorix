@@ -1,5 +1,5 @@
 /**
- * FioriX — Stage S3: SAP S/4HANA Connectivity Test Suite
+ * Fiorify — Stage S3: SAP S/4HANA Connectivity Test Suite
  *
  * Verifies deployed-backend connectivity capabilities to SAP S/4HANA 2023 on System S21:
  *  1. BTP Destination resolution & configuration validation
@@ -24,7 +24,7 @@ import {
 } from '../src/infrastructure/connectivity/sapErrorTaxonomy.js';
 import { BtpDestinationAdapter } from '../src/adapters/btpDestinationAdapter.js';
 
-describe('FioriX S3 SAP Connectivity — S/4HANA 2023 / S21 Integration', () => {
+describe('Fiorify S3 SAP Connectivity — S/4HANA 2023 / S21 Integration', () => {
 
   // 1. Read-Only Boundary Enforcement
   it('1. Rejects write operations (POST, PUT, DELETE, PATCH) with WRITE_OPERATION_BLOCKED error', async () => {

@@ -7,15 +7,15 @@
 ---
 
 ## 1. Context and Problem Statement
-FioriX must interrogate on-premise S/4HANA systems to extract transaction headers, programs, packages, CDS views, Gateway services, and SU24 authorization profiles. The integration path must operate across enterprise firewalls without introducing security vulnerabilities, exposing arbitrary RFCs, or modifying SAP repository objects.
+Fiorify must interrogate on-premise S/4HANA systems to extract transaction headers, programs, packages, CDS views, Gateway services, and SU24 authorization profiles. The integration path must operate across enterprise firewalls without introducing security vulnerabilities, exposing arbitrary RFCs, or modifying SAP repository objects.
 
 ## 2. Decision
 1. **Sanctioned Connectivity Route:** All communication from BTP to S/4HANA must strictly follow:
    $$\text{CAP Backend} \longrightarrow \text{BTP Destination Service} \longrightarrow \text{BTP Connectivity Service} \longrightarrow \text{SAP Cloud Connector} \longrightarrow \text{S/4HANA DEV}$$
-2. **Strict Read-Only Enforcement:** The communication user in S/4HANA is provisioned with a custom least-privilege role (`Z_FIORIX_DISCOVERY_RO`) containing display-only authorizations (`S_DEVELOP` ACTVT 03, `S_TABU_DIS` Display, `S_ADT_RES`).
+2. **Strict Read-Only Enforcement:** The communication user in S/4HANA is provisioned with a custom least-privilege role (`Z_Fiorify_DISCOVERY_RO`) containing display-only authorizations (`S_DEVELOP` ACTVT 03, `S_TABU_DIS` Display, `S_ADT_RES`).
 3. **No Automated Transports or Writes:** Automated transport creation (`E070`), table modification, or automated activation of generated ABAP code on the SAP host is **strictly excluded**.
 4. **Targeted URL Whitelisting:** Cloud Connector mapping must be restricted exclusively to `/sap/bc/adt/*` and `/sap/opu/odata/*`. Generic RFC gateway paths (`/sap/bc/rfc`) and Web Dynpro endpoints (`/sap/bc/webdynpro`) are disallowed.
-5. **Static Discovery vs. Dynamic Reality:** FioriX will discover static structural pointers (programs, includes, tables). Any unresolvable dynamic calls (`CALL SCREEN`, `SUBMIT (var)`) must be classified as `UNKNOWN`, not inferred.
+5. **Static Discovery vs. Dynamic Reality:** Fiorify will discover static structural pointers (programs, includes, tables). Any unresolvable dynamic calls (`CALL SCREEN`, `SUBMIT (var)`) must be classified as `UNKNOWN`, not inferred.
 
 ## 3. Consequences
 - **Positive:** Total alignment with enterprise SAP cybersecurity policies; zero risk of production system disturbance or unauthorized data modification.

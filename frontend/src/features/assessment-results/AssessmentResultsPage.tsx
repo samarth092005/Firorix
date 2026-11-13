@@ -500,7 +500,7 @@ export const AssessmentResultsPage: React.FC = () => {
   const primaryCandidate = candidates[0] || null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '1440px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '100%', margin: '0 auto', paddingBottom: '36px' }}>
       {/* Breadcrumb Navigation */}
       <Breadcrumbs
         items={[
@@ -1134,7 +1134,7 @@ export const AssessmentResultsPage: React.FC = () => {
                     Clean Core Target Architecture Blueprint (100% Functional Gap)
                   </h4>
                   <p style={{ margin: '3px 0 0 0', fontSize: '12.5px', color: '#64748B' }}>
-                    Because zero standard Fiori apps exist for transaction <strong>{assessment.tcode}</strong>, FioriX commissions a custom Clean Core RAP application stack in Generation Studio.
+                    Because zero standard Fiori apps exist for transaction <strong>{assessment.tcode}</strong>, Fiorify commissions a custom Clean Core RAP application stack in Generation Studio.
                   </p>
                 </div>
                 <button

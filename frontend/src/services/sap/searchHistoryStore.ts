@@ -1,6 +1,6 @@
 import { SearchHistoryItem, SearchStatusCode, TransactionClassification } from '../contracts/types';
 
-const STORAGE_KEY = 'fiorix_phase1_search_history_v1';
+const STORAGE_KEY = 'Fiorify_phase1_search_history_v1';
 
 export class SearchHistoryStore {
   private inMemoryFallback: SearchHistoryItem[] = [];

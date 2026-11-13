@@ -1,5 +1,5 @@
 /**
- * FioriX — Data Model Service (GEN-04)
+ * Fiorify — Data Model Service (GEN-04)
  *
  * Implements CRUD operations, relationship modeling, and validation
  * orchestration for Generation Studio CDS data models.

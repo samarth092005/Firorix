@@ -1,5 +1,5 @@
-# FioriX User Workflows & Journey Specifications
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
+# Fiorify User Workflows & Journey Specifications
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
 **Document Version:** 1.0.0  
 **Phase:** Sprint 1 Frontend Implementation  
 
@@ -11,7 +11,7 @@
 sequenceDiagram
     autonumber
     actor Consultant as Functional Consultant / Architect
-    participant Shell as FioriX UI (React)
+    participant Shell as Fiorify UI (React)
     participant Store as Local Mock Store
     actor Developer as ABAP / UI5 Developer
 
@@ -70,7 +70,7 @@ sequenceDiagram
 6. **Step 5 - Review & Create:** Summary view with **Create Assessment** button. Dispatches background scan job and redirects to the full Assessment Workspace.
 
 ### Workflow 4: Assessment Workspace (The Core 9-Stage Workbench)
-Located at `/assessments/:id`, this is the heart of FioriX:
+Located at `/assessments/:id`, this is the heart of Fiorify:
 - **Tab 1: Overview:** Executive summary, system info, assessment progress, and current stage badge.
 - **Tab 2: Technical Analysis:** Interactive tree and table of discovered SAP DDIC and repository objects with evidence levels.
 - **Tab 3: Business Context:** Business process documentation (`Order-to-Cash`), actors, activities, and process flow.

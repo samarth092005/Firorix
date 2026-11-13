@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Landscape & System Registry (SAP-LIVE-01 & ENTERPRISE-01)
+ * Fiorify — SAP Landscape & System Registry (SAP-LIVE-01 & ENTERPRISE-01)
  *
  * Implements:
  * - Multi-system registry with environment classification (DEV, QAS, PRD, SANDBOX).

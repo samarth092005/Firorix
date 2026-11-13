@@ -1,4 +1,4 @@
-# FIORIX — CANONICAL MATCHING QUALITY & FIT-GAP AUDIT
+# Fiorify — CANONICAL MATCHING QUALITY & FIT-GAP AUDIT
 **Document ID:** AUDIT-MATCH-2026-001  
 **Status:** COMPLETE  
 **Date:** 2026-11-08  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This audit assesses the candidate matching, scoring, and recommendation systems across the FioriX platform. It addresses the existence of multiple legacy engines (`matchingEngine.js`, `catalogueAdapter.js`, frontend `evidenceEngine.ts`, and synthetic fixtures) and validates the transition to the unified, deterministic **`fioriMatchingEngine.js`** as the single authoritative backend engine.
+This audit assesses the candidate matching, scoring, and recommendation systems across the Fiorify platform. It addresses the existence of multiple legacy engines (`matchingEngine.js`, `catalogueAdapter.js`, frontend `evidenceEngine.ts`, and synthetic fixtures) and validates the transition to the unified, deterministic **`fioriMatchingEngine.js`** as the single authoritative backend engine.
 
 ---
 

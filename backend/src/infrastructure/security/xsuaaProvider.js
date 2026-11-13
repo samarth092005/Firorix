@@ -1,7 +1,7 @@
 import { JwtVerifier } from './jwtVerifier.js';
 
 /**
- * FioriX SAP BTP Authorization and Trust Management (XSUAA) Provider
+ * Fiorify SAP BTP Authorization and Trust Management (XSUAA) Provider
  *
  * Implements authentication provider integration with SAP BTP XSUAA service.
  * In SAP BTP Cloud Foundry, service bindings are exposed through the VCAP_SERVICES environment variable.
@@ -33,7 +33,7 @@ export class XsuaaAuthenticationProvider {
         clientid: process.env.XSUAA_CLIENT_ID,
         clientsecret: process.env.XSUAA_CLIENT_SECRET,
         url: process.env.XSUAA_URL,
-        identityzone: process.env.XSUAA_IDENTITY_ZONE || 'fiorix-zone',
+        identityzone: process.env.XSUAA_IDENTITY_ZONE || 'Fiorify-zone',
         verificationkey: process.env.XSUAA_VERIFICATION_KEY
       };
     }

@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: Service Binding Proposal Generator
+ * Fiorify — GEN-05: Service Binding Proposal Generator
  *
  * Generates the Service Binding planning configuration (.srvb.json)
  * defining OData V4 UI service endpoints and manual activation instructions.
@@ -19,7 +19,7 @@ export function generateServiceBindingProposal(project, architecture) {
 
   const proposal = {
     schemaVersion: '1.0.0',
-    nature: 'FIORIX_PLANNING_ARTIFACT_ONLY',
+    nature: 'Fiorify_PLANNING_ARTIFACT_ONLY',
     warning: 'This is a planning/configuration artifact. It is NOT an activatable ABAP SRVB object. Creation and activation must be performed in Eclipse ADT.',
     bindingName,
     bindingType: 'ODATA_V4_UI',

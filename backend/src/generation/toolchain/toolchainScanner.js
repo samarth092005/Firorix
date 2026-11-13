@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-09: Workstation & Developer Toolchain Scanner
+ * Fiorify — GEN-09: Workstation & Developer Toolchain Scanner
  *
  * Implements read-only, non-invasive detection of developer tools, runtimes,
  * and Eclipse ADT environments for S/4HANA 2023 development.
@@ -66,7 +66,7 @@ export class ToolchainScanner {
       path: process.execPath,
       status: nodeOk ? 'READY' : 'UPGRADE_RECOMMENDED',
       details: nodeOk
-        ? `Node.js ${nodeVersion} meets modern FioriX/UI5 baseline (>= v20.x).`
+        ? `Node.js ${nodeVersion} meets modern Fiorify/UI5 baseline (>= v20.x).`
         : `Node.js ${nodeVersion} is below recommended v20.x.`
     };
     if (!nodeOk) {
@@ -152,8 +152,8 @@ export class ToolchainScanner {
 
     // 8. Port Status Scan (4004, 4050, 4051, 5173)
     const portChecks = await Promise.all([
-      checkPortFree(4004).then((free) => ({ port: 4004, service: 'FioriX Backend', free })),
-      checkPortFree(5173).then((free) => ({ port: 5173, service: 'FioriX Frontend (Vite)', free })),
+      checkPortFree(4004).then((free) => ({ port: 4004, service: 'Fiorify Backend', free })),
+      checkPortFree(5173).then((free) => ({ port: 5173, service: 'Fiorify Frontend (Vite)', free })),
       checkPortFree(4050).then((free) => ({ port: 4050, service: 'Local Preview Default', free })),
       checkPortFree(4051).then((free) => ({ port: 4051, service: 'Local Preview Alternate', free }))
     ]);

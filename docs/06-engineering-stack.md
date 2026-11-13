@@ -6,7 +6,7 @@
 |---|---|---|
 | **TypeScript 5.5+** | End-to-end type safety | **CONFIRMED.** Used across frontend and CAP backend for strict domain modeling. |
 | **Node.js 20 LTS** | Primary runtime environment | **CONFIRMED.** Supported by Cloud Foundry Node.js buildpack and CAP runtime. |
-| **React 18.3+** | FioriX web client & workbench | **CONFIRMED FRONTEND.** High developer velocity, rapid HMR, and modular component architecture. |
+| **React 18.3+** | Fiorify web client & workbench | **CONFIRMED FRONTEND.** High developer velocity, rapid HMR, and modular component architecture. |
 | **Vite 5.4+** | Frontend build toolchain & dev server | **CONFIRMED BUNDLER.** Sub-second HMR, optimized ESM production bundling, instant startup. |
 | **React Router 6.28+** | Client-side routing & navigation | **CONFIRMED ROUTING.** Declarative, nested routing supporting deep-linked workspaces. |
 | **SAP Fiori Horizon Design Tokens**| Enterprise visual styling | **CONFIRMED STYLING.** Custom properties (`tokens.css`, `components.css`) matching SAP Horizon. |

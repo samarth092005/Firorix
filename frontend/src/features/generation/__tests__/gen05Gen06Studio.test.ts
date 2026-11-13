@@ -247,7 +247,7 @@ describe('GEN-05 & GEN-06: Frontend Generation Studio Service Integration', () =
     it('triggers Fiori Elements scaffolding generation with target UI5 1.120.0', async () => {
       const mockFioriConfig = {
         floorplan: 'ListReportObjectPage' as const,
-        namespace: 'fiorix.payment',
+        namespace: 'Fiorify.payment',
         appTitle: 'Manage Payments S21',
         description: 'Modernized Fiori Elements Application'
       };
@@ -261,7 +261,7 @@ describe('GEN-05 & GEN-06: Frontend Generation Studio Service Integration', () =
             artifactType: 'FIORI_MANIFEST',
             objectName: 'manifest.json',
             filePath: 'fiori/webapp/manifest.json',
-            content: '{ "sap.app": { "id": "fiorix.payment" } }',
+            content: '{ "sap.app": { "id": "Fiorify.payment" } }',
             language: 'JSON',
             generationTemplateVersion: '1.0.0',
             generatedAt: new Date().toISOString(),

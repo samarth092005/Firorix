@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-06: SAP Fiori Elements Manifest Generator
+ * Fiorify — GEN-06: SAP Fiori Elements Manifest Generator
  *
  * Generates webapp/manifest.json for OData V4 List Report & Object Page
  * strictly matching GEN-05 Service Definition and Binding specifications.
@@ -12,7 +12,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
   if (!rootEntity) return null;
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-  const appId = uiConfig.appId || `com.fiorix.custom.${prefix}`;
+  const appId = uiConfig.appId || `com.Fiorify.custom.${prefix}`;
   const serviceName = `ZUI_${prefix.toUpperCase()}`;
   const mainServiceUri = `/sap/opu/odata4/sap/${serviceName.toLowerCase()}/srvd/sap/${serviceName.toLowerCase()}/0001/`;
 
@@ -49,7 +49,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
         }
       },
       sourceTemplate: {
-        id: 'fiorix.fe.lrop.v4',
+        id: 'Fiorify.fe.lrop.v4',
         version: '1.0.0'
       }
     },

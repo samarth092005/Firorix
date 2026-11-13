@@ -4,7 +4,7 @@
 
 ## 1. Architectural Style & Core Pattern
 
-FioriX is designed as a **Modular CAP Monolith** paired with an enterprise **React 18 / Fiori Horizon web workbench**. It deliberately avoids premature microservice fragmentation, hosting domain services within a single scalable CAP Node.js container on SAP BTP Cloud Foundry.
+Fiorify is designed as a **Modular CAP Monolith** paired with an enterprise **React 18 / Fiori Horizon web workbench**. It deliberately avoids premature microservice fragmentation, hosting domain services within a single scalable CAP Node.js container on SAP BTP Cloud Foundry.
 
 ```mermaid
 flowchart TB
@@ -15,7 +15,7 @@ flowchart TB
     end
 
     subgraph ClientTier ["Client Tier (Browser)"]
-        UI[FioriX Frontend: React 18 + TypeScript + Vite]
+        UI[Fiorify Frontend: React 18 + TypeScript + Vite]
         Tokens[SAP Fiori Horizon Design System & Tokens]
         Router[React Router 6: 6 Primary Navigation Areas]
         UI --- Tokens
@@ -97,12 +97,12 @@ flowchart TB
    - Communicates with S/4HANA exclusively through BTP Destination and Connectivity services.
 
 4. **Persistence Tier (HANA Cloud / SQLite):**
-   - Stores FioriX metadata, snapshots, requirements, catalog data, fit-gap matrices, and audit logs across 28+ relational entities.
+   - Stores Fiorify metadata, snapshots, requirements, catalog data, fit-gap matrices, and audit logs across 28+ relational entities.
    - Never stores or replicates transactional SAP business documents.
 
 5. **On-Premise SAP Tier (S/4HANA):**
    - Remains the authoritative source of truth for technical repository objects, package hierarchies, and SU24 authorization proposals.
-   - Read-only access enforced by communication role `Z_FIORIX_DISCOVERY_RO`.
+   - Read-only access enforced by communication role `Z_Fiorify_DISCOVERY_RO`.
 
 ---
 

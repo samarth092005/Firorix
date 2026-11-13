@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Connection Health & Capability Probe Service (Stage S3)
+ * Fiorify — SAP Connection Health & Capability Probe Service (Stage S3)
  *
  * Implements a 10-point comprehensive capability probe across the SAP S/4HANA connectivity stack:
  *  1. DESTINATION_RESOLUTION: BTP destination resolution

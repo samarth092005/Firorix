@@ -12,7 +12,7 @@ const STORAGE_KEY = 'fiorify_auth_session';
 export const DEMO_USER: AuthUser = {
   id: 'usr-admin-001',
   email: 'admin@fiorify.corp',
-  name: 'Enterprise System Administrator',
+  name: 'Admin',
   role: 'ADMIN',
   department: 'SAP Architecture & Platform Governance'
 };
@@ -20,7 +20,7 @@ export const DEMO_USER: AuthUser = {
 export const authService = {
   getUser(): AuthUser | null {
     try {
-      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('fiorix_auth_session');
+      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('Fiorify_auth_session');
       if (!data) return DEMO_USER;
       const parsed = JSON.parse(data) as AuthUser;
       if (parsed) {

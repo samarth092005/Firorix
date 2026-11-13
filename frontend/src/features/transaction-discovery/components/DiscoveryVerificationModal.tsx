@@ -538,7 +538,7 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                         color: '#451A03'
                       }}
                     >
-                      <strong>Clean Core Architecture:</strong> FioriX will formulate CDS View Entities, RAP Managed Behavior with Draft, and Fiori Elements List Report / Object Page in Generation Studio.
+                      <strong>Clean Core Architecture:</strong> Fiorify will formulate CDS View Entities, RAP Managed Behavior with Draft, and Fiori Elements List Report / Object Page in Generation Studio.
                     </div>
                   </div>
                 )}

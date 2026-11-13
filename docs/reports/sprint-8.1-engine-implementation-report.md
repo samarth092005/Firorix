@@ -1,4 +1,4 @@
-# FioriX Sprint 8.1: Backend Fit-Gap Assessment Engine Implementation Report
+# Fiorify Sprint 8.1: Backend Fit-Gap Assessment Engine Implementation Report
 **Date:** November 5, 2026  
 **Stage:** Stage 1 — Backend Fit-Gap Engine Implementation  
 **Status:** Completed & Verified  
@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-In **Sprint 8.1 (Stage 1)**, FioriX successfully delivered the core backend **Fit-Gap Assessment Engine** (`fitGapAssessmentEngine.js`).
+In **Sprint 8.1 (Stage 1)**, Fiorify successfully delivered the core backend **Fit-Gap Assessment Engine** (`fitGapAssessmentEngine.js`).
 
 This engine takes a business requirement and evaluates discovered SAP Fiori candidate applications (`F1612`, `F-53` classic tile, `F1367`) across 8 independent assessment dimensions. It executes **pure, deterministic, in-memory evaluation logic** without making outbound network or SAP calls, ensuring 100% offline predictability and benchmark reproducibility.
 
@@ -167,7 +167,7 @@ The engine enforces 9 strict governance rules:
 1. **Missing Mandatory Capability:** If any capability marked in a `MANDATORY` requirement is missing, the engine generates a `CRITICAL` gap and strictly caps overall status at `PARTIAL_FIT` or `NO_FIT`.
 2. **Missing Mandatory Operation:** If a required operation (e.g. `PostPayment`) is absent from the service's verified operations, a `CRITICAL` technical gap is logged, preventing `VERIFIED_FIT`.
 3. **Missing Evidence $\neq$ Proof of Failure:** When evidence is missing (e.g. unknown user authorization), the dimension is marked `PENDING_VERIFICATION` rather than penalizing the application as a confirmed negative.
-4. **Unknown Authorization Stays Unknown:** If PFCG role assignments are not supplied, authorization status is set to `PENDING_VERIFICATION`. FioriX never assumes that catalogue role mentions imply granted access.
+4. **Unknown Authorization Stays Unknown:** If PFCG role assignments are not supplied, authorization status is set to `PENDING_VERIFICATION`. Fiorify never assumes that catalogue role mentions imply granted access.
 5. **Unknown Activation Stays Unknown:** If live SICF or Gateway activation records are absent, activation is marked `PENDING_VERIFICATION` with an actionable Basis task.
 6. **Z-Service Alias Disambiguation:** A service alias using customer namespace `Z` (e.g. `ZFAP_PAYMENT_POST_SRV`) is accepted only when schema verification is established. Unverified aliases generate a `MAJOR` gap and surface as conflicting evidence.
 7. **Technical Viability $\neq$ Functional Equivalence:** A 100% technical OData score cannot override functional gaps or Dynpro customizations.

@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05 & GEN-06 API Integration Test Suite
+ * Fiorify — GEN-05 & GEN-06 API Integration Test Suite
  *
  * Verifies the complete HTTP API contracts for Architecture Designer,
  * ABAP Generator, Fiori Elements Generator, Artifact Registry, and Static Validation.
@@ -17,7 +17,7 @@ describe('GEN-05 & GEN-06 REST API Integration', () => {
   let port;
   let baseUrl;
   let testProjectId = `GEN-API-${Date.now()}`;
-  const adminSecret = 'fiorix-admin-dev-secret';
+  const adminSecret = 'Fiorify-admin-dev-secret';
 
   before(async () => {
     // Create an initial test project with entities and requirements
@@ -133,7 +133,7 @@ describe('GEN-05 & GEN-06 REST API Integration', () => {
     const res = await fetch(`${baseUrl}/api/v1/generation/projects/${testProjectId}/fiori/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appId: 'com.fiorix.mat.manage' })
+      body: JSON.stringify({ appId: 'com.Fiorify.mat.manage' })
     });
 
     assert.equal(res.status, 201);

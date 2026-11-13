@@ -9,7 +9,7 @@ import {
   StageCompletionStatus
 } from '../../../services/contracts/types';
 
-describe('FIORIX SPRINT S0 / ASSESSMENT RESULTS FINALIZATION — 16 REGRESSION TESTS', () => {
+describe('Fiorify SPRINT S0 / ASSESSMENT RESULTS FINALIZATION — 16 REGRESSION TESTS', () => {
 
   // Test 1: F-53 Contradiction Regression Test
   it('Scenario 1: F-53 contradiction regression test — verifies DDIC, FAL, re-anchored release, and resolved contradictions', async () => {

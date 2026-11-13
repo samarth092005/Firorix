@@ -2,13 +2,13 @@
 **Status:** APPROVED  
 **Date:** November 2026  
 **Deciders:** Principal Frontend Architect, Senior React Engineer, SAP Fiori UX Specialist  
-**Technical Scope:** FioriX Web Client & Workbench Shell  
+**Technical Scope:** Fiorify Web Client & Workbench Shell  
 
 ---
 
 ## 1. Context and Problem Statement
 
-FioriX requires a high-performance, enterprise-grade web frontend to serve as the unified assessment and controlled generation platform for SAP S/4HANA On-Premise transactions. The frontend must present complex technical metadata, multi-stage business analysis, Fiori catalog comparisons, fit-gap matrices, and draft application blueprints.
+Fiorify requires a high-performance, enterprise-grade web frontend to serve as the unified assessment and controlled generation platform for SAP S/4HANA On-Premise transactions. The frontend must present complex technical metadata, multi-stage business analysis, Fiori catalog comparisons, fit-gap matrices, and draft application blueprints.
 
 The target CAP Node.js backend and SAP HANA Cloud database will be developed in subsequent sprints. The immediate objective is to implement a complete, robust, fully functional first frontend release operating locally with high-fidelity demonstration data.
 

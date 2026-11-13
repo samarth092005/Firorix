@@ -620,10 +620,10 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                 fontWeight: 700
               }}
             >
-              SC
+              A
             </div>
             <span style={{ fontSize: '13px', fontWeight: 500, color: '#0F172A' }}>
-              SAP Consultant
+              Admin
             </span>
             <ChevronDown size={13} color="#64748B" />
           </button>
@@ -686,57 +686,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   My Profile
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    navigate('/assessment-history');
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 14px',
-                    textAlign: 'left',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '12px',
-                    color: 'var(--fiori-text-primary, #0F172A)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F1F5F9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <Clock size={14} color="#16A34A" />
-                  Recent Activity
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    navigate('/settings');
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 14px',
-                    textAlign: 'left',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '12px',
-                    color: 'var(--fiori-text-primary, #0F172A)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F1F5F9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <Settings size={14} color="#475569" />
-                  Preferences
-                </button>
 
                 <div style={{ height: '1px', backgroundColor: 'var(--fiori-border, #E2E8F0)', margin: '4px 0' }} />
 
@@ -766,57 +715,9 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                   Authorized System Configuration
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    navigate('/approvals');
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 14px',
-                    textAlign: 'left',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '12px',
-                    color: 'var(--fiori-text-primary, #0F172A)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#F1F5F9')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <Scale size={14} color="#D97706" />
-                  Governance &amp; Approvals
-                </button>
+                
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    setIsResetConfirmOpen(true);
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '8px 14px',
-                    textAlign: 'left',
-                    background: 'none',
-                    border: 'none',
-                    fontSize: '12px',
-                    color: '#B91C1C',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FEF2F2')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                >
-                  <RotateCcw size={14} color="#DC2626" />
-                  Reset Demo Environment
-                </button>
+
 
                 <div style={{ height: '1px', backgroundColor: 'var(--fiori-border, #E2E8F0)', margin: '4px 0' }} />
 

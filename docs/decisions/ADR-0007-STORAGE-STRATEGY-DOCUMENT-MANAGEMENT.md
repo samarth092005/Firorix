@@ -7,7 +7,7 @@
 ---
 
 ## 1. Context and Problem Statement
-FioriX generates reviewable draft application files (ABAP CDS View Entities, RAP Service Definitions, SAPUI5 manifests, and ZIP bundles). Cloud Foundry application containers possess ephemeral local filesystems that are wiped on container restart, scale-out, or redeployment. We must define a durable, enterprise-compliant storage architecture without assuming arbitrary hyperscaler storage (such as AWS S3) is entitled.
+Fiorify generates reviewable draft application files (ABAP CDS View Entities, RAP Service Definitions, SAPUI5 manifests, and ZIP bundles). Cloud Foundry application containers possess ephemeral local filesystems that are wiped on container restart, scale-out, or redeployment. We must define a durable, enterprise-compliant storage architecture without assuming arbitrary hyperscaler storage (such as AWS S3) is entitled.
 
 ## 2. Decision
 1. **Durable Storage Hierarchy:**

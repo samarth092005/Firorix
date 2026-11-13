@@ -106,11 +106,11 @@ export const DiscoveryWizard: React.FC<DiscoveryWizardProps> = ({
 
   useEffect(() => {
     // Check if an assessment handoff payload exists from Candidate Comparison Matrix
-    const handoffJson = sessionStorage.getItem('fiorix_pending_assessment_handoff');
+    const handoffJson = sessionStorage.getItem('Fiorify_pending_assessment_handoff');
     if (handoffJson) {
       try {
         const handoff = JSON.parse(handoffJson);
-        sessionStorage.removeItem('fiorix_pending_assessment_handoff');
+        sessionStorage.removeItem('Fiorify_pending_assessment_handoff');
         if (handoff.requirement?.tcode) {
           const tcodeClean = handoff.requirement.tcode;
           applyPresetForTcode(tcodeClean);

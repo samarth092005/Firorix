@@ -36,7 +36,7 @@ export class LiveSapAdapter {
 
   /**
    * Queries S/4HANA target system (S21-200) via official read-only OData service:
-   * GET /sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV/TransactionSet('{tcode}')
+   * GET /sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV/TransactionSet('{tcode}')
    *
    * Architectural Invariant:
    * LIVE_SAP mode NEVER falls back to synthetic or demo mock data.
@@ -78,7 +78,7 @@ export class LiveSapAdapter {
     }
 
     // 2. Prepare Target Endpoint URL
-    const baseUrl = system.odataServiceUrl || '/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV';
+    const baseUrl = system.odataServiceUrl || '/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV';
     const targetUrl = `${baseUrl}/TransactionSet('${encodeURIComponent(trimmed)}')?$format=json`;
 
     // 3. Dispatch Live HTTP Request with Timeout and AbortController
@@ -104,7 +104,7 @@ export class LiveSapAdapter {
           success: false,
           statusCode: 'ACCESS_DENIED',
           system,
-          errorMessage: `Live SAP Authentication Failed (HTTP ${response.status}) on ${system.systemId} (Client ${system.client}). Target user lacks authorization for service Z_FIORIX_DISCOVERY_SRV or DDIC tables (TSTC/TADIR). Check PFCG authorization objects S_SERVICE and S_TABU_DIS.`,
+          errorMessage: `Live SAP Authentication Failed (HTTP ${response.status}) on ${system.systemId} (Client ${system.client}). Target user lacks authorization for service Z_Fiorify_DISCOVERY_SRV or DDIC tables (TSTC/TADIR). Check PFCG authorization objects S_SERVICE and S_TABU_DIS.`,
           transaction: {
             tcode: trimmed,
             exists: false,
@@ -143,7 +143,7 @@ export class LiveSapAdapter {
           success: false,
           statusCode: 'CONNECTION_ERROR',
           system,
-          errorMessage: `Live SAP Gateway returned HTTP error ${response.status} (${response.statusText}) from ${targetUrl}. Ensure service Z_FIORIX_DISCOVERY_SRV is activated in /IWFND/MAINT_SERVICE on system ${system.systemId}.`
+          errorMessage: `Live SAP Gateway returned HTTP error ${response.status} (${response.statusText}) from ${targetUrl}. Ensure service Z_Fiorify_DISCOVERY_SRV is activated in /IWFND/MAINT_SERVICE on system ${system.systemId}.`
         };
       }
 
@@ -238,10 +238,10 @@ export class LiveSapAdapter {
         system,
         errorMessage: `Cannot establish live connection to SAP system ${system.systemId} (Client ${system.client}): ${detailMsg}
 Remediation for Basis / ABAP Architect:
-1. Verify S21 SAP Gateway service Z_FIORIX_DISCOVERY_SRV is active (/IWFND/MAINT_SERVICE).
-2. Verify BTP Cloud Connector / reverse proxy route to /sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV.
+1. Verify S21 SAP Gateway service Z_Fiorify_DISCOVERY_SRV is active (/IWFND/MAINT_SERVICE).
+2. Verify BTP Cloud Connector / reverse proxy route to /sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV.
 3. Verify network firewall rules and CORS allowance on SAP Web Dispatcher / ICM.
-4. INVARIANT ENFORCED: FioriX in LIVE_SAP mode strictly refrains from falling back to synthetic mock data.`
+4. INVARIANT ENFORCED: Fiorify in LIVE_SAP mode strictly refrains from falling back to synthetic mock data.`
       };
     }
   }

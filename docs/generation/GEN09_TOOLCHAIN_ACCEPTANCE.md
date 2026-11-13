@@ -1,4 +1,4 @@
-# FioriX — GEN-09: Developer Toolchain Acceptance Report
+# Fiorify — GEN-09: Developer Toolchain Acceptance Report
 
 **Date of Execution:** November 11, 2026  
 **Test Suite:** `backend/test/gen09ToolchainReadiness.test.js`  
@@ -30,4 +30,4 @@ Execution of `toolchainScanner.scanEnvironment()` on the active development work
 
 ## 3. Acceptance Statement
 
-GEN-09 provides complete environment diagnostics and comprehensive developer handover documentation, ensuring a smooth transition of generated code from FioriX Generation Studio into standard SAP development tooling.
+GEN-09 provides complete environment diagnostics and comprehensive developer handover documentation, ensuring a smooth transition of generated code from Fiorify Generation Studio into standard SAP development tooling.

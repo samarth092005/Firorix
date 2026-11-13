@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Phase 1 Master Regression Test Suite (P1-A, P1-B, P1-C)
+ * Fiorify — Generation Studio Phase 1 Master Regression Test Suite (P1-A, P1-B, P1-C)
  *
  * Covers:
  * 1. Create standalone project with local workspace indicator
@@ -123,18 +123,18 @@ describe('Generation Studio Phase 1 — Workspace Foundation, Project Management
   };
 
   before(async () => {
-    prevAdminSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    prevAdminSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
     originalFetch = global.fetch;
     global.fetch = async (url, options = {}) => {
       const headers = {
-        'x-fiorix-admin-secret': TEST_ADMIN_SECRET,
+        'x-Fiorify-admin-secret': TEST_ADMIN_SECRET,
         ...(options.headers || {})
       };
       return originalFetch(url, { ...options, headers });
     };
 
-    testDir = path.join(os.tmpdir(), `fiorix-gen-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    testDir = path.join(os.tmpdir(), `Fiorify-gen-test-${Date.now()}-${Math.random().toString(36).slice(2)}`);
     fs.mkdirSync(testDir, { recursive: true });
 
     testAssessmentPath = path.join(testDir, 'assessments.json');
@@ -172,9 +172,9 @@ describe('Generation Studio Phase 1 — Workspace Foundation, Project Management
       global.fetch = originalFetch;
     }
     if (prevAdminSecret !== undefined) {
-      process.env.FIORIX_ADMIN_SECRET = prevAdminSecret;
+      process.env.Fiorify_ADMIN_SECRET = prevAdminSecret;
     } else {
-      delete process.env.FIORIX_ADMIN_SECRET;
+      delete process.env.Fiorify_ADMIN_SECRET;
     }
     if (server) {
       await new Promise((resolve) => server.close(resolve));

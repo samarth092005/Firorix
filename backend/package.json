@@ -1,7 +1,7 @@
 {
-  "name": "fiorix-backend",
+  "name": "Fiorify-backend",
   "version": "1.0.0",
-  "description": "FioriX SAP Finance Discovery Backend Service (Node 20 LTS & CAP)",
+  "description": "Fiorify SAP Finance Discovery Backend Service (Node 20 LTS & CAP)",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "cap",
     "btp"
   ],
-  "author": "FioriX Engineering Team",
+  "author": "Fiorify Engineering Team",
   "license": "ISC",
   "engines": {
     "node": ">=20.0.0"

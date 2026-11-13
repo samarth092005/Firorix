@@ -1,5 +1,5 @@
 /**
- * FioriX MCP Subsystem — Discovery Transaction Context
+ * Fiorify MCP Subsystem — Discovery Transaction Context
  *
  * Normalizes input transaction parameters, business requirements,
  * target system landscape, and MCP execution options into an immutable context object.

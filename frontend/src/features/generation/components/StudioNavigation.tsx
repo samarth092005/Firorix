@@ -45,18 +45,7 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
   hasActiveProject
 }) => {
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderBottom: '1px solid var(--fiori-border, #E2E8F0)',
-        padding: '0 20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '6px',
-        overflowX: 'auto',
-        whiteSpace: 'nowrap'
-      }}
-    >
+    <nav className="studio-navigation-bar" aria-label="Generation Studio 9 Phases Navigation">
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = activeView === item.id;
@@ -68,43 +57,17 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
             type="button"
             disabled={isDisabled}
             onClick={() => onSelectView(item.id)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 14px',
-              border: 'none',
-              background: 'none',
-              cursor: isDisabled ? 'not-allowed' : 'pointer',
-              opacity: isDisabled ? 0.45 : 1,
-              borderBottom: isActive ? '3px solid #0066FF' : '3px solid transparent',
-              color: isActive ? '#0066FF' : (isDisabled ? '#94A3B8' : '#334155'),
-              fontWeight: isActive ? 700 : 500,
-              fontSize: '13px',
-              transition: 'all 0.15s ease',
-              outline: 'none',
-              position: 'relative'
-            }}
+            className={`studio-nav-btn ${isActive ? 'active' : ''}`}
             title={isDisabled ? 'Select or create a project from Projects Dashboard to open this workspace' : item.label}
           >
-            <Icon size={15} color={isActive ? '#0066FF' : (isDisabled ? '#94A3B8' : '#64748B')} />
+            <Icon size={15} color={isActive ? 'var(--studio-primary)' : (isDisabled ? 'var(--studio-text-subtle)' : 'var(--studio-text-muted)')} />
             <span>{item.label}</span>
-            <span
-              style={{
-                fontSize: '10px',
-                padding: '2px 6px',
-                borderRadius: '10px',
-                backgroundColor: isActive ? '#EFF6FF' : '#F1F5F9',
-                color: isActive ? '#0066FF' : '#64748B',
-                fontWeight: 600,
-                marginLeft: '2px'
-              }}
-            >
+            <span className="studio-nav-tag">
               {item.phaseTag}
             </span>
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 };

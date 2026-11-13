@@ -1,7 +1,7 @@
 /**
- * FioriX MCP Subsystem — Discovery Evidence Mapper
+ * Fiorify MCP Subsystem — Discovery Evidence Mapper
  *
- * Maps MCP tool execution outputs into canonical FioriX technical evidence records,
+ * Maps MCP tool execution outputs into canonical Fiorify technical evidence records,
  * preserving authoritative evidence classifications and attaching explicit source provenance.
  */
 

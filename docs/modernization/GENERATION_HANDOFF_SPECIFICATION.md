@@ -1,4 +1,4 @@
-# FioriX Generation Studio Project Handoff Specification (MW-03)
+# Fiorify Generation Studio Project Handoff Specification (MW-03)
 
 ## 1. Executive Summary
 

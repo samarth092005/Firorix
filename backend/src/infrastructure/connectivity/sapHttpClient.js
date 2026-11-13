@@ -1,5 +1,5 @@
 /**
- * FioriX — Resilient Read-Only SAP HTTP Client (Stage S3)
+ * Fiorify — Resilient Read-Only SAP HTTP Client (Stage S3)
  *
  * Implements:
  * - Read-only enforcement (strictly GET / HEAD for SAP endpoints)
@@ -26,8 +26,8 @@ export class SapHttpClient {
     const m = String(method || 'GET').toUpperCase();
     if (m !== 'GET' && m !== 'HEAD' && m !== 'OPTIONS') {
       const err = new Error(
-        `SAP WRITE OPERATION BLOCKED: Method "${m}" violates FioriX Read-Only SAP Access Boundary. ` +
-        'FioriX never executes writes, transports, or object mutations in SAP S/4HANA.'
+        `SAP WRITE OPERATION BLOCKED: Method "${m}" violates Fiorify Read-Only SAP Access Boundary. ` +
+        'Fiorify never executes writes, transports, or object mutations in SAP S/4HANA.'
       );
       err.code = 'WRITE_OPERATION_BLOCKED';
       err.statusCode = 'AUTHORIZATION_BLOCKED';

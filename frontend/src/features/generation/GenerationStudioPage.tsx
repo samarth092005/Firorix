@@ -7,6 +7,7 @@ import { CreateProjectModal } from './components/CreateProjectModal';
 import { WorkspaceShellView } from './components/WorkspaceShellView';
 import { frontendGenerationProjectService } from './services/generationProjectService';
 import { GenerationProject, StudioInternalView, CreateProjectPayload } from './types';
+import './GenerationStudio.css';
 
 export const GenerationStudioPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -214,14 +215,7 @@ export const GenerationStudioPage: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: 'calc(100vh - 56px)',
-        backgroundColor: '#F8FAFC'
-      }}
-    >
+    <div className="studio-root">
       {/* 4.1 Studio Header */}
       <StudioHeader
         project={activeProject}
@@ -238,7 +232,7 @@ export const GenerationStudioPage: React.FC = () => {
       />
 
       {/* Main View Area */}
-      <div style={{ flex: 1, maxWidth: '1440px', width: '100%', margin: '0 auto', padding: '16px 24px' }}>
+      <div style={{ flex: 1, maxWidth: '100%', width: '100%', margin: '0 auto', padding: '0 0 32px' }}>
         {isInitializingHandoff ? (
           <div
             style={{

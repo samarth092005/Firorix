@@ -1,4 +1,4 @@
-# FioriX — SAP S/4HANA Connectivity Audit (Phase S0)
+# Fiorify — SAP S/4HANA Connectivity Audit (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  
@@ -10,7 +10,7 @@
 
 ## 1. Objective & Non-Negotiable Rules
 
-The objective of FioriX connectivity is to inspect, discover, and extract technical metadata from customer SAP S/4HANA systems in a **strictly read-only, non-invasive** manner.
+The objective of Fiorify connectivity is to inspect, discover, and extract technical metadata from customer SAP S/4HANA systems in a **strictly read-only, non-invasive** manner.
 
 ### Non-Negotiable Protection Rules
 1. **Zero SAP Writes:** No creation of transport requests, no ABAP program compilation/activation, no table modifications, and no business data posting.
@@ -42,7 +42,7 @@ The objective of FioriX connectivity is to inspect, discover, and extract techni
 
 ### 2.3 Live vs. Mock Switching (`backend/src/adapters/liveSapAdapter.js` vs `mockSapAdapter.js`)
 - Current switching mechanism:
-  - Controlled by environment flag: `FIORIX_USE_MOCK_SAP=true|false`.
+  - Controlled by environment flag: `Fiorify_USE_MOCK_SAP=true|false`.
   - In unit and integration test environments, `mockSapAdapter` provides static fixtures for `ME21N`, `VA01`, `FB60`, etc.
   - In live mode, requests execute through `liveSapAdapter.js` -> `btpDestinationAdapter.js`.
 
@@ -52,7 +52,7 @@ The objective of FioriX connectivity is to inspect, discover, and extract techni
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  FioriX Backend (Cloud Foundry Node.js 20 App)        │
+│  Fiorify Backend (Cloud Foundry Node.js 20 App)        │
 └───────────┬────────────────────────────────────────────┘
             │
             │ VCAP_SERVICES Binding
@@ -104,4 +104,4 @@ The objective of FioriX connectivity is to inspect, discover, and extract techni
 
 1. **Strictly Read-Only HTTP Verbs:** The BTP adapter and HTTP client must only issue `GET` and `HEAD` requests to SAP endpoints. Any `POST`, `PUT`, `DELETE`, or `PATCH` request targeting on-premise SAP endpoints must be blocked at the adapter layer.
 2. **Access Control in Cloud Connector:** Cloud Connector must be configured to expose only path prefixes with "Path and all sub-paths" set to read-only, explicitly rejecting write calls.
-3. **Audit Logging of SAP Queries:** Every query executed against SAP systems must generate an immutable audit log entry in FioriX including timestamp, user, target system, endpoint, and response code.
+3. **Audit Logging of SAP Queries:** Every query executed against SAP systems must generate an immutable audit log entry in Fiorify including timestamp, user, target system, endpoint, and response code.

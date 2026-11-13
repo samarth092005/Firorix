@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: Dynamic OData V4 Metadata & Service Document Generator
+ * Fiorify — GEN-07: Dynamic OData V4 Metadata & Service Document Generator
  *
  * Synthesizes EDMX V4 XML and Service Document JSON purely from the project's
  * authoritative dataModelSpec, entity definitions, and architecture specification.

@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: In-Process Mock OData V4 HTTP Server
+ * Fiorify — GEN-07: In-Process Mock OData V4 HTTP Server
  *
  * Implements a lightweight, isolated Node.js HTTP server binding strictly to 127.0.0.1
  * serving dynamic OData V4 endpoints and generated Fiori Elements static webapp files.
@@ -13,8 +13,8 @@ import { sanitizeWebappPath, MAX_REQUEST_BODY_BYTES } from './previewSecurity.js
 import { defaultPreviewSessionStore } from './previewSessionStore.js';
 
 export const PREVIEW_WATERMARK_HTML = `
-<!-- FIORIX GEN-07 MANDATORY WATERMARK -->
-<div id="fiorix-preview-banner" style="position:fixed;top:0;left:0;right:0;height:28px;background:#c0392b;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:700;font-size:11px;letter-spacing:0.8px;display:flex;align-items:center;justify-content:center;z-index:2147483647;box-shadow:0 2px 6px rgba(0,0,0,0.3);text-transform:uppercase;user-select:none;pointer-events:none;">
+<!-- Fiorify GEN-07 MANDATORY WATERMARK -->
+<div id="Fiorify-preview-banner" style="position:fixed;top:0;left:0;right:0;height:28px;background:#c0392b;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:700;font-size:11px;letter-spacing:0.8px;display:flex;align-items:center;justify-content:center;z-index:2147483647;box-shadow:0 2px 6px rgba(0,0,0,0.3);text-transform:uppercase;user-select:none;pointer-events:none;">
   &#9888; LOCAL MOCK PREVIEW — SYNTHETIC DATA ONLY — NOT CONNECTED TO SAP S21
 </div>
 <style>body { padding-top: 28px !important; }</style>

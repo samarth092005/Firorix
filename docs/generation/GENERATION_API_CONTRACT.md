@@ -1,10 +1,10 @@
-# FIORIX GENERATION STUDIO — REST API SPECIFICATION
+# Fiorify GENERATION STUDIO — REST API SPECIFICATION
 ## Authoritative Endpoints for Milestones GEN-02, GEN-03 & GEN-04
 
 **Version:** 1.0.0  
 **Status:** Approved & Implemented  
 **Base Path:** `/api/v1/generation`  
-**Security:** Admin authorization required (`fiorix.generation.manage` via `x-fiorix-admin-secret` header or JWT session token).
+**Security:** Admin authorization required (`Fiorify.generation.manage` via `x-Fiorify-admin-secret` header or JWT session token).
 
 ---
 

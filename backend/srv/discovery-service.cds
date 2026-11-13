@@ -1,4 +1,4 @@
-using { fiorix.discovery as discovery } from '../db/schema';
+using { Fiorify.discovery as discovery } from '../db/schema';
 
 service DiscoveryService @(path: '/odata/v4/discovery') {
 

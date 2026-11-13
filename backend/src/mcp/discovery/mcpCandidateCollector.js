@@ -1,5 +1,5 @@
 /**
- * FioriX MCP Subsystem — Discovery Candidate Collector
+ * Fiorify MCP Subsystem — Discovery Candidate Collector
  *
  * Extracts Fiori application candidate references from MCP tool responses,
  * normalizes candidate records, and merges them with the local canonical FAL catalogue.

@@ -1,4 +1,4 @@
-# FioriX — DISC-QA + CAT-03 Final Technical Acceptance & Data Integrity Verification Report
+# Fiorify — DISC-QA + CAT-03 Final Technical Acceptance & Data Integrity Verification Report
 
 **Document ID:** `FX-VERIFY-DISC-QA-CAT03-20261107`  
 **Target Repository:** `C:\Users\samarth\firorix`  
@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-This report delivers a thorough, independent technical audit and data integrity verification of the **DISC-QA + CAT-03** implementation in FioriX. Every reported metric, source file, JSON cache entry, API endpoint, and test suite was independently inspected and executed against actual repository code.
+This report delivers a thorough, independent technical audit and data integrity verification of the **DISC-QA + CAT-03** implementation in Fiorify. Every reported metric, source file, JSON cache entry, API endpoint, and test suite was independently inspected and executed against actual repository code.
 
 ### Core Audit Outcomes:
 1. **Catalogue Store Verification:** Confirmed exactly **32 canonical records** in `backend/data/fiori_app_catalog_cache.json`. Verified **32 unique Application IDs** and **0 duplicates**. Every record carries genuine live provenance (`OFFICIAL_CATALOGUE_LIVE`), parsed directly from SAP's official public OData endpoint (`SingleApp.xsodata`).

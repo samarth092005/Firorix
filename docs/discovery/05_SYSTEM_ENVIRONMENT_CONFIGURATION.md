@@ -1,4 +1,4 @@
-# FioriX — System Environment Configuration Specification (Workstream D2 & D4)
+# Fiorify — System Environment Configuration Specification (Workstream D2 & D4)
 
 ## 1. Target Landscape Architecture
 - **Primary Landscape**: SAP S/4HANA 2023 On-Premise / Private Edition
@@ -14,7 +14,7 @@ When connecting to SAP S21, low-level table inspection (`TSTC`, `TSTCT`, `TADIR`
 - `S_DEVELOP`: Activity 03 (Display) for object types `PROG`, `TRAN`, `DEVC`.
 - `S_TABU_DIS`: Activity 03 (Display) for table authorization group `&NC&` / `TSTC`.
 
-When authorizations are missing (ADT returns HTTP 403), FioriX:
+When authorizations are missing (ADT returns HTTP 403), Fiorify:
 1. Honestly flags metadata as `PARTIAL_METADATA` / `PENDING_VERIFICATION`.
 2. Emits an actionable Basis remediation banner in the UI detailing the required PFCG objects.
 3. Continues standard Fiori matching using Gateway catalog correlations and authoritative DDIC snapshots.

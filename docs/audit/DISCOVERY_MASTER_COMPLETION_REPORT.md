@@ -1,4 +1,4 @@
-# FIORIX — DISCOVERY MASTER SPRINT COMPLETION REPORT
+# Fiorify — DISCOVERY MASTER SPRINT COMPLETION REPORT
 **Sprint Deliverables: Workstreams D1 + D2 + D3 + D4**  
 **Target Landscape: SAP S/4HANA 2023 On-Premise (System S21, Client 200)**  
 **Execution Timestamp:** 2026-11-10T18:33:00+05:30  
@@ -7,7 +7,7 @@
 ---
 
 ## 1. Executive Summary
-The FioriX Discovery platform for SAP S/4HANA 2023 On-Premise has been completely built, hardened, and verified across all four workstreams (D1 Catalogue Extraction, D2 Universal Transaction Discovery, D3 Matching Engine & Fit-Gap, and D4 Discovery UI & End-to-End).
+The Fiorify Discovery platform for SAP S/4HANA 2023 On-Premise has been completely built, hardened, and verified across all four workstreams (D1 Catalogue Extraction, D2 Universal Transaction Discovery, D3 Matching Engine & Fit-Gap, and D4 Discovery UI & End-to-End).
 
 All non-negotiable architectural invariants and Clean Core governance principles have been strictly enforced. Hardcoded registries, false percentages, and embedded secrets have been eliminated.
 

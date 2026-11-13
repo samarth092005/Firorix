@@ -1,5 +1,5 @@
 /**
- * Sanitized diagnostic logger for the FioriX MCP subsystem.
+ * Sanitized diagnostic logger for the Fiorify MCP subsystem.
  * Strictly prevents leaking credentials, tokens, or private endpoints.
  */
 
@@ -44,25 +44,25 @@ export class McpLogger {
 
   debug(msg, meta) {
     if (this._shouldLog('debug')) {
-      console.debug(`[FioriX MCP][DEBUG] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
+      console.debug(`[Fiorify MCP][DEBUG] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
     }
   }
 
   info(msg, meta) {
     if (this._shouldLog('info')) {
-      console.info(`[FioriX MCP][INFO] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
+      console.info(`[Fiorify MCP][INFO] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
     }
   }
 
   warn(msg, meta) {
     if (this._shouldLog('warn')) {
-      console.warn(`[FioriX MCP][WARN] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
+      console.warn(`[Fiorify MCP][WARN] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
     }
   }
 
   error(msg, meta) {
     if (this._shouldLog('error')) {
-      console.error(`[FioriX MCP][ERROR] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
+      console.error(`[Fiorify MCP][ERROR] ${redactSensitiveData(msg)}`, meta ? redactSensitiveData(meta) : '');
     }
   }
 }

@@ -5,7 +5,7 @@ import { transactionDiscoveryEngine, TransactionDiscoveryEngine } from '../src/e
 import { technicalEvidenceEngine, TechnicalEvidenceEngine, PROVENANCE_CATEGORIES, CONFIDENCE_LEVELS } from '../src/engine/technicalEvidenceEngine.js';
 import { fioriMatchingEngine, FioriMatchingEngine, MATCH_CLASSIFICATIONS, RECOMMENDATION_READINESS } from '../src/engine/fioriMatchingEngine.js';
 
-describe('FioriX DISC-01 + DISC-02 + MATCH-01 + MATCH-02 Master Suite', () => {
+describe('Fiorify DISC-01 + DISC-02 + MATCH-01 + MATCH-02 Master Suite', () => {
   let server;
   let baseUrl;
 

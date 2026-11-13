@@ -1,8 +1,8 @@
-# FIORIX — SAP SYSTEM VERIFICATION CHECKLIST (SPRINT S0)
+# Fiorify — SAP SYSTEM VERIFICATION CHECKLIST (SPRINT S0)
 
 **Document Identifier:** CHK-S4H-2023-S0  
 **Target Environment:** SAP S/4HANA 2023 On-Premise / Private Cloud (e.g. System S21, Client 200)  
-**Execution Context:** Pre-Flight Verification for FioriX Generation Baseline  
+**Execution Context:** Pre-Flight Verification for Fiorify Generation Baseline  
 **Tools Required:** SAP GUI for Windows / Java and ABAP Development Tools (ADT / Eclipse)  
 **Security Invariant:** Zero credentials, passwords, private keys, or tokens requested or recorded.  
 **Governance Invariant:** No unexecuted check may be marked as PASS. Checks requiring SAP Administrator or Basis intervention are explicitly flagged.
@@ -11,7 +11,7 @@
 
 ## 1. Overview and Verification Methodology
 
-Before the FioriX Generation Studio can output production-grade ABAP Core Data Services (CDS), RESTful Application Programming Model (RAP) definitions, and SAP Fiori Elements projects, the real physical capabilities of the connected target SAP landscape must be verified.
+Before the Fiorify Generation Studio can output production-grade ABAP Core Data Services (CDS), RESTful Application Programming Model (RAP) definitions, and SAP Fiori Elements projects, the real physical capabilities of the connected target SAP landscape must be verified.
 
 This checklist provides step-by-step instructions for SAP Basis administrators, security leads, and ABAP developers to collect, verify, and attest the 17 essential architectural parameters of the target landscape.
 
@@ -35,7 +35,7 @@ This checklist provides step-by-step instructions for SAP Basis administrators, 
 | **05** | Database Platform | SAP HANA Database 2.0 (SPS07+) | SAP GUI / DBA | Basis / HANA DBA | `PENDING_BASIS` |
 | **06** | ADT Connection & Discovery | `/sap/bc/adt/discovery` HTTP 200 | ADT / HTTP | Security Admin (S_ADT_RES) | **`BLOCKED_AUTH`** (HTTP 403 on S21) |
 | **07** | ABAP Language Version | `ABAP for Cloud Development` (Tier 1) | ADT / SE21 | ABAP Lead / Basis | `NOT_TESTED` |
-| **08** | Package Creation Permissions | Authorized in `Z*` or `/FIORIX/` | ADT / SE21 | Security Admin (S_DEVELOP) | `NOT_TESTED` |
+| **08** | Package Creation Permissions | Authorized in `Z*` or `/Fiorify/` | ADT / SE21 | Security Admin (S_DEVELOP) | `NOT_TESTED` |
 | **09** | Namespace Availability | `Z*` / `Y*` or registered prefix | SAP GUI / SE03 | Basis / Development Lead | `NOT_TESTED` |
 | **10** | Object Creation & Activation | `DDLS, BDEF, SRVD, SRVB, CLAS` | ADT | Security Admin (S_DEVELOP) | `NOT_TESTED` |
 | **11** | Transport Organizer (CTS) | Workbench Request (`K9*`) | SAP GUI / SE09 | Basis Administrator | `NOT_TESTED` |
@@ -115,7 +115,7 @@ This checklist provides step-by-step instructions for SAP Basis administrators, 
   2. Alternatively, perform an HTTP GET request to:
      `http(s)://<sap_host>:<port>/sap/bc/adt/discovery`
      Header: `Accept: application/xml, text/xml`
-  3. **Empirical Evidence from FioriX Sprint S0:**
+  3. **Empirical Evidence from Fiorify Sprint S0:**
      - Endpoint responded with: `HTTP 403 Forbidden`
      - Response Body: `SADT_RESOURCE_003: No authorization to access the resource /sap/bc/adt/discovery`
   4. **Remediation Action Required from Security Administrator:**
@@ -140,7 +140,7 @@ This checklist provides step-by-step instructions for SAP Basis administrators, 
 - **Objective:** Confirm permissions to create development packages.
 - **SAP GUI Navigation:**
   1. Execute Transaction `SE21` or open ADT Package Explorer.
-  2. Attempt to create a test development package (e.g. `$TMP_TEST` or `ZFIORIX_TEST`).
+  2. Attempt to create a test development package (e.g. `$TMP_TEST` or `ZFiorify_TEST`).
   3. Check authorization for `S_DEVELOP` with `DEVCLASS` and `OBJTYPE = DEVC`.
 - **Support Needed:** Security Administrator.
 
@@ -177,7 +177,7 @@ This checklist provides step-by-step instructions for SAP Basis administrators, 
 
 ### Check 12: OData V2 Gateway Availability
 - **Objective:** Verify active OData V2 Gateway catalog.
-- **Empirical Evidence from FioriX Sprint S0:**
+- **Empirical Evidence from Fiorify Sprint S0:**
   - Endpoint `/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection` responded with HTTP 200 on connected S21.
   - Successfully retrieved 1,300+ registered services.
   - Status: **`PASS`**.
@@ -241,7 +241,7 @@ When escalating to SAP Basis or Security Administrators, provide the following s
 
 ```
 To: SAP Basis & Security Administration Team
-Subject: Authorization & Configuration Request for FioriX S/4HANA 2023 Baseline
+Subject: Authorization & Configuration Request for Fiorify S/4HANA 2023 Baseline
 
 Landscape: SAP S/4HANA 2023 (System S21, Client 200)
 
@@ -257,7 +257,7 @@ Landscape: SAP S/4HANA 2023 (System S21, Client 200)
    - SRVB (Service Binding)
    - DDLX (Metadata Extension)
    - CLAS (ABAP Classes)
-   Within Package Range: Z* or /FIORIX/*
+   Within Package Range: Z* or /Fiorify/*
 
 3. ICF Service Activation:
    Confirm active status of:

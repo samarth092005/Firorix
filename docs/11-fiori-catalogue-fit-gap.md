@@ -8,7 +8,7 @@ The **SAP Fiori Apps Reference Library** (`fal.cloud.sap`) serves as the authori
 
 ### Gating Invariant: Rejection of Live Scraping
 - `fal.cloud.sap` has **no public REST API** for automated harvesting. Automated headless web scraping is prohibited by SAP terms of service, unstable, and prone to DOM redesign breakages.
-- **Sanctioned Method:** FioriX ingests an **officially exported, curated offline catalog dataset** (Excel/JSON export) seeded into the `FIORI_APP` and `APP_RELEASE` database tables.
+- **Sanctioned Method:** Fiorify ingests an **officially exported, curated offline catalog dataset** (Excel/JSON export) seeded into the `FIORI_APP` and `APP_RELEASE` database tables.
 - Standard SAP applications are maintained in distinct partitions from customer-specific custom applications (`isCustom = true`).
 
 ---

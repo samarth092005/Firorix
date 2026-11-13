@@ -51,7 +51,7 @@ fiori/
 #### 3.1 `webapp/manifest.json` (`FIORI_MANIFEST`)
 - **Schema Version:** `1.59.0`
 - **`sap.app`:**
-  - `id`: `<namespace>.<appTitle>` (e.g., `fiorix.payment.managepayments`)
+  - `id`: `<namespace>.<appTitle>` (e.g., `Fiorify.payment.managepayments`)
   - `dataSources`: OData V4 data source pointing to the relative service endpoint `/sap/opu/odata4/sap/zui_paymentheader_o4/srvd/sap/zui_paymentheader_o4/0001/`.
   - `annotations`: Local `annotation` reference pointing to `webapp/annotations/annotations.xml`.
 - **`sap.ui5`:**

@@ -26,10 +26,10 @@ export class DatabasePool {
       config.connectionString = connectionString;
     } else {
       config.host = customConfig.host || process.env.PGHOST || '127.0.0.1';
-      config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : (process.env.FIORIX_ALLOW_EMBEDDED_PG === 'true' ? 54334 : 5432));
+      config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' ? 54334 : 5432));
       config.user = customConfig.user || process.env.PGUSER || 'postgres';
       config.password = customConfig.password || process.env.PGPASSWORD || 'password';
-      config.database = customConfig.database || process.env.PGDATABASE || (process.env.FIORIX_ALLOW_EMBEDDED_PG === 'true' ? 'postgres' : 'fiorix');
+      config.database = customConfig.database || process.env.PGDATABASE || (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' ? 'postgres' : 'Fiorify');
     }
 
     // Attempt direct connection to configured PostgreSQL
@@ -43,7 +43,7 @@ export class DatabasePool {
       return globalPool;
     } catch (directConnErr) {
       // If direct connection failed and local embedded auto-start is permitted (e.g. tests or local dev)
-      if (process.env.FIORIX_ALLOW_EMBEDDED_PG === 'true' || process.env.NODE_ENV === 'test') {
+      if (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.NODE_ENV === 'test') {
         pool.end().catch(() => {});
         return await DatabasePool.initEmbedded(customConfig);
       }
@@ -112,7 +112,7 @@ export class DatabasePool {
       activeConfig = config;
 
       // Ensure target database exists
-      const targetDb = options.database || process.env.PGDATABASE || 'fiorix';
+      const targetDb = options.database || process.env.PGDATABASE || 'Fiorify';
       if (targetDb !== 'postgres') {
         const adminClient = await globalPool.connect();
         const checkDb = await adminClient.query(
@@ -128,6 +128,14 @@ export class DatabasePool {
         config.database = targetDb;
         globalPool = new Pool(config);
         activeConfig = config;
+      }
+
+      try {
+        const { MigrationRunner } = await import('./migrator.js');
+        const runner = new MigrationRunner();
+        await runner.migrateUp();
+      } catch (migErr) {
+        console.warn('[DatabasePool] Embedded PG migration notice:', migErr.message);
       }
 
       return globalPool;

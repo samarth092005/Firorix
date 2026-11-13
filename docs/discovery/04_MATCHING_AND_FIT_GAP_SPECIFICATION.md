@@ -1,4 +1,4 @@
-# FioriX — Matching Engine and Fit-Gap Specification (Workstream D3)
+# Fiorify — Matching Engine and Fit-Gap Specification (Workstream D3)
 
 ## 1. 10-Stage Deterministic Matching Sequence
 

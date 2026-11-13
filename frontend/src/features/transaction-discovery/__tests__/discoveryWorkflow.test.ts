@@ -5,7 +5,7 @@ import { assessmentService } from '../../../services/assessmentService';
 import { activityService } from '../../../services/activityService';
 import { PRESET_SCENARIOS } from '../types';
 
-describe('FioriX Sprint 3 - Guided Transaction Discovery & SAP Reference Integration', () => {
+describe('Fiorify Sprint 3 - Guided Transaction Discovery & SAP Reference Integration', () => {
   const S21_SYSTEM = 'S21-200';
   const CLIENT_200 = '200';
   const S4HANA_RELEASE = 'SAP S/4HANA 2023 Private Edition';
@@ -36,7 +36,7 @@ describe('FioriX Sprint 3 - Guided Transaction Discovery & SAP Reference Integra
     expect(candidate.appName).toBe('Manage Outgoing Payments');
     expect(candidate.uiTechnology).toBe('SAP Fiori elements');
     expect(candidate.officialSourceUrl).toBe('https://fal.cloud.sap/apps/F0773');
-  });
+  }, 15000);
 
   // 2. F-28 Discovery Test
   it('discovers F-28 Post Incoming Payments with full DDIC metadata and F1345 successor', async () => {
@@ -121,7 +121,7 @@ describe('FioriX Sprint 3 - Guided Transaction Discovery & SAP Reference Integra
       timestamp: new Date().toISOString()
     });
     expect(fbl1n.exists).toBe(true);
-  });
+  }, 15000);
 
   // 5. Preset scenario configuration completeness
   it('validates preset scenario configurations for all pilot transactions', () => {

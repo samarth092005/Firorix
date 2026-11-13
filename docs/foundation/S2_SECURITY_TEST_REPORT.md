@@ -1,4 +1,4 @@
-# FioriX — Stage S2: Security Test Execution Report
+# Fiorify — Stage S2: Security Test Execution Report
 
 ## 1. Executive Summary
 The Stage S2 Security Foundation test suite was executed against the native Node.js HTTP runtime and PostgreSQL persistence layer. All 14 mandatory security test cases passed with zero failures and zero regressions.
@@ -25,9 +25,9 @@ The Stage S2 Security Foundation test suite was executed against the native Node
 | 7 | Tenant Assessment Isolation | User with `TENANT-A` attempting `GET /api/v1/assessments/:id` owned by `TENANT-B` rejected with HTTP 403. | :white_check_mark: PASS |
 | 8 | Tenant Artifact Isolation | User with `TENANT-A` attempting to download artifact belonging to `TENANT-B` rejected with HTTP 403. | :white_check_mark: PASS |
 | 9 | Tenant System Isolation | User with `TENANT-A` accessing SAP system profile owned by `TENANT-B` rejected with HTTP 403. | :white_check_mark: PASS |
-| 10 | Missing Permission Check | User lacking `fiorix.audit.read` requesting `/api/v1/security/audit` rejected with HTTP 403. | :white_check_mark: PASS |
+| 10 | Missing Permission Check | User lacking `Fiorify.audit.read` requesting `/api/v1/security/audit` rejected with HTTP 403. | :white_check_mark: PASS |
 | 11 | Connection Pool Reuse | Pool client setting `app.current_tenant` executes `DISCARD ALL` on release; next checkout clean. | :white_check_mark: PASS |
-| 12 | Export Authorization Check | User without `fiorix.artifacts.export` denied (HTTP 403); Admin with export scope granted (HTTP 200). | :white_check_mark: PASS |
+| 12 | Export Authorization Check | User without `Fiorify.artifacts.export` denied (HTTP 403); Admin with export scope granted (HTTP 200). | :white_check_mark: PASS |
 | 13 | Secret Redaction | `AuthService.redactSecrets` masks passwords, bearer tokens, client secrets, and SAP credentials with `[REDACTED]`. | :white_check_mark: PASS |
 | 14 | Audit Hash Chain Integrity | 3 events logged to `security_audit_events`; `verifyChain()` computes intact SHA-256 hashes back to `GENESIS`. | :white_check_mark: PASS |
 

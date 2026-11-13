@@ -1,7 +1,7 @@
-# FIORIX — DISCOVERY RELEASE ACCEPTANCE REPORT
+# Fiorify — DISCOVERY RELEASE ACCEPTANCE REPORT
 
 **Document ID:** REL-ACCEPT-2026-01  
-**Release Target:** FioriX Discovery Platform v1.0.0 (Production Candidate)  
+**Release Target:** Fiorify Discovery Platform v1.0.0 (Production Candidate)  
 **Verification Date:** November 8, 2026  
 **Auditor:** Lead Enterprise Architect & Platform Security Auditor  
 **Scope:** Canonical Discovery, Technical Evidence, Master Index, FAL Catalogue, MCP Orchestration, Fit-Gap Engine, Governance & Generation Studio Handoff  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This document presents the complete 40-scenario release acceptance evaluation for the FioriX Discovery platform. Testing was executed across both backend and frontend suites, validating end-to-end functionality, security controls, SAP connectivity boundaries, and architectural integrity.
+This document presents the complete 40-scenario release acceptance evaluation for the Fiorify Discovery platform. Testing was executed across both backend and frontend suites, validating end-to-end functionality, security controls, SAP connectivity boundaries, and architectural integrity.
 
 ### Summary Metrics
 | Category | Total Scenarios | Pass | Fail | Blocked / On Hold |

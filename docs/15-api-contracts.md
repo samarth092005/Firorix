@@ -4,7 +4,7 @@
 
 ## 1. Protocol Architecture & Conventions
 
-FioriX adopts a **hybrid protocol architecture**:
+Fiorify adopts a **hybrid protocol architecture**:
 1. **OData V4 Core Protocol:** Used for all domain entity queries, filtering, sorting, pagination, and transactional CRUD operations across the 7 CAP services.
 2. **OData V4 Actions & Functions:** Used for imperative business workflows (such as requirement confirmation, running fit-gap, and triggering draft generation).
 3. **Asynchronous Job Contracts:** Long-running discovery and where-used scans return `202 Accepted` with a `JobReference` (`jobId`), with status polled asynchronously.

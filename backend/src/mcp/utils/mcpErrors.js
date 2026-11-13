@@ -1,5 +1,5 @@
 /**
- * Custom error hierarchy for FioriX MCP subsystem.
+ * Custom error hierarchy for Fiorify MCP subsystem.
  */
 
 export class McpError extends Error {

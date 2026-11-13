@@ -50,16 +50,6 @@ export const CandidateComparison: React.FC<CandidateComparisonProps> = ({
       render: (c: CatalogueReference) => c.supportedProductRelease
     },
     {
-      label: 'OData Service References',
-      render: (c: CatalogueReference) => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontFamily: 'var(--font-mono)', fontSize: '11px' }}>
-          {c.odataServices.map((s) => (
-            <span key={s}>{s}</span>
-          ))}
-        </div>
-      )
-    },
-    {
       label: 'Business Roles',
       render: (c: CatalogueReference) => (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -78,20 +68,6 @@ export const CandidateComparison: React.FC<CandidateComparisonProps> = ({
             </span>
           ))}
         </div>
-      )
-    },
-    {
-      label: 'Official Reference Link',
-      render: (c: CatalogueReference) => (
-        <a
-          href={c.officialSourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fiori-btn fiori-btn-subtle"
-          style={{ fontSize: '11px', height: '24px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-        >
-          View on FAL <ExternalLink size={11} />
-        </a>
       )
     }
   ];

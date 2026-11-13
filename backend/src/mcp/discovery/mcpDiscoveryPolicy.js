@@ -1,5 +1,5 @@
 /**
- * FioriX MCP Subsystem — Discovery Execution Policy
+ * Fiorify MCP Subsystem — Discovery Execution Policy
  *
  * Evaluates whether MCP operations should be performed for a discovery request
  * and determines the list of approved, relevant tool calls with schema-compliant arguments.

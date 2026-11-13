@@ -223,7 +223,7 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
 
   // 8. GET /api/v1/generation/projects/:id/artifacts/:id/download
   if (req.method === 'GET' && url.pathname.includes('/artifacts/') && url.pathname.endsWith('/download')) {
-    if (!requirePermission('fiorix.artifacts.export')) return true;
+    if (!requirePermission('Fiorify.artifacts.export')) return true;
     const parts = url.pathname.split('/');
     const pIdx = parts.indexOf('projects');
     const aIdx = parts.indexOf('artifacts');
@@ -231,7 +231,7 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
     const artifactId = decodeURIComponent(parts[aIdx + 1]);
 
     try {
-      const project = await generationProjectService.getProject(projectId, currentUser);
+      const project = await generationProjectService.getProject(projectId);
       if (!project) {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Project not found: ${projectId}` }));

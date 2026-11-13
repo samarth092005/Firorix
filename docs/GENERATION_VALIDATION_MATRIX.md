@@ -1,8 +1,8 @@
-# FIORIX — GENERATION VALIDATION MATRIX & STUDIO UX SPECIFICATION
+# Fiorify — GENERATION VALIDATION MATRIX & STUDIO UX SPECIFICATION
 
 **Document ID:** VAL-UX-GEN-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Release:** FioriX v2.0.0  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Release:** Fiorify v2.0.0  
 **Status:** SPECIFICATION APPROVED — VALIDATION & UX BLUEPRINT  
 **Author:** Quality Assurance Architect & Principal UX Lead  
 
@@ -10,9 +10,9 @@
 
 ## 1. Generation Validation Philosophy & Boundaries
 
-In accordance with FioriX's core architectural principle of **engineering honesty**:
+In accordance with Fiorify's core architectural principle of **engineering honesty**:
 1. **Never Assign PASS Without Verification:** A generation status of `PASS` is awarded only after all static validation rules execute without critical errors. Unchecked rules are flagged as `NOT_EVALUATED`.
-2. **Clear Boundary: Static Validation vs. Target ABAP Activation:** FioriX executes **in-engine static syntax, grammar, naming, and Clean Core consistency validation**. FioriX does *not* claim to execute full ABAP compiler activation or live ATC checks, which require an active SAP kernel compiler. All outputs are explicitly designated as **Reviewable Drafts for Sandbox Import**.
+2. **Clear Boundary: Static Validation vs. Target ABAP Activation:** Fiorify executes **in-engine static syntax, grammar, naming, and Clean Core consistency validation**. Fiorify does *not* claim to execute full ABAP compiler activation or live ATC checks, which require an active SAP kernel compiler. All outputs are explicitly designated as **Reviewable Drafts for Sandbox Import**.
 3. **Export Blocking:** Any `CRITICAL` validation error strictly prevents Stage 2 ZIP packaging and export.
 
 ---
@@ -146,7 +146,7 @@ flowchart LR
 ### Screen 10: Export Project (Real ZIP Archive Download)
 * **Purpose:** Delivers the binary ZIP archive and integrity documentation.
 * **UI Controls:**
-  - "Download Project Archive (ZIP)" button triggering real browser file download (`fiorix-draft-{projectId}.zip`).
+  - "Download Project Archive (ZIP)" button triggering real browser file download (`Fiorify-draft-{projectId}.zip`).
   - "Download Validation Report (Markdown)" button.
   - Complete `generation-manifest.json` display with verification instructions:
     ```bash
@@ -162,4 +162,4 @@ flowchart LR
 1. **Zero Fabricated Progress Indicators:** The UI will never display artificial progress bars (`setTimeout(100)` increments). Network calls will display standard SAP Fiori busy indicators while actual backend compilation executes.
 2. **Deterministic Response Times:** Real backend template compilation takes under 250 milliseconds. Once complete, results render immediately.
 3. **Draft Boundary Notice:** Every screen reinforces the message:
-   > *"FioriX accelerates custom Clean Core development. Draft artifacts must be imported into an isolated SAP DEV sandbox via Eclipse ADT or abapGit for manual review, activation, and testing."*
+   > *"Fiorify accelerates custom Clean Core development. Draft artifacts must be imported into an isolated SAP DEV sandbox via Eclipse ADT or abapGit for manual review, activation, and testing."*

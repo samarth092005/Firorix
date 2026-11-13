@@ -2,12 +2,12 @@
 **Status:** APPROVED  
 **Date:** November 2026  
 **Deciders:** Senior Enterprise UX Architect, Senior React Engineer, SAP Fiori UX Specialist  
-**Technical Scope:** FioriX Web Frontend Component Architecture  
+**Technical Scope:** Fiorify Web Frontend Component Architecture  
 
 ---
 
 ## 1. Context and Problem Statement
-FioriX is implemented in React 18 with TypeScript and Vite. It must reflect SAP Fiori design principles (Horizon theme) while maintaining rapid responsiveness, high density, and clean accessibility. We need a clear strategy regarding whether to force `@ui5/webcomponents-react` across every DOM element, rely on standard HTML/CSS with SAP tokens, or adopt a selective hybrid approach.
+Fiorify is implemented in React 18 with TypeScript and Vite. It must reflect SAP Fiori design principles (Horizon theme) while maintaining rapid responsiveness, high density, and clean accessibility. We need a clear strategy regarding whether to force `@ui5/webcomponents-react` across every DOM element, rely on standard HTML/CSS with SAP tokens, or adopt a selective hybrid approach.
 
 ## 2. Decision
 1. **Primary Component Foundation:** Maintain the established custom React component library styled with **official SAP Fiori Horizon design tokens** (`tokens.css`, `components.css`).

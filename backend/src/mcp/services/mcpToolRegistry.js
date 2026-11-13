@@ -1,7 +1,7 @@
 import { mcpToolPolicy } from '../security/mcpToolPolicy.js';
 
 /**
- * Dynamic Tool Registry for FioriX MCP Subsystem.
+ * Dynamic Tool Registry for Fiorify MCP Subsystem.
  * Maintains runtime tool inventory discovered directly from the live MCP server.
  * Never fabricates tools when disconnected.
  */

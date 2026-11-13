@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP CDS Reuse Registry (GEN-04)
+ * Fiorify — SAP CDS Reuse Registry (GEN-04)
  *
  * Provides a curated registry of released standard SAP CDS view entities
  * for S/4HANA 2023 On-Premise, with strict provenance tracking.

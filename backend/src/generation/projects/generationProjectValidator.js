@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Project Validator (P1-B)
+ * Fiorify — Generation Project Validator (P1-B)
  *
  * Implements validation guardrails for Generation Studio projects:
  * - Strict Project ID validation (prevents path traversal and shell injection)

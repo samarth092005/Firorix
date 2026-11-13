@@ -1,7 +1,7 @@
-# FioriX — Master Final Implementation Report
+# Fiorify — Master Final Implementation Report
 ## Integrated Sprint: SEC-01 + GOV-01 + REC-QA-01 + PERSIST-QA-01 + SAP-LIVE-01 + CAT-04 + ENTERPRISE-01
 
-**Project:** FioriX — SAP Modernization Intelligence Platform  
+**Project:** Fiorify — SAP Modernization Intelligence Platform  
 **Target Architecture:** SAP S/4HANA 2023 Private Edition & Legacy SAP ECC 6.0 EHP8 Landscapes  
 **Runtime:** Node.js 20 LTS, React 18, TypeScript, Vite, SAP BTP / Destination & Gateway Connectivity, `@sap-ux/fiori-mcp-server`  
 **Date of Delivery:** November 2026  
@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-FioriX is an enterprise-grade SAP modernization intelligence platform designed to systematically guide organizations transitioning from classic ERP/ECC landscapes to SAP S/4HANA and Clean Core SAPUI5/Fiori architectures.
+Fiorify is an enterprise-grade SAP modernization intelligence platform designed to systematically guide organizations transitioning from classic ERP/ECC landscapes to SAP S/4HANA and Clean Core SAPUI5/Fiori architectures.
 
 In this unified master engineering sprint, all seven mission-critical milestones were architected, implemented, integrated, and verified directly within the existing repository codebase:
 
@@ -35,13 +35,13 @@ All test suites across backend and frontend passed with 100% success rate:
 
 ```
                                   +-------------------------------------------------------------+
-                                  |                 FioriX React 18 / Vite UI                   |
+                                  |                 Fiorify React 18 / Vite UI                   |
                                   |  (Overview, Checker, Discovery, Fit-Gap, Governance, etc.)  |
                                   +------------------------------+------------------------------+
                                                                  | Native Fetch (REST)
                                                                  v
 +-------------------------------------------------------------------------------------------------------------------------------+
-|                                                FioriX Central HTTP Server (Node 20)                                           |
+|                                                Fiorify Central HTTP Server (Node 20)                                           |
 |                                                                                                                               |
 |  +------------------------+  +--------------------------+  +---------------------------+  +--------------------------------+  |
 |  |   AuthService (SEC-01) |  | AssessmentStore (GOV-01) |  | RecommendationEngine      |  | EnterpriseService (ENTERPRISE) |  |
@@ -81,7 +81,7 @@ All test suites across backend and frontend passed with 100% success rate:
   - `REQUESTER`: Business requirement submission, assessment tracking, view permitted records.
   - `APPROVER`: Governance review, formal approval or rejection of recommendations, review comments.
   - `VIEWER`: Read-only access to permitted dashboards, reports, and portfolio summaries.
-- Implemented HMAC-SHA256 token generation and verification with configurable TTL (default 24h) and deterministic development tokens (`fiorix_dev_token_admin`, `fiorix_dev_token_sap_consultant`, `fiorix_dev_token_approver`, `fiorix_dev_token_requester`, `fiorix_dev_token_viewer`).
+- Implemented HMAC-SHA256 token generation and verification with configurable TTL (default 24h) and deterministic development tokens (`Fiorify_dev_token_admin`, `Fiorify_dev_token_sap_consultant`, `Fiorify_dev_token_approver`, `Fiorify_dev_token_requester`, `Fiorify_dev_token_viewer`).
 - Secured all sensitive backend routes using `requireRole` middleware:
   - `POST /api/v1/assessments/:id/submit-review` $\rightarrow$ `SAP_CONSULTANT`, `ADMIN`
   - `POST /api/v1/assessments/:id/approve` $\rightarrow$ `APPROVER`, `ADMIN`
@@ -89,7 +89,7 @@ All test suites across backend and frontend passed with 100% success rate:
   - `POST /api/v1/assessments/:id/archive` $\rightarrow$ `ADMIN`
   - `POST /api/v1/systems/:systemId/diagnostics` $\rightarrow$ `SAP_CONSULTANT`, `ADMIN`
   - `POST /api/v1/fiori-catalogue/sync` $\rightarrow$ `ADMIN`
-- Enforced strict secret redaction (`AuthService.redactSecrets`) removing credentials (`password`, `secret`, `authorization`, `x-fiorix-admin-secret`, etc.) from logs and client responses.
+- Enforced strict secret redaction (`AuthService.redactSecrets`) removing credentials (`password`, `secret`, `authorization`, `x-Fiorify-admin-secret`, etc.) from logs and client responses.
 
 ---
 

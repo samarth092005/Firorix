@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-08: Zero-Dependency Pure Node.js PKZIP Archiver & Extractor
+ * Fiorify — GEN-08: Zero-Dependency Pure Node.js PKZIP Archiver & Extractor
  *
  * Implements 100% specification-compliant PKZIP 2.0 archive creation and extraction
  * using Node.js built-ins (node:zlib, node:buffer, node:fs, node:path).

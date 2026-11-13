@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: ABAP Artifact Contract & Types
+ * Fiorify — GEN-05: ABAP Artifact Contract & Types
  *
  * Defines canonical metadata schemas and helper utilities for ABAP/RAP generated artifacts.
  */

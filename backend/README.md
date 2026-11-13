@@ -1,6 +1,6 @@
-# FioriX Backend & SAP S/4HANA Discovery Service
+# Fiorify Backend & SAP S/4HANA Discovery Service
 
-**Project:** FioriX — SAP S/4HANA Transaction-to-Fiori Discovery Tool  
+**Project:** Fiorify — SAP S/4HANA Transaction-to-Fiori Discovery Tool  
 **Target Landscape:** S21 (Client 200) — SAP S/4HANA 2023 Private Edition  
 **Observed Components:** S4CORE 108, SAP_BASIS 758, SAP_UI 758, SAP_GWFND 758  
 **Backend Runtime:** Node.js 20 LTS (Native HTTP & CAP CDS Models)  
@@ -10,11 +10,11 @@
 
 ## 1. Architecture Overview
 
-The FioriX backend provides both a **lightweight, native Node 20 HTTP service** and **SAP Cloud Application Programming Model (CAP) CDS service definitions** for deployment on SAP BTP Cloud Foundry / Kyma.
+The Fiorify backend provides both a **lightweight, native Node 20 HTTP service** and **SAP Cloud Application Programming Model (CAP) CDS service definitions** for deployment on SAP BTP Cloud Foundry / Kyma.
 
 ```
                     ┌────────────────────────────┐
-                    │   FioriX React Frontend    │
+                    │   Fiorify React Frontend    │
                     └──────────────┬─────────────┘
                                    │
               ┌────────────────────┴────────────────────┐
@@ -73,7 +73,7 @@ npm start
 | `SAP_DESTINATION_NAME` | `S21` | Target BTP Destination name |
 | `SAP_CLIENT` | `200` | Target SAP Client |
 | `SAP_TIMEOUT_MS` | `10000` | Request timeout in milliseconds |
-| `FIORIX_ADMIN_SECRET` | *(empty)* | Administrative secret required for `/api/v1/gateway-smoke-test` |
+| `Fiorify_ADMIN_SECRET` | *(empty)* | Administrative secret required for `/api/v1/gateway-smoke-test` |
 | `CORS_ALLOWED_ORIGINS` | *(safe local defaults)* | Comma-separated list of allowed origins or `*` |
 | `VCAP_SERVICES` | *(auto BTP CF)* | Cloud Foundry service bindings for Destination & Connectivity |
 
@@ -91,7 +91,7 @@ npm start
 ## 3. SAP CAP Model Definitions
 
 For future deployment into an SAP BTP HANA Cloud / HDI container:
-- **`backend/db/schema.cds`**: Defines `fiorix.discovery.Systems`, `Transactions`, `FioriApps`, and `TCodeMappings`.
+- **`backend/db/schema.cds`**: Defines `Fiorify.discovery.Systems`, `Transactions`, `FioriApps`, and `TCodeMappings`.
 - **`backend/srv/discovery-service.cds`**: Exposes `/odata/v4/discovery` with projection entities and the `searchTransaction` action.
 
 ---
@@ -101,11 +101,11 @@ For future deployment into an SAP BTP HANA Cloud / HDI container:
 To enable full end-to-end live queries against SAP S/4HANA 2023 system `S21` client `200`:
 
 ### Required ABAP OData Service
-- **Service Name:** `Z_FIORIX_DISCOVERY_SRV`
+- **Service Name:** `Z_Fiorify_DISCOVERY_SRV`
 - **Gateway Activation:** Transaction `/IWFND/MAINT_SERVICE`
 - **EntitySet:** `TransactionSet`
 - **Key Field:** `Tcode` (CHAR 20)
-- **Target Gateway Path:** `/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV/TransactionSet('{tcode}')`
+- **Target Gateway Path:** `/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV/TransactionSet('{tcode}')`
 
 ### Expected Fields in OData Response
 ```json
@@ -125,7 +125,7 @@ To enable full end-to-end live queries against SAP S/4HANA 2023 system `S21` cli
 ```
 
 ### SAP Security & Authorizations
-- **Authorization Object:** `S_SERVICE` with hash for `Z_FIORIX_DISCOVERY_SRV`.
+- **Authorization Object:** `S_SERVICE` with hash for `Z_Fiorify_DISCOVERY_SRV`.
 - **Authorization Object:** `S_TCODE` for discovery scope.
 - **Authorization Object:** `S_TABU_DIS` with table authorization group for DDIC tables (`TSTC`, `TSTCT`, `TADIR`).
 - **Read-Only Invariant:** The discovery role MUST be strictly read-only. No write or transport authorizations are required.

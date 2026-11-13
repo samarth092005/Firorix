@@ -71,7 +71,7 @@ export const SystemsPage: React.FC = () => {
       </div>
 
       <MessageStrip type="info">
-        <strong>Governance Boundary Notice:</strong> FioriX operates in local demonstration mode. Connection tests simulate BTP Destination Service pings over Cloud Connector without sending real packets to live enterprise backends.
+        <strong>Governance Boundary Notice:</strong> Fiorify operates in local demonstration mode. Connection tests simulate BTP Destination Service pings over Cloud Connector without sending real packets to live enterprise backends.
       </MessageStrip>
 
       {testResult && (

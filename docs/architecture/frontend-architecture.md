@@ -1,5 +1,5 @@
-# FioriX Frontend Architecture Specification
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
+# Fiorify Frontend Architecture Specification
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
 **Document Version:** 1.0.0  
 **Status:** APPROVED FOR SPRINT 1 FRONTEND IMPLEMENTATION  
 **Role:** Principal Frontend Architect & SAP Fiori UX Specialist  
@@ -8,7 +8,7 @@
 
 ## 1. Architectural Mission & Core Principles
 
-FioriX is an enterprise engineering and decision-governance workbench. It is engineered specifically for SAP Functional Consultants, ABAP Developers, and Enterprise Solution Architects.
+Fiorify is an enterprise engineering and decision-governance workbench. It is engineered specifically for SAP Functional Consultants, ABAP Developers, and Enterprise Solution Architects.
 
 ### Core Architecture Axioms
 1. **Standard SAP Fiori First:** Architecture prioritizes standard SAP catalog exploration before any custom build workflow is unlocked.
@@ -23,7 +23,7 @@ FioriX is an enterprise engineering and decision-governance workbench. It is eng
 
 ```
 +--------------------------------------------------------------------------+
-|                          FioriX Frontend Stack                           |
+|                          Fiorify Frontend Stack                           |
 +--------------------------------------------------------------------------+
 | Framework:        React 18.3+ with TypeScript 5.5+                       |
 | Build Tool:       Vite 5.4+ (ESM, ultra-fast HMR, optimized bundling)    |

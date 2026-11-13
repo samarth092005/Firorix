@@ -1,5 +1,5 @@
 /**
- * FioriX — Data Model Validation Engine (GEN-04)
+ * Fiorify — Data Model Validation Engine (GEN-04)
  *
  * Implements deterministic validation for SAP S/4HANA 2023 RAP CDS data models:
  * - Structural integrity (Root entity, unique names, key presence, ABAP types)

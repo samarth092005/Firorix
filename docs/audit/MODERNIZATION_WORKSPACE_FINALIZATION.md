@@ -1,8 +1,8 @@
-# FioriX Modernization Workspace Finalization Audit Report (MW-01 + MW-02 + MW-03)
+# Fiorify Modernization Workspace Finalization Audit Report (MW-01 + MW-02 + MW-03)
 
 ## 1. Executive Summary
 
-- **Sprint**: FIORIX — MODERNIZATION WORKSPACE FINALIZATION (MW-01, MW-02, MW-03).
+- **Sprint**: Fiorify — MODERNIZATION WORKSPACE FINALIZATION (MW-01, MW-02, MW-03).
 - **Scope**: Finalization of Stage 4 (Modernization Workspace) across Frontend UI, Backend REST APIs, Authoritative Persistence, and Generation Studio Project Experience.
 - **Verification Result**: **100% PASS**
   - **Backend Test Suite**: 329 passing tests across 44 suites (including 16/16 Modernization Workspace regression tests).

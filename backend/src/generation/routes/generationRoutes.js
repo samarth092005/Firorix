@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Combined Router (GEN-02, GEN-03, GEN-04)
+ * Fiorify — Generation Studio Combined Router (GEN-02, GEN-03, GEN-04)
  *
  * Dispatches requirements, data model, assessment context, and CDS registry API requests.
  */

@@ -1,5 +1,5 @@
 /**
- * FioriX MCP Subsystem — Discovery Result Envelope
+ * Fiorify MCP Subsystem — Discovery Result Envelope
  *
  * Normalizes the output of an MCP-assisted discovery run, encapsulating
  * tool telemetry, extracted evidence, candidate enrichment metrics, and limitations.

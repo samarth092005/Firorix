@@ -28,10 +28,10 @@ A comprehensive test execution run was conducted across all backend and frontend
    - *Error:* `listen EADDRINUSE: address already in use 127.0.0.1:4050`.
    - *Cause:* Port 4050 was occupied on the developer workstation by an orphaned Node process (`PID 21744`).
    - *Verification:* When executed in isolation after terminating or bumping port, all 8 tests pass cleanly.
-2. **`FioriX S1 - Persistence Foundation Verification Suite` (13 failures):**
+2. **`Fiorify S1 - Persistence Foundation Verification Suite` (13 failures):**
    - *Error:* Database connection refused on port 54334.
    - *Cause:* The ephemeral PostgreSQL container on port 54334 was interrupted during parallel batch execution.
-3. **`FioriX S2 Security Foundation` (2 failures):**
+3. **`Fiorify S2 Security Foundation` (2 failures):**
    - *Error:* HTTP 403 on artifact download and export permission tests.
    - *Cause:* Mock test context lacked tenant boundary header synchronization.
 4. **`MCP REST API Routes` & Legacy Endpoints (5 failures):**

@@ -77,7 +77,7 @@ export const DEMO_ASSESSMENT_RECORDS: AssessmentRecord[] = [
       {
         eventId: 'AUD-CORR-F53-01',
         timestamp: '2026-11-10T12:30:00.000Z',
-        author: 'FioriX Canonical Audit Engine',
+        author: 'Fiorify Canonical Audit Engine',
         actorId: 'SYS-AUDIT-ENGINE',
         actorRole: 'SYSTEM_AUDITOR',
         previousState: 'COMPLETED',
@@ -382,7 +382,7 @@ export const DEMO_SYSTEM_HEALTH: SystemHealthResponse = {
   },
   metadataService: {
     status: 'MOCK_STANDBY',
-    endpoint: '/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV',
+    endpoint: '/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV',
     version: 'V2 / ADT 7.58'
   },
   catalogueStatus: {

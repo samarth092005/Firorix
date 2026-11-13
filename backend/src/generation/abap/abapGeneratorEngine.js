@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: ABAP Generator Engine
+ * Fiorify — GEN-05: ABAP Generator Engine
  *
  * Orchestrates deterministic ABAP/RAP artifact generation for S/4HANA 2023 Clean Core:
  * Tables -> CDS View Entities -> Behavior Definitions -> Implementation Skeletons ->

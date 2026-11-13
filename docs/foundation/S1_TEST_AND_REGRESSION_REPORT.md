@@ -1,4 +1,4 @@
-# FIORIX — PHASE S1 TEST AND REGRESSION REPORT
+# Fiorify — PHASE S1 TEST AND REGRESSION REPORT
 **Verification of Persistence Foundation & Zero Regression Confirmation**
 
 **Date:** 2026-11-11  

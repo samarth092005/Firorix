@@ -1,9 +1,9 @@
-# FIORIX — S1 DATABASE SCHEMA VERIFICATION
+# Fiorify — S1 DATABASE SCHEMA VERIFICATION
 **PostgreSQL Live Schema, Tables, Extensions, Foreign Keys & Migration Verification**
 
 **Date:** 2026-11-11  
 **Database Engine:** PostgreSQL 18.6 on x86_64-windows (MSVC-19.44.35228, 64-bit)  
-**Database:** `fiorix` | **Schema:** `public`  
+**Database:** `Fiorify` | **Schema:** `public`  
 **Status:** VERIFIED LIVE AGAINST DATABASE ENGINE  
 
 ---

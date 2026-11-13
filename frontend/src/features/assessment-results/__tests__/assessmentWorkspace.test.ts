@@ -5,7 +5,7 @@ import { assessmentExportService } from '../services/assessmentExportService';
 import { fioriCatalogueAdapter } from '../../../services/catalogue/catalogueAdapter';
 import { AssessmentRecord } from '../../../services/contracts/types';
 
-describe('FioriX Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recommendations', () => {
+describe('Fiorify Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recommendations', () => {
   // 1. F-53 Post Outgoing Payments Assessment
   it('correctly evaluates F-53 Post Outgoing Payments with F0773 successor, multi-candidates and OData tracking', async () => {
     const assessment = await assessmentService.getAssessmentByTCode('F-53');

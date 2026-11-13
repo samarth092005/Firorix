@@ -1,8 +1,8 @@
 /**
- * FioriX — GEN-09: Developer Handover & Workstation Setup Guide Generator
+ * Fiorify — GEN-09: Developer Handover & Workstation Setup Guide Generator
  *
  * Generates authoritative, step-by-step developer instructions for importing,
- * reviewing, activating, and deploying FioriX-generated artifacts into SAP S/4HANA 2023 S21.
+ * reviewing, activating, and deploying Fiorify-generated artifacts into SAP S/4HANA 2023 S21.
  */
 
 /**
@@ -120,7 +120,7 @@ ${fioriSteps.map((s) => `### Step ${s.stepNumber}: ${s.title}\n${s.description}\
 ---
 
 ## 4. Governance, Security & Clean Core Assertions
-- **Zero Deployment Guarantee:** FioriX Generation Studio operates strictly offline. No objects have been activated or written into System S21 repositories during generation.
+- **Zero Deployment Guarantee:** Fiorify Generation Studio operates strictly offline. No objects have been activated or written into System S21 repositories during generation.
 - **Clean Core Adherence:** CDS View Entities and RAP Behavior definitions utilize only released standard SAP CDS annotations and S/4HANA 2023 language elements.
 - **Credential Hygiene:** No system passwords, private keys, or session tokens exist within this project package.
 `;

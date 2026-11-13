@@ -9,7 +9,7 @@ import {
   GAP_CATEGORIES
 } from '../src/engine/fitGapAssessmentEngine.js';
 
-describe('FioriX Sprint 8.1 — Backend Fit-Gap Assessment Engine Unit Tests', () => {
+describe('Fiorify Sprint 8.1 — Backend Fit-Gap Assessment Engine Unit Tests', () => {
   // Common standard requirement fixture
   const basePaymentRequirement = {
     id: 'REQ-FI-001',

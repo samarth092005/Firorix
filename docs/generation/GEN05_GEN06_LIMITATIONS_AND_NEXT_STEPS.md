@@ -3,7 +3,7 @@
 
 ### 1. Architectural Boundaries & Non-Negotiable Constraints
 
-In strict accordance with the FioriX Protection Rules:
+In strict accordance with the Fiorify Protection Rules:
 1. **Strictly Local Draft Artifacts:** GEN-05 and GEN-06 do not write directly to the SAP dictionary (`DDIC`), perform RFC/ADT activations, or create Transport Requests (`CTS`).
 2. **Draft Persistence Staging:** The current RAP behavior generator targets `MANAGED_RAP_DRAFT` and `MANAGED_RAP_NON_DRAFT`. Complex unmanaged BAPI transactions (`UNMANAGED_RAP`) require manual implementation of the `save` and `cleanup` methods in ABAP.
 3. **Target System Compatibility:** The synthesized code targets **SAP S/4HANA 2023 FPS00 (ABAP Cloud Language Version 5)**. Running against legacy NetWeaver 7.50 or ERP 6.0 EHP8 would fail due to the usage of `define view entity` and RAP `strict ( 2 );`.

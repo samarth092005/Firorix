@@ -1,5 +1,5 @@
 /**
- * FioriX — Frontend Generation Project Service (GEN-02, GEN-03, GEN-04)
+ * Fiorify — Frontend Generation Project Service (GEN-02, GEN-03, GEN-04)
  *
  * Communicates with backend /api/v1/generation REST endpoints.
  * Provides client-side methods for Projects, Requirements, and Data Model designers.
@@ -74,7 +74,10 @@ export class FrontendGenerationProjectService {
     const res = await fetch(url);
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.errorMessage || `Failed to fetch projects (HTTP ${res.status})`);
+      const fallbackMsg = (res.status >= 500 && !errData.errorMessage)
+        ? `Backend service is unreachable on port 4004 (HTTP ${res.status}). Please ensure the backend server is running.`
+        : `Failed to fetch projects (HTTP ${res.status})`;
+      throw new Error(errData.errorMessage || fallbackMsg);
     }
 
     const data = await res.json();

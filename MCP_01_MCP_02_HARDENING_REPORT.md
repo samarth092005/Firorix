@@ -1,4 +1,4 @@
-# FioriX — MCP-01 + MCP-02 Hardening Verification Report
+# Fiorify — MCP-01 + MCP-02 Hardening Verification Report
 
 **Milestone:** MCP-01 (Setup & Connectivity) + MCP-02 (Backend Tool Integration) Hardening Verification  
 **Repository:** `C:\Users\samarth\firorix`  
@@ -11,7 +11,7 @@
 
 ## 1. Executive Summary
 
-This hardening audit evaluated the production-readiness, operational safety, and lifecycle isolation of the SAP Fiori MCP subsystem implemented for FioriX. 
+This hardening audit evaluated the production-readiness, operational safety, and lifecycle isolation of the SAP Fiori MCP subsystem implemented for Fiorify. 
 
 The audit focused on six core hardening vectors:
 1. **Behavioral Code Audit of SAP Tools:** Decompiled and inspected `@sap-ux/fiori-mcp-server/dist/index.js` to ensure tools classified as read-only do not cause hidden disk or state mutations.
@@ -53,9 +53,9 @@ All MCP REST endpoints were audited for authentication enforcement, timing attac
 | `/api/v1/mcp/status` | `GET` | Read-Only | None (Safe public telemetry) | N/A |
 | `/api/v1/mcp/tools` | `GET` | Read-Only | None (Sanitized tool inventory) | N/A |
 | `/api/v1/mcp/health` | `GET` | Read-Only | None (Partitioned diagnostic metrics) | N/A |
-| `/api/v1/mcp/connect` | `POST` | Privileged | Constant-time `checkAdminAuth()` via `X-FioriX-Admin-Secret` or `Authorization: Bearer` | `401 Unauthorized` |
-| `/api/v1/mcp/disconnect` | `POST` | Privileged | Constant-time `checkAdminAuth()` via `X-FioriX-Admin-Secret` or `Authorization: Bearer` | `401 Unauthorized` |
-| `/api/v1/mcp/tools/:name/execute` | `POST` | Privileged | Constant-time `checkAdminAuth()` via `X-FioriX-Admin-Secret` or `Authorization: Bearer` | `401 Unauthorized` |
+| `/api/v1/mcp/connect` | `POST` | Privileged | Constant-time `checkAdminAuth()` via `X-Fiorify-Admin-Secret` or `Authorization: Bearer` | `401 Unauthorized` |
+| `/api/v1/mcp/disconnect` | `POST` | Privileged | Constant-time `checkAdminAuth()` via `X-Fiorify-Admin-Secret` or `Authorization: Bearer` | `401 Unauthorized` |
+| `/api/v1/mcp/tools/:name/execute` | `POST` | Privileged | Constant-time `checkAdminAuth()` via `X-Fiorify-Admin-Secret` or `Authorization: Bearer` | `401 Unauthorized` |
 
 ### Security Verification Details:
 1. **Timing-Safe Secret Verification:** Admin secret authentication uses `crypto.timingSafeEqual` in `btpDestinationAdapter.js` to guard against timing attacks.
@@ -113,13 +113,13 @@ The MCP subsystem provides architectural separation between local MCP server exe
 
 - **Current Status:** `NOT_TESTED_VIA_MCP` (Explicitly reported by `GET /api/v1/mcp/health`).
 - **Rationale:** The `@sap-ux/fiori-mcp-server` relies on local user environment stores or system profiles for live SAP connection. In this milestone, testing verified the MCP protocol and tools that operate locally or against public docs. No live mutating operations against target SAP systems were permitted or executed.
-- **Independence:** Core SAP transaction discovery, Gateway catalog probing, and BTP destination checks continue through FioriX's existing validated adapters (`btpDestinationAdapter.js`, `sapGatewayMetadataAdapter.js`, `sapTransactionDiscoveryAdapter.js`).
+- **Independence:** Core SAP transaction discovery, Gateway catalog probing, and BTP destination checks continue through Fiorify's existing validated adapters (`btpDestinationAdapter.js`, `sapGatewayMetadataAdapter.js`, `sapTransactionDiscoveryAdapter.js`).
 
 ---
 
 ## 7. Failure-Isolation Verification
 
-To ensure MCP failures cannot destabilize the primary FioriX platform:
+To ensure MCP failures cannot destabilize the primary Fiorify platform:
 1. **Isolated Initialization:** `defaultMcpService.initialize()` in `server.js` is non-blocking (`.catch(...)`). If the MCP server fails to launch, the HTTP backend starts normally and serves Discovery, Matching, and Fit-Gap routes without interruption.
 2. **Circuit Protection:** Tool execution failures, timeouts (`McpTimeoutError`), or process crashes do not throw uncaught exceptions; they return structured error envelopes (`success: false`, `executionStatus: 'FAILED' | 'TIMEOUT' | 'UNAVAILABLE'`).
 3. **No Engine Coupling:** The MCP subsystem does not mutate or inject data into `transactionDiscoveryEngine`, `technicalEvidenceEngine`, or `fioriMatchingEngine`.
@@ -129,7 +129,7 @@ To ensure MCP failures cannot destabilize the primary FioriX platform:
 ## 8. Frontend Security Review
 
 Audit of frontend components (`frontend/src/features/mcp/McpManagementPage.tsx` and `frontend/src/services/api/apiClient.ts`):
-- **Admin Secret Header Propagation:** Updated `apiClient.executeMcpTool` to accept `adminSecret?: string` and attach `X-FioriX-Admin-Secret` header to execution requests.
+- **Admin Secret Header Propagation:** Updated `apiClient.executeMcpTool` to accept `adminSecret?: string` and attach `X-Fiorify-Admin-Secret` header to execution requests.
 - **Secure Management UI:** The management interface provides an Admin Secret password input field; privileged actions (`Connect`, `Disconnect`, `Execute Tool`) forward the credential without persisting it in local storage or exposing it in logs.
 - **Client-Side Validation:** UI disallows execution of blocked tools (`isAllowed === false`) with clear policy warnings, while server-side policy enforces hard blocking regardless of client input.
 
@@ -191,7 +191,7 @@ Duration:           ~2.3s
 9. `backend/test/mcpConnectionManager.test.js`:
    - Added test verifying state transition to `DISCONNECTED` on unexpected child exit.
 10. `frontend/src/services/api/apiClient.ts`:
-    - Updated `executeMcpTool` to accept optional `adminSecret` and forward in `X-FioriX-Admin-Secret` header.
+    - Updated `executeMcpTool` to accept optional `adminSecret` and forward in `X-Fiorify-Admin-Secret` header.
 11. `frontend/src/features/mcp/McpManagementPage.tsx`:
     - Forwarded user-entered `adminSecret` in tool execution calls.
 

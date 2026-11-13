@@ -1,4 +1,4 @@
-# FioriX — Official Fiori Catalogue Management Specification (Workstream D1)
+# Fiorify — Official Fiori Catalogue Management Specification (Workstream D1)
 
 ## 1. Release Specificity for SAP S/4HANA 2023 On-Premise
 The canonical catalogue is strictly aligned with the target landscape: **SAP S/4HANA 2023 On-Premise (FPS02)**. Applications are classified into distinct product suites:

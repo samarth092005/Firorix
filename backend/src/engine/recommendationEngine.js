@@ -1,5 +1,5 @@
 /**
- * FioriX — Governed Recommendation Engine (REC-01 & REC-QA-01)
+ * Fiorify — Governed Recommendation Engine (REC-01 & REC-QA-01)
  *
  * Formulates authoritative architectural verdicts:
  * - ADOPT: Standard Fiori application fulfills all requirements with verified compatibility.
@@ -222,7 +222,7 @@ export class RecommendationEngine {
         // Missing evidence guardrail: NEVER BUILD on missing evidence or failed preconditions
         governanceOverridesApplied.push(GOVERNANCE_OVERRIDES.MISSING_EVIDENCE_PREVENTS_BUILD);
         outcome = RECOMMENDATION_OUTCOMES.REVIEW;
-        rationale = `Under FioriX Clean Core governance rules, custom BUILD is strictly prevented without fulfilling mandatory preconditions: ${buildPreconditions.missingCriteria.join(', ')}. Complete verification first.`;
+        rationale = `Under Fiorify Clean Core governance rules, custom BUILD is strictly prevented without fulfilling mandatory preconditions: ${buildPreconditions.missingCriteria.join(', ')}. Complete verification first.`;
         risks.push({
           id: 'RISK-PREMATURE-BUILD',
           category: 'GOVERNANCE',
@@ -392,7 +392,7 @@ export class RecommendationEngine {
       remediationPlan,
 
       auditMetadata: {
-        engine: 'FIORIX_GOVERNED_RECOMMENDATION_ENGINE',
+        engine: 'Fiorify_GOVERNED_RECOMMENDATION_ENGINE',
         version: 'REC-01',
         timestamp: recTimestamp
       }
@@ -663,7 +663,7 @@ export class RecommendationEngine {
       actionableRemediationPlan: [],
       remediationPlan: [],
       auditMetadata: {
-        engine: 'FIORIX_GOVERNED_RECOMMENDATION_ENGINE',
+        engine: 'Fiorify_GOVERNED_RECOMMENDATION_ENGINE',
         version: 'REC-01',
         timestamp: new Date().toISOString()
       }

@@ -79,7 +79,7 @@ During the end-to-end audit `GEN-COMPLETE-AUDIT-01`, a total of **8 defects and 
 - **Component:** `backend/src/generation/validation/staticValidationEngine.js`
 - **Root Cause:** Validation uses JavaScript string pattern matching rather than a full ABAP language parser.
 - **Impact:** Cannot detect subtle syntax errors (e.g. missing periods `.` inside method bodies or invalid ABAP expressions).
-- **Remediation:** Document this boundary clearly in user guides: FioriX performs pre-flight structural validation; full syntax compilation occurs inside Eclipse ADT.
+- **Remediation:** Document this boundary clearly in user guides: Fiorify performs pre-flight structural validation; full syntax compilation occurs inside Eclipse ADT.
 
 ---
 

@@ -142,7 +142,7 @@ export const TransactionCheckerPage: React.FC = () => {
   const isLiveActiveSystem = activeSystem?.mode === 'LIVE_SAP';
 
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px 20px 48px' }}>
+    <div style={{ width: '100%', maxWidth: '100%', margin: '0 auto', padding: '0 0 48px' }}>
       {/* Page Title & Context Header */}
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>

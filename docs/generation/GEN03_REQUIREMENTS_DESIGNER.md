@@ -1,4 +1,4 @@
-# FIORIX GENERATION STUDIO — MILESTONE GEN-03 SPECIFICATION
+# Fiorify GENERATION STUDIO — MILESTONE GEN-03 SPECIFICATION
 ## Requirements Designer, Backlog Management & Confirmation Gating
 
 **Version:** 1.0.0  

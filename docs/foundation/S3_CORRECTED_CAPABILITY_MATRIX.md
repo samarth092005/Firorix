@@ -1,6 +1,6 @@
-# FioriX — Stage S3: Corrected SAP Endpoint Capability Matrix
+# Fiorify — Stage S3: Corrected SAP Endpoint Capability Matrix
 
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
 **Evaluation Principle:** Implementation existence does NOT equate to live system verification.  
 **Last Empirical Evaluation Timestamp:** `2026-11-11T10:55:00.000Z`
@@ -22,13 +22,13 @@ The following matrix strictly separates **code implementation readiness**, **BTP
 | 7 | `RELEASE_VERIFICATION` | Component Table / Catalog Metadata | **IMPLEMENTED** | **CONFIGURED** | :hourglass_flowing_sand: **NOT VERIFIED** | `S_TABU_DIS` (DICBERCLS: `SS`, ACTVT `03`) | 2026-11-11 10:55 UTC | `UNVERIFIED_PENDING_SCC` |
 | 8 | `TRANSACTION_DISCOVERY` | Multi-source ADT / TSTC Index | **IMPLEMENTED** | **CONFIGURED** | :hourglass_flowing_sand: **NOT VERIFIED** | `S_DEVELOP` (OBJTYPE: `TRAN`, ACTVT `03`), `S_TABU_DIS` | 2026-11-11 10:55 UTC | `UNVERIFIED_PENDING_SCC` |
 | 9 | `CDS_METADATA` | ADT Data Definitions (`DDLS`) | **IMPLEMENTED** | **CONFIGURED** | :hourglass_flowing_sand: **NOT VERIFIED** | `S_DEVELOP` (OBJTYPE: `DDLS`, ACTVT `03`) | 2026-11-11 10:55 UTC | `UNVERIFIED_PENDING_SCC` |
-| 10 | `READ_ONLY_BOUNDARIES` | In-process HTTP Guardrail | **IMPLEMENTED** | **CONFIGURED** | :white_check_mark: **VERIFIED** | None (FioriX In-Process Enforcement) | 2026-11-11 10:55 UTC | `IN_PROCESS_ASSERTION` |
+| 10 | `READ_ONLY_BOUNDARIES` | In-process HTTP Guardrail | **IMPLEMENTED** | **CONFIGURED** | :white_check_mark: **VERIFIED** | None (Fiorify In-Process Enforcement) | 2026-11-11 10:55 UTC | `IN_PROCESS_ASSERTION` |
 
 ---
 
 ## 2. Granular Error Status Taxonomy
 
-FioriX strictly preserves the distinction between technical infrastructure blockages, authorization denials, and functional domain gaps. Under no circumstances is an infrastructure error interpreted as a missing transaction or an automatic trigger for a custom `BUILD` recommendation.
+Fiorify strictly preserves the distinction between technical infrastructure blockages, authorization denials, and functional domain gaps. Under no circumstances is an infrastructure error interpreted as a missing transaction or an automatic trigger for a custom `BUILD` recommendation.
 
 ```mermaid
 flowchart TD

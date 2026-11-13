@@ -34,7 +34,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
   before(async () => {
     testStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-test-enterprise-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-enterprise-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
     enterpriseService = new EnterpriseService({ assessmentStore, systemRegistry });
@@ -83,7 +83,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     const res = await fetch(`${baseUrl}/api/v1/systems/ECC-100/diagnostics`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant'
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant'
       }
     });
     const diag = await res.json();
@@ -140,7 +140,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     const res = await fetch(`${baseUrl}/api/v1/fiori-catalogue/sync`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_admin',
+        'Authorization': 'Bearer Fiorify_dev_token_admin',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -182,7 +182,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
 
     const res = await fetch(`${baseUrl}/api/v1/enterprise/portfolio`, {
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant'
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant'
       }
     });
 
@@ -200,7 +200,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
   it('6. GET /api/v1/enterprise/roadmap generates prioritized modernization roadmap', async () => {
     const res = await fetch(`${baseUrl}/api/v1/enterprise/roadmap`, {
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant'
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant'
       }
     });
 
@@ -229,7 +229,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     const res = await fetch(`${baseUrl}/api/v1/enterprise/assessments/process`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant',
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
@@ -253,7 +253,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     const qasRes = await fetch(`${baseUrl}/api/v1/assessments/${created.id}/deployment-readiness`, {
       method: 'PUT',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant',
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -275,7 +275,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     const prdRes = await fetch(`${baseUrl}/api/v1/assessments/${created.id}/deployment-readiness`, {
       method: 'PUT',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant',
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -296,18 +296,18 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
   it('9. GET /api/v1/enterprise/reports/:reportType generates exportable executive reports', async () => {
     const mdRes = await fetch(`${baseUrl}/api/v1/enterprise/reports/executive-summary?format=markdown`, {
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_viewer'
+        'Authorization': 'Bearer Fiorify_dev_token_viewer'
       }
     });
 
     assert.strictEqual(mdRes.status, 200);
     const mdText = await mdRes.text();
-    assert.ok(mdText.includes('# FioriX Enterprise Modernization Report'));
+    assert.ok(mdText.includes('# Fiorify Enterprise Modernization Report'));
     assert.ok(mdText.includes('Executive Summary'));
 
     const jsonRes = await fetch(`${baseUrl}/api/v1/enterprise/reports/technical-remediation?format=json`, {
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_viewer'
+        'Authorization': 'Bearer Fiorify_dev_token_viewer'
       }
     });
 

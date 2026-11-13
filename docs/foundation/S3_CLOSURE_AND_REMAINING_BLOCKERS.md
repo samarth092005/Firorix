@@ -1,6 +1,6 @@
-# FioriX — Stage S3: Connectivity Closure & Remaining Blockers Report
+# Fiorify — Stage S3: Connectivity Closure & Remaining Blockers Report
 
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
 **Execution Runtime:** Node.js 20 Native HTTP Backend + React/Vite  
 **Target Deployment:** SAP BTP Cloud Foundry (`eu30`, org `Abhiyanta_India Solutions Private Limited_sap-btp-ais-d0a7p7v8`, space `dev`)  
@@ -20,7 +20,7 @@ However, an empirical inspection of the SAP BTP environment and the on-premise l
 
 Empirical inspection using the Cloud Foundry CLI and BTP REST APIs establishes the following facts:
 
-| Infrastructure Component | Discovered Reality | Impact on FioriX |
+| Infrastructure Component | Discovered Reality | Impact on Fiorify |
 | :--- | :--- | :--- |
 | **BTP Destination Service** | • Instance exists (`BTPLense-destination-service`, `wzsess-destination`, etc.)<br>• OAuth2 token exchange with `https://destination-configuration.cfapps.eu30.hana.ondemand.com` succeeds.<br>• Destination `S21` exists in the subaccount. | **RESOLVED**: Destination metadata (Client 200, BasicAuth, OnPremise proxy) can be resolved. |
 | **Destination S21 Configuration** | • Target URL: `http://kbl_fiori:8000` (internal IP: `192.168.1.55:8000`)<br>• Configured with personal user `int_samarth` and `TrustAll=true`.<br>• Carries obsolete Web IDE properties (`WebIDEUsage=odata_abap,bsp_execute,dev_abap`). | **ACTION REQUIRED**: Must be hardened with a dedicated technical service account, `TrustAll` removed, and legacy properties cleaned up. |
@@ -28,8 +28,8 @@ Empirical inspection using the Cloud Foundry CLI and BTP REST APIs establishes t
 | **SAP Cloud Connector (SCC)** | • No active tunnel verified between BTP Subaccount and virtual host `kbl_fiori:8000`.<br>• Internal application server `192.168.1.55:8000` is on a private customer subnet. | **BLOCKER**: S21 is physically unreachable from the BTP Cloud Foundry runtime or local workstation without the Cloud Connector tunnel. |
 | **S21 HTTP Reachability** | • Direct TCP/HTTP probe to `192.168.1.55:8000` times out (15,000ms abort).<br>• Cloud Connector virtual host `kbl_fiori:8000` returns `ETIMEDOUT`. | **BLOCKER**: Network path is completely down. |
 | **SAP Authentication & Metadata** | • Unverified because the host is unreachable.<br>• User `int_samarth` credentials cannot be challenged against ICM. | **UNVERIFIED**: Authentication, Gateway Catalog, and ADT discovery cannot be verified. |
-| **PostgreSQL Managed Service** | • `cf marketplace` contains **NO** `postgresql-db` or `postgres` service offering in this subaccount/org/space. | **BLOCKER**: FioriX cannot deploy its PostgreSQL persistence layer as a native BTP managed service without subaccount entitlement additions or external hosting. |
-| **XSUAA Production Binding** | • Multiple other applications possess XSUAA instances (`BTPLense-auth`, `BTPMonitorTool-xsuaa-service`, etc.), but none are dedicated to FioriX.<br>• Reusing another app's XSUAA instance causes token audience validation failure (`aud` mismatch). | **BLOCKER**: FioriX requires its own dedicated XSUAA instance created with `xs-security.json`. |
+| **PostgreSQL Managed Service** | • `cf marketplace` contains **NO** `postgresql-db` or `postgres` service offering in this subaccount/org/space. | **BLOCKER**: Fiorify cannot deploy its PostgreSQL persistence layer as a native BTP managed service without subaccount entitlement additions or external hosting. |
+| **XSUAA Production Binding** | • Multiple other applications possess XSUAA instances (`BTPLense-auth`, `BTPMonitorTool-xsuaa-service`, etc.), but none are dedicated to Fiorify.<br>• Reusing another app's XSUAA instance causes token audience validation failure (`aud` mismatch). | **BLOCKER**: Fiorify requires its own dedicated XSUAA instance created with `xs-security.json`. |
 
 ---
 
@@ -64,7 +64,7 @@ To prevent duplicate maintenance, the runtime discovery adapters and server endp
 
 The remaining blockers are strictly operational and administrative. The codebase is prepared to handle live connectivity as soon as these prerequisites are fulfilled:
 
-### 4.1 What FioriX Can Do Right Now (Current Capability)
+### 4.1 What Fiorify Can Do Right Now (Current Capability)
 - [x] Run locally with full PostgreSQL persistence, schema migrations, and rollback support.
 - [x] Authenticate administrators via RFC 7519 JWT verification with RBAC (9 enterprise permissions).
 - [x] Enforce backend multi-tenant isolation across assessments, projects, artifacts, and systems.
@@ -88,7 +88,7 @@ The remaining blockers are strictly operational and administrative. The codebase
   - **REJECT** broad `/sap/opu/odata` or `/sap/bc/adt` wildcards.
 - [ ] **ICF Service Activation**: Activate nodes `/sap/bc/echo`, `/sap/opu/odata/iwfnd/catalogservice`, and `/sap/bc/adt` in transaction `SICF`.
 - [ ] **Technical Service User Creation**:
-  - Create user `BTP_FIORIX_SVC` (User Type: `B - System User` or `C - Communication User`).
+  - Create user `BTP_Fiorify_SVC` (User Type: `B - System User` or `C - Communication User`).
   - Assign least-privilege role containing `S_SERVICE` (SRV_TYPE: `HT`), `S_ADT_RES` (URI: `/sap/bc/adt/*`), `S_DEVELOP` (ACTVT: `03` Display only for `TRAN`, `PROG`, `DDLS`; restricted `DEVCLASS`), and `S_TABU_DIS` (ACTVT: `03` Display only for auth group `SS` or `TSTC`).
   - **DO NOT grant `SAP_ALL`, `SAP_NEW`, or unrestricted `S_DEVELOP`.**
   - Set strong password without expiration policy for technical communication.
@@ -97,21 +97,21 @@ The remaining blockers are strictly operational and administrative. The codebase
 
 ### 4.3 What Requires a BTP Subaccount Administrator
 - [ ] **Provision Connectivity Service**:
-  - Run `cf create-service connectivity lite fiorix-connectivity` in space `dev`.
+  - Run `cf create-service connectivity lite Fiorify-connectivity` in space `dev`.
   - Confirm binding credentials will be injected into application `VCAP_SERVICES`.
 - [ ] **Update Destination S21**:
-  - Replace user `int_samarth` with `BTP_FIORIX_SVC` and its corresponding password.
+  - Replace user `int_samarth` with `BTP_Fiorify_SVC` and its corresponding password.
   - Remove `TrustAll=true`.
   - Remove legacy Web IDE properties (`WebIDEEnabled`, `WebIDESystem`, `WebIDEUsage`, `HTML5.DynamicDestination`).
   - Retain `Name=S21`, `Type=HTTP`, `URL=http://kbl_fiori:8000`, `ProxyType=OnPremise`, `Authentication=BasicAuthentication`, `sap-client=200`.
 - [ ] **Provision XSUAA Service Instance**:
-  - Execute `cf create-service xsuaa application fiorix-xsuaa -c xs-security.json` with the canonical FioriX security definition.
+  - Execute `cf create-service xsuaa application Fiorify-xsuaa -c xs-security.json` with the canonical Fiorify security definition.
 - [ ] **Resolve Database Entitlement**:
   - Either add the `postgresql-db` service entitlement (Hyperscaler standard) to the subaccount, or provision an external managed PostgreSQL instance reachable via network egress, or authorize the SAP HANA Cloud repository adapter path.
 
 ---
 
 ### 4.4 What Requires a Developer
-- [ ] **Bind Services in `manifest.yml`**: Update `manifest.yml` to bind `fiorix-xsuaa`, `fiorix-destination`, `fiorix-connectivity`, and the designated database service.
+- [ ] **Bind Services in `manifest.yml`**: Update `manifest.yml` to bind `Fiorify-xsuaa`, `Fiorify-destination`, `Fiorify-connectivity`, and the designated database service.
 - [ ] **Deploy & Run Live Smoke Test**: Deploy application to Cloud Foundry and execute the 10-point capability probe (`/api/v1/connectivity/health`).
 - [ ] **Capture First Genuine SAP Evidence**: Only upon receiving HTTP 200 from S21 via Cloud Connector, update capability statuses to `VERIFIED`.

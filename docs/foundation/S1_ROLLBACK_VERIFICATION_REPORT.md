@@ -1,4 +1,4 @@
-# FIORIX — PHASE S1 ROLLBACK VERIFICATION REPORT
+# Fiorify — PHASE S1 ROLLBACK VERIFICATION REPORT
 **Migration Reversal, Database Teardown & Disaster Recovery Verification**
 
 **Date:** 2026-11-11  

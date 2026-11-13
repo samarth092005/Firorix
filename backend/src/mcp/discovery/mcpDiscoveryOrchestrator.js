@@ -1,5 +1,5 @@
 /**
- * FioriX MCP Subsystem — Discovery Orchestrator
+ * Fiorify MCP Subsystem — Discovery Orchestrator
  *
  * Coordinates MCP-assisted discovery operations for transaction and requirement queries:
  * 1. Evaluates execution policy against current connection and registry state.

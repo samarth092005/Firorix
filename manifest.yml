@@ -1,6 +1,6 @@
 ---
 applications:
-  - name: fiorix-platform
+  - name: Fiorify-platform
     memory: 1024M
     disk_quota: 2048M
     buildpacks:
@@ -8,13 +8,13 @@ applications:
     command: node backend/src/server.js
     env:
       NODE_ENV: production
-      FIORIX_PERSISTENCE: postgres
-      FIORIX_ENFORCE_AUTH: "true"
+      Fiorify_PERSISTENCE: postgres
+      Fiorify_ENFORCE_AUTH: "true"
       SAP_DESTINATION_NAME: S21
       SAP_CLIENT: "200"
       SAP_TIMEOUT_MS: "15000"
     services:
-      - fiorix-destination
-      - fiorix-connectivity
-      - fiorix-xsuaa
-      - fiorix-postgres
+      - Fiorify-destination
+      - Fiorify-connectivity
+      - Fiorify-xsuaa
+      - Fiorify-postgres

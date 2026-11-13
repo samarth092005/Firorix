@@ -1,22 +1,22 @@
-# FIORIX — GENERATION STUDIO ARCHITECTURE & PIPELINE DESIGN
+# Fiorify — GENERATION STUDIO ARCHITECTURE & PIPELINE DESIGN
 
 **Document ID:** ARCH-GEN-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Status:** ARCHITECTURALLY APPROVED — IMPLEMENTATION BLUEPRINT  
-**Target Release:** FioriX v2.0.0 (Generation Milestone)  
+**Target Release:** Fiorify v2.0.0 (Generation Milestone)  
 **Author:** Enterprise Solution Architect & ABAP Cloud Architecture Lead  
 
 ---
 
 ## 1. Architectural Vision & Scope
 
-The **FioriX Generation Studio** transforms verified SAP assessment findings, business requirements, and DDIC metadata into clean-core, production-grade SAP Fiori application draft packages.
+The **Fiorify Generation Studio** transforms verified SAP assessment findings, business requirements, and DDIC metadata into clean-core, production-grade SAP Fiori application draft packages.
 
 Generation Studio is **not** an uncontrolled code generator. It operates as a **strictly governed developer accelerator** adhering to:
 1. **SAP Clean Core Tier 1 Developer Extensibility:** Cloud-ready RAP (RESTful Application Programming) Business Objects and modern SAP Fiori Elements (OData V4).
 2. **Deterministic Template Compilation:** Source code is generated using typed, semantic templates rather than non-deterministic black-box LLM hallucinations.
 3. **Two-Stage Governance Gating:** Stage 1 (BUILD Decision Approval) and Stage 2 (Draft Artifact Export Authorization).
-4. **Draft-Only Boundary:** All generated code is delivered as an offline reviewable project package (ZIP archive with integrity manifest). FioriX **never** performs automated CTS transport creation, direct database updates, or automated activation on the target SAP system.
+4. **Draft-Only Boundary:** All generated code is delivered as an offline reviewable project package (ZIP archive with integrity manifest). Fiorify **never** performs automated CTS transport creation, direct database updates, or automated activation on the target SAP system.
 
 ---
 
@@ -196,7 +196,7 @@ flowchart TD
 * **Input:** `projectId: string`, `userContext: UserToken`
 * **Function:**
   - Enforces Stage 2 Export Governance sign-off.
-  - Streams an offline ZIP archive (`fiorix-draft-{projectId}.zip`) containing the complete ABAP and UI5 directory tree, the `generation-manifest.json`, and `validation-report.md`.
+  - Streams an offline ZIP archive (`Fiorify-draft-{projectId}.zip`) containing the complete ABAP and UI5 directory tree, the `generation-manifest.json`, and `validation-report.md`.
   - Emits immutable `AUDIT_ARTIFACTS_EXPORTED` event to `assessmentStore.js`.
 * **Output:** Binary ZIP file download stream.
 
@@ -209,7 +209,7 @@ The Generation Studio remains aligned with the existing **Node.js/Express** back
 ### Technology Stack Matrix
 | Layer | Technology | Justification |
 | :--- | :--- | :--- |
-| **Backend Runtime** | Node.js (v20+ LTS) | Native fit with existing FioriX server architecture; non-blocking I/O for file generation. |
+| **Backend Runtime** | Node.js (v20+ LTS) | Native fit with existing Fiorify server architecture; non-blocking I/O for file generation. |
 | **Server Framework** | Express / Native Node HTTP | Direct integration into `backend/src/server.js` without architecture fork. |
 | **Template Engine** | TypeScript-typed Template Literals / EJS | Deterministic AST generation, zero external compile bloat, verifiable syntax trees. |
 | **Archive Creation** | `archiver` (npm) | Standard, streaming ZIP bundle generation with high performance and zero disk bloat. |
@@ -221,7 +221,7 @@ The Generation Studio remains aligned with the existing **Node.js/Express** back
 
 ## 5. Security & Governance Architecture
 
-FioriX strictly enforces the **Two-Stage Governance Gate**:
+Fiorify strictly enforces the **Two-Stage Governance Gate**:
 
 ```mermaid
 sequenceDiagram
@@ -229,7 +229,7 @@ sequenceDiagram
     actor Dev as Developer / Functional
     actor Arch as Enterprise Architect
     participant FE as Generation Studio UI
-    participant BE as FioriX Backend API
+    participant BE as Fiorify Backend API
     participant Store as Assessment & Audit Store
     participant Disk as Artifact File Store
 
@@ -256,7 +256,7 @@ sequenceDiagram
     FE->>BE: POST /api/v1/generation/:projectId/export
     BE->>BE: Verify Stage 2 Export Authorization
     BE->>Store: Append AUDIT_ARTIFACTS_EXPORTED
-    BE-->>FE: Stream fiorix-draft-{projectId}.zip
+    BE-->>FE: Stream Fiorify-draft-{projectId}.zip
 ```
 
 ### Security Invariants

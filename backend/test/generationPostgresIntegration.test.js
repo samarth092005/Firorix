@@ -1,5 +1,5 @@
 /**
- * FioriX — QA-02: Generation Project PostgreSQL Repository Readiness & Migration Test Suite
+ * Fiorify — QA-02: Generation Project PostgreSQL Repository Readiness & Migration Test Suite
  *
  * Verifies:
  * 1. GenerationProjectRepository CRUD against active PostgreSQL pool.
@@ -28,7 +28,7 @@ describe('QA-02: PostgreSQL Repository Readiness & Store Migration', () => {
   let testProjectId = `GEN-PG-TEST-${Date.now()}`;
 
   before(async () => {
-    process.env.FIORIX_ALLOW_EMBEDDED_PG = 'true';
+    process.env.Fiorify_ALLOW_EMBEDDED_PG = 'true';
     pool = await DatabasePool.getPool();
     assert.ok(pool, 'PostgreSQL database pool must be initialized');
 
@@ -152,7 +152,7 @@ describe('QA-02: PostgreSQL Repository Readiness & Store Migration', () => {
     assert.equal(lookup, null);
   });
 
-  it('7. Preserves file store as default: GenerationProjectStore operates on file system when FIORIX_PERSISTENCE is unset', () => {
+  it('7. Preserves file store as default: GenerationProjectStore operates on file system when Fiorify_PERSISTENCE is unset', () => {
     const store = new GenerationProjectStore();
     assert.equal(store.useDatabase, false, 'Default store must NOT be forced to PostgreSQL in local dev');
     assert.ok(fs.existsSync(store.storageDir), 'File storage directory must exist');

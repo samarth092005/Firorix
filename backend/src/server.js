@@ -1,4 +1,6 @@
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { btpDestinationAdapter, loadLocalEnv } from './adapters/btpDestinationAdapter.js';
 
@@ -79,7 +81,7 @@ export function setCorsHeaders(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, X-Requested-With, X-FioriX-Admin-Secret'
+    'Content-Type, Authorization, X-Requested-With, X-Fiorify-Admin-Secret'
   );
   res.setHeader('Access-Control-Max-Age', '86400');
 }
@@ -104,9 +106,9 @@ export function createServer(options = {}) {
   const mcpDiscoveryOrchestrator = options.mcpDiscoveryOrchestrator || defaultMcpDiscoveryOrchestrator;
   const authService = options.authService || defaultAuthService;
   const securityAuditLogger = options.securityAuditLogger || defaultSecurityAuditLogger;
-  const enforceAuth = options.enforceAuth === true || process.env.FIORIX_ENFORCE_AUTH === 'true';
+  const enforceAuth = options.enforceAuth === true || process.env.Fiorify_ENFORCE_AUTH === 'true';
   const systemRegistry = options.systemRegistry || defaultSystemRegistry;
-  const defaultTenantId = options.tenantId || process.env.FIORIX_TENANT_ID || 'DEFAULT-TENANT-S21';
+  const defaultTenantId = options.tenantId || process.env.Fiorify_TENANT_ID || 'DEFAULT-TENANT-S21';
   const enterpriseService = options.enterpriseService || new EnterpriseService({ assessmentStore, systemRegistry });
   const generationHandoffStore = options.generationHandoffStore || defaultGenerationHandoffStore;
   if (options.assessmentStore && generationHandoffStore) {
@@ -131,21 +133,22 @@ export function createServer(options = {}) {
   }
 
   const server = http.createServer(async (req, res) => {
-    setCorsHeaders(req, res);
+    try {
+      setCorsHeaders(req, res);
 
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
+      if (req.method === 'OPTIONS') {
+        res.writeHead(204);
+        res.end();
+        return;
+      }
 
-    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
     // Helper to resolve authenticated user context (SEC-01 + S2)
     const resolveUser = () => {
       const authHeader = req.headers.authorization;
-      const customSecret = req.headers['x-fiorix-admin-secret'];
-      const configuredSecret = process.env.FIORIX_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : undefined);
+      const customSecret = req.headers['x-Fiorify-admin-secret'];
+      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : undefined);
       const requestTenantId = req.headers['x-tenant-id'] || defaultTenantId;
 
       const isAdminSecretValid = (sec) => {
@@ -159,9 +162,9 @@ export function createServer(options = {}) {
       if (customSecret) {
         if (isAdminSecretValid(customSecret)) {
           return {
-            id: req.headers['x-fiorix-admin-user'] || 'USR-ADMIN-01',
-            name: req.headers['x-fiorix-admin-name'] || 'Enterprise System Administrator',
-            email: req.headers['x-fiorix-admin-email'] || 'admin@fiorix.corp',
+            id: req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01',
+            name: req.headers['x-Fiorify-admin-name'] || 'Admin',
+            email: req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp',
             role: USER_ROLES.ADMIN,
             tenantId: requestTenantId,
             department: 'SAP Architecture & Platform Governance'
@@ -174,9 +177,9 @@ export function createServer(options = {}) {
         const token = authHeader.slice(7).trim();
         if (isAdminSecretValid(token)) {
           return {
-            id: req.headers['x-fiorix-admin-user'] || 'USR-ADMIN-01',
-            name: req.headers['x-fiorix-admin-name'] || 'Enterprise System Administrator',
-            email: req.headers['x-fiorix-admin-email'] || 'admin@fiorix.corp',
+            id: req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01',
+            name: req.headers['x-Fiorify-admin-name'] || 'Admin',
+            email: req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp',
             role: USER_ROLES.ADMIN,
             tenantId: requestTenantId,
             department: 'SAP Architecture & Platform Governance'
@@ -186,8 +189,8 @@ export function createServer(options = {}) {
         if (verified) {
           const tokenTenantId = verified.tenantId || verified.ext_attr?.zdn;
           const hasCrossTenantAdmin = Array.isArray(verified.scopes) && (
-            verified.scopes.includes('fiorix.admin.access') ||
-            verified.scopes.includes('fiorix.tenants.manage') ||
+            verified.scopes.includes('Fiorify.admin.access') ||
+            verified.scopes.includes('Fiorify.tenants.manage') ||
             verified.role === USER_ROLES.ADMIN
           );
           if (req.headers['x-tenant-id'] && tokenTenantId && req.headers['x-tenant-id'] !== tokenTenantId && !hasCrossTenantAdmin) {
@@ -205,8 +208,8 @@ export function createServer(options = {}) {
 
       return {
         id: 'USR-ADMIN-01',
-        name: 'Enterprise System Administrator',
-        email: 'admin@fiorix.corp',
+        name: 'Admin',
+        email: 'admin@Fiorify.corp',
         role: USER_ROLES.ADMIN,
         tenantId: defaultTenantId,
         department: 'SAP Architecture & Platform Governance'
@@ -300,8 +303,8 @@ export function createServer(options = {}) {
     const checkAdminAuth = () => {
       const authHeader = req.headers.authorization;
       const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-      const customHeaderSecret = req.headers['x-fiorix-admin-secret']
-        ? String(req.headers['x-fiorix-admin-secret']).trim()
+      const customHeaderSecret = req.headers['x-Fiorify-admin-secret']
+        ? String(req.headers['x-Fiorify-admin-secret']).trim()
         : null;
       const providedSecret = customHeaderSecret || bearerSecret;
 
@@ -309,7 +312,7 @@ export function createServer(options = {}) {
         return false;
       }
 
-      const configuredSecret = process.env.FIORIX_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
+      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
       if (providedSecret === configuredSecret) return true;
       if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(providedSecret)) return true;
       return false;
@@ -430,10 +433,58 @@ export function createServer(options = {}) {
 
     if (await handleMcpRoute(req, res, url, { mcpService, checkAdminAuth })) return;
 
+    // Static frontend serving (for production and unified BTP deployments)
+    const frontendDistDir = path.resolve(process.cwd(), 'frontend', 'dist');
+    if (req.method === 'GET' && !url.pathname.startsWith('/api/')) {
+      const safePath = path.normalize(url.pathname).replace(/^(\.\.[\/\\])+/, '');
+      let filePath = path.join(frontendDistDir, safePath);
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+        filePath = path.join(filePath, 'index.html');
+      }
+
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        const ext = path.extname(filePath).toLowerCase();
+        const mimeTypes = {
+          '.html': 'text/html',
+          '.js': 'application/javascript',
+          '.css': 'text/css',
+          '.json': 'application/json',
+          '.svg': 'image/svg+xml',
+          '.png': 'image/png',
+          '.jpg': 'image/jpeg',
+          '.ico': 'image/x-icon',
+          '.woff': 'font/woff',
+          '.woff2': 'font/woff2'
+        };
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': contentType });
+        fs.createReadStream(filePath).pipe(res);
+        return;
+      }
+
+      // SPA fallback to index.html if request is for HTML navigation
+      const indexPath = path.join(frontendDistDir, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        fs.createReadStream(indexPath).pipe(res);
+        return;
+      }
+    }
+
     // Route not found
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Endpoint Not Found', path: url.pathname }));
-  });
+  } catch (unexpectedErr) {
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+    }
+    res.end(JSON.stringify({
+      success: false,
+      statusCode: 'INTERNAL_SERVER_ERROR',
+      errorMessage: unexpectedErr.message || 'An unexpected internal server error occurred.'
+    }));
+  }
+});
 
   server.on('close', async () => {
     if (mcpService && typeof mcpService.shutdown === 'function') {
@@ -445,6 +496,18 @@ export function createServer(options = {}) {
     }
   });
 
+  const originalClose = server.close.bind(server);
+  server.close = function (cb) {
+    if (typeof server.closeAllConnections === 'function') {
+      try {
+        server.closeAllConnections();
+      } catch (e) {
+        // ignore
+      }
+    }
+    return originalClose(cb);
+  };
+
   return server;
 }
 
@@ -453,15 +516,15 @@ const server = createServer();
 const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isDirectRun) {
   defaultMcpService.initialize().catch((err) => {
-    console.warn(`[FioriX MCP] Non-blocking initialization note: ${err.message}`);
+    console.warn(`[Fiorify MCP] Non-blocking initialization note: ${err.message}`);
   });
 
   const handleGracefulShutdown = async (signal) => {
-    console.log(`[FioriX] Received ${signal}. Shutting down cleanly...`);
+    console.log(`[Fiorify] Received ${signal}. Shutting down cleanly...`);
     try {
       await defaultMcpService.shutdown();
     } catch (err) {
-      console.warn(`[FioriX MCP] Shutdown warning: ${err.message}`);
+      console.warn(`[Fiorify MCP] Shutdown warning: ${err.message}`);
     }
     server.close(() => {
       process.exit(0);

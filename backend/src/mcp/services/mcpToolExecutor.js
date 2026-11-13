@@ -28,7 +28,7 @@ export class McpToolExecutor {
    * @param {string} toolName Name of the tool
    * @param {object} args Arguments matching tool inputSchema
    * @param {object} [options] Optional runtime overrides (e.g. timeoutMs)
-   * @returns {Promise<object>} Normalized FioriX API response
+   * @returns {Promise<object>} Normalized Fiorify API response
    */
   async execute(toolName, args = {}, options = {}) {
     const startTime = Date.now();
@@ -63,7 +63,7 @@ export class McpToolExecutor {
         category: tool.category,
         error: {
           code: 'MCP_TOOL_BLOCKED_BY_POLICY',
-          message: policyEvaluation.reason || 'This tool is blocked by FioriX read-only security policy.'
+          message: policyEvaluation.reason || 'This tool is blocked by Fiorify read-only security policy.'
         },
         durationMs,
         connectionState: connState

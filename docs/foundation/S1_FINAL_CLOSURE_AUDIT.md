@@ -1,4 +1,4 @@
-# FIORIX — S1 FINAL CLOSURE AUDIT
+# Fiorify — S1 FINAL CLOSURE AUDIT
 **Persistence Foundation Final Audit & Stage Acceptance Report**
 
 **Date:** 2026-11-11  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-Stage S1 (Persistence Foundation) is formally audited, closed, and accepted. FioriX has completed its transition from fragile JSON flat-files to a normalized, ACID-compliant PostgreSQL relational database with zero regression across existing Discovery, Catalogue, Assessment Results, and Generation Studio capabilities.
+Stage S1 (Persistence Foundation) is formally audited, closed, and accepted. Fiorify has completed its transition from fragile JSON flat-files to a normalized, ACID-compliant PostgreSQL relational database with zero regression across existing Discovery, Catalogue, Assessment Results, and Generation Studio capabilities.
 
 All non-negotiable rules for S1 were strictly upheld:
 1. **Preserved Runtime:** Native Node.js HTTP runtime (`server.js`) remains intact; no CAP, Express, Prisma, or TypeORM was introduced.
@@ -39,7 +39,7 @@ All non-negotiable rules for S1 were strictly upheld:
 ## 3. Database State Summary
 
 - **Database Engine:** PostgreSQL 18.6 on x86_64-windows (msvc-19.44.35228, 64-bit)
-- **Active Database:** `fiorix`
+- **Active Database:** `Fiorify`
 - **Active Schema:** `public`
 - **Total Tables:** 17 (16 Domain Entities + 1 Migration Metadata)
 - **Total Foreign Keys:** 19

@@ -1,11 +1,11 @@
-# FioriX — Stage S2: Security Architecture
+# Fiorify — Stage S2: Security Architecture
 
 ## 1. Overview & Security Baseline
-FioriX is designed to interface with enterprise SAP S/4HANA on-premise systems (specifically SAP S/4HANA 2023 on System S21, Client 200) via SAP Business Technology Platform (SAP BTP). Stage S2 establishes production-grade authentication, authorization, multi-tenant isolation, cryptographic audit logging, and credential protection.
+Fiorify is designed to interface with enterprise SAP S/4HANA on-premise systems (specifically SAP S/4HANA 2023 on System S21, Client 200) via SAP Business Technology Platform (SAP BTP). Stage S2 establishes production-grade authentication, authorization, multi-tenant isolation, cryptographic audit logging, and credential protection.
 
 ### Guiding Principles:
-1. **Single Authenticated Administrator Model**: The initial release operates under a single authenticated FioriX Administrator role, strictly gating all administrative, configuration, and data-modifying operations.
-2. **Read-Only SAP Access**: FioriX never issues mutating RFCs, writes, transports, or object activations to the backend SAP S/4HANA instance.
+1. **Single Authenticated Administrator Model**: The initial release operates under a single authenticated Fiorify Administrator role, strictly gating all administrative, configuration, and data-modifying operations.
+2. **Read-Only SAP Access**: Fiorify never issues mutating RFCs, writes, transports, or object activations to the backend SAP S/4HANA instance.
 3. **Defense-in-Depth Authentication**: Decoupled authentication supporting enterprise SAP BTP XSUAA (OAuth 2.0 / JWT) with fallback refusal in production environments when unbound.
 4. **Tenant Isolation**: Every assessment, project, artifact, and connected SAP system profile is strictly isolated to its owning tenant. Cross-tenant access is unconditionally blocked with HTTP 403 Forbidden.
 5. **Tamper-Evident Security Auditing**: All security-relevant events, access violations, permission denials, and state transitions are cryptographically chained using SHA-256 integrity hashing back to the genesis record.
@@ -16,13 +16,13 @@ FioriX is designed to interface with enterprise SAP S/4HANA on-premise systems (
 
 ```mermaid
 flowchart TD
-    Client["Client / Browser / CLI"] -->|HTTP Request with Bearer Token| Gateway["FioriX Native HTTP Runtime (server.js)"]
+    Client["Client / Browser / CLI"] -->|HTTP Request with Bearer Token| Gateway["Fiorify Native HTTP Runtime (server.js)"]
     Gateway --> AuthFilter["Authentication Filter (resolveUser)"]
     
     AuthFilter --> CheckType{"Token Type"}
     CheckType -->|XSUAA / BTP JWT| XSUAA["XsuaaAuthenticationProvider"]
     CheckType -->|RFC 7519 HMAC / RSA| NativeJWT["JwtVerifier (HS256 / RS256)"]
-    CheckType -->|Admin Secret Header| AdminSecret["X-FioriX-Admin-Secret"]
+    CheckType -->|Admin Secret Header| AdminSecret["X-Fiorify-Admin-Secret"]
     CheckType -->|Dev Token (Non-Prod Only)| DevAuth["Local Dev Bypass (Rejected in Prod)"]
     
     XSUAA --> VerifySignature{"Verify Signature, Expiry, Iss, Aud"}
@@ -48,7 +48,7 @@ In deployed SAP BTP Cloud Foundry environments, user identity is provisioned via
 ---
 
 ## 4. Multi-Tenant Isolation
-Customer-owned data in FioriX is partitioned using a strict tenant code (`tenant_id`).
+Customer-owned data in Fiorify is partitioned using a strict tenant code (`tenant_id`).
 
 1. **Entity Ownership**:
    - `tenants`: Root organizational tenant entity.

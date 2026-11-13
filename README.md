@@ -1,4 +1,4 @@
-# FioriX — SAP S/4HANA Modernization & Generation Platform
+# Fiorify — SAP S/4HANA Modernization & Generation Platform
 
 [![Target Architecture](https://img.shields.io/badge/SAP%20Target-S%2F4HANA%202023%20On--Premise%20(S21)-0070f2?style=flat-square&logo=sap)](https://www.sap.com)
 [![Clean Core](https://img.shields.io/badge/Architecture-Clean%20Core%20%26%20ABAP%20Cloud-107e3e?style=flat-square)](https://community.sap.com)
@@ -9,7 +9,7 @@
 
 > **"STANDARD SAP FIORI FIRST. CUSTOM BUILD ONLY WHEN A GENUINE GAP EXISTS."**
 
-FioriX is an enterprise-grade SAP modernization workbench and code generation studio. It bridges the gap between classical SAP GUI dynpro transactions and modern SAP Fiori applications by:
+Fiorify is an enterprise-grade SAP modernization workbench and code generation studio. It bridges the gap between classical SAP GUI dynpro transactions and modern SAP Fiori applications by:
 1. **Discovering** standard Fiori replacements grounded in live SAP kernel dictionaries (TSTC, TADIR, dynpros) and the official 18,000+ app SAP Fiori Reference Library.
 2. **Governing** transitions through evidence-based fit-gap scoring and Lead Architect approval workflows.
 3. **Generating** production-ready ABAP RESTful Application Programming Model (RAP) Business Objects and SAP Fiori Elements V4 applications with instant local ephemeral mock previews.
@@ -32,7 +32,7 @@ flowchart TD
         FITGAP -->|Genuine Custom Gap| APPROVAL["Enterprise Architect Approval Gate"]
     end
 
-    subgraph GenStudio ["3. FioriX Generation Studio"]
+    subgraph GenStudio ["3. Fiorify Generation Studio"]
         APPROVAL -->|Authoritative BUILD Snapshot| GEN_PROJ["Project Foundation Store\n(Canonical JSON + Postgres Adapter)"]
         GEN_PROJ --> REQ_DES["Requirements Designer\n(Gap Backlog & Approval Provenance)"]
         REQ_DES --> DM_DES["Data Model Designer\n(CDS Entities, Compositions, Reuse Registry)"]
@@ -93,7 +93,7 @@ When standard SAP Fiori apps leave genuine functional gaps, Generation Studio ge
 
 ### Pillar 4: Packaging & Developer Handover (`GEN-08` / `GEN-09`)
 - **Zero-Dependency PKZIP Archiver:** Custom streaming archiver implemented with pure Node.js built-ins (`zlib`, `Buffer`), creating standard `.zip` bundles without bloated external dependencies.
-- **Cryptographic Provenance:** Generates `fiorix-export-manifest.json` recording SHA-256 hashes of every generated file.
+- **Cryptographic Provenance:** Generates `Fiorify-export-manifest.json` recording SHA-256 hashes of every generated file.
 - **Bi-Directional Traceability:** Computes strict mathematical requirement coverage percentages linking T-Code requirements $\rightarrow$ CDS entities $\rightarrow$ RAP behaviors $\rightarrow$ Fiori UI fields.
 - **Eclipse ADT Handover Guide:** Generates tailored, step-by-step instructions for importing database tables, activating CDS views, pasting BDEFs, and publishing OData V4 service bindings in Eclipse ADT.
 
@@ -134,14 +134,14 @@ Project_Handover_Bundle.zip
 │   ├── TRACEABILITY_MATRIX.md            # Forward & Backward Requirement Traceability
 │   ├── DEVELOPER_HANDOVER_GUIDE.md       # Step-by-Step Eclipse ADT & BAS Instructions
 │   └── README.md                         # Project Summary & Implementation Notes
-└── fiorix-export-manifest.json           # Root Manifest with SHA-256 Checksums
+└── Fiorify-export-manifest.json           # Root Manifest with SHA-256 Checksums
 ```
 
 ---
 
 ## 🎯 SAP S/4HANA 2023 Baseline Compatibility Matrix
 
-| Component | Target Baseline (S21) | FioriX Generator Setting | Compatibility Rationale |
+| Component | Target Baseline (S21) | Fiorify Generator Setting | Compatibility Rationale |
 | :--- | :--- | :--- | :--- |
 | **SAP System** | SAP S/4HANA 2023 On-Premise | System Connection `S21`, Client `200` | S21 verified target landscape |
 | **SAP_BASIS** | 7.58 (ABAP Cloud Foundation) | RAP `strict ( 2 );` | Full ABAP Cloud Clean Core compliance |
@@ -154,12 +154,12 @@ Project_Handover_Bundle.zip
 
 ## 🔒 Security, Isolation & Clean Core Invariants
 
-1. **Role-Based Access Control (Admin Boundary):** Every Generation Studio endpoint enforces session validation requiring `fiorix.generation.manage` and `fiorix.artifacts.export`.
+1. **Role-Based Access Control (Admin Boundary):** Every Generation Studio endpoint enforces session validation requiring `Fiorify.generation.manage` and `Fiorify.artifacts.export`.
 2. **Tenant Isolation:** Tenant identity is strictly derived from cryptographically verified session tokens or trusted gateway assertions. Cross-tenant access is rejected with `403 TenantAccessDenied` and audited.
 3. **Approval Provenance:** Custom RAP generation requires an authoritative `APPROVED` state from Discovery assessments. Unapproved assessments cannot enter Generation Studio.
 4. **Zip Slip & Path Traversal Guards:** The PKZIP archiver normalizes all entry paths, rejecting null bytes, Windows drive prefixes (`C:`), and directory traversal segments (`..`). File extractions verify `fullPath.startsWith(targetRoot)`.
 5. **Zero Plaintext Secrets:** Passwords, API tokens, and SAP connection secrets are strictly excluded from source control and generated project exports. Configuration templates are provided as `.env.example`.
-6. **No Direct Remote SAP Activation:** FioriX is a deterministic, offline-capable code synthesis studio. It performs zero unreviewed direct SAP writes, transports, or RFC activations. All code is exported for human ABAP developer review in Eclipse ADT.
+6. **No Direct Remote SAP Activation:** Fiorify is a deterministic, offline-capable code synthesis studio. It performs zero unreviewed direct SAP writes, transports, or RFC activations. All code is exported for human ABAP developer review in Eclipse ADT.
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Connectivity Error Taxonomy (Stage S3)
+ * Fiorify — SAP Connectivity Error Taxonomy (Stage S3)
  *
  * Implements deterministic error classification and ensures connectivity failures
  * are NEVER conflated with missing transactions or non-existent Fiori applications.

@@ -28,7 +28,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
   before(async () => {
     testStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-test-sec01-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-sec01-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
     server = createServer({ assessmentStore });
@@ -84,7 +84,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
   });
 
   it('3. GET /api/v1/auth/me resolves identity from Authorization Bearer token', async () => {
-    const consultantToken = 'fiorix_dev_token_sap_consultant';
+    const consultantToken = 'Fiorify_dev_token_sap_consultant';
     const res = await fetch(`${baseUrl}/api/v1/auth/me`, {
       headers: {
         'Authorization': `Bearer ${consultantToken}`
@@ -110,7 +110,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     const res = await fetch(`${baseUrl}/api/v1/assessments/${created.id}/approve`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_viewer',
+        'Authorization': 'Bearer Fiorify_dev_token_viewer',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ comments: 'I approve as viewer' })
@@ -136,14 +136,14 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     await fetch(`${baseUrl}/api/v1/assessments/${created.id}/submit-review`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant'
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant'
       }
     });
 
     const res = await fetch(`${baseUrl}/api/v1/assessments/${created.id}/approve`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_approver',
+        'Authorization': 'Bearer Fiorify_dev_token_approver',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ comments: 'Self approval attempt' })
@@ -171,7 +171,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     const res = await fetch(`${baseUrl}/api/v1/assessments/${created.id}/approve`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_approver',
+        'Authorization': 'Bearer Fiorify_dev_token_approver',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ comments: 'Architectural compliance verified. Approved for deployment.' })
@@ -187,7 +187,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     const viewerRes = await fetch(`${baseUrl}/api/v1/systems/ECC-100/diagnostics`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_viewer'
+        'Authorization': 'Bearer Fiorify_dev_token_viewer'
       }
     });
     assert.strictEqual(viewerRes.status, 403);
@@ -195,7 +195,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     const adminRes = await fetch(`${baseUrl}/api/v1/systems/ECC-100/diagnostics`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_admin'
+        'Authorization': 'Bearer Fiorify_dev_token_admin'
       }
     });
     const adminBody = await adminRes.json();
@@ -209,7 +209,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     const consRes = await fetch(`${baseUrl}/api/v1/fiori-catalogue/sync`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_sap_consultant',
+        'Authorization': 'Bearer Fiorify_dev_token_sap_consultant',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ records: [] })
@@ -219,7 +219,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
     const adminRes = await fetch(`${baseUrl}/api/v1/fiori-catalogue/sync`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_admin',
+        'Authorization': 'Bearer Fiorify_dev_token_admin',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ records: [], dryRun: true })
@@ -242,7 +242,7 @@ describe('SEC-01: Authentication, RBAC and Security Enforcement', () => {
 
     const verifyRes = await fetch(`${baseUrl}/api/v1/assessments/${assessment.id}/verify-audit`, {
       headers: {
-        'Authorization': 'Bearer fiorix_dev_token_admin'
+        'Authorization': 'Bearer Fiorify_dev_token_admin'
       }
     });
 

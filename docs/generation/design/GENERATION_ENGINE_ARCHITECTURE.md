@@ -1,7 +1,7 @@
-# FIORIX GENERATION ENGINE — SUBSYSTEM ARCHITECTURE & TEMPLATE SPECIFICATION
+# Fiorify GENERATION ENGINE — SUBSYSTEM ARCHITECTURE & TEMPLATE SPECIFICATION
 **Document ID:** ARCH-GEN-ENG-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Release:** FioriX v2.0.0  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Release:** Fiorify v2.0.0  
 **Status:** COMPLETE ARCHITECTURAL SPECIFICATION  
 **Author:** Principal ABAP Cloud Architect & Systems Lead  
 

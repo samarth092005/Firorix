@@ -1,7 +1,7 @@
-# FIORIX — GENERATION STUDIO READINESS AUDIT (GEN-01)
+# Fiorify — GENERATION STUDIO READINESS AUDIT (GEN-01)
 
 **Document ID:** AUDIT-GEN-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Phase:** Generation Studio Architecture & Readiness Audit (GEN-01)  
 **Date:** November 8, 2026  
 **Auditor:** Enterprise Solution Architect & Clean Core Lead Reviewer  
@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary
 
-As the Discovery module has achieved release acceptance (`REL-ACCEPT-2026-01`) with locked DDIC evidence, Free Fiori App Library (FAL) catalogue matching, and governed recommendation scoring, FioriX is initiating the **Generation Studio** phase.
+As the Discovery module has achieved release acceptance (`REL-ACCEPT-2026-01`) with locked DDIC evidence, Free Fiori App Library (FAL) catalogue matching, and governed recommendation scoring, Fiorify is initiating the **Generation Studio** phase.
 
 The Generation Studio is tasked with generating reviewable, clean-core, production-grade SAP Fiori application drafts (ABAP CDS View Entities, RAP Behavior Definitions, DCL Access Controls, Service Definitions, Service Bindings, and UI5 Fiori Elements List Report / Object Page projects) for assessments whose formal recommendation is **`BUILD`**.
 
@@ -34,7 +34,7 @@ This audit conducts a thorough, forensic inspection of the existing codebase to 
 | :--- | :--- | :--- | :--- |
 | `frontend/src/features/generation/GenerationStudioPage.tsx` | Main Generation Studio project overview page | Reads context from `location.state` or falls back to `localStore.getBlueprints()[0]`. Displays hardcoded fallback values if assessment is missing. Renders an honest "Generation Engine On Hold" banner. | **Mock / Placeholder** |
 | `frontend/src/features/generation/GeneratedArtifactsPage.tsx` | Draft artifacts repository & code viewer | Iterates over `localStore.getBlueprints()`. Displays code snippets in preformatted blocks. Download button triggers simulated `setTimeout` notification (`Simulated download: ${fileName}`). | **Mock / Prototype** |
-| `frontend/src/services/mock/generationService.ts` | Generation API client mock | Simulates AST compilation with `setTimeout(700)`. Interpolates clean T-Code into static string templates. Saves to `localStorage['fiorix_blueprints']`. No backend communication. | **Mock** |
+| `frontend/src/services/mock/generationService.ts` | Generation API client mock | Simulates AST compilation with `setTimeout(700)`. Interpolates clean T-Code into static string templates. Saves to `localStorage['Fiorify_blueprints']`. No backend communication. | **Mock** |
 | `frontend/src/services/mock/localStore.ts` | Browser storage manager | Stores blueprints, assessments, and validation findings in `localStorage` under `STORAGE_KEYS.BLUEPRINTS`. Resets to demo constants on clean storage. | **Mock Store** |
 | `frontend/src/services/mock/demoData.ts` | Static seed data | Contains `INITIAL_BLUEPRINTS['ASM-2026-003']` and `INITIAL_VALIDATION_FINDINGS` (VF-001 through VF-003). | **Fabricated Seed Data** |
 | `frontend/src/types/index.ts` | Legacy TypeScript interfaces | Defines `GeneratedArtifact`, `GeneratedApplicationBlueprint`, `ValidationFinding`. Missing RAP behavioral types, draft enablement, and DCL models. | **Incomplete Contract** |
@@ -139,7 +139,7 @@ This audit conducts a thorough, forensic inspection of the existing codebase to 
      ```typescript
      const handleExportZip = () => {
        if (!blueprint) return;
-       setNotification(`Reviewable draft archive downloaded: fiorix-draft-${blueprint.projectId}.zip (integrity verified)`);
+       setNotification(`Reviewable draft archive downloaded: Fiorify-draft-${blueprint.projectId}.zip (integrity verified)`);
        setTimeout(() => setNotification(null), 4000);
      };
      ```
@@ -165,7 +165,7 @@ This audit conducts a thorough, forensic inspection of the existing codebase to 
 ### 9. Whether artifacts are persisted outside browser local storage
 * **Audit Finding:** **NO.**
 * **Technical Evidence:**
-  Artifact persistence is bound exclusively to `localStorage.getItem('fiorix_blueprints')`. If the user opens another browser, clears browsing data, or operates in incognito mode, all generated artifacts vanish. There is zero server-side disk or database persistence for blueprints or artifacts.
+  Artifact persistence is bound exclusively to `localStorage.getItem('Fiorify_blueprints')`. If the user opens another browser, clears browsing data, or operates in incognito mode, all generated artifacts vanish. There is zero server-side disk or database persistence for blueprints or artifacts.
 
 ---
 

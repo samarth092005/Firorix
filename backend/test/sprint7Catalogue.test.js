@@ -10,7 +10,7 @@ import {
 } from '../src/adapters/officialFioriCatalogueAdapter.js';
 import { createServer } from '../src/server.js';
 
-describe('FioriX Sprint 7 — Official SAP Fiori Apps Reference Library Unit Tests', () => {
+describe('Fiorify Sprint 7 — Official SAP Fiori Apps Reference Library Unit Tests', () => {
   it('extractODataServices cleanly parses raw delimiter strings and deduplicates tokens', () => {
     assert.deepStrictEqual(extractODataServices(''), []);
     assert.deepStrictEqual(extractODataServices(null), []);
@@ -21,7 +21,7 @@ describe('FioriX Sprint 7 — Official SAP Fiori Apps Reference Library Unit Tes
     );
   });
 
-  it('normalizeCatalogueApp normalizes raw OData responses into the FioriX catalogue data model', () => {
+  it('normalizeCatalogueApp normalizes raw OData responses into the Fiorify catalogue data model', () => {
     const rawF1612 = {
       appId: 'F1612',
       AppName: 'Post Outgoing Payments',
@@ -53,7 +53,7 @@ describe('FioriX Sprint 7 — Official SAP Fiori Apps Reference Library Unit Tes
   });
 
   it('OfficialFioriCatalogueAdapter retrieves an app by ID and caches to memory and disk', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-cat-test-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-cat-test-'));
     const cacheFilePath = path.join(tempDir, 'catalog_cache.json');
 
     const mockFetch = async () => ({
@@ -104,7 +104,7 @@ describe('FioriX Sprint 7 — Official SAP Fiori Apps Reference Library Unit Tes
   });
 
   it('OfficialFioriCatalogueAdapter falls back to disk cache when live query fails', async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-cat-fallback-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-cat-fallback-'));
     const cacheFilePath = path.join(tempDir, 'catalog_cache.json');
 
     const cachedSnapshot = [
@@ -229,7 +229,7 @@ describe('FioriX Sprint 7 — Official SAP Fiori Apps Reference Library Unit Tes
   });
 });
 
-describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integration', () => {
+describe('Fiorify Sprint 7 — HTTP Server Official Catalogue Endpoints Integration', () => {
   const TEST_ADMIN_SECRET = 'sprint-7-test-secret-xyz';
 
   const mockOfficialCatalogueAdapter = {
@@ -354,8 +354,8 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
   };
 
   it('protects GET /api/v1/fiori-catalogue/apps/:appId with ?refresh=true and returns 401 when unauthorized, but allows public cached read', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -380,13 +380,13 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
       assert.strictEqual(dataPublic.app.appId, 'F1612');
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 
   it('allows GET /api/v1/fiori-catalogue/apps/F1612 with 200 when authorized and 404 for unknown app', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -399,7 +399,7 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
     try {
       // 1. Success for F1612
       const resF1612 = await fetch(`http://localhost:${port}/api/v1/fiori-catalogue/apps/F1612`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(resF1612.status, 200);
       const dataF1612 = await resF1612.json();
@@ -408,7 +408,7 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
 
       // 2. 404 for unknown app
       const res404 = await fetch(`http://localhost:${port}/api/v1/fiori-catalogue/apps/UNKNOWN_APP`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(res404.status, 404);
       const data404 = await res404.json();
@@ -416,13 +416,13 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
       assert.strictEqual(data404.statusCode, 'NOT_FOUND');
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 
   it('allows GET /api/v1/fiori-catalogue/search with 200 and evaluates matches when evaluateLive=true', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -435,7 +435,7 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
 
     try {
       const res = await fetch(`http://localhost:${port}/api/v1/fiori-catalogue/search?tcode=F-53&evaluateLive=true`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(res.status, 200);
       const data = await res.json();
@@ -445,7 +445,7 @@ describe('FioriX Sprint 7 — HTTP Server Official Catalogue Endpoints Integrati
       assert.strictEqual(data.evaluatedMatches.status, 'VERIFIED_MATCH');
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 });

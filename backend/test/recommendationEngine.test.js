@@ -8,7 +8,7 @@ import {
   GOVERNANCE_OVERRIDES
 } from '../src/engine/recommendationEngine.js';
 
-describe('FioriX REC-01 — Governed Recommendation Engine Unit Tests', () => {
+describe('Fiorify REC-01 — Governed Recommendation Engine Unit Tests', () => {
   const baseReq = {
     id: 'REQ-01',
     title: 'Post Outgoing Payments',

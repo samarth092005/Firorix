@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: RAP Architecture Contract & Constants
+ * Fiorify — GEN-05: RAP Architecture Contract & Constants
  *
  * Defines canonical RAP architecture profiles, lock/ETag strategies,
  * authorization strategies, and service protocols for S/4HANA 2023 on-premise.

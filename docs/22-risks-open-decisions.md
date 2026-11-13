@@ -21,7 +21,7 @@ Every major design decision and risk is formally classified into one of five cat
 | **FAL Catalog Ingestion Approach** | **CONFIRMED** | Curated offline official FAL export seeded into HANA. Automated web scraping rejected (CRIT-01). | Solution Architect | Sprint 2 |
 | **Target S/4HANA Release Profile** | **REQUIRES R&D** | Query `SPAM` in DEV sandbox (Client 200) to pin exact S4CORE/BASIS release and RAP features. | SAP Basis / Tech Lead | Sprint 1 |
 | **ADT Connectivity via Cloud Connector** | **BLOCKED BY ACCESS**| Test `/sap/bc/adt/discovery` over Cloud Connector tunnel using BTP Destination spike. | SCC Administrator | Sprint 1 |
-| **Least-Privilege SAP Technical Role** | **BLOCKED BY ACCESS**| Provision custom role `Z_FIORIX_DISCOVERY_RO` strictly scoped to metadata tables. | SAP Security Architect | Sprint 1 |
+| **Least-Privilege SAP Technical Role** | **BLOCKED BY ACCESS**| Provision custom role `Z_Fiorify_DISCOVERY_RO` strictly scoped to metadata tables. | SAP Security Architect | Sprint 1 |
 | **ADT Where-Used Cross-Reference Overhead**| **REQUIRES R&D** | Measure response times and CPU impact of `/sap/bc/adt/repository/crossreferences` in DEV. | ABAP Technical Lead | Sprint 1 |
 | **BTP Subaccount Entitlements Export** | **BLOCKED BY ACCESS**| Export BTP cockpit inventory confirming Cloud Foundry quota, HANA Cloud, and DMS. | BTP Global Admin | Sprint 4 |
 | **Excel Bulk Upload & System Scans** | **DEFERRED** | Deferred to Sprint 14+. Sprint 1–13 focus exclusively on single pilot T-Code (e.g. ME21N). | Product Owner | Sprint 14 |

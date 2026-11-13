@@ -1,5 +1,5 @@
 /**
- * FioriX — Transaction Search Service (Re-exported from canonical services)
+ * Fiorify — Transaction Search Service (Re-exported from canonical services)
  * Backward-compatibility bridge for any legacy consumers and tests.
  */
 

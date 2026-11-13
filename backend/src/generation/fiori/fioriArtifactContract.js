@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-06: SAP Fiori Elements Artifact Contract & Types
+ * Fiorify — GEN-06: SAP Fiori Elements Artifact Contract & Types
  *
  * Defines canonical schemas for UI5/Fiori Elements generated projects.
  */

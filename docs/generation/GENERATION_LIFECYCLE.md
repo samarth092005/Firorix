@@ -1,4 +1,4 @@
-# FIORIX GENERATION STUDIO — LIFECYCLE & STATE MACHINE SPECIFICATION
+# Fiorify GENERATION STUDIO — LIFECYCLE & STATE MACHINE SPECIFICATION
 ## Comprehensive Lifecycle Gating, Transitions & Validation Thresholds
 
 **Version:** 1.0.0  

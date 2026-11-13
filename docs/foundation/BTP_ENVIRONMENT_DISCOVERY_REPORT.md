@@ -1,6 +1,6 @@
-# FIORIX — BTP ENVIRONMENT DISCOVERY REPORT (READ-ONLY)
+# Fiorify — BTP ENVIRONMENT DISCOVERY REPORT (READ-ONLY)
 **Document ID:** REP-BTP-DISCOVERY-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Landscape:** SAP BTP (Europe / Frankfurt - eu30) & SAP S/4HANA 2023 (S21 Client 200)  
 **Date:** November 11, 2026  
 **Status:** COMPLETE READ-ONLY AUDIT — ZERO CREDENTIALS EXPOSED — ZERO RESOURCES MUTATED  
@@ -16,7 +16,7 @@ No credentials (passwords, tokens, client secrets, or private keys) were logged,
 
 ```
 +---------------------------------------------------------------------------------------------------------+
-|                                FIORIX SAP BTP DISCOVERY SCORECARD                                       |
+|                                Fiorify SAP BTP DISCOVERY SCORECARD                                       |
 +------------------------------------+----------------+---------------------------------------------------+
 | Discovery Domain                   | Status         | Summary Finding                                   |
 +------------------------------------+----------------+---------------------------------------------------+
@@ -54,7 +54,7 @@ Inspection of `backend/.env` was performed to identify variable names and evalua
 | `SAP_URL_OVERRIDE` | SAP S/4HANA Direct Override | **YES** | Direct private IP override (`http://192.168.1.55:8000`). |
 | `SAP_USER` | SAP S/4HANA Basic Auth | **YES** | SAP system technical user. |
 | `SAP_PASSWORD` | SAP S/4HANA Basic Auth | **YES** | SAP system password. |
-| `FIORIX_ADMIN_SECRET` | Internal Security | **YES** | Local API protection key. |
+| `Fiorify_ADMIN_SECRET` | Internal Security | **YES** | Local API protection key. |
 | `MCP_*` | MCP Subsystem Configuration | **YES** | Server package, timeout, and reconnect policies. |
 
 ### Observations on Missing Credentials
@@ -178,7 +178,7 @@ Direct API access via BTP Destination Service REST endpoint (`/destination-confi
 | **Level 3** | **Cloud Connector Connected** | **NOT VERIFIED** | No `connectivity` service instance exists in the `dev` space, and no Cloud Connector management API is bound to verify the live tunnel state. *Policy: Do not claim connected without evidence.* |
 | **Level 4** | **S21 HTTP Endpoint Responds** | **FAIL / BLOCKED** | Local IP override `http://192.168.1.55:8000` timed out after `15,000ms`. Virtual host `http://kbl_fiori:8000` cannot be resolved locally without an active Connectivity Proxy tunnel. |
 | **Level 5** | **SAP Authentication Succeeds** | **NOT VERIFIED** | Blocked by Level 4. Cannot verify SAP Gateway user authentication (`HTTP 200` vs `HTTP 401`) until the TCP/HTTP connection is established. |
-| **Level 6** | **Required SAP Metadata Accessible** | **NOT VERIFIED** | Blocked by Level 4. `/sap/opu/odata/IWFND/CATALOGSERVICE;v=2` and `/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV` unreachable. |
+| **Level 6** | **Required SAP Metadata Accessible** | **NOT VERIFIED** | Blocked by Level 4. `/sap/opu/odata/IWFND/CATALOGSERVICE;v=2` and `/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV` unreachable. |
 
 ---
 
@@ -195,8 +195,8 @@ To achieve full live end-to-end S3 connectivity from local and BTP runtimes to S
 2. **Create Connectivity Service Instance in Space `dev`:**
    - As Space Developer in `dev`, execute:
      ```bash
-     cf create-service connectivity lite fiorix-connectivity-service
-     cf create-service-key fiorix-connectivity-service fiorix-connectivity-key
+     cf create-service connectivity lite Fiorify-connectivity-service
+     cf create-service-key Fiorify-connectivity-service Fiorify-connectivity-key
      ```
    - Extract `clientid`, `clientsecret`, `url`, and `token_service_url` to enable Cloud SDK local tunnel simulation.
 

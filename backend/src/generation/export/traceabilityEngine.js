@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-08: Traceability Engine
+ * Fiorify — GEN-08: Traceability Engine
  *
  * Generates an end-to-end Traceability Matrix linking:
  * Confirmed Requirement -> Data Model Entity/Field -> CDS View Entity ->
@@ -191,7 +191,7 @@ export function buildTraceabilityMatrix(project) {
 export function renderTraceabilityMarkdown(traceabilityReport) {
   const { metrics, requirementMappings, entityMappings } = traceabilityReport;
 
-  return `# FioriX Traceability Matrix — Project ${traceabilityReport.projectId}
+  return `# Fiorify Traceability Matrix — Project ${traceabilityReport.projectId}
 Generated: ${traceabilityReport.generatedAt}
 Overall Traceability Score: **${metrics.traceabilityIndex}%**
 
@@ -211,6 +211,6 @@ ${requirementMappings.map((r) => `| ${r.requirementId} | ${r.title} | ${r.catego
 ${entityMappings.map((e) => `| ${e.name} | ${e.entityType} | ${e.fieldsCount} | ${e.databaseTable} | ${e.interfaceView} | ${e.consumptionView} | ${e.metadataExtension} | ${e.status} |`).join('\n')}
 
 ---
-*Notice: This matrix was deterministically calculated by FioriX Generation Studio without manual interpolation.*
+*Notice: This matrix was deterministically calculated by Fiorify Generation Studio without manual interpolation.*
 `;
 }

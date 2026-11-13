@@ -1,5 +1,5 @@
 /**
- * FioriX MCP Subsystem — Discovery Module Exports
+ * Fiorify MCP Subsystem — Discovery Module Exports
  */
 
 export { McpTransactionContext } from './mcpTransactionContext.js';

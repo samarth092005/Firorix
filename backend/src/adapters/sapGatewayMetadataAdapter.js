@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Gateway Metadata Adapter
+ * Fiorify — SAP Gateway Metadata Adapter
  *
  * Discovers and inspects registered SAP Gateway OData services directly
  * from SAP S/4HANA 2023 System S21 (Client 200).

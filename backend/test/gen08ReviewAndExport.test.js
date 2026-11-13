@@ -91,7 +91,7 @@ describe('GEN-08: Review, Governance, Packaging and Export Suite', () => {
 
   test('1. Pure Node.js zipArchiver creates valid PKZIP and readZipArchive decompresses matching content', () => {
     const testFiles = [
-      { path: 'test.txt', content: 'Hello FioriX Archiver!' },
+      { path: 'test.txt', content: 'Hello Fiorify Archiver!' },
       { path: 'sub/nested.json', content: JSON.stringify({ ok: true, count: 42 }) }
     ];
 
@@ -102,7 +102,7 @@ describe('GEN-08: Review, Governance, Packaging and Export Suite', () => {
     const extracted = readZipArchive(zipBuf);
     assert.equal(extracted.length, 2);
     assert.equal(extracted[0].path, 'test.txt');
-    assert.equal(extracted[0].content.toString('utf-8'), 'Hello FioriX Archiver!');
+    assert.equal(extracted[0].content.toString('utf-8'), 'Hello Fiorify Archiver!');
     assert.equal(extracted[1].path, 'sub/nested.json');
     assert.deepEqual(JSON.parse(extracted[1].content.toString('utf-8')), { ok: true, count: 42 });
   });
@@ -112,7 +112,7 @@ describe('GEN-08: Review, Governance, Packaging and Export Suite', () => {
     assert.throws(() => sanitizeZipEntryPath('sub/../../evil.sh'), /Path traversal/);
     assert.throws(() => sanitizeZipEntryPath('C:\\Windows\\system32'), /Windows drive/);
 
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-test-'));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-test-'));
     try {
       const validZip = createZipArchive([{ path: 'safe.txt', content: 'Safe content' }]);
       const extracted = extractZipArchive(validZip, tempDir);
@@ -132,7 +132,7 @@ describe('GEN-08: Review, Governance, Packaging and Export Suite', () => {
     assert.equal(report.requirementMappings.length, 2);
 
     const md = renderTraceabilityMarkdown(report);
-    assert.ok(md.includes('# FioriX Traceability Matrix'));
+    assert.ok(md.includes('# Fiorify Traceability Matrix'));
     assert.ok(md.includes('Requirement-to-Artifact Traceability Chain'));
   });
 
@@ -140,7 +140,7 @@ describe('GEN-08: Review, Governance, Packaging and Export Suite', () => {
     const nonAdmin = { id: 'USR-2', role: 'VIEWER' };
     await assert.rejects(
       async () => defaultExportManager.validateExportReadiness(testProjectId, nonAdmin),
-      /Only authenticated FioriX Administrators/
+      /Only authenticated Fiorify Administrators/
     );
 
     // Initial check without warning acknowledgment
@@ -163,12 +163,12 @@ describe('GEN-08: Review, Governance, Packaging and Export Suite', () => {
     assert.equal(exportResult.manifest.confidentialityNotice.containsSecrets, false);
 
     // Verify ZIP contains expected directories
-    const tempExtractDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-export-verify-'));
+    const tempExtractDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-export-verify-'));
     try {
       const extractedFiles = extractZipArchive(exportResult.zipBuffer, tempExtractDir);
 
       // Check key files exist in extracted package
-      assert.ok(extractedFiles.includes('fiorix-export-manifest.json'));
+      assert.ok(extractedFiles.includes('Fiorify-export-manifest.json'));
       assert.ok(extractedFiles.includes('README.md'));
       assert.ok(extractedFiles.includes('docs/TRACEABILITY.md'));
       assert.ok(extractedFiles.includes('docs/ARCHITECTURE.md'));

@@ -1,4 +1,4 @@
-# FIORIX — S1 SOURCE MIGRATION PATH VERIFICATION
+# Fiorify — S1 SOURCE MIGRATION PATH VERIFICATION
 **Legacy Source Stores, Path Mapping, Record Preservation & Non-Destructive Invariance**
 
 **Date:** 2026-11-11  

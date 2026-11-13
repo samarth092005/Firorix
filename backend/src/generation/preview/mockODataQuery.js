@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: Safe OData V4 Mock Query Processor
+ * Fiorify — GEN-07: Safe OData V4 Mock Query Processor
  *
  * Implements deterministic query parsing ($select, $filter, $orderby, $top, $skip, $count)
  * without dynamic code execution (NO eval, NO new Function, NO unsafe RegExp).

@@ -1,11 +1,11 @@
-# FioriX — Complete SAP Fiori Discovery Architecture (D1 + D2 + D3 + D4)
+# Fiorify — Complete SAP Fiori Discovery Architecture (D1 + D2 + D3 + D4)
 
 ## 1. Architectural Mission & Clean Core Mandate
-FioriX is the enterprise modernization platform specifically designed for **SAP S/4HANA 2023 On-Premise** (System `S21`, Client `200`). The Discovery subsystem delivers an evidence-based, deterministic pipeline to discover any SAP transaction code, retrieve verified DDIC and repository facts, cross-reference standard SAP Fiori applications, evaluate functional and technical compatibility, and formulate governed recommendations adhering strictly to standard-first principles:
+Fiorify is the enterprise modernization platform specifically designed for **SAP S/4HANA 2023 On-Premise** (System `S21`, Client `200`). The Discovery subsystem delivers an evidence-based, deterministic pipeline to discover any SAP transaction code, retrieve verified DDIC and repository facts, cross-reference standard SAP Fiori applications, evaluate functional and technical compatibility, and formulate governed recommendations adhering strictly to standard-first principles:
 
 $$\text{ADOPT} \longrightarrow \text{CONFIGURE} \longrightarrow \text{EXTEND} \longrightarrow \text{BUILD}$$
 
-Under no circumstances does FioriX recommend `BUILD` without fulfilling rigorous 9-point preconditions and verifying confirmed material functional gaps.
+Under no circumstances does Fiorify recommend `BUILD` without fulfilling rigorous 9-point preconditions and verifying confirmed material functional gaps.
 
 ```mermaid
 flowchart TD

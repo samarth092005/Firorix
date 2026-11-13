@@ -2,13 +2,13 @@
 **Status:** APPROVED WITH CONDITIONS  
 **Date:** November 2026  
 **Deciders:** Principal Software Architect, SAP S/4HANA Technical Architect, BTP Platform Architect  
-**Technical Scope:** FioriX Discovery, Assessment, and Generation Platform  
+**Technical Scope:** Fiorify Discovery, Assessment, and Generation Platform  
 
 ---
 
 ## 1. Context and Problem Statement
 
-FioriX is designed to accelerate and govern the migration of SAP S/4HANA On-Premise transactions to modern SAP Fiori applications. The platform inspects classic transactions, extracts structural metadata, discovers relevant standard SAP Fiori apps, executes requirement-level fit-gap analysis, recommends **Adopt / Extend / Build / Review**, and assists with controlled generation of custom Fiori drafts where a custom build is fully justified.
+Fiorify is designed to accelerate and govern the migration of SAP S/4HANA On-Premise transactions to modern SAP Fiori applications. The platform inspects classic transactions, extracts structural metadata, discovers relevant standard SAP Fiori apps, executes requirement-level fit-gap analysis, recommends **Adopt / Extend / Build / Review**, and assists with controlled generation of custom Fiori drafts where a custom build is fully justified.
 
 Before initiating project scaffolding or implementation, an architectural review was performed across the pre-development specification pack (`docs/00` through `docs/23`). Several foundational architectural choices, integration boundaries, and technical risk mitigations require formal decision-making to prevent unverified assumptions from propagating into application code.
 
@@ -16,7 +16,7 @@ Before initiating project scaffolding or implementation, an architectural review
 
 ## 2. Decision Drivers
 
-1. **Enterprise Governance & Safety:** Generated artifacts must remain reviewable drafts; FioriX must never trigger unauthorized modifications or transports in S/4HANA.
+1. **Enterprise Governance & Safety:** Generated artifacts must remain reviewable drafts; Fiorify must never trigger unauthorized modifications or transports in S/4HANA.
 2. **Standard Fiori First Principle:** Standard SAP Fiori applications must be systematically evaluated and prioritized prior to proposing custom app development.
 3. **Enterprise Connectivity Boundaries:** Integration with on-premise S/4HANA must operate through sanctioned SAP BTP channels (Cloud Connector, Destination Service) under least-privilege read-only authorizations.
 4. **Architectural Simplicity & Maintainability:** Avoid premature microservice proliferation; favor a modular SAP Cloud Application Programming Model (CAP) architecture.
@@ -42,7 +42,7 @@ The core technology stack is formally established as:
 - **Hosting Environment:** SAP BTP Cloud Foundry Runtime (Node.js 20 LTS buildpack).
 - **Core Backend Framework:** SAP Cloud Application Programming Model (CAP) Node.js with TypeScript (`@sap/cds`).
 - **Database:** SAP HANA Cloud (managed via HDI container).
-- **FioriX Frontend:** SAPUI5 Freestyle enterprise workbench utilizing the SAP Fiori Horizon design system.
+- **Fiorify Frontend:** SAPUI5 Freestyle enterprise workbench utilizing the SAP Fiori Horizon design system.
 - **Ingress & Authentication:** SAP BTP Managed Application Router integrated with SAP BTP XSUAA and SAP Cloud Identity Services.
 
 ### Policy 2: Dual Protocol Architecture (OData V4 for Data, REST for Orchestration)
@@ -53,7 +53,7 @@ To resolve the contradiction between CAP standard conventions and the REST API s
 ### Policy 3: Strict Read-Only S/4HANA Integration Boundary for Pilot
 - The integration path from BTP to S/4HANA is strictly read-only:
   $$\text{CAP Backend} \longrightarrow \text{Destination Service} \longrightarrow \text{Connectivity Service} \longrightarrow \text{Cloud Connector} \longrightarrow \text{S/4HANA Endpoints}$$
-- Under no circumstances shall FioriX create transport requests (`E070`/`TRCORR`), modify standard SAP tables, or execute automated object activation in the S/4HANA system during Phase 1.
+- Under no circumstances shall Fiorify create transport requests (`E070`/`TRCORR`), modify standard SAP tables, or execute automated object activation in the S/4HANA system during Phase 1.
 - All SAP-side activation checks must be executed manually by a developer in an isolated developer sandbox via exported draft files.
 
 ### Policy 4: Curated Offline Fiori App Catalog Ingestion
@@ -73,7 +73,7 @@ To resolve the contradiction between CAP standard conventions and the REST API s
   2. **Fallback:** Dedicated HANA Cloud Large Object (LOB) table (`GENERATED_ARTIFACT_CONTENT`) within the HDI container, with a strict 10 MB per-project size constraint.
 
 ### Policy 7: Standard Fiori First Enforcement Gate
-- FioriX must enforce an automated governance check: A custom application specification (`GENERATION_PROJECT`) cannot be initiated unless:
+- Fiorify must enforce an automated governance check: A custom application specification (`GENERATION_PROJECT`) cannot be initiated unless:
   1. A formal Fit-Gap run has executed against the Fiori catalog.
   2. A recommendation of `BUILD` has been recorded.
   3. A human Functional Consultant or Architect has explicitly confirmed that no standard Fiori app satisfies the critical business requirements.
@@ -110,7 +110,7 @@ Before code implementation commences in Sprint 5, the following conditions must 
 
 1. Target S/4HANA On-Premise release, patch level, and ABAP platform version verified in DEV sandbox.
 2. SAP Cloud Connector tunnel established and verified against `/sap/bc/adt/discovery`.
-3. Least-privilege communication role (`Z_FIORIX_DISCOVERY_RO`) provisioned in S/4HANA.
+3. Least-privilege communication role (`Z_Fiorify_DISCOVERY_RO`) provisioned in S/4HANA.
 4. BTP Subaccount entitlements verified (HANA Cloud HDI, Cloud Foundry quota, and DMS/Storage).
 5. Pilot transaction code formally selected and signed off by Functional and Technical leads.
 6. Curated pilot catalog dataset (50–100 Fiori apps) prepared and validated.
@@ -121,6 +121,6 @@ Before code implementation commences in Sprint 5, the following conditions must 
 
 | Role | Name / Title | Decision | Date |
 |---|---|---|---|
-| **Principal Software Architect** | FioriX Platform Architecture | **APPROVED WITH CONDITIONS** | 02 Nov 2026 |
+| **Principal Software Architect** | Fiorify Platform Architecture | **APPROVED WITH CONDITIONS** | 02 Nov 2026 |
 | **SAP S/4HANA Technical Architect**| SAP Platform Integration | **APPROVED WITH CONDITIONS** | 02 Nov 2026 |
 | **BTP Platform Architect** | BTP Cloud Governance | **APPROVED WITH CONDITIONS** | 02 Nov 2026 |

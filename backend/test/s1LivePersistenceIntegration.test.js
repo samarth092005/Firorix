@@ -8,7 +8,7 @@ import { GenerationProjectStore } from '../src/generation/projects/generationPro
 import { AssessmentRepository } from '../src/infrastructure/db/repositories/assessmentRepository.js';
 import { GenerationProjectRepository } from '../src/infrastructure/db/repositories/generationProjectRepository.js';
 
-process.env.FIORIX_ADMIN_SECRET = 'test-s1-admin-secret-2026';
+process.env.Fiorify_ADMIN_SECRET = 'test-s1-admin-secret-2026';
 
 function makeRequest(server, options, payload = null) {
   return new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@ function makeRequest(server, options, payload = null) {
       method: options.method || 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'X-FioriX-Admin-Secret': 'test-s1-admin-secret-2026',
+        'X-Fiorify-Admin-Secret': 'test-s1-admin-secret-2026',
         ...(options.headers || {})
       }
     };
@@ -46,11 +46,11 @@ function makeRequest(server, options, payload = null) {
   });
 }
 
-test('FioriX S1.4 — Live Persistence HTTP API Integration Tests (PostgreSQL)', async (t) => {
+test('Fiorify S1.4 — Live Persistence HTTP API Integration Tests (PostgreSQL)', async (t) => {
   // Ensure DB pool is connected and schema is ready
-  process.env.FIORIX_ALLOW_EMBEDDED_PG = 'true';
-  const originalSecret = process.env.FIORIX_ADMIN_SECRET;
-  process.env.FIORIX_ADMIN_SECRET = 'test-s1-admin-secret-2026';
+  process.env.Fiorify_ALLOW_EMBEDDED_PG = 'true';
+  const originalSecret = process.env.Fiorify_ADMIN_SECRET;
+  process.env.Fiorify_ADMIN_SECRET = 'test-s1-admin-secret-2026';
   const pool = await DatabasePool.getPool();
   assert.ok(pool, 'PostgreSQL pool must be available');
 
@@ -87,7 +87,7 @@ test('FioriX S1.4 — Live Persistence HTTP API Integration Tests (PostgreSQL)',
 
   // Cleanup helper on exit
   t.after(async () => {
-    process.env.FIORIX_ADMIN_SECRET = originalSecret;
+    process.env.Fiorify_ADMIN_SECRET = originalSecret;
     if (server) await stopServer(server);
     // Remove test records from DB cleanly
     await pool.query('DELETE FROM generation_artifacts WHERE project_id = $1;', [testProjectId]);

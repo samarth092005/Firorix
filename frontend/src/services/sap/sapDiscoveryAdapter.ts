@@ -30,7 +30,7 @@ export interface ISapDiscoveryAdapter {
  * - CVERS: Component release levels (S4CORE 108, SAP_BASIS 758)
  *
  * SAP Integration Service Contract:
- * Read-only Gateway OData Service: /sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV
+ * Read-only Gateway OData Service: /sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV
  */
 class SapDiscoveryAdapter implements ISapDiscoveryAdapter {
   getSystemMetadataSources() {
@@ -42,7 +42,7 @@ class SapDiscoveryAdapter implements ISapDiscoveryAdapter {
         { name: 'TDEVC', description: 'Development Classes (Packages)', role: 'Package hierarchy and software component mapping (S4CORE).' },
         { name: 'CVERS', description: 'Release and Component Status Table', role: 'System software release and SP level verification (S4CORE 108 SP0003).' }
       ],
-      serviceEndpoint: '/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV',
+      serviceEndpoint: '/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV',
       serviceStatus: 'DEPLOYED_PENDING_INTEGRATION' as const
     };
   }

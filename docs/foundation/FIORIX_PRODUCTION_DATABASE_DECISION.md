@@ -1,6 +1,6 @@
-# FioriX — Production Persistence Architecture & Deployment Decision Document
+# Fiorify — Production Persistence Architecture & Deployment Decision Document
 
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise  
 **Runtime:** Native Node.js 20 HTTP Backend  
 **Status:** **ARCHITECTURAL DECISION REQUIRED BEFORE CLOUD FOUNDRY DEPLOYMENT**
@@ -9,7 +9,7 @@
 
 ## 1. Problem Statement & Empirical Marketplace Discovery
 
-In Stage S1, FioriX successfully implemented an enterprise relational persistence architecture based on PostgreSQL 15+ (`pg` driver, versioned migrations, transactional repositories, artifact metadata storage, and tamper-evident audit chaining).
+In Stage S1, Fiorify successfully implemented an enterprise relational persistence architecture based on PostgreSQL 15+ (`pg` driver, versioned migrations, transactional repositories, artifact metadata storage, and tamper-evident audit chaining).
 
 However, live inspection of the target SAP BTP Cloud Foundry marketplace (`cf marketplace`) reveals that:
 - **No managed PostgreSQL service (`postgresql-db` or hyperscaler plan) is entitled or available in this Cloud Foundry subaccount/space.**
@@ -27,7 +27,7 @@ This document evaluates the three realistic deployment paths for production pers
 
 ### Major Incompatibilities Between Current Repository and SAP HANA:
 
-| Technical Feature | Current FioriX PostgreSQL Implementation | SAP HANA / HDI Container Equivalent | Compatibility Status |
+| Technical Feature | Current Fiorify PostgreSQL Implementation | SAP HANA / HDI Container Equivalent | Compatibility Status |
 |---|---|---|:---:|
 | **Node.js Client Driver** | `pg` (`pg.Pool`, `pg.Client`) | Requires `@sap/hana-client` or `@sap/hdbext` | :x: Incompatible |
 | **Primary Keys & Identity** | `BIGSERIAL` / `SERIAL PRIMARY KEY` | `BIGINT GENERATED ALWAYS AS IDENTITY` | :x: DDL Incompatible |
@@ -42,7 +42,7 @@ This document evaluates the three realistic deployment paths for production pers
 
 ```mermaid
 flowchart TD
-    Current["Current FioriX Backend<br>(PostgreSQL 15+ Repositories & Migrations)"]
+    Current["Current Fiorify Backend<br>(PostgreSQL 15+ Repositories & Migrations)"]
     
     Current --> OptA["Option A: BTP Managed PostgreSQL<br>(postgresql-db Hyperscaler Plan)"]
     Current --> OptB["Option B: External Managed PostgreSQL<br>(AWS RDS / Azure / GCP Cloud SQL / Neon)"]
@@ -59,7 +59,7 @@ flowchart TD
 
 ### Option A: SAP BTP Hyperscaler Managed PostgreSQL (`postgresql-db`)
 
-- **Architecture**: The BTP Global Account Administrator adds the `postgresql-db` service entitlement (plan: `standard` or `trial`) to the subaccount. FioriX creates an instance via `cf create-service postgresql-db standard fiorix-postgres` and binds it in `manifest.yml`.
+- **Architecture**: The BTP Global Account Administrator adds the `postgresql-db` service entitlement (plan: `standard` or `trial`) to the subaccount. Fiorify creates an instance via `cf create-service postgresql-db standard Fiorify-postgres` and binds it in `manifest.yml`.
 - **Code Compatibility**: **100% compatible**. No repository rewrites, no migration changes.
 - **Entitlement / Prerequisite**: Requires the BTP Global Account Administrator to enable the PostgreSQL quota in the BTP Cockpit under **Entitlements**.
 - **Pros**: Fully managed within SAP BTP; automatic backup, TLS, and native service binding.
@@ -69,7 +69,7 @@ flowchart TD
 
 ### Option B: External Managed PostgreSQL Reached via Cloud Foundry Network Egress
 
-- **Architecture**: PostgreSQL 15+ is hosted on an external managed cloud provider (e.g. AWS RDS for PostgreSQL, Azure Database for PostgreSQL, Google Cloud SQL, or Neon/Aiven). The connection string is injected into Cloud Foundry using a User-Provided Service (`cf cups fiorix-postgres -p '{"uri":"postgres://..."}'`).
+- **Architecture**: PostgreSQL 15+ is hosted on an external managed cloud provider (e.g. AWS RDS for PostgreSQL, Azure Database for PostgreSQL, Google Cloud SQL, or Neon/Aiven). The connection string is injected into Cloud Foundry using a User-Provided Service (`cf cups Fiorify-postgres -p '{"uri":"postgres://..."}'`).
 - **Code Compatibility**: **100% compatible**. Native `pg.Pool` connects directly via TLS to the external database host.
 - **Entitlement / Prerequisite**: None in SAP BTP. Requires external cloud database and TLS connection. Outbound traffic from Cloud Foundry `eu30` must be permitted to port 5432.
 - **Pros**: Zero code rewrites; immediate deployment without waiting for BTP Global Account entitlement changes; leverages existing enterprise cloud subscriptions.
@@ -79,7 +79,7 @@ flowchart TD
 
 ### Option C: SAP HANA Cloud with Deliberately Engineered Repository Adapter
 
-- **Architecture**: FioriX replaces its PostgreSQL repository layer with an SAP HANA Cloud repository layer using the existing `hana` (plan `hdi-shared`) service instance.
+- **Architecture**: Fiorify replaces its PostgreSQL repository layer with an SAP HANA Cloud repository layer using the existing `hana` (plan `hdi-shared`) service instance.
 - **Code Compatibility**: **0% compatible as-is**. Requires an extensive architectural refactoring sprint:
   1. Rewrite all 2 migration DDL files to SAP HANA SQL.
   2. Implement an abstract `IRepository` interface with separate `PostgreSqlAssessmentRepository` and `HanaAssessmentRepository`.
@@ -102,5 +102,5 @@ flowchart TD
 | **BTP Native Cohesion** | High | Medium | **Very High** |
 
 ### Formulated Architectural Decision:
-1. **Short-Term / Staging Path**: **Option B (External Managed PostgreSQL)** or **Option A (BTP PostgreSQL entitlement)** is strongly recommended for initial Cloud Foundry deployment because FioriX's PostgreSQL persistence layer is already built, audited, and 100% verified.
+1. **Short-Term / Staging Path**: **Option B (External Managed PostgreSQL)** or **Option A (BTP PostgreSQL entitlement)** is strongly recommended for initial Cloud Foundry deployment because Fiorify's PostgreSQL persistence layer is already built, audited, and 100% verified.
 2. **Long-Term Enterprise Path**: If customer compliance mandates that zero external database connections are permitted outside the SAP BTP boundary, an isolated engineering sprint must be authorized to develop a dedicated **HANA Repository Adapter** without modifying existing domain logic.

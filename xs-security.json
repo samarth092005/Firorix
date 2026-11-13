@@ -1,57 +1,57 @@
 {
-  "xsappname": "fiorix",
+  "xsappname": "Fiorify",
   "tenant-mode": "dedicated",
-  "description": "FioriX SAP Modernization Platform Security Configuration",
+  "description": "Fiorify SAP Modernization Platform Security Configuration",
   "scopes": [
     {
-      "name": "$XSAPPNAME.FioriXAdmin",
-      "description": "Full administrative access to FioriX configuration, system landscape, and security audit"
+      "name": "$XSAPPNAME.FiorifyAdmin",
+      "description": "Full administrative access to Fiorify configuration, system landscape, and security audit"
     },
     {
-      "name": "$XSAPPNAME.FioriXArchitect",
+      "name": "$XSAPPNAME.FiorifyArchitect",
       "description": "Enterprise and Solution Architect access for discovery, assessments, and generation project creation"
     },
     {
-      "name": "$XSAPPNAME.FioriXViewer",
+      "name": "$XSAPPNAME.FiorifyViewer",
       "description": "Read-only viewer access to discovery records, catalogue, and assessment history"
     }
   ],
   "attributes": [
     {
       "name": "tenantId",
-      "description": "FioriX Tenant Isolation Identifier",
+      "description": "Fiorify Tenant Isolation Identifier",
       "valueType": "string"
     }
   ],
   "role-templates": [
     {
-      "name": "FioriX_Administrator",
-      "description": "FioriX Platform Administrator with full governance privileges",
+      "name": "Fiorify_Administrator",
+      "description": "Fiorify Platform Administrator with full governance privileges",
       "scope-references": [
-        "$XSAPPNAME.FioriXAdmin",
-        "$XSAPPNAME.FioriXArchitect",
-        "$XSAPPNAME.FioriXViewer"
+        "$XSAPPNAME.FiorifyAdmin",
+        "$XSAPPNAME.FiorifyArchitect",
+        "$XSAPPNAME.FiorifyViewer"
       ],
       "attribute-references": [
         "tenantId"
       ]
     },
     {
-      "name": "FioriX_Enterprise_Architect",
-      "description": "FioriX Enterprise Architect with assessment and generation privileges",
+      "name": "Fiorify_Enterprise_Architect",
+      "description": "Fiorify Enterprise Architect with assessment and generation privileges",
       "scope-references": [
-        "$XSAPPNAME.FioriXArchitect",
-        "$XSAPPNAME.FioriXViewer"
+        "$XSAPPNAME.FiorifyArchitect",
+        "$XSAPPNAME.FiorifyViewer"
       ],
       "attribute-references": [
         "tenantId"
       ]
     },
     {
-      "name": "FioriX_Viewer",
+      "name": "Fiorify_Viewer",
       "description": "Read-only access across modernizing landscapes",
       "scope-references": [
-        "$XSAPPNAME.FioriXViewer"
+        "$XSAPPNAME.FiorifyViewer"
       ],
       "attribute-references": [
         "tenantId"
@@ -60,24 +60,24 @@
   ],
   "role-collections": [
     {
-      "name": "FioriX Administrator",
-      "description": "Enterprise Administrator role collection for FioriX Platform",
+      "name": "Fiorify Administrator",
+      "description": "Enterprise Administrator role collection for Fiorify Platform",
       "role-template-references": [
-        "$XSAPPNAME.FioriX_Administrator"
+        "$XSAPPNAME.Fiorify_Administrator"
       ]
     },
     {
-      "name": "FioriX Architect",
-      "description": "Enterprise Architect role collection for FioriX Platform",
+      "name": "Fiorify Architect",
+      "description": "Enterprise Architect role collection for Fiorify Platform",
       "role-template-references": [
-        "$XSAPPNAME.FioriX_Enterprise_Architect"
+        "$XSAPPNAME.Fiorify_Enterprise_Architect"
       ]
     },
     {
-      "name": "FioriX ReadOnly",
+      "name": "Fiorify ReadOnly",
       "description": "Read-only role collection for executive stakeholders",
       "role-template-references": [
-        "$XSAPPNAME.FioriX_Viewer"
+        "$XSAPPNAME.Fiorify_Viewer"
       ]
     }
   ]

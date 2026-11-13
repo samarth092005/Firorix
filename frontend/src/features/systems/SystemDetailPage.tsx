@@ -136,7 +136,7 @@ export const SystemDetailPage: React.FC = () => {
           </div>
           <div className="fiori-card-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <MessageStrip type="info">
-              Communication user is strictly constrained to read-only metadata objects under role <code>Z_FIORIX_DISCOVERY_RO</code>.
+              Communication user is strictly constrained to read-only metadata objects under role <code>Z_Fiorify_DISCOVERY_RO</code>.
             </MessageStrip>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>

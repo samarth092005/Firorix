@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: Preview Session Store & Port Allocator
+ * Fiorify — GEN-07: Preview Session Store & Port Allocator
  *
  * Tracks in-memory preview sessions, allocated ports in the range 4050-4099,
  * active HTTP server references, request telemetry logs, and synthetic records.

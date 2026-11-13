@@ -1,4 +1,4 @@
-# FioriX — GEN-09: Developer Toolchain & Workstation Readiness Architecture
+# Fiorify — GEN-09: Developer Toolchain & Workstation Readiness Architecture
 
 **Milestone:** GEN-09 Developer Toolchain  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
@@ -9,14 +9,14 @@
 
 ## 1. Executive Summary
 
-GEN-09 bridges the transition from FioriX Generation Studio to the developer's local workstation. It provides:
+GEN-09 bridges the transition from Fiorify Generation Studio to the developer's local workstation. It provides:
 1. **Workstation Environment Diagnostics:** Read-only inspection of installed developer runtimes, tools, and Eclipse ADT plugins.
 2. **Authoritative Developer Handover Guides:** Detailed, step-by-step instructions for ABAP and Fiori developers to review, activate, and test generated artifacts in Eclipse ADT and SAP S21.
 
 ### Core Non-Negotiables
 - **No Host Mutation:** The toolchain scanner executes safe read-only queries with short process timeouts (2500ms). It never installs packages, alters environment variables, or mutates configuration files.
 - **Strict S21 Alignment:** All developer handover instructions are customized to System `S21`, Client `200`, and S/4HANA 2023 ABAP Cloud standards.
-- **Zero Deployment Enforcement:** Confirms that no direct repository writes or CTS transports were triggered by FioriX.
+- **Zero Deployment Enforcement:** Confirms that no direct repository writes or CTS transports were triggered by Fiorify.
 
 ---
 
@@ -26,7 +26,7 @@ The `toolchainScanner.js` module inspects the following components:
 
 | Tool | Detection Mechanism | Minimum Required Version | Purpose in Landscape |
 | :--- | :--- | :--- | :--- |
-| **Node.js** | `process.version` | `>= v20.x` | Runtime for FioriX Backend and UI5 tooling |
+| **Node.js** | `process.version` | `>= v20.x` | Runtime for Fiorify Backend and UI5 tooling |
 | **npm** | `npm --version` | Standard | Dependency management for generated Fiori apps |
 | **Java JDK** | `java -version` & `JAVA_HOME` | `>= Java 17` | Required runtime for Eclipse IDE and ADT |
 | **Git** | `git --version` | Optional | Version control and abapGit repository syncing |
@@ -34,7 +34,7 @@ The `toolchainScanner.js` module inspects the following components:
 | **ADT Plugin** | Scan `plugins/` and `dropins/` for `com.sap.adt.*` | ADT 3.38+ | Eclipse plugin for CDS, RAP, and ABAP editing |
 | **SAP GUI** | Scan `Program Files (x86)\SAP\FrontEnd\SAPgui\saplogon.exe` | SAP GUI 8.00 | Optional tool for classic transactions and SAP Logon |
 | **UI5 CLI** | `ui5 --version` | `@ui5/cli 3.x+` | Local UI5 development and build tooling |
-| **TCP Ports** | Socket bind test on `127.0.0.1` | Ports 4004, 5173, 4050, 4051 | Verifies port availability for FioriX & Preview servers |
+| **TCP Ports** | Socket bind test on `127.0.0.1` | Ports 4004, 5173, 4050, 4051 | Verifies port availability for Fiorify & Preview servers |
 
 ### Readiness Determination Logic
 - **`READY`:** Node.js v20+, Java runtime, and Eclipse ADT plugin detected.

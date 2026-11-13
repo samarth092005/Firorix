@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-06: SAP Fiori Elements Generator Test Suite
+ * Fiorify — GEN-06: SAP Fiori Elements Generator Test Suite
  *
  * Verifies:
  * 1. Fiori Elements manifest.json generation (OData V4, S/4HANA 2023 baseline, targets, entitySet binding).
@@ -94,7 +94,7 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
   it('1. Generates webapp/manifest.json conforming to SAP Fiori Elements for OData V4 standards', () => {
     const arch = archEngine.evaluate(sampleProject);
     const manifestArt = generateFioriManifest(sampleProject, arch, {
-      appId: 'com.fiorix.vendor.invoices',
+      appId: 'com.Fiorify.vendor.invoices',
       pageTitle: 'Manage Vendor Invoices'
     });
 
@@ -103,7 +103,7 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
     assert.equal(manifestArt.language, 'JSON');
 
     const manifest = JSON.parse(manifestArt.content);
-    assert.equal(manifest['sap.app'].id, 'com.fiorix.vendor.invoices');
+    assert.equal(manifest['sap.app'].id, 'com.Fiorify.vendor.invoices');
     assert.equal(manifest['sap.app'].title, 'Manage Vendor Invoices');
     assert.equal(manifest['sap.app'].dataSources.mainService.settings.odataVersion, '4.0');
     assert.equal(manifest['sap.app'].dataSources.mainService.uri, '/sap/opu/odata4/sap/zui_zvendorinvoice/srvd/sap/zui_zvendorinvoice/0001/');
@@ -137,17 +137,17 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
   it('3. Generates complete frontend scaffolding (Component.js, index.html, i18n, package.json, ui5.yaml, README)', () => {
     const arch = archEngine.evaluate(sampleProject);
     const scaffolding = generateFioriProjectScaffolding(sampleProject, arch, {
-      appId: 'com.fiorix.vendor.invoices'
+      appId: 'com.Fiorify.vendor.invoices'
     });
 
     assert.equal(scaffolding.length, 6);
 
     const comp = scaffolding.find((s) => s.objectName === 'Component.js');
-    assert.ok(comp.content.includes('AppComponent.extend("com.fiorix.vendor.invoices.Component"'));
+    assert.ok(comp.content.includes('AppComponent.extend("com.Fiorify.vendor.invoices.Component"'));
 
     const html = scaffolding.find((s) => s.objectName === 'index.html');
     assert.ok(html.content.includes('data-sap-ui-theme="sap_horizon"'));
-    assert.ok(html.content.includes('data-name="com.fiorix.vendor.invoices"'));
+    assert.ok(html.content.includes('data-name="com.Fiorify.vendor.invoices"'));
 
     const i18n = scaffolding.find((s) => s.objectName === 'i18n.properties');
     assert.ok(i18n.content.includes('entity.ZVendorInvoice=Vendor Invoice'));
@@ -155,7 +155,7 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
 
     const pkg = scaffolding.find((s) => s.objectName === 'package.json');
     const pkgJson = JSON.parse(pkg.content);
-    assert.equal(pkgJson.name, 'fiorix-zvendorinvoice-ui');
+    assert.equal(pkgJson.name, 'Fiorify-zvendorinvoice-ui');
 
     const yaml = scaffolding.find((s) => s.objectName === 'ui5.yaml');
     assert.ok(yaml.content.includes('version: "1.120.0"'));
@@ -182,9 +182,9 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
 
     // 2. Generate GEN-06 artifacts
     const fioriArts = [
-      generateFioriManifest(project, arch, { appId: 'com.fiorix.vendor.invoices' }),
+      generateFioriManifest(project, arch, { appId: 'com.Fiorify.vendor.invoices' }),
       generateFioriAnnotationsXml(project, arch),
-      ...generateFioriProjectScaffolding(project, arch, { appId: 'com.fiorix.vendor.invoices' })
+      ...generateFioriProjectScaffolding(project, arch, { appId: 'com.Fiorify.vendor.invoices' })
     ];
 
     ArtifactRegistry.commitArtifacts(project, fioriArts, { phase: 'GEN_06_FIORI' });

@@ -52,7 +52,16 @@ export const AppShell: React.FC = () => {
             minWidth: 0
           }}
         >
-          <div style={{ flex: 1, padding: '24px 32px', maxWidth: '1600px', width: '100%', margin: '0 auto' }}>
+          <div
+            style={{
+              flex: 1,
+              padding: 'clamp(18px, 2vw, 28px) clamp(20px, 2.5vw, 36px)',
+              maxWidth: '1720px',
+              width: '100%',
+              margin: '0 auto',
+              boxSizing: 'border-box'
+            }}
+          >
             <React.Suspense
               fallback={
                 <div

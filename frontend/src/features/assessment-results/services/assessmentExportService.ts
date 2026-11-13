@@ -1,5 +1,5 @@
 /**
- * FioriX — Full Assessment Export Service
+ * Fiorify — Full Assessment Export Service
  *
  * Implements formal documentation export for SAP transaction discovery and Fit-Gap assessment:
  * - Structured markdown generation with 4-Way Fact Separation.
@@ -67,7 +67,7 @@ export class AssessmentExportService {
       systemAvailability,
       recommendation,
       exportMetadata: {
-        platform: 'FioriX Modernization Platform • SAP S/4HANA 2023 System S21 Client 200',
+        platform: 'Fiorify Modernization Platform • SAP S/4HANA 2023 System S21 Client 200',
         disclaimer: 'Catalogue candidates cross-referenced with SAP Fiori Apps Reference Library (fal.cloud.sap). Recommendations adhere to Clean Core principles.',
         exportedAt: new Date().toISOString(),
         version: '1.0.0'
@@ -177,7 +177,7 @@ Clean Core zero-modification baseline enforced. All dynpro variants and screen e
 
 ## 9. Approval Gate & Lifecycle Governance
 - **Status:** ${assessment.status || 'PENDING_REVIEW'}
-- **Platform:** FioriX Workbench v1.0.0
+- **Platform:** Fiorify Workbench v1.0.0
 - **Handoff Gate:** ${recommendation.outcome === 'BUILD' ? 'Eligible for Generation Studio' : 'Standard FLP Activation'}
 
 ---
@@ -258,7 +258,7 @@ Provenances: ${assessment.isDemo ? 'CURATED_DEMO_FIXTURE (Pending Live Verificat
    */
   downloadPdf(data: FullAssessmentExportData): void {
     const doc = this.generatePdf(data);
-    const filename = `FioriX_Assessment_${data.assessment.tcode}_${new Date().toISOString().slice(0, 10)}.pdf`;
+    const filename = `Fiorify_Assessment_${data.assessment.tcode}_${new Date().toISOString().slice(0, 10)}.pdf`;
     doc.save(filename);
   }
 
@@ -271,7 +271,7 @@ Provenances: ${assessment.isDemo ? 'CURATED_DEMO_FIXTURE (Pending Live Verificat
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `FioriX_Assessment_${data.assessment.tcode}_${new Date().toISOString().slice(0, 10)}.doc`;
+    link.download = `Fiorify_Assessment_${data.assessment.tcode}_${new Date().toISOString().slice(0, 10)}.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

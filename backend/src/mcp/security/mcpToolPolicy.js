@@ -1,5 +1,5 @@
 /**
- * Secure Tool Execution Policy for FioriX MCP Subsystem.
+ * Secure Tool Execution Policy for Fiorify MCP Subsystem.
  * Enforces a conservative allowlist restricting execution to read-only tools.
  * All generation and modification tools are blocked by policy.
  */

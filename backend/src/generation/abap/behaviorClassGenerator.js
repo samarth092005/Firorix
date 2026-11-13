@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: Behavior Implementation Skeleton Generator
+ * Fiorify — GEN-05: Behavior Implementation Skeleton Generator
  *
  * Generates the ABAP Class skeleton (BP_I_*) providing local handler and saver
  * implementations with explicitly mapped requirement IDs and TODO placeholders.

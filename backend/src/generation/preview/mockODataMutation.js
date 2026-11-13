@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: Mock OData Mutation Processor
+ * Fiorify — GEN-07: Mock OData Mutation Processor
  *
  * Implements Create, Update, Delete for mock OData V4 endpoints with strict
  * enforcement of architecture profile permissions (READ_ONLY_QUERY rejection).

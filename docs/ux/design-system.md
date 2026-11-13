@@ -1,5 +1,5 @@
-# FioriX Design System & Visual Standards
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
+# Fiorify Design System & Visual Standards
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Controlled Generation Platform  
 **Document Version:** 1.0.0  
 **Phase:** Sprint 1 Frontend Implementation  
 
@@ -7,7 +7,7 @@
 
 ## 1. Design System Philosophy
 
-The FioriX Design System is engineered to feel indistinguishable from official SAP enterprise tools while delivering the responsiveness, modularity, and rapid feedback of modern React applications.
+The Fiorify Design System is engineered to feel indistinguishable from official SAP enterprise tools while delivering the responsiveness, modularity, and rapid feedback of modern React applications.
 
 ### Key Pillars
 - **Zero Decorative Hype:** No pulsating gradients, no AI robot illustrations, no glowing sci-fi borders.

@@ -1,6 +1,6 @@
-# FIORIX GENERATION STUDIO — PHASE 0 CODEBASE & ENVIRONMENT AUDIT
+# Fiorify GENERATION STUDIO — PHASE 0 CODEBASE & ENVIRONMENT AUDIT
 **Document ID:** AUDIT-GEN-PHASE0-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Milestone:** Phase 0: System Design & Readiness Audit  
 **Date:** November 10, 2026  
 **Auditor:** Principal Enterprise Solution Architect & ABAP Cloud Technical Lead  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This audit assesses the current implementation status, dependencies, persistence architecture, and developer host environment for the **FioriX Generation Studio**. 
+This audit assesses the current implementation status, dependencies, persistence architecture, and developer host environment for the **Fiorify Generation Studio**. 
 
 The goal of Generation Studio is to deliver an end-to-end, local-first SAP Fiori application generation environment representing **70% of full product functionality**. The studio enables developers and architects to intake approved modernization BUILD assessments, design business requirements, model clean-core data structures, configure RAP/Fiori architectures, generate deterministic ABAP and Fiori UI source artifacts, simulate execution with a local mock OData server, run comprehensive static validations, review code diffs, and export deployable project bundles.
 
@@ -155,7 +155,7 @@ While SAP connectivity and ADT activation are strictly excluded from Phase 0–1
 
 ## 4. Audit Conclusions & Recommendations
 
-1. **Architecture Isolation:** The Generation Studio must remain an independent sub-application within FioriX. All 9 screens must be rendered inside Generation Studio, maintaining the existing navigation shell.
+1. **Architecture Isolation:** The Generation Studio must remain an independent sub-application within Fiorify. All 9 screens must be rendered inside Generation Studio, maintaining the existing navigation shell.
 2. **Preserve Read-Only Assessment Boundary:** Never write back changes to assessment calculations, fit-gap scores, or recommendation rules. Read handoff records as authoritative inputs.
 3. **Consolidate State Management:** Replace volatile in-memory prototype structures with persistent, file-backed project storage (`backend/data/generationProjects.json`).
 4. **Deterministic Engine:** Implement code generation using pure JavaScript template functions and semantic schema models. Avoid external runtime dependencies.

@@ -23,7 +23,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [activeSystem, setActiveSystem] = useState<SapSystem | null>(null);
 
   const currentUser = {
-    name: 'Enterprise System Administrator',
+    name: 'Admin',
     role: 'ADMIN',
     email: 'admin@fiorify.corp'
   };
@@ -54,9 +54,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     localStore.resetAll();
     try {
-      localStorage.removeItem('fiorix_notifications_store_v1');
+      localStorage.removeItem('Fiorify_notifications_store_v1');
       localStorage.removeItem('fiorify_notifications_store_v1');
-      localStorage.removeItem('fiorix_auth_session_v1');
+      localStorage.removeItem('Fiorify_auth_session_v1');
       localStorage.removeItem('fiorify_auth_session_v1');
       sessionStorage.clear();
     } catch {}

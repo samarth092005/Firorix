@@ -1,5 +1,5 @@
 /**
- * FioriX — Security, Authentication & Role-Based Access Control (SEC-01)
+ * Fiorify — Security, Authentication & Role-Based Access Control (SEC-01)
  *
  * Implements centralized authentication, role verification, token validation,
  * secret redaction, and authorization matrix enforcement.
@@ -43,24 +43,24 @@ export const PERMISSIONS = Object.freeze({
   USER_ADMIN: 'USER_ADMIN',
 
   // S2 Foundation Enterprise Permissions
-  ADMIN_ACCESS: 'fiorix.admin.access',
-  SYSTEMS_READ: 'fiorix.systems.read',
-  SYSTEMS_MANAGE: 'fiorix.systems.manage',
-  DISCOVERY_EXECUTE: 'fiorix.discovery.execute',
-  CATALOGUE_MANAGE: 'fiorix.catalogue.manage',
-  ASSESSMENTS_MANAGE: 'fiorix.assessments.manage',
-  GENERATION_MANAGE: 'fiorix.generation.manage',
-  ARTIFACTS_EXPORT: 'fiorix.artifacts.export',
-  AUDIT_READ: 'fiorix.audit.read',
-  'fiorix.admin.access': 'fiorix.admin.access',
-  'fiorix.systems.read': 'fiorix.systems.read',
-  'fiorix.systems.manage': 'fiorix.systems.manage',
-  'fiorix.discovery.execute': 'fiorix.discovery.execute',
-  'fiorix.catalogue.manage': 'fiorix.catalogue.manage',
-  'fiorix.assessments.manage': 'fiorix.assessments.manage',
-  'fiorix.generation.manage': 'fiorix.generation.manage',
-  'fiorix.artifacts.export': 'fiorix.artifacts.export',
-  'fiorix.audit.read': 'fiorix.audit.read'
+  ADMIN_ACCESS: 'Fiorify.admin.access',
+  SYSTEMS_READ: 'Fiorify.systems.read',
+  SYSTEMS_MANAGE: 'Fiorify.systems.manage',
+  DISCOVERY_EXECUTE: 'Fiorify.discovery.execute',
+  CATALOGUE_MANAGE: 'Fiorify.catalogue.manage',
+  ASSESSMENTS_MANAGE: 'Fiorify.assessments.manage',
+  GENERATION_MANAGE: 'Fiorify.generation.manage',
+  ARTIFACTS_EXPORT: 'Fiorify.artifacts.export',
+  AUDIT_READ: 'Fiorify.audit.read',
+  'Fiorify.admin.access': 'Fiorify.admin.access',
+  'Fiorify.systems.read': 'Fiorify.systems.read',
+  'Fiorify.systems.manage': 'Fiorify.systems.manage',
+  'Fiorify.discovery.execute': 'Fiorify.discovery.execute',
+  'Fiorify.catalogue.manage': 'Fiorify.catalogue.manage',
+  'Fiorify.assessments.manage': 'Fiorify.assessments.manage',
+  'Fiorify.generation.manage': 'Fiorify.generation.manage',
+  'Fiorify.artifacts.export': 'Fiorify.artifacts.export',
+  'Fiorify.audit.read': 'Fiorify.audit.read'
 });
 
 export const ROLE_PERMISSIONS = Object.freeze({
@@ -82,15 +82,15 @@ export const ROLE_PERMISSIONS = Object.freeze({
     PERMISSIONS.MCP_MANAGE,
     PERMISSIONS.MCP_TOOL_EXECUTE,
     PERMISSIONS.USER_ADMIN,
-    'fiorix.admin.access',
-    'fiorix.systems.read',
-    'fiorix.systems.manage',
-    'fiorix.discovery.execute',
-    'fiorix.catalogue.manage',
-    'fiorix.assessments.manage',
-    'fiorix.generation.manage',
-    'fiorix.artifacts.export',
-    'fiorix.audit.read'
+    'Fiorify.admin.access',
+    'Fiorify.systems.read',
+    'Fiorify.systems.manage',
+    'Fiorify.discovery.execute',
+    'Fiorify.catalogue.manage',
+    'Fiorify.assessments.manage',
+    'Fiorify.generation.manage',
+    'Fiorify.artifacts.export',
+    'Fiorify.audit.read'
   ],
   [USER_ROLES.SAP_CONSULTANT]: [
     PERMISSIONS.ASSESSMENT_CREATE,
@@ -102,11 +102,11 @@ export const ROLE_PERMISSIONS = Object.freeze({
     PERMISSIONS.CATALOGUE_VIEW,
     PERMISSIONS.SAP_DIAGNOSTICS_RUN,
     PERMISSIONS.MCP_TOOL_EXECUTE,
-    'fiorix.discovery.execute',
-    'fiorix.systems.read',
-    'fiorix.generation.manage',
-    'fiorix.artifacts.export',
-    'fiorix.assessments.manage'
+    'Fiorify.discovery.execute',
+    'Fiorify.systems.read',
+    'Fiorify.generation.manage',
+    'Fiorify.artifacts.export',
+    'Fiorify.assessments.manage'
   ],
   [USER_ROLES.APPROVER]: [
     PERMISSIONS.ASSESSMENT_VIEW,
@@ -131,8 +131,8 @@ export const ROLE_PERMISSIONS = Object.freeze({
 export const DEFAULT_USERS = Object.freeze([
   {
     id: 'USR-ADMIN-01',
-    email: 'admin@fiorix.corp',
-    name: 'Enterprise System Administrator',
+    email: 'admin@Fiorify.corp',
+    name: 'Admin',
     role: USER_ROLES.ADMIN,
     department: 'SAP Architecture & Platform Governance',
     tenantId: 'DEFAULT-TENANT-S21',
@@ -140,7 +140,7 @@ export const DEFAULT_USERS = Object.freeze([
   },
   {
     id: 'USR-CONS-01',
-    email: 'consultant@fiorix.corp',
+    email: 'consultant@Fiorify.corp',
     name: 'Lead SAP Architect',
     role: USER_ROLES.SAP_CONSULTANT,
     department: 'SAP Digital Transformation',
@@ -149,7 +149,7 @@ export const DEFAULT_USERS = Object.freeze([
   },
   {
     id: 'USR-APPR-01',
-    email: 'approver@fiorix.corp',
+    email: 'approver@Fiorify.corp',
     name: 'Enterprise Architecture Board Approver',
     role: USER_ROLES.APPROVER,
     department: 'Enterprise Governance Committee',
@@ -158,7 +158,7 @@ export const DEFAULT_USERS = Object.freeze([
   },
   {
     id: 'USR-REQ-01',
-    email: 'requester@fiorix.corp',
+    email: 'requester@Fiorify.corp',
     name: 'Business Process Lead',
     role: USER_ROLES.REQUESTER,
     department: 'Procure to Pay Practice',
@@ -167,7 +167,7 @@ export const DEFAULT_USERS = Object.freeze([
   },
   {
     id: 'USR-VIEW-01',
-    email: 'viewer@fiorix.corp',
+    email: 'viewer@Fiorify.corp',
     name: 'Compliance Auditor',
     role: USER_ROLES.VIEWER,
     department: 'Internal Audit & Reporting',
@@ -183,10 +183,10 @@ export function hashPassword(password) {
 export class AuthService {
   constructor(options = {}) {
     const isProduction = process.env.NODE_ENV === 'production';
-    if (isProduction && !options.jwtSecret && (!process.env.FIORIX_JWT_SECRET || process.env.FIORIX_JWT_SECRET.length < 32)) {
-      throw new Error('[FioriX Security] Fatal: FIORIX_JWT_SECRET environment variable with at least 32 characters is required in production.');
+    if (isProduction && !options.jwtSecret && (!process.env.Fiorify_JWT_SECRET || process.env.Fiorify_JWT_SECRET.length < 32)) {
+      throw new Error('[Fiorify Security] Fatal: Fiorify_JWT_SECRET environment variable with at least 32 characters is required in production.');
     }
-    this.jwtSecret = options.jwtSecret || process.env.FIORIX_JWT_SECRET || 'fiorix-enterprise-auth-secret-key-2026';
+    this.jwtSecret = options.jwtSecret || process.env.Fiorify_JWT_SECRET || 'Fiorify-enterprise-auth-secret-key-2026';
     this.tokenTtlMs = options.tokenTtlMs || 24 * 60 * 60 * 1000; // 24 hours
     this.revokedTokens = new Set();
     this.users = new Map(DEFAULT_USERS.map((u) => [u.email.toLowerCase(), { ...u }]));
@@ -218,9 +218,11 @@ export class AuthService {
       return { success: false, error: 'INVALID_CREDENTIALS', errorMessage: 'Invalid user credentials' };
     }
     const inputHash = hashPassword(password);
-    // Allow either the hashed password or standard dev passwords
-    const isDevPass = (password === 'admin-dev-password' && user.role === USER_ROLES.ADMIN) ||
-                      (password === 'consultant-dev-password' && user.role === USER_ROLES.SAP_CONSULTANT);
+    // Allow either the hashed password or standard dev passwords (only outside production)
+    const isDevPass = (process.env.NODE_ENV !== 'production') && (
+      (password === 'admin-dev-password' && user.role === USER_ROLES.ADMIN) ||
+      (password === 'consultant-dev-password' && user.role === USER_ROLES.SAP_CONSULTANT)
+    );
     if (user.passwordHash !== inputHash && !isDevPass) {
       return { success: false, error: 'INVALID_CREDENTIALS', errorMessage: 'Invalid user credentials' };
     }
@@ -253,8 +255,8 @@ export class AuthService {
     };
     return JwtVerifier.sign(payload, this.jwtSecret, {
       expiresInSeconds: options.expiresInSeconds || Math.floor(this.tokenTtlMs / 1000),
-      issuer: options.issuer || 'https://fiorix.corp/auth',
-      audience: options.audience || 'fiorix-platform'
+      issuer: options.issuer || 'https://Fiorify.corp/auth',
+      audience: options.audience || 'Fiorify-platform'
     });
   }
 
@@ -270,17 +272,17 @@ export class AuthService {
     }
 
     // Support deterministic dev tokens strictly in non-production
-    if (cleanToken.startsWith('fiorix_dev_token_')) {
+    if (cleanToken.startsWith('Fiorify_dev_token_')) {
       const isProduction = process.env.NODE_ENV === 'production';
-      const allowDevTokens = process.env.FIORIX_ALLOW_DEV_TOKENS === 'true' || process.env.NODE_ENV === 'test' || (!isProduction && process.env.FIORIX_DISABLE_DEV_TOKENS !== 'true');
+      const allowDevTokens = process.env.Fiorify_ALLOW_DEV_TOKENS === 'true' || process.env.NODE_ENV === 'test' || (!isProduction && process.env.Fiorify_DISABLE_DEV_TOKENS !== 'true');
       if (isProduction || !allowDevTokens) {
         return null;
       }
-      const roleSuffix = cleanToken.replace('fiorix_dev_token_', '').toUpperCase();
+      const roleSuffix = cleanToken.replace('Fiorify_dev_token_', '').toUpperCase();
       const matchedRole = USER_ROLES[roleSuffix] || USER_ROLES.VIEWER;
       const matchedUser = Array.from(this.users.values()).find((u) => u.role === matchedRole) || {
         id: `USR-DEV-${matchedRole}`,
-        email: `dev-${matchedRole.toLowerCase()}@fiorix.corp`,
+        email: `dev-${matchedRole.toLowerCase()}@Fiorify.corp`,
         name: `Dev ${matchedRole}`,
         role: matchedRole,
         department: 'Development Environment',
@@ -326,8 +328,8 @@ export class AuthService {
     // Standard RFC 7519 JWT
     const verifyOpts = {
       algorithms: ['HS256', 'RS256'],
-      issuer: options.issuer || 'https://fiorix.corp/auth',
-      audience: options.audience || 'fiorix-platform',
+      issuer: options.issuer || 'https://Fiorify.corp/auth',
+      audience: options.audience || 'Fiorify-platform',
       ...options
     };
     const result = JwtVerifier.verify(cleanToken, this.jwtSecret, verifyOpts);
@@ -390,7 +392,7 @@ export class AuthService {
       'password',
       'secret',
       'authorization',
-      'x-fiorix-admin-secret',
+      'x-Fiorify-admin-secret',
       'clientsecret',
       'token',
       'btp_password',

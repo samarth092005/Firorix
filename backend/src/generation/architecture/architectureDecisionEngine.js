@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: RAP Architecture Decision Engine
+ * Fiorify — GEN-05: RAP Architecture Decision Engine
  *
  * Deterministically evaluates confirmed project requirements, data model entities,
  * and assessment provenance to formulate an authoritative RAP architectural profile.

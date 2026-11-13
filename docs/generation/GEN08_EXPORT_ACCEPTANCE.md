@@ -1,4 +1,4 @@
-# FioriX — GEN-08: Review & Export Acceptance Report
+# Fiorify — GEN-08: Review & Export Acceptance Report
 
 **Date of Execution:** November 11, 2026  
 **Test Suite:** `backend/test/gen08ReviewAndExport.test.js`  
@@ -25,7 +25,7 @@ During Subtest 5, the test framework:
 1. Executed `packageExport` for project `PRJ-EXPORT-TEST`.
 2. Extracted the resulting ZIP buffer into a fresh temporary directory (`os.tmpdir()`).
 3. Read every single exported file from disk and computed its actual SHA-256 digest using `node:crypto`.
-4. Compared each file's digest against the value recorded in `fiorix-export-manifest.json`.
+4. Compared each file's digest against the value recorded in `Fiorify-export-manifest.json`.
 5. **Result:** 100% match across all artifacts. Zero checksum deviations.
 
 ---

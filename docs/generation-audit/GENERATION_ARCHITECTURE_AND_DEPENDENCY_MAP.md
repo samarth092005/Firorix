@@ -8,7 +8,7 @@
 
 ## 1. Executive Architectural Overview
 
-FioriX Generation Studio is structured as an end-to-end, local-first code synthesis pipeline designed to bridge SAP discovery assessments with enterprise-grade SAP S/4HANA 2023 ABAP RESTful Application Programming Model (RAP) and SAP Fiori Elements development.
+Fiorify Generation Studio is structured as an end-to-end, local-first code synthesis pipeline designed to bridge SAP discovery assessments with enterprise-grade SAP S/4HANA 2023 ABAP RESTful Application Programming Model (RAP) and SAP Fiori Elements development.
 
 The system strictly adheres to the principle:
 > **"STANDARD SAP FIORI FIRST. CUSTOM BUILD ONLY WHEN A GENUINE GAP EXISTS."**
@@ -82,7 +82,7 @@ flowchart TD
         DA[BUILD Assessment Report] -->|Authoritative Snapshot| GS_CREATE[Project Creation API]
     end
 
-    subgraph GenStudio ["FioriX Generation Studio Pipeline"]
+    subgraph GenStudio ["Fiorify Generation Studio Pipeline"]
         GS_CREATE --> GEN02[GEN-02: Project Foundation Store]
         GEN02 --> GEN03[GEN-03: Requirements Designer]
         GEN03 -->|Gap Backlog & Custom Req| GEN04[GEN-04: Data Model Designer]

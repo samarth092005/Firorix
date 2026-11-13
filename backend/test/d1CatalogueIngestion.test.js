@@ -22,10 +22,10 @@ describe('Workstream D1 — Official Fiori Catalogue Extraction & Release Specif
   let tempStatusPath;
   let falIngestionService;
   let officialCatalogueAdapter;
-  const adminSecret = 'test-fiorix-d1-admin';
+  const adminSecret = 'test-Fiorify-d1-admin';
 
   before(async () => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorix-d1-cat-test-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'Fiorify-d1-cat-test-'));
     tempCachePath = path.join(tempDir, 'fiori_app_catalog_cache.json');
     tempStatusPath = path.join(tempDir, 'fiori_app_catalog_status.json');
 
@@ -236,7 +236,7 @@ describe('Workstream D1 — Official Fiori Catalogue Extraction & Release Specif
       const rollbackResponse = await fetch(`${baseUrl}/api/v1/fiori-catalogue/rollback`, {
         method: 'POST',
         headers: {
-          'X-FioriX-Admin-Secret': adminSecret,
+          'X-Fiorify-Admin-Secret': adminSecret,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({})
@@ -255,7 +255,7 @@ describe('Workstream D1 — Official Fiori Catalogue Extraction & Release Specif
       const rollbackResponse = await fetch(`${baseUrl}/api/v1/fiori-catalogue/rollback`, {
         method: 'POST',
         headers: {
-          'X-FioriX-Admin-Secret': 'wrong-secret',
+          'X-Fiorify-Admin-Secret': 'wrong-secret',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({})

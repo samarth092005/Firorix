@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Domain Types & View Models (GEN-02, GEN-03, GEN-04)
+ * Fiorify — Generation Studio Domain Types & View Models (GEN-02, GEN-03, GEN-04)
  */
 
 export type ProjectOrigin = 'DISCOVERY_BUILD' | 'STANDALONE' | 'TEMPLATE';

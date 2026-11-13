@@ -1,5 +1,5 @@
 /**
- * FioriX — Data Model Designer Contracts & Types (GEN-04)
+ * Fiorify — Data Model Designer Contracts & Types (GEN-04)
  *
  * Implements canonical schemas, ABAP CDS types, semantic roles,
  * and relationship structures for SAP S/4HANA 2023 On-Premise.

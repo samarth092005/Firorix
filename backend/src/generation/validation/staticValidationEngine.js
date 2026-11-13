@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05 & GEN-06 Static Validation Engine
+ * Fiorify — GEN-05 & GEN-06 Static Validation Engine
  *
  * Implements rigorous, honest static verification of generated ABAP RAP artifacts,
  * Fiori Elements UI5 files, and cross-artifact consistency contracts for S/4HANA 2023.
@@ -247,7 +247,7 @@ export class StaticValidationEngine {
           message: `SHA-256 checksum mismatch for "${art.objectName}": stored "${art.checksum}", computed "${actualHash}".`,
           explanation: 'Artifact content was modified out-of-band without updating its cryptographic checksum.',
           suggestedCorrection: 'Re-save artifact through the authoritative ArtifactRegistry API.',
-          evidenceBasis: 'FioriX Cryptographic Provenance Standard'
+          evidenceBasis: 'Fiorify Cryptographic Provenance Standard'
         });
       }
     }

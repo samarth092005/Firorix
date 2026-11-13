@@ -1,4 +1,4 @@
-# FIORIX — SAP S21 CONNECTIVITY & LANDSCAPE ARCHITECTURE AUDIT
+# Fiorify — SAP S21 CONNECTIVITY & LANDSCAPE ARCHITECTURE AUDIT
 **Document ID:** AUDIT-SAP-CONN-2026-001  
 **Status:** COMPLETE  
 **Date:** 2026-11-08  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This audit examines the connectivity path between FioriX and target SAP S/4HANA systems, focusing on **SAP S/4HANA 2023 Private Edition (System: S21, Client: 200)**:
+This audit examines the connectivity path between Fiorify and target SAP S/4HANA systems, focusing on **SAP S/4HANA 2023 Private Edition (System: S21, Client: 200)**:
 - BTP Destination Service authentication and token exchange.
 - SAP Cloud Connector reverse proxy mapping.
 - SAP Gateway OData Catalog reachability (`/sap/opu/odata/IWFND/CATALOGSERVICE;v=2`).
@@ -20,7 +20,7 @@ This audit examines the connectivity path between FioriX and target SAP S/4HANA 
 
 ## 2. Landscape Architecture & Separation of Runtimes
 
-FioriX supports two strictly separated operational runtime profiles:
+Fiorify supports two strictly separated operational runtime profiles:
 
 ### 2.1 Local Developer Runtime
 - **Target:** Developer workstation connecting to S21 via approved VPN, local forward proxy, or explicit tunnel.

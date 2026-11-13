@@ -47,7 +47,7 @@ class NotificationService {
 
   private loadFromStorage(): void {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('fiorix_notifications_store_v1');
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('Fiorify_notifications_store_v1');
       if (raw) {
         this.notifications = JSON.parse(raw);
       }

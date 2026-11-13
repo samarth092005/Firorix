@@ -1,4 +1,4 @@
-# FioriX — Target Database Architecture (Phase S1 Corrected & Complete)
+# Fiorify — Target Database Architecture (Phase S1 Corrected & Complete)
 
 **Document Version:** 2.0  
 **Phase:** S1 — Persistence Foundation  

@@ -2,7 +2,7 @@
 ## Rigorous Module-by-Module Code Review & Verification
 
 ### 1. Audit Scope & Objective
-This audit reviews the implementation source code of the **FioriX Generation Studio (GEN-05 RAP Backend Generator & GEN-06 SAP Fiori Elements Generator)** to verify structural integrity, algorithmic correctness, Clean Core adherence, and error handling.
+This audit reviews the implementation source code of the **Fiorify Generation Studio (GEN-05 RAP Backend Generator & GEN-06 SAP Fiori Elements Generator)** to verify structural integrity, algorithmic correctness, Clean Core adherence, and error handling.
 
 **Classification Scheme:**
 - `PASS`: Verified with actual evidence.

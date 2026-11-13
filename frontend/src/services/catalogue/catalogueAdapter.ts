@@ -83,7 +83,7 @@ function mapRecordToCatalogueReference(record: CatalogueAppRecord): CatalogueRef
  * Target: https://fal.cloud.sap
  *
  * Live Backend Synchronization:
- * FioriX combines live OData endpoint access against the SAP FAL index (18,225+ apps)
+ * Fiorify combines live OData endpoint access against the SAP FAL index (18,225+ apps)
  * with locally cached release snapshots and curated baselines for ultra-fast response.
  */
 class FioriCatalogueAdapter implements IFioriCatalogueAdapter {

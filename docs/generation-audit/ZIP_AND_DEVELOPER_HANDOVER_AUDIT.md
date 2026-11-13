@@ -9,7 +9,7 @@
 ## 1. Zero-Dependency PKZIP Engine Audit
 
 ### 1.1 Architecture & Implementation (`zipArchiver.js`)
-FioriX Generation Studio implements a pure Node.js PKZIP packaging engine (`zipArchiver.js`) that produces standard `.zip` archives with zero external runtime dependencies.
+Fiorify Generation Studio implements a pure Node.js PKZIP packaging engine (`zipArchiver.js`) that produces standard `.zip` archives with zero external runtime dependencies.
 
 **Technical Specifications:**
 - **Local File Header:** Injects signature `0x04034b50`, DOS time/date, CRC-32 checksum, compressed/uncompressed sizes, and UTF-8 path.
@@ -57,7 +57,7 @@ Project_Export_Bundle.zip
 │   ├── TRACEABILITY_MATRIX.md            (T-Code -> Gap -> CDS -> UI Traceability)
 │   ├── DEVELOPER_HANDOVER_GUIDE.md       (Step-by-step Eclipse ADT & BAS Instructions)
 │   └── README.md                         (Project Summary and Reviewer Guide)
-└── fiorix-export-manifest.json           (Root Manifest with SHA-256 Checksums)
+└── Fiorify-export-manifest.json           (Root Manifest with SHA-256 Checksums)
 ```
 
 ---

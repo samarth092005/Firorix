@@ -7,7 +7,7 @@
 ---
 
 ## 1. Context and Problem Statement
-When standard SAP Fiori applications are proven insufficient via fit-gap analysis, FioriX can assist developers by generating custom Fiori draft artifacts. Uncontrolled code generation risks creating non-compliant, non-clean-core ABAP artifacts, violating SAP release compatibility rules, and producing unmaintainable code.
+When standard SAP Fiori applications are proven insufficient via fit-gap analysis, Fiorify can assist developers by generating custom Fiori draft artifacts. Uncontrolled code generation risks creating non-compliant, non-clean-core ABAP artifacts, violating SAP release compatibility rules, and producing unmaintainable code.
 
 ## 2. Decision
 1. **Mandatory Gating:** Custom app generation is locked behind a strict governance gate:

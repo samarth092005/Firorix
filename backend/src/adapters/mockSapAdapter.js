@@ -11,7 +11,7 @@ export const SYSTEMS = [
     active: true,
     softwareComponents: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
     rfcDestination: 'S21_RFC_DISCOVERY',
-    odataServiceUrl: '/sap/opu/odata/sap/Z_FIORIX_DISCOVERY_SRV'
+    odataServiceUrl: '/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV'
   },
   {
     systemId: 'S21-200-DEMO',

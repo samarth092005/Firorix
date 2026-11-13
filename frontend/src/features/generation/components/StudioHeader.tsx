@@ -28,66 +28,31 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   const isArchived = project?.lifecycleStatus === 'ARCHIVED';
 
   return (
-    <div
-      style={{
-        backgroundColor: '#FFFFFF',
-        borderBottom: '1px solid var(--fiori-border, #E2E8F0)',
-        padding: '16px 24px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)'
-      }}
-    >
-      {/* Top Banner: Breadcrumbs & Local-First Indicator */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          marginBottom: '10px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <header className="studio-header">
+      {/* Top Banner: Breadcrumbs & Actions */}
+      <div className="studio-header-top">
+        <div className="studio-breadcrumbs">
           {project && (
             <button
               type="button"
-              className="fiori-btn fiori-btn-subtle"
-              style={{ padding: '4px 8px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              className="studio-btn-back"
               onClick={onBackToDashboard}
             >
               <ArrowLeft size={14} /> Projects Dashboard
             </button>
           )}
-          {project && <span style={{ color: '#94A3B8' }}>/</span>}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Layers size={16} color="#0066FF" />
-            <span style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-              FioriX Generation Studio
-            </span>
+          {project && <span style={{ color: 'var(--studio-text-subtle)' }}>/</span>}
+          <div className="studio-brand-title">
+            <Layers size={16} color="var(--studio-primary)" />
+            <span>Fiorify Generation Studio</span>
           </div>
-          <span
-            style={{
-              fontSize: '11px',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              backgroundColor: '#EFF6FF',
-              color: '#0066FF',
-              fontWeight: 700,
-              border: '1px solid #BFDBFE'
-            }}
-          >
-            Studio Active • Local-First
-          </span>
         </div>
 
-        {/* Local-First Indicator Pill */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
- 
-
+        {/* Studio Actions */}
+        <div className="studio-header-actions">
           <button
             type="button"
-            className="fiori-btn fiori-btn-subtle"
-            style={{ padding: '4px 10px', fontSize: '12px', height: '28px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            className="studio-btn-icon"
             onClick={onRefresh}
             disabled={isLoading}
             title="Refresh current workspace"
@@ -99,69 +64,27 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       </div>
 
       {/* Main Title Row & Context Chips */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}
-      >
+      <div className="studio-header-main">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <h1
-              className="fiori-page-title"
-              style={{
-                margin: 0,
-                fontSize: '20px',
-                fontWeight: 700,
-                color: '#0F172A',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
+          <div className="studio-project-title-group">
+            <h1 className="studio-project-heading">
               {project ? project.projectName : 'Custom Fiori Application Generation Studio'}
             </h1>
 
             {project && (
-              <span
-                style={{
-                  fontSize: '11px',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  backgroundColor: project.origin === 'DISCOVERY_BUILD' ? '#EDE9FE' : '#F1F5F9',
-                  color: project.origin === 'DISCOVERY_BUILD' ? '#6D28D9' : '#475569',
-                  fontWeight: 700,
-                  border: `1px solid ${project.origin === 'DISCOVERY_BUILD' ? '#DDD6FE' : '#E2E8F0'}`
-                }}
-              >
+              <span className={`studio-chip ${project.origin === 'DISCOVERY_BUILD' ? 'primary' : ''}`}>
                 {project.origin === 'DISCOVERY_BUILD' ? 'DISCOVERY BUILD' : 'STANDALONE WORKSPACE'}
               </span>
             )}
 
             {project && (
-              <span
-                style={{
-                  fontSize: '11px',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  backgroundColor: isArchived ? '#FEE2E2' : '#DCFCE7',
-                  color: isArchived ? '#991B1B' : '#166534',
-                  fontWeight: 700,
-                  border: `1px solid ${isArchived ? '#FCA5A5' : '#86EFAC'}`
-                }}
-              >
+              <span className={`studio-chip ${isArchived ? '' : 'success'}`}>
                 Status: {project.lifecycleStatus}
               </span>
             )}
           </div>
 
-          <p
-            className="fiori-page-subtitle"
-            style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}
-          >
+          <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--studio-text-muted)' }}>
             {project
               ? (project.description || 'Custom RAP Managed application development project under Clean Core architecture.')
               : 'Architect, generate, validate and export Clean Core custom SAP Fiori applications for genuine functional gaps.'}
@@ -177,16 +100,16 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               gap: '16px',
               flexWrap: 'wrap',
               fontSize: '12px',
-              color: '#475569',
-              padding: '8px 12px',
-              backgroundColor: '#F8FAFC',
-              borderRadius: '6px',
-              border: '1px solid #E2E8F0'
+              color: 'var(--studio-text-muted)',
+              padding: '8px 14px',
+              backgroundColor: 'var(--studio-surface-subtle)',
+              borderRadius: 'var(--studio-radius-sm)',
+              border: '1px solid var(--studio-border)'
             }}
           >
             <div>
-              <span style={{ color: '#94A3B8', fontWeight: 600 }}>Project ID:</span>{' '}
-              <code style={{ fontWeight: 700, color: '#0F172A' }}>{project.projectId}</code>
+              <span style={{ color: 'var(--studio-text-subtle)', fontWeight: 600 }}>Project ID:</span>{' '}
+              <code style={{ fontWeight: 700, color: 'var(--studio-text-main)' }}>{project.projectId}</code>
             </div>
 
             {project.sourceTransactionCode && (
@@ -251,6 +174,6 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           </span>
         </div>
       )}
-    </div>
+    </header>
   );
 };

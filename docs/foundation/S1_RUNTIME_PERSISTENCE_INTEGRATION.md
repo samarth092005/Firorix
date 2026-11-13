@@ -1,4 +1,4 @@
-# FIORIX — S1 RUNTIME PERSISTENCE INTEGRATION
+# Fiorify — S1 RUNTIME PERSISTENCE INTEGRATION
 **End-to-End Application API Routing, Repository Delegation & Fail-Fast Safeguards**
 
 **Date:** 2026-11-11  
@@ -40,7 +40,7 @@ To satisfy directive clause S1.3 ("Find all remaining JSON-backed runtime access
 ## 3. Strict Fail-Fast Policy (No Silent Fallback)
 
 In accordance with Non-Negotiable Rule 6:
-- When running in database mode (`useDatabase: true` or `FIORIX_PERSISTENCE === 'postgres'`), `AssessmentStore` and `GenerationProjectStore` execute directly against `AssessmentRepository` and `GenerationProjectRepository`.
+- When running in database mode (`useDatabase: true` or `Fiorify_PERSISTENCE === 'postgres'`), `AssessmentStore` and `GenerationProjectStore` execute directly against `AssessmentRepository` and `GenerationProjectRepository`.
 - If PostgreSQL is disconnected, terminated, or encounters an operational error, the call does **NOT** swallow the error or fall back to reading from local JSON files.
 - An explicit error is thrown, propagating HTTP 500 / 503 to callers with correlation tracking, ensuring stale file data cannot mask database outages.
 

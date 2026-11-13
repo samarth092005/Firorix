@@ -1,5 +1,5 @@
 /**
- * FioriX — Generation Studio Requirements Service (GEN-03)
+ * Fiorify — Generation Studio Requirements Service (GEN-03)
  *
  * Implements requirement management, Discovery assessment import,
  * validation gate checks, and state transitions for Generation Projects.

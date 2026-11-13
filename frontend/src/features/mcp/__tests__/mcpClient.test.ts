@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ApiClient } from '../../../services/api/apiClient';
 
-describe('FioriX MCP-01 + MCP-02 — Frontend API Client Tests', () => {
+describe('Fiorify MCP-01 + MCP-02 — Frontend API Client Tests', () => {
   let client: ApiClient;
   const originalFetch = globalThis.fetch;
 
@@ -152,6 +152,6 @@ describe('FioriX MCP-01 + MCP-02 — Frontend API Client Tests', () => {
 
     await client.connectMcp('my-admin-secret');
     const [, calledInit] = (globalThis.fetch as any).mock.calls[0];
-    expect(calledInit.headers['X-FioriX-Admin-Secret']).toBe('my-admin-secret');
+    expect(calledInit.headers['X-Fiorify-Admin-Secret']).toBe('my-admin-secret');
   });
 });

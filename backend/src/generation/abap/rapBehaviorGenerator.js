@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: RAP Behavior Definition Generator
+ * Fiorify — GEN-05: RAP Behavior Definition Generator
  *
  * Generates ABAP RAP Behavior Definitions (BDEF) supporting Managed with Draft,
  * Managed without Draft, and Read-Only Query profiles in compliance with S/4HANA 2023.

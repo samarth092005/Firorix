@@ -1,5 +1,5 @@
 /**
- * FioriX — Advanced Fit-Gap Assessment Engine (FITGAP-02)
+ * Fiorify — Advanced Fit-Gap Assessment Engine (FITGAP-02)
  *
  * Evaluates business requirements against discovered SAP Fiori application candidates
  * across 10 structured dimensions using evidence-backed rules, normalized weighting,
@@ -424,7 +424,7 @@ export class FitGapAssessmentEngine {
 
       recommendation,
       evidenceReferences,
-      provenance: 'FIORIX_FIT_GAP_ASSESSMENT_ENGINE',
+      provenance: 'Fiorify_FIT_GAP_ASSESSMENT_ENGINE',
       assessmentTimestamp
     };
   }
@@ -1466,7 +1466,7 @@ export class FitGapAssessmentEngine {
         nextActions: ['Provide complete requirement and candidate objects.']
       },
       evidenceReferences: [],
-      provenance: 'FIORIX_FIT_GAP_ASSESSMENT_ENGINE',
+      provenance: 'Fiorify_FIT_GAP_ASSESSMENT_ENGINE',
       assessmentTimestamp
     };
   }

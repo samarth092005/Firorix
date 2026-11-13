@@ -1,4 +1,4 @@
-# FIORIX — DATABASE AND CATALOGUE ARCHITECTURE AUDIT
+# Fiorify — DATABASE AND CATALOGUE ARCHITECTURE AUDIT
 **Document ID:** AUDIT-DATA-CAT-2026-001  
 **Status:** COMPLETE  
 **Date:** 2026-11-08  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-This audit evaluates the database and catalogue layer of FioriX, encompassing:
+This audit evaluates the database and catalogue layer of Fiorify, encompassing:
 1. The JSON file-backed persistence store (`backend/data/assessments.json` and `assessmentStore.js`).
 2. The SAP Cloud Application Programming Model (CAP) Core Data Services (CDS) models (`backend/db/schema.cds` and `backend/srv/discovery-service.cds`).
 3. The official SAP Fiori Apps Reference Library (FAL) cache and ingestion engine (`backend/src/adapters/officialFioriCatalogueAdapter.js` and `backend/src/tools/ingestFAL.js`).

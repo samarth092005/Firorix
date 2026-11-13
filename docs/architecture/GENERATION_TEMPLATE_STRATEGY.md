@@ -1,4 +1,4 @@
-# FIORIX — GENERATION TEMPLATE STRATEGY (SPRINT S0)
+# Fiorify — GENERATION TEMPLATE STRATEGY (SPRINT S0)
 
 **Document Identifier:** STRAT-GEN-TEMPLATE-S0  
 **Target Architecture:** Application Generation Strategy for SAP S/4HANA 2023  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Strategy Overview
 
-The FioriX Generation Studio translates assessments whose governed recommendation is **`BUILD`** into modern, clean-core SAP Fiori application blueprints.
+The Fiorify Generation Studio translates assessments whose governed recommendation is **`BUILD`** into modern, clean-core SAP Fiori application blueprints.
 
 Generating clean-core applications requires supporting distinct architectural patterns based on actual business requirements and verified target system capabilities. Not every legacy SAP GUI transaction requires complex, multi-entity transactional behavior; reporting transactions require simple, high-performance analytical views, while complex legacy transactions require careful bridging between classic BAPIs and modern RAP protocols.
 
@@ -40,7 +40,7 @@ Clean Core Tier: Tier 1 (ABAP Cloud Compatible)
 
 ## 3. Comprehensive Evaluation of Application Patterns
 
-FioriX defines four distinct architectural patterns to prevent over-engineering:
+Fiorify defines four distinct architectural patterns to prevent over-engineering:
 
 ### Pattern A: Draft-Enabled Managed RAP (Template 1)
 - **Target Use Cases:** Legacy transactional maintenance transactions with Create, Edit, and Delete operations (e.g. custom master data, custom order processing, approval workflows).
@@ -98,7 +98,7 @@ FioriX defines four distinct architectural patterns to prevent over-engineering:
 
 ## 5. Template Selection & Rejection Decision Matrix
 
-The FioriX Generation Engine applies strict deterministic conditions to select the appropriate template or reject generation entirely:
+The Fiorify Generation Engine applies strict deterministic conditions to select the appropriate template or reject generation entirely:
 
 ```mermaid
 flowchart TD

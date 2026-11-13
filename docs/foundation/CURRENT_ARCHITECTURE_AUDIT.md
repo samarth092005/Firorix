@@ -1,4 +1,4 @@
-# FioriX — Current Architecture Audit (Phase S0)
+# Fiorify — Current Architecture Audit (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-FioriX is an enterprise SAP Modernization Platform targeting SAP S/4HANA 2023 On-Premise (baseline system `S21`, client `200`). Its core mission is to analyze existing SAP transactions, discover suitable standard SAP Fiori applications, identify functional and technical gaps, and generate custom Fiori applications only when no suitable standard solution exists.
+Fiorify is an enterprise SAP Modernization Platform targeting SAP S/4HANA 2023 On-Premise (baseline system `S21`, client `200`). Its core mission is to analyze existing SAP transactions, discover suitable standard SAP Fiori applications, identify functional and technical gaps, and generate custom Fiori applications only when no suitable standard solution exists.
 
 The platform is split into two major functional sections:
 1. **Discovery & Assessment Platform (Phase 0):** Transaction Discovery, Technical Evidence Collection, Canonical Fiori Catalogue Matching, Fit-Gap Assessment, and Governance Recommendation Engine.
@@ -28,7 +28,7 @@ This document establishes the architecture baseline as of Phase S0 before introd
        │ HTTP / JSON (REST APIs)
        ▼
 ┌────────────────────────────────────────────────────────────────────────┐
-│  FioriX Backend Runtime (Node.js 20 Native HTTP)                      │
+│  Fiorify Backend Runtime (Node.js 20 Native HTTP)                      │
 │  - server.js (Single-process HTTP server, port 3001)                   │
 │  - No Express, No CAP, Zero external framework overhead               │
 ├────────────────────────────────────────────────────────────────────────┤
@@ -113,7 +113,7 @@ This document establishes the architecture baseline as of Phase S0 before introd
 | **Persistence** | 4 JSON files on local disk with `.tmp` and `.bak` rename patterns | ACID relational PostgreSQL with transactional consistency and migration tooling |
 | **Concurrency** | In-memory single-process mutex lock per file/project | Row-level locking and database transactions spanning multiple entities |
 | **Multi-Tenancy** | Single shared data namespace; no tenant separation | Strict tenant ID scoping across all tables, APIs, and file artifacts |
-| **Authentication** | Shared static admin token via `X-FioriX-Admin-Secret` | Server-side session/token authentication with RBAC and secure credential store |
+| **Authentication** | Shared static admin token via `X-Fiorify-Admin-Secret` | Server-side session/token authentication with RBAC and secure credential store |
 | **SAP Connectivity** | Local mock adapter with BTP Destination stub; manual credential flags | Production BTP Destination + Connectivity Service + Cloud Connector pipeline |
 | **Audit Trails** | In-memory/JSON hash-chained array inside assessment records | Dedicated, immutable audit log table with indexed timestamps, actors, and events |
 

@@ -173,7 +173,7 @@ describe('Workstream D2 — Universal SAP Transaction Code Discovery Architectur
       });
 
       // Query an arbitrary valid T-Code not in snapshot
-      const result = await adapter.discoverTransaction('CS01');
+      const result = await adapter.discoverTransaction('CA01');
       assert.strictEqual(result.success, true);
       assert.strictEqual(result.statusCode, 'PARTIAL_METADATA');
       assert.strictEqual(result.verificationStatus, 'PENDING_VERIFICATION');

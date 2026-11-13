@@ -1,4 +1,4 @@
-# FioriX — Pre-Implementation Regression Baseline (Phase S0)
+# Fiorify — Pre-Implementation Regression Baseline (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This document establishes the official empirical baseline for the FioriX platform as verified immediately prior to any Phase S1 implementation work. All commands were freshly executed in the workspace and their actual terminal outputs and exit codes recorded.
+This document establishes the official empirical baseline for the Fiorify platform as verified immediately prior to any Phase S1 implementation work. All commands were freshly executed in the workspace and their actual terminal outputs and exit codes recorded.
 
 No historical test numbers were assumed or fabricated.
 

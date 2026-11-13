@@ -1,11 +1,11 @@
-# FioriX — Stage S3: SAP S/4HANA Connectivity Architecture
+# Fiorify — Stage S3: SAP S/4HANA Connectivity Architecture
 
 ## 1. Architectural Overview
-FioriX connects modern cloud application runtimes to backend on-premise SAP S/4HANA systems (specifically target system **S21**, Client **200**, running **SAP S/4HANA 2023 On-Premise**) without opening inbound firewall ports or deploying proprietary agents inside the customer SAP kernel.
+Fiorify connects modern cloud application runtimes to backend on-premise SAP S/4HANA systems (specifically target system **S21**, Client **200**, running **SAP S/4HANA 2023 On-Premise**) without opening inbound firewall ports or deploying proprietary agents inside the customer SAP kernel.
 
 ```mermaid
 flowchart LR
-    subgraph FioriX_Runtime ["FioriX Runtime (Cloud Foundry / Local)"]
+    subgraph Fiorify_Runtime ["Fiorify Runtime (Cloud Foundry / Local)"]
         HTTPRouter["Node.js 20 HTTP Router (server.js)"]
         HealthSvc["SapConnectionHealthService"]
         ConnProvider["SapConnectivityProvider"]

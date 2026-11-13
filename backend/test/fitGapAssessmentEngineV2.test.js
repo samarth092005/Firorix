@@ -10,7 +10,7 @@ import {
   GAP_CATEGORIES
 } from '../src/engine/fitGapAssessmentEngine.js';
 
-describe('FioriX FITGAP-02 — Advanced Fit-Gap Assessment Engine 10-Dimension Tests', () => {
+describe('Fiorify FITGAP-02 — Advanced Fit-Gap Assessment Engine 10-Dimension Tests', () => {
   const sampleRequirement = {
     id: 'REQ-MM-001',
     title: 'Create and Approve Purchase Requisitions',

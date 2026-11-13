@@ -1,6 +1,6 @@
-# FIORIX GENERATION STUDIO — UI/UX DESIGN SPECIFICATION
+# Fiorify GENERATION STUDIO — UI/UX DESIGN SPECIFICATION
 **Document ID:** SPEC-GEN-UX-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Release:** Generation Milestone (Phase 0 Design)  
 **Status:** COMPLETE DESIGN SPECIFICATION  
 **Author:** Principal UX Architect & Design System Lead  
@@ -9,7 +9,7 @@
 
 ## 1. Design System & Principles
 
-The Generation Studio UI adheres strictly to the **SAP Fiori Design Guidelines (Horizon / Morning Horizon theme)**, maintaining visual harmony with the rest of the FioriX enterprise suite.
+The Generation Studio UI adheres strictly to the **SAP Fiori Design Guidelines (Horizon / Morning Horizon theme)**, maintaining visual harmony with the rest of the Fiorify enterprise suite.
 
 ### 1.1 Core Design Principles
 1. **Local-First Transparency:** System status clearly indicates local file storage, local mock services, and sandbox boundaries.
@@ -21,8 +21,8 @@ The Generation Studio UI adheres strictly to the **SAP Fiori Design Guidelines (
 
 ## 2. Studio Layout & Navigation Hierarchy
 
-Generation Studio operates as an enclosed, multi-view sub-application within FioriX:
-- **Global Header (AppShell):** FioriX top navigation (Overview, Discovery, Catalogue, Generation Studio, Settings).
+Generation Studio operates as an enclosed, multi-view sub-application within Fiorify:
+- **Global Header (AppShell):** Fiorify top navigation (Overview, Discovery, Catalogue, Generation Studio, Settings).
 - **Studio Sub-Header:** Displays active Project Name, Source T-Code, Target Release, Lifecycle Stage Badge, and quick action buttons.
 - **Studio Segmented Navigation (TabBar):** 9 distinct work areas arranged logically from concept to export:
   1. `Projects Dashboard`
@@ -37,7 +37,7 @@ Generation Studio operates as an enclosed, multi-view sub-application within Fio
 
 ```mermaid
 graph TD
-    Shell[FioriX AppShell] --> StudioHeader[Generation Studio Sub-Header]
+    Shell[Fiorify AppShell] --> StudioHeader[Generation Studio Sub-Header]
     StudioHeader --> NavTabs[Internal 9-Tab Navigation]
     NavTabs --> Tab1[1. Projects]
     NavTabs --> Tab2[2. Requirements]

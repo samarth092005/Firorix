@@ -20,7 +20,7 @@ export class McpService {
    * Auto-connects if MCP_AUTO_CONNECT=true and MCP_ENABLED=true.
    */
   async initialize() {
-    mcpLogger.info(`Initializing FioriX MCP subsystem (Enabled: ${this.config.enabled}, AutoConnect: ${this.config.autoConnect})`);
+    mcpLogger.info(`Initializing Fiorify MCP subsystem (Enabled: ${this.config.enabled}, AutoConnect: ${this.config.autoConnect})`);
     if (this.config.enabled && this.config.autoConnect) {
       try {
         await this.connectionManager.connect();
@@ -68,7 +68,7 @@ export class McpService {
       components: {
         backendAvailability: {
           status: 'UP',
-          message: 'FioriX backend HTTP service is running'
+          message: 'Fiorify backend HTTP service is running'
         },
         mcpSubsystemConfigured: {
           status: this.config.enabled ? 'ENABLED' : 'DISABLED',

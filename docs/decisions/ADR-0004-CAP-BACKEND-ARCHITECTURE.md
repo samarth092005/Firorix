@@ -2,12 +2,12 @@
 **Status:** APPROVED  
 **Date:** November 2026  
 **Deciders:** Senior SAP Solution Architect, Senior CAP Developer, BTP Platform Architect  
-**Technical Scope:** FioriX Backend Runtime & Service Boundaries  
+**Technical Scope:** Fiorify Backend Runtime & Service Boundaries  
 
 ---
 
 ## 1. Context and Problem Statement
-FioriX requires a robust backend on SAP BTP Cloud Foundry to orchestrate S/4HANA metadata discovery, business requirement governance, catalog search, fit-gap calculation, and draft code generation. We must decide between a microservices-per-feature architecture vs. a modular monolithic CAP application.
+Fiorify requires a robust backend on SAP BTP Cloud Foundry to orchestrate S/4HANA metadata discovery, business requirement governance, catalog search, fit-gap calculation, and draft code generation. We must decide between a microservices-per-feature architecture vs. a modular monolithic CAP application.
 
 ## 2. Decision
 1. **Modular CAP Monolith:** Implement the backend as a **single modular SAP Cloud Application Programming Model (CAP) Node.js application** in TypeScript.

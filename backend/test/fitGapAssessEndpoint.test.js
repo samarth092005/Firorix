@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from '../src/server.js';
 import { ASSESSMENT_STATUSES } from '../src/engine/fitGapAssessmentEngine.js';
 
-describe('FioriX FITGAP-01 — POST /api/v1/fitgap/assess Endpoint Tests', () => {
+describe('Fiorify FITGAP-01 — POST /api/v1/fitgap/assess Endpoint Tests', () => {
   let server;
   let baseUrl;
 

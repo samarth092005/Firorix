@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: Preview Security & Isolation Policy
+ * Fiorify — GEN-07: Preview Security & Isolation Policy
  *
  * Enforces admin-only access, safe loopback binding (127.0.0.1), safe port ranges (4050-4099),
  * query complexity limits, path traversal prevention, and project isolation.
@@ -11,7 +11,7 @@ export const MAX_REQUEST_BODY_BYTES = 1024 * 1024; // 1MB
 export const MAX_QUERY_COMPLEXITY_DEPTH = 5;
 
 /**
- * Validates that the request identity has FioriX Administrator privileges.
+ * Validates that the request identity has Fiorify Administrator privileges.
  *
  * @param {Object} userContext
  * @returns {boolean}
@@ -26,7 +26,7 @@ export function verifyAdminAccess(userContext) {
 
   // Support local development single-admin, SAP consultant, and role-based checks
   const isAdmin = userContext.role === 'ADMIN' ||
-    userContext.role === 'FIORIX_ADMIN' ||
+    userContext.role === 'Fiorify_ADMIN' ||
     userContext.role === 'SAP_CONSULTANT' ||
     userContext.role === 'APPROVER' ||
     userContext.isAdmin === true ||
@@ -34,12 +34,12 @@ export function verifyAdminAccess(userContext) {
     userContext.id === 'USR-ADMIN-01' ||
     userContext.username === 'admin' ||
     (Array.isArray(userContext.scopes) && (
-      userContext.scopes.includes('fiorix.generation.manage') ||
-      userContext.scopes.includes('fiorix.admin.access')
+      userContext.scopes.includes('Fiorify.generation.manage') ||
+      userContext.scopes.includes('Fiorify.admin.access')
     ));
 
   if (!isAdmin) {
-    const err = new Error('Access denied: Preview subsystem requires FioriX Administrator role.');
+    const err = new Error('Access denied: Preview subsystem requires Fiorify Administrator role.');
     err.code = 'FORBIDDEN';
     err.statusCode = 403;
     throw err;

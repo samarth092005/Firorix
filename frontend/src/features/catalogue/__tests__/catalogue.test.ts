@@ -6,7 +6,7 @@ import {
 } from '../../../services/catalogue/catalogueService';
 import { apiClient, ApiError } from '../../../services/api/apiClient';
 
-describe('FioriX CAT-02 — Frontend Canonical Catalogue Integration Tests', () => {
+describe('Fiorify CAT-02 — Frontend Canonical Catalogue Integration Tests', () => {
   const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
@@ -308,7 +308,7 @@ describe('FioriX CAT-02 — Frontend Canonical Catalogue Integration Tests', () 
   });
 
   // 10. No administrative secret sent by browser requests
-  it('10. verifies that browser catalogue search and detail requests do not send X-FioriX-Admin-Secret', async () => {
+  it('10. verifies that browser catalogue search and detail requests do not send X-Fiorify-Admin-Secret', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({
@@ -322,7 +322,7 @@ describe('FioriX CAT-02 — Frontend Canonical Catalogue Integration Tests', () 
 
     await catalogueService.searchCatalogue({ searchQuery: 'Test' });
     const [, searchInit] = (globalThis.fetch as any).mock.calls[0];
-    expect(searchInit.headers['X-FioriX-Admin-Secret']).toBeUndefined();
+    expect(searchInit.headers['X-Fiorify-Admin-Secret']).toBeUndefined();
     expect(searchInit.headers['Authorization']).toBeUndefined();
 
     globalThis.fetch = vi.fn().mockResolvedValue(
@@ -338,7 +338,7 @@ describe('FioriX CAT-02 — Frontend Canonical Catalogue Integration Tests', () 
 
     await catalogueService.getAppById('F1612');
     const [, detailInit] = (globalThis.fetch as any).mock.calls[0];
-    expect(detailInit.headers['X-FioriX-Admin-Secret']).toBeUndefined();
+    expect(detailInit.headers['X-Fiorify-Admin-Secret']).toBeUndefined();
     expect(detailInit.headers['Authorization']).toBeUndefined();
   });
 

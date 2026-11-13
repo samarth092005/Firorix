@@ -289,7 +289,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
   const serviceName = `ZUI_${prefix}`;
   const serviceBindingName = `ZUI_${prefix}_O4`;
   const odataEndpoint = `/sap/opu/odata4/sap/${serviceName.toLowerCase()}_o4/srvd/sap/${serviceName.toLowerCase()}/0001/`;
-  const componentId = `customer.fiorix.${prefix.toLowerCase()}`;
+  const componentId = `customer.Fiorify.${prefix.toLowerCase()}`;
   const bspUrl = `/sap/bc/ui5_ui5/sap/zui5_${prefix.toLowerCase()}`;
   const catalogId = `ZCAT_${prefix.toUpperCase()}`;
 

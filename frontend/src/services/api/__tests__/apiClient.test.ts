@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ApiClient, ApiError, generateCorrelationId } from '../apiClient';
 
-describe('FioriX FX-002 — Central API Client Unit Tests', () => {
+describe('Fiorify FX-002 — Central API Client Unit Tests', () => {
   let client: ApiClient;
   const originalFetch = globalThis.fetch;
 
@@ -19,7 +19,7 @@ describe('FioriX FX-002 — Central API Client Unit Tests', () => {
 
   // 1. GET request and JSON parsing
   it('executes GET request and parses JSON response successfully', async () => {
-    const mockData = { status: 'UP', service: 'FioriX Discovery API' };
+    const mockData = { status: 'UP', service: 'Fiorify Discovery API' };
     globalThis.fetch = vi.fn().mockResolvedValue(
       new Response(JSON.stringify(mockData), {
         status: 200,
@@ -344,7 +344,7 @@ describe('FioriX FX-002 — Central API Client Unit Tests', () => {
 
     const [, calledInit] = (globalThis.fetch as any).mock.calls[0];
     // Verify no secret header was sent from frontend
-    expect(calledInit.headers['X-FioriX-Admin-Secret']).toBeUndefined();
+    expect(calledInit.headers['X-Fiorify-Admin-Secret']).toBeUndefined();
   });
 
   // 14. CAT-02: searchCatalogue calls GET /api/v1/fiori-catalogue/search without admin secret
@@ -376,7 +376,7 @@ describe('FioriX FX-002 — Central API Client Unit Tests', () => {
     expect(calledUrl).toContain('/api/v1/fiori-catalogue/search');
     expect(calledUrl).toContain('query=Outgoing');
     expect(calledUrl).toContain('limit=10');
-    expect(calledInit.headers['X-FioriX-Admin-Secret']).toBeUndefined();
+    expect(calledInit.headers['X-Fiorify-Admin-Secret']).toBeUndefined();
     expect(calledInit.headers['Authorization']).toBeUndefined();
   });
 
@@ -409,7 +409,7 @@ describe('FioriX FX-002 — Central API Client Unit Tests', () => {
 
     const [calledUrl, calledInit] = (globalThis.fetch as any).mock.calls[0];
     expect(calledUrl).toBe('http://localhost:4004/api/v1/fiori-catalogue/apps/F1612');
-    expect(calledInit.headers['X-FioriX-Admin-Secret']).toBeUndefined();
+    expect(calledInit.headers['X-Fiorify-Admin-Secret']).toBeUndefined();
   });
 
   // 16. CAT-02: getCatalogueStatus calls GET /api/v1/fiori-catalogue/status

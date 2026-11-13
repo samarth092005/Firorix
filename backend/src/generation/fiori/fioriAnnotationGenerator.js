@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-06: SAP Fiori Elements XML Annotation Generator
+ * Fiorify — GEN-06: SAP Fiori Elements XML Annotation Generator
  *
  * Generates webapp/annotations/annotations.xml for OData V4 client-side
  * UI vocabulary enrichment matching GEN-05 CDS views.

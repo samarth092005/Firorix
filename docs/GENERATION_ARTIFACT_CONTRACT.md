@@ -1,8 +1,8 @@
-# FIORIX — DISCOVERY HANDOFF & ARTIFACT REGISTRY CONTRACT
+# Fiorify — DISCOVERY HANDOFF & ARTIFACT REGISTRY CONTRACT
 
 **Document ID:** CONTRACT-GEN-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
-**Target Release:** FioriX v2.0.0  
+**Project:** Fiorify — SAP Modernization Platform  
+**Target Release:** Fiorify v2.0.0  
 **Status:** SPECIFICATION COMPLETE — NORMATIVE CONTRACT  
 **Author:** Platform Security Architect & API Governance Board  
 
@@ -31,8 +31,8 @@ The generation engine rejects any request where:
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fiorix.enterprise.sap/schemas/generation-handoff-v1.json",
-  "title": "FioriX Generation Handoff Contract",
+  "$id": "https://Fiorify.enterprise.sap/schemas/generation-handoff-v1.json",
+  "title": "Fiorify Generation Handoff Contract",
   "type": "object",
   "required": [
     "assessmentId",
@@ -360,7 +360,7 @@ Every compilation produces an authoritative, immutable project registry record s
 
 ```json
 {
-  "$schema": "https://fiorix.enterprise.sap/schemas/generation-manifest-v1.json",
+  "$schema": "https://Fiorify.enterprise.sap/schemas/generation-manifest-v1.json",
   "projectId": "GEN-ASM-2026-003",
   "assessmentId": "ASM-2026-003",
   "tcode": "ZPLANT_DISPUTE",

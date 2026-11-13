@@ -181,41 +181,26 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
   };
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="dashboard-container">
       {/* Top Action Bar & Filters */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '16px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', flex: 1 }}>
-          {/* Search Box */}
-          <div style={{ position: 'relative', minWidth: '260px', maxWidth: '360px', flex: 1 }}>
-            <Search
-              size={15}
-              color="#94A3B8"
-              style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }}
-            />
-            <input
-              type="text"
-              placeholder="Search by ID, name, T-Code..."
-              className="fiori-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ paddingLeft: '32px', height: '36px', fontSize: '13px', width: '100%' }}
-            />
-          </div>
+      <div className="dashboard-toolbar">
+        <div className="dashboard-search-wrap">
+          <Search size={16} className="dashboard-search-icon" />
+          <input
+            type="text"
+            placeholder="Search by ID, name, T-Code..."
+            className="dashboard-search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
+        <div className="dashboard-filter-group">
           {/* Status Filter */}
           <select
-            className="fiori-select"
+            className="dashboard-select"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ height: '36px', fontSize: '12px', minWidth: '140px' }}
           >
             <option value="ALL">All Statuses</option>
             <option value="DRAFT">Draft</option>
@@ -225,10 +210,9 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
 
           {/* Origin Filter */}
           <select
-            className="fiori-select"
+            className="dashboard-select"
             value={originFilter}
             onChange={(e) => setOriginFilter(e.target.value)}
-            style={{ height: '36px', fontSize: '12px', minWidth: '150px' }}
           >
             <option value="ALL">All Origins</option>
             <option value="DISCOVERY_BUILD">Discovery Build</option>
@@ -237,19 +221,17 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
 
           {/* Sort By */}
           <select
-            className="fiori-select"
+            className="dashboard-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            style={{ height: '36px', fontSize: '12px', minWidth: '150px' }}
           >
-            <option value="updatedAt">Sort by: Recently Updated</option>
-            <option value="projectName">Sort by: Project Name</option>
+            <option value="updatedAt">Recently Updated</option>
+            <option value="projectName">Project Name</option>
           </select>
 
           <button
             type="button"
-            className="fiori-btn fiori-btn-subtle"
-            style={{ height: '36px', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            className="studio-btn-icon"
             onClick={onRefresh}
             disabled={isLoading}
             title="Refresh projects list"
@@ -257,28 +239,16 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
             <RefreshCw size={14} className={isLoading ? 'spin' : ''} />
           </button>
 
+          {/* Primary Action Button */}
           <button
             type="button"
-            className="fiori-btn fiori-btn-subtle"
-            style={{ height: '36px', padding: '0 10px', display: 'flex', alignItems: 'center', gap: '6px', color: '#B91C1C' }}
-            onClick={() => setIsResetDialogOpen(true)}
-            title="Reset demo projects and clear clutter"
+            className="dashboard-btn-create"
+            onClick={onCreateProject}
           >
-            <RotateCcw size={14} color="#DC2626" />
-            <span style={{ fontSize: '12px', fontWeight: 600 }}>Reset Demo</span>
+            <Plus size={16} />
+            <span>New Generation Project</span>
           </button>
         </div>
-
-        {/* Primary Action Button */}
-        <button
-          type="button"
-          className="fiori-btn fiori-btn-primary"
-          style={{ height: '36px', display: 'flex', alignItems: 'center', gap: '8px', padding: '0 16px', fontWeight: 600 }}
-          onClick={onCreateProject}
-        >
-          <Plus size={16} />
-          <span>New Generation Project</span>
-        </button>
       </div>
 
       {/* Error Strip */}
@@ -391,111 +361,49 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
 
       {/* Projects Grid */}
       {!isLoading && filteredProjects.length > 0 && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-            gap: '20px'
-          }}
-        >
+        <div className="project-cards-grid">
           {filteredProjects.map((project) => {
             const isArchived = project.lifecycleStatus === 'ARCHIVED';
             const progress = getPhaseProgress(project);
 
             return (
-              <div
-                key={project.projectId}
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid var(--fiori-border, #E2E8F0)',
-                  borderRadius: '8px',
-                  boxShadow: 'var(--fiori-shadow-card, 0 1px 3px rgba(0,0,0,0.06))',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                  overflow: 'hidden'
-                }}
-              >
+              <div key={project.projectId} className="project-card">
                 {/* Card Top: Badges & Origin */}
-                <div
-                  style={{
-                    padding: '14px 18px',
-                    borderBottom: '1px solid #F1F5F9',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    backgroundColor: '#F8FAFC'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        backgroundColor: project.origin === 'DISCOVERY_BUILD' ? '#EDE9FE' : '#F1F5F9',
-                        color: project.origin === 'DISCOVERY_BUILD' ? '#6D28D9' : '#475569',
-                        fontWeight: 700
-                      }}
-                    >
-                      {project.origin === 'DISCOVERY_BUILD' ? 'DISCOVERY BUILD' : 'STANDALONE'}
+                <div className="project-card-header">
+                  <div>
+                    <h3 className="project-card-title">
+                      {project.projectName}
+                    </h3>
+                    <span className="project-card-code">
+                      ID: {project.projectId}
                     </span>
-
-                    {project.sourceTransactionCode && (
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          padding: '2px 8px',
-                          borderRadius: '4px',
-                          backgroundColor: '#FEF3C7',
-                          color: '#92400E',
-                          fontWeight: 700
-                        }}
-                      >
-                        {project.sourceTransactionCode}
-                      </span>
-                    )}
                   </div>
 
-                  <span
-                    style={{
-                      fontSize: '11px',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: isArchived ? '#FEE2E2' : '#DCFCE7',
-                      color: isArchived ? '#991B1B' : '#166534',
-                      fontWeight: 700
-                    }}
-                  >
+                  <span className={`studio-chip ${isArchived ? '' : 'success'}`}>
                     {project.lifecycleStatus}
                   </span>
                 </div>
 
                 {/* Card Body */}
-                <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div>
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: '16px',
-                        fontWeight: 700,
-                        color: '#0F172A',
-                        lineHeight: 1.3
-                      }}
-                    >
-                      {project.projectName}
-                    </h3>
-                    <div style={{ fontSize: '12px', color: '#64748B', fontFamily: 'var(--font-mono)', marginTop: '4px' }}>
-                      ID: {project.projectId}
-                    </div>
+                <div className="project-card-body">
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <span className={`studio-chip ${project.origin === 'DISCOVERY_BUILD' ? 'primary' : ''}`}>
+                      {project.origin === 'DISCOVERY_BUILD' ? 'DISCOVERY BUILD' : 'STANDALONE'}
+                    </span>
+
+                    {project.sourceTransactionCode && (
+                      <span className="studio-chip" style={{ backgroundColor: 'var(--studio-warning-bg)', color: 'var(--studio-warning)', borderColor: '#FDE68A' }}>
+                        T-Code: {project.sourceTransactionCode}
+                      </span>
+                    )}
                   </div>
 
                   <p
                     style={{
                       margin: 0,
                       fontSize: '13px',
-                      color: '#475569',
-                      lineHeight: 1.4,
+                      color: 'var(--studio-text-muted)',
+                      lineHeight: 1.5,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
@@ -509,13 +417,14 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                   <div
                     style={{
                       fontSize: '12px',
-                      color: '#64748B',
-                      padding: '8px 10px',
-                      backgroundColor: '#F8FAFC',
-                      borderRadius: '4px',
+                      color: 'var(--studio-text-muted)',
+                      padding: '10px 12px',
+                      backgroundColor: 'var(--studio-surface-subtle)',
+                      borderRadius: 'var(--studio-radius-sm)',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '4px'
+                      gap: '4px',
+                      border: '1px solid var(--studio-border)'
                     }}
                   >
                     <div>
@@ -534,50 +443,28 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                     )}
                   </div>
 
-                  {/* Phase Progress Bar (Derived from Real Data) */}
-                  <div style={{ marginTop: 'auto', paddingTop: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748B', marginBottom: '4px' }}>
-                      <span>Phases Completed</span>
-                      <span style={{ fontWeight: 700, color: '#0F172A' }}>
+                  {/* Segmented Phase Progress Bar */}
+                  <div className="progress-meter" style={{ marginTop: 'auto', paddingTop: '8px' }}>
+                    <div className="progress-header">
+                      <span className="progress-label">8-Phase Pipeline</span>
+                      <span className="progress-fraction">
                         {progress.completed} of {progress.total} ({progress.percentage}%)
                       </span>
                     </div>
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '6px',
-                        backgroundColor: '#E2E8F0',
-                        borderRadius: '3px',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: `${progress.percentage}%`,
-                          height: '100%',
-                          backgroundColor: '#0066FF',
-                          borderRadius: '3px',
-                          transition: 'width 0.3s ease'
-                        }}
-                      />
+                    <div className="progress-track" title={`${progress.completed} of ${progress.total} phases completed`}>
+                      {Array.from({ length: 8 }).map((_, idx) => (
+                        <div
+                          key={idx}
+                          className={`progress-segment ${idx < progress.completed ? 'completed' : (idx === progress.completed ? 'active' : '')}`}
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
 
                 {/* Card Footer: Timestamp & Actions */}
-                <div
-                  style={{
-                    padding: '12px 18px',
-                    borderTop: '1px solid #F1F5F9',
-                    backgroundColor: '#FFFFFF',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '8px'
-                  }}
-                >
-                  <span style={{ fontSize: '11px', color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div className="project-card-footer">
+                  <span style={{ fontSize: '11px', color: 'var(--studio-text-subtle)', display: 'flex', alignItems: 'center', gap: '5px' }}>
                     <Calendar size={12} />
                     {new Date(project.updatedAt || project.createdAt).toLocaleDateString()}
                   </span>
@@ -585,8 +472,7 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <button
                       type="button"
-                      className="fiori-btn fiori-btn-subtle"
-                      style={{ padding: '4px 8px', fontSize: '12px' }}
+                      className="btn-card-icon"
                       onClick={() => onDuplicateProject(project.projectId)}
                       title="Duplicate this project"
                     >
@@ -596,29 +482,26 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                     {isArchived ? (
                       <button
                         type="button"
-                        className="fiori-btn fiori-btn-subtle"
-                        style={{ padding: '4px 8px', fontSize: '12px' }}
+                        className="btn-card-icon"
                         onClick={() => onRestoreProject(project.projectId)}
                         title="Restore project to active DRAFT"
                       >
-                        <RotateCcw size={13} color="#166534" />
+                        <RotateCcw size={13} color="var(--studio-success)" />
                       </button>
                     ) : (
                       <button
                         type="button"
-                        className="fiori-btn fiori-btn-subtle"
-                        style={{ padding: '4px 8px', fontSize: '12px' }}
+                        className="btn-card-icon"
                         onClick={() => onArchiveProject(project.projectId)}
                         title="Archive project (read-only)"
                       >
-                        <Archive size={13} color="#D97706" />
+                        <Archive size={13} color="var(--studio-warning)" />
                       </button>
                     )}
 
                     <button
                       type="button"
-                      className="fiori-btn fiori-btn-subtle"
-                      style={{ padding: '4px 8px', fontSize: '12px', color: '#DC2626' }}
+                      className="btn-card-icon danger"
                       onClick={() => onDeleteProject(project.projectId)}
                       title="Delete project"
                     >
@@ -627,11 +510,10 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
 
                     <button
                       type="button"
-                      className="fiori-btn fiori-btn-primary"
-                      style={{ padding: '4px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      className="btn-open-workspace"
                       onClick={() => onOpenProject(project)}
                     >
-                      <span>Open</span>
+                      <span>Workspace</span>
                       <ArrowRight size={13} />
                     </button>
                   </div>

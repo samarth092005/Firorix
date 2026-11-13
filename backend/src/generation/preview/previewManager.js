@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-07: Preview Manager
+ * Fiorify — GEN-07: Preview Manager
  *
  * Coordinates lifecycle management, synthetic data generation, port allocation,
  * and session state for isolated in-process mock preview servers.

@@ -8,7 +8,7 @@ import { AssessmentStore, LIFECYCLE_STATES } from '../src/services/assessmentSto
 import { RECOMMENDATION_OUTCOMES, GOVERNANCE_OVERRIDES, EXTENSIBILITY_TIERS } from '../src/engine/recommendationEngine.js';
 import { DIMENSION_STATUSES, ASSESSMENT_STATUSES, GAP_SEVERITIES } from '../src/engine/fitGapAssessmentEngine.js';
 
-describe('FioriX TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios A through G)', () => {
+describe('Fiorify TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios A through G)', () => {
   let server;
   let baseUrl;
   let testStoragePath;
@@ -17,7 +17,7 @@ describe('FioriX TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios 
   before(async () => {
     testStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-master-e2e-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-master-e2e-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
     server = createServer({ assessmentStore });

@@ -6,7 +6,6 @@ import {
   CatalogueStatusInfo
 } from '../../services/catalogue/catalogueService';
 import { ApiError } from '../../services/api/apiClient';
-import { FilterBar } from '../../components/tables/FilterBar';
 import { MessageStrip } from '../../components/status/MessageStrip';
 import {
   Library,
@@ -17,12 +16,13 @@ import {
   Server,
   Layers,
   Database,
-  LayoutGrid,
-  Table as TableIcon,
   CheckCircle2,
   ArrowRight,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Search,
+  X,
+  RotateCcw
 } from 'lucide-react';
 import { sapDiscoveryAdapter } from '../../services/sap/sapDiscoveryAdapter';
 import { DiscoveryVerificationModal } from '../transaction-discovery/components/DiscoveryVerificationModal';
@@ -41,7 +41,6 @@ export const CataloguePage: React.FC = () => {
   const [selectedAppType, setSelectedAppType] = useState('');
   const [selectedProvenance, setSelectedProvenance] = useState('');
   const [selectedModule, setSelectedModule] = useState('ALL');
-  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [statusLoading, setStatusLoading] = useState(true);
@@ -175,6 +174,44 @@ export const CataloguePage: React.FC = () => {
     return { display: top, extraCount };
   }, []);
 
+  // Dynamic Module Counts
+  const moduleCounts = useMemo(() => {
+    let fi = 0;
+    let mm = 0;
+    let sd = 0;
+    let config = 0;
+
+    apps.forEach((app) => {
+      const text = `${app.lineOfBusiness || ''} ${app.businessProcess || ''} ${app.appName || ''}`.toUpperCase();
+      if (text.includes('FINANCE') || text.includes('ACCOUNT') || text.includes('PAYMENT')) fi++;
+      if (text.includes('PURCHAS') || text.includes('SOURCING') || text.includes('SUPPLY') || text.includes('INVOICE')) mm++;
+      if (text.includes('SALE') || text.includes('BILLING') || text.includes('CUSTOMER')) sd++;
+      if (text.includes('CONFIG') || text.includes('NUMBER RANGE') || text.includes('PERIOD')) config++;
+    });
+
+    return { all: apps.length, fi, mm, sd, config };
+  }, [apps]);
+
+  const modules = useMemo(() => [
+    { id: 'ALL', label: 'All Applications', count: moduleCounts.all },
+    { id: 'FI', label: 'Finance & Controlling (FI/CO)', count: moduleCounts.fi },
+    { id: 'MM', label: 'Sourcing & Procurement (MM)', count: moduleCounts.mm },
+    { id: 'SD', label: 'Sales & Distribution (SD)', count: moduleCounts.sd },
+    { id: 'CONFIG', label: 'Configuration & Administration', count: moduleCounts.config },
+  ], [moduleCounts]);
+
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() || selectedLob || selectedAppType || selectedProvenance || selectedModule !== 'ALL'
+  );
+
+  const handleResetFilters = useCallback(() => {
+    setSearchQuery('');
+    setSelectedLob('');
+    setSelectedAppType('');
+    setSelectedProvenance('');
+    setSelectedModule('ALL');
+  }, []);
+
   // Filter apps
   const filteredApps = useMemo(() => {
     return apps.filter((app) => {
@@ -211,28 +248,6 @@ export const CataloguePage: React.FC = () => {
         </div>
 
         <div className="catalogue-actions">
-          {/* Grid vs Table View Switcher */}
-          <div className="view-toggle-group">
-            <button
-              type="button"
-              className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
-              title="Tile Grid View"
-            >
-              <LayoutGrid size={14} />
-              <span>Grid</span>
-            </button>
-            <button
-              type="button"
-              className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
-              onClick={() => setViewMode('table')}
-              title="Compact Table View"
-            >
-              <TableIcon size={14} />
-              <span>Table</span>
-            </button>
-          </div>
-
           <button
             type="button"
             className="btn-refresh"
@@ -294,113 +309,123 @@ export const CataloguePage: React.FC = () => {
           </div>
         </div>
 
-        <div className="catalogue-kpi-card">
-          <div className="kpi-icon-wrap amber">
-            <Server size={20} />
-          </div>
-          <div className="kpi-content">
-            <div className="kpi-value-row">
-              <span className="kpi-number" style={{ fontSize: '15px' }}>
-                {statusInfo?.liveSourceStatus === 'OFFICIAL_EXPORT_IMPORTED' ? 'Official Export' : (statusInfo?.liveSourceStatus || 'Offline Cache')}
-              </span>
-              <span className="kpi-subtext">{statusInfo?.catalogueFreshness || 'Current'}</span>
-            </div>
-            <span className="kpi-title">Catalogue Ingestion Provenance</span>
-          </div>
-        </div>
+
       </div>
 
-      {/* 3. Module Quick-Filter Bar */}
-      <div className="module-filter-bar">
-        <span style={{ fontSize: '12px', fontWeight: 600, color: '#6a7d90', marginRight: '4px' }}>Quick Filter:</span>
-        <button
-          type="button"
-          className={`module-pill ${selectedModule === 'ALL' ? 'active' : ''}`}
-          onClick={() => setSelectedModule('ALL')}
-        >
-          All Applications ({apps.length})
-        </button>
-        <button
-          type="button"
-          className={`module-pill ${selectedModule === 'FI' ? 'active' : ''}`}
-          onClick={() => setSelectedModule('FI')}
-        >
-          Finance &amp; Controlling (FI/CO)
-        </button>
-        <button
-          type="button"
-          className={`module-pill ${selectedModule === 'MM' ? 'active' : ''}`}
-          onClick={() => setSelectedModule('MM')}
-        >
-          Sourcing &amp; Procurement (MM)
-        </button>
-        <button
-          type="button"
-          className={`module-pill ${selectedModule === 'SD' ? 'active' : ''}`}
-          onClick={() => setSelectedModule('SD')}
-        >
-          Sales &amp; Distribution (SD)
-        </button>
-        <button
-          type="button"
-          className={`module-pill ${selectedModule === 'CONFIG' ? 'active' : ''}`}
-          onClick={() => setSelectedModule('CONFIG')}
-        >
-          Configuration &amp; Administration
-        </button>
-      </div>
+      {/* 3. Unified Filter & Search Control Panel */}
+      <div className="catalogue-filter-panel">
+        {/* Upper Row: Domain Quick Filter Pills */}
+        <div className="filter-panel-top">
+          <div className="domain-pill-group">
+            <span className="domain-filter-label">Quick Filter:</span>
+            {modules.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                className={`domain-pill ${selectedModule === m.id ? 'active' : ''}`}
+                onClick={() => setSelectedModule(m.id)}
+              >
+                <span className="domain-pill-text">{m.label}</span>
+                <span className="domain-pill-count">{m.count}</span>
+              </button>
+            ))}
+          </div>
 
-      {/* 4. Filter Toolbar */}
-      <div className="catalogue-filter-toolbar">
-        <div className="search-input-wrap">
-          <FilterBar
-            searchPlaceholder="Search by SAP T-Code (e.g. MM01, VA01, ME21N, F-53, CO01, ZPAY_CUSTOM), App ID (F1602), or name..."
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onReset={() => {
-              setSearchQuery('');
-              setSelectedLob('');
-              setSelectedAppType('');
-              setSelectedProvenance('');
-              setSelectedModule('ALL');
-            }}
-          />
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="btn-filter-reset"
+              onClick={handleResetFilters}
+              title="Reset all search and filter parameters"
+            >
+              <RotateCcw size={12} />
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
 
-        <select
-          value={selectedLob}
-          onChange={(e) => setSelectedLob(e.target.value)}
-          className="select-compact"
-        >
-          <option value="">All Lines of Business</option>
-          <option value="Finance">Finance</option>
-          <option value="Sourcing and Procurement">Sourcing and Procurement</option>
-          <option value="Supply Chain">Supply Chain</option>
-          <option value="Corporate Finance">Corporate Finance</option>
-        </select>
+        {/* Lower Row: Search Bar & Compact Filter Selects */}
+        <div className="filter-panel-bottom">
+          <div className="search-field-wrapper">
+            <Search size={16} className="search-field-icon" />
+            <input
+              type="text"
+              className="search-field-input"
+              placeholder="Search by SAP T-Code (e.g. MM01, VA01, ME21N, F-53, CO01), App ID (F1602), or name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="search-field-clear"
+                onClick={() => setSearchQuery('')}
+                title="Clear search query"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
 
-        <select
-          value={selectedAppType}
-          onChange={(e) => setSelectedAppType(e.target.value)}
-          className="select-compact"
-        >
-          <option value="">All App Types</option>
-          <option value="Transactional">Transactional</option>
-          <option value="SAP GUI">SAP GUI for HTML (WebGUI)</option>
-          <option value="Fact sheet">Fact sheet</option>
-          <option value="Analytical">Analytical</option>
-        </select>
+          <div className="filter-dropdown-group">
+            <select
+              value={selectedLob}
+              onChange={(e) => setSelectedLob(e.target.value)}
+              className="catalogue-select"
+              title="Filter by Line of Business"
+            >
+              <option value="">All Lines of Business</option>
+              <option value="Finance">Finance</option>
+              <option value="Sourcing and Procurement">Sourcing and Procurement</option>
+              <option value="Supply Chain">Supply Chain</option>
+              <option value="Corporate Finance">Corporate Finance</option>
+            </select>
 
-        <select
-          value={selectedProvenance}
-          onChange={(e) => setSelectedProvenance(e.target.value)}
-          className="select-compact"
-        >
-          <option value="">All Provenance</option>
-          <option value="OFFICIAL_CATALOGUE_LIVE">Live SAP FAL</option>
-          <option value="OFFICIAL_FAL_EXPORT">Official Export</option>
-          <option value="CURATED_FIXTURE">Demo Fixture</option>
-        </select>
+            <select
+              value={selectedAppType}
+              onChange={(e) => setSelectedAppType(e.target.value)}
+              className="catalogue-select"
+              title="Filter by Application Type"
+            >
+              <option value="">All App Types</option>
+              <option value="Transactional">Transactional</option>
+              <option value="SAP GUI">SAP GUI for HTML (WebGUI)</option>
+              <option value="Fact sheet">Fact sheet</option>
+              <option value="Analytical">Analytical</option>
+            </select>
+
+            <select
+              value={selectedProvenance}
+              onChange={(e) => setSelectedProvenance(e.target.value)}
+              className="catalogue-select"
+              title="Filter by Data Provenance"
+            >
+              <option value="">All Provenance</option>
+              <option value="OFFICIAL_CATALOGUE_LIVE">Live SAP FAL</option>
+              <option value="OFFICIAL_FAL_EXPORT">Official Export</option>
+              <option value="OFFICIAL_CATALOGUE_CACHED">Verified Baseline</option>
+              <option value="CURATED_FIXTURE">Demo Fixture</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Results Counter / Filter Indicator */}
+        <div className="filter-panel-status">
+          <span className="results-count">
+            Showing <strong>{filteredApps.length}</strong> of {apps.length} applications
+          </span>
+          {hasActiveFilters && (
+            <span className="active-filter-tags">
+              Active filters: {[
+                searchQuery.trim() ? `Search: "${searchQuery.trim()}"` : '',
+                selectedModule !== 'ALL' ? (modules.find(m => m.id === selectedModule)?.label || selectedModule) : '',
+                selectedLob ? `LoB: ${selectedLob}` : '',
+                selectedAppType ? `Type: ${selectedAppType}` : '',
+                selectedProvenance ? `Source: ${selectedProvenance}` : ''
+              ].filter(Boolean).join(' • ')}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Offline State */}
@@ -604,8 +629,8 @@ export const CataloguePage: React.FC = () => {
         </div>
       )}
 
-      {/* 5A. Fiori Tile Grid View */}
-      {!loading && !isOffline && !error && filteredApps.length > 0 && viewMode === 'grid' && (
+      {/* 5. Fiori Tile Grid View */}
+      {!loading && !isOffline && !error && filteredApps.length > 0 && (
         <div className="app-grid">
           {filteredApps.map((app) => {
             const isWebGui = app.appType === 'SAP GUI' || app.uiTechnology?.includes('SAP GUI');
@@ -676,90 +701,6 @@ export const CataloguePage: React.FC = () => {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* 5B. Compact Table View */}
-      {!loading && !isOffline && !error && filteredApps.length > 0 && viewMode === 'table' && (
-        <div style={{ overflowX: 'auto', marginBottom: '32px' }}>
-          <table className="fiori-table-modern">
-            <thead>
-              <tr>
-                <th style={{ width: '90px' }}>App ID</th>
-                <th>Application Name &amp; Description</th>
-                <th style={{ width: '130px' }}>Technology</th>
-                <th style={{ width: '150px' }}>Line of Business</th>
-                <th style={{ width: '180px' }}>Business Roles</th>
-                <th style={{ width: '120px' }}>Provenance</th>
-                <th style={{ textAlign: 'right', width: '170px' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredApps.map((app) => {
-                const isWebGui = app.appType === 'SAP GUI' || app.uiTechnology?.includes('SAP GUI');
-                const isElements = !isWebGui && (app.uiTechnology?.includes('elements') || app.appType === 'Transactional');
-                const techClass = isWebGui ? 'webgui' : (isElements ? 'elements' : 'freestyle');
-                const roles = parseRoles(app.businessRole);
-
-                return (
-                  <tr key={app.appId}>
-                    <td>
-                      <code style={{ fontSize: '13px', fontWeight: 700, color: '#0f233a' }}>
-                        {app.appId}
-                      </code>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 600, color: '#0f233a' }}>{app.appName}</div>
-                      {app.odataServices && app.odataServices.length > 0 && (
-                        <div style={{ fontSize: '11px', color: '#0070f2', marginTop: '2px', fontFamily: 'monospace' }}>
-                          OData: {app.odataServices[0]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`tech-badge-pill ${techClass}`}>
-                        {isWebGui ? 'WebGUI' : (isElements ? 'Fiori Elements' : 'Freestyle')}
-                      </span>
-                    </td>
-                    <td style={{ color: '#556b82' }}>{app.lineOfBusiness || app.businessProcess || '—'}</td>
-                    <td>
-                      {roles.display.length > 0 ? (
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                          {roles.display.map((r) => (
-                            <span key={r} className="role-chip">{r}</span>
-                          ))}
-                          {roles.extraCount > 0 && <span className="role-chip more">+{roles.extraCount}</span>}
-                        </div>
-                      ) : (
-                        <span style={{ color: '#999' }}>—</span>
-                      )}
-                    </td>
-                    <td>{renderProvenanceBadge(app.provenance)}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                        <button
-                          type="button"
-                          className="btn-card-assess"
-                          style={{ padding: '5px 10px', fontSize: '11px' }}
-                          onClick={() => navigate(`/transaction-discovery?tcode=${encodeURIComponent(app.appId)}`)}
-                        >
-                          Assess
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-card-details"
-                          style={{ padding: '5px 8px', fontSize: '11px' }}
-                          onClick={() => navigate(`/catalogue/${encodeURIComponent(app.appId)}`)}
-                        >
-                          Details
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       )}
 

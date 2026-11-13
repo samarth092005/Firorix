@@ -120,8 +120,8 @@ export class SemanticArchetypeEngine {
         title: `ABAP Runtime Error & Dump Analytics (${tcode})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: `Inspect, filter, and analyze ABAP short dumps (runtime errors) with full exception context and stack trace.`,
         acceptanceCriteria: [
@@ -135,8 +135,8 @@ export class SemanticArchetypeEngine {
         title: 'Hierarchical Call Stack Trace Viewer',
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Provide tabular line-by-line inspection of ABAP program execution call stack and line numbers.',
         acceptanceCriteria: [
@@ -149,8 +149,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Re-Analyze Dump Context',
         category: 'ACTION',
         priority: 'SHOULD_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Implement instance action "reAnalyzeDump" to verify if code fix resolved underlying exception.',
         acceptanceCriteria: [
@@ -163,8 +163,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Mark Resolution Status',
         category: 'ACTION',
         priority: 'SHOULD_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Enable Basis administrators to acknowledge and flag dump as RESOLVED or KNOWN_BUG.',
         acceptanceCriteria: [
@@ -176,8 +176,8 @@ export class SemanticArchetypeEngine {
         title: 'Validation: Date Range Safety Boundary',
         category: 'VALIDATION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Validate that query window does not exceed 90 days to prevent excessive database scan.',
         acceptanceCriteria: [
@@ -245,7 +245,8 @@ export class SemanticArchetypeEngine {
         targetEntityId: childId,
         name: '_CallStack',
         relationshipType: 'COMPOSITION',
-        cardinality: 'ZERO_TO_MANY',
+        cardinality: '[0..*]',
+        mapping: [{ sourceField: 'DumpUUID', targetField: 'DumpUUID' }],
         description: `Composition from ${rootName} to ${childName}`,
         onDelete: 'CASCADE'
       }
@@ -294,8 +295,8 @@ export class SemanticArchetypeEngine {
         title: `Procurement Document Header & Status (${tcode})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: `Manage purchasing orders and contracts with Company Code, Supplier, and Total Valuation.`,
         acceptanceCriteria: [
@@ -308,8 +309,8 @@ export class SemanticArchetypeEngine {
         title: 'Line Item Specification with Quantities & Units',
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Provide tabular management of line item materials, order quantities, net pricing, and receiving plants.',
         acceptanceCriteria: [
@@ -322,8 +323,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Formal Approval Release',
         category: 'ACTION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Implement instance action "approvePurchaseOrder" for authorized purchasing manager sign-off.',
         acceptanceCriteria: [
@@ -336,8 +337,8 @@ export class SemanticArchetypeEngine {
         title: 'Validation: Mandatory Supplier & Positive Quantity',
         category: 'VALIDATION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Enforce that Supplier exists in master records and item quantity is strictly greater than zero.',
         acceptanceCriteria: [
@@ -408,7 +409,8 @@ export class SemanticArchetypeEngine {
         targetEntityId: childId,
         name: '_Items',
         relationshipType: 'COMPOSITION',
-        cardinality: 'ZERO_TO_MANY',
+        cardinality: '[0..*]',
+        mapping: [{ sourceField: 'PurchaseOrderUUID', targetField: 'PurchaseOrderUUID' }],
         description: `Composition from ${rootName} to ${childName}`,
         onDelete: 'CASCADE'
       }
@@ -457,8 +459,8 @@ export class SemanticArchetypeEngine {
         title: `Production Order Header & Scheduling (${tcode})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Track production orders, target quantities, production plant, and planned start/end dates.',
         acceptanceCriteria: [
@@ -471,8 +473,8 @@ export class SemanticArchetypeEngine {
         title: 'Bill of Materials (BOM) Component Allocation',
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Manage component parts list, requirement quantities, and warehouse staging storage locations.',
         acceptanceCriteria: [
@@ -485,8 +487,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Order Release & Technical Completion (TECO)',
         category: 'ACTION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Provide actions "releaseOrder" to start manufacturing and "completeTechnically" upon finishing run.',
         acceptanceCriteria: [
@@ -498,8 +500,8 @@ export class SemanticArchetypeEngine {
         title: 'Validation: Production Schedule Sequence',
         category: 'VALIDATION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Validate that Basic End Date is equal to or after Basic Start Date.',
         acceptanceCriteria: [
@@ -565,7 +567,8 @@ export class SemanticArchetypeEngine {
         targetEntityId: childId,
         name: '_Components',
         relationshipType: 'COMPOSITION',
-        cardinality: 'ZERO_TO_MANY',
+        cardinality: '[0..*]',
+        mapping: [{ sourceField: 'OrderUUID', targetField: 'OrderUUID' }],
         description: `Composition from ${rootName} to ${childName}`,
         onDelete: 'CASCADE'
       }
@@ -614,8 +617,8 @@ export class SemanticArchetypeEngine {
         title: `Financial Journal Document Management (${tcode})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Post and manage accounting documents with Company Code, Posting Date, and Currency.',
         acceptanceCriteria: [
@@ -628,8 +631,8 @@ export class SemanticArchetypeEngine {
         title: 'Debit / Credit Line Item Balancing',
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Manage individual G/L line items with debit/credit indicators, cost centers, and line item text.',
         acceptanceCriteria: [
@@ -642,8 +645,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Post Document / Simulate Balance',
         category: 'ACTION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Implement actions "simulatePosting" and "postDocument" with real-time financial validation.',
         acceptanceCriteria: [
@@ -656,8 +659,8 @@ export class SemanticArchetypeEngine {
         title: 'Validation: Strict Zero Balance Verification',
         category: 'VALIDATION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Prevent posting if debit and credit sum do not balance to zero.',
         acceptanceCriteria: [
@@ -724,7 +727,8 @@ export class SemanticArchetypeEngine {
         targetEntityId: childId,
         name: '_LineItems',
         relationshipType: 'COMPOSITION',
-        cardinality: 'ZERO_TO_MANY',
+        cardinality: '[0..*]',
+        mapping: [{ sourceField: 'DocumentUUID', targetField: 'DocumentUUID' }],
         description: `Composition from ${rootName} to ${childName}`,
         onDelete: 'CASCADE'
       }
@@ -773,8 +777,8 @@ export class SemanticArchetypeEngine {
         title: `Sales Order Header & Customer Contract (${tcode})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Manage sales orders, sold-to customers, requested delivery dates, and total net valuation.',
         acceptanceCriteria: [
@@ -787,8 +791,8 @@ export class SemanticArchetypeEngine {
         title: 'Sales Order Line Items & Schedule Lines',
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Manage order line items with product material, confirmed quantity, unit pricing, and shipping plant.',
         acceptanceCriteria: [
@@ -801,8 +805,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Release Credit Block / Check Availability',
         category: 'ACTION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Implement actions "releaseCreditBlock" and "checkAvailability" with real-time customer status.',
         acceptanceCriteria: [
@@ -814,8 +818,8 @@ export class SemanticArchetypeEngine {
         title: 'Validation: Requested Delivery Date Horizon',
         category: 'VALIDATION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Validate that requested delivery date is not in the past.',
         acceptanceCriteria: [
@@ -886,7 +890,8 @@ export class SemanticArchetypeEngine {
         targetEntityId: childId,
         name: '_Items',
         relationshipType: 'COMPOSITION',
-        cardinality: 'ZERO_TO_MANY',
+        cardinality: '[0..*]',
+        mapping: [{ sourceField: 'SalesOrderUUID', targetField: 'SalesOrderUUID' }],
         description: `Composition from ${rootName} to ${childName}`,
         onDelete: 'CASCADE'
       }
@@ -935,8 +940,8 @@ export class SemanticArchetypeEngine {
         title: `Enterprise Business Workflow (${tcode})`,
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: `Modernize ${tcode} (${desc || 'Custom Enterprise Transaction'}) into a Clean Core Fiori Elements application.`,
         acceptanceCriteria: [
@@ -949,8 +954,8 @@ export class SemanticArchetypeEngine {
         title: 'Line Item Execution & Detailed Specifications',
         category: 'FUNCTIONAL',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Provide tabular line-by-line item specifications with quantities, cost valuations, and execution status.',
         acceptanceCriteria: [
@@ -963,8 +968,8 @@ export class SemanticArchetypeEngine {
         title: 'Action: Lifecycle Approval Workflow',
         category: 'ACTION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Implement instance actions "submitRequest", "approveRequest", and "rejectRequest".',
         acceptanceCriteria: [
@@ -977,8 +982,8 @@ export class SemanticArchetypeEngine {
         title: 'Validation: Mandatory Header Key & Status Guardrails',
         category: 'VALIDATION',
         priority: 'MUST_HAVE',
-        status: 'CONFIRMED',
-        sourceType: 'DOMAIN_ARCHETYPE',
+        status: 'DRAFT',
+        sourceType: 'DISCOVERY_ASSESSMENT',
         source: 'DOMAIN_ARCHETYPE',
         description: 'Enforce that business request identifier is unique and dates adhere to process window.',
         acceptanceCriteria: [
@@ -1047,7 +1052,8 @@ export class SemanticArchetypeEngine {
         targetEntityId: childId,
         name: '_Items',
         relationshipType: 'COMPOSITION',
-        cardinality: 'ZERO_TO_MANY',
+        cardinality: '[0..*]',
+        mapping: [{ sourceField: 'DocumentUUID', targetField: 'DocumentUUID' }],
         description: `Composition from ${rootName} to ${childName}`,
         onDelete: 'CASCADE'
       }

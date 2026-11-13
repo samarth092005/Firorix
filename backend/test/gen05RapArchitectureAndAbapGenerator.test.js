@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: RAP Architecture Designer & ABAP Generator Test Suite
+ * Fiorify — GEN-05: RAP Architecture Designer & ABAP Generator Test Suite
  *
  * Verifies:
  * 1. Architecture decision engine profile selection (Managed with Draft, Non-Draft, Read-Only, Unmanaged).
@@ -221,7 +221,7 @@ describe('GEN-05: RAP Architecture Designer & ABAP Generator', () => {
     const srvbJson = JSON.parse(srvb[0].content);
     assert.equal(srvbJson.bindingType, 'ODATA_V4_UI');
     assert.equal(srvbJson.serviceDefinition, 'ZUI_ZPAYMENTHEADER');
-    assert.equal(srvbJson.nature, 'FIORIX_PLANNING_ARTIFACT_ONLY');
+    assert.equal(srvbJson.nature, 'Fiorify_PLANNING_ARTIFACT_ONLY');
   });
 
   it('8. Shared Artifact Registry: commits artifacts, calculates SHA-256, and preserves manual edits', () => {

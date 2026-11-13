@@ -1,6 +1,6 @@
-# FioriX — Stage S3: BTP Connectivity Service Provisioning & Integration Guide
+# Fiorify — Stage S3: BTP Connectivity Service Provisioning & Integration Guide
 
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
 **Execution Runtime:** Node.js 20 Native HTTP Backend (`@sap-cloud-sdk/connectivity` v3.26.4)  
 **Deployment Org/Space:** `Abhiyanta_India Solutions Private Limited_sap-btp-ais-d0a7p7v8` / `dev`  
@@ -36,14 +36,14 @@ Plans Available:
 
 ## 2. Binding Contract & `VCAP_SERVICES` Structure
 
-When the `connectivity` service instance (plan `lite`) is bound to the FioriX backend application in Cloud Foundry, BTP injects the following JSON payload into the application process environment (`VCAP_SERVICES`):
+When the `connectivity` service instance (plan `lite`) is bound to the Fiorify backend application in Cloud Foundry, BTP injects the following JSON payload into the application process environment (`VCAP_SERVICES`):
 
 ```json
 {
   "connectivity": [
     {
-      "name": "fiorix-connectivity",
-      "instance_name": "fiorix-connectivity",
+      "name": "Fiorify-connectivity",
+      "instance_name": "Fiorify-connectivity",
       "label": "connectivity",
       "plan": "lite",
       "tags": ["connectivity"],
@@ -62,7 +62,7 @@ When the `connectivity` service instance (plan `lite`) is bound to the FioriX ba
 ```
 
 ### Runtime Integration Flow
-1. FioriX invokes `getDestination({ destinationName: 'S21' })` from `@sap-cloud-sdk/connectivity`.
+1. Fiorify invokes `getDestination({ destinationName: 'S21' })` from `@sap-cloud-sdk/connectivity`.
 2. The SDK reads destination `S21` metadata from the bound `destination` service (`ProxyType: OnPremise`, `URL: http://kbl_fiori:8000`).
 3. Because `ProxyType` is `OnPremise`, the SDK queries the bound `connectivity` service credentials to acquire a short-lived token via mTLS.
 4. The outgoing HTTP request to `http://kbl_fiori:8000` is directed through `onpremise_proxy_host:onpremise_proxy_port` with header `SAP-Connectivity-Authentication: Bearer <token>`.
@@ -78,24 +78,24 @@ When the `connectivity` service instance (plan `lite`) is bound to the FioriX ba
 ### Step 1: Create the Connectivity Service Instance
 ```bash
 # Execute in terminal authenticated to target org and space 'dev'
-cf create-service connectivity lite fiorix-connectivity
+cf create-service connectivity lite Fiorify-connectivity
 ```
 
 ### Step 2: Verify Successful Provisioning
 ```bash
 # Verify instance status reports 'create succeeded'
-cf service fiorix-connectivity
+cf service Fiorify-connectivity
 ```
 
-### Step 3: Bind to FioriX in `manifest.yml`
+### Step 3: Bind to Fiorify in `manifest.yml`
 ```yaml
 applications:
-  - name: fiorix-platform
+  - name: Fiorify-platform
     # ... runtime parameters ...
     services:
-      - fiorix-destination
-      - fiorix-connectivity
-      - fiorix-xsuaa
+      - Fiorify-destination
+      - Fiorify-connectivity
+      - Fiorify-xsuaa
 ```
 
 ---

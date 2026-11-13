@@ -1,7 +1,7 @@
-# FioriX Generation Studio — Master Programme Acceptance Report
+# Fiorify Generation Studio — Master Programme Acceptance Report
 ## Combined Closure of GEN-05, GEN-06, GEN-07, GEN-08 & GEN-09
 
-**Programme:** FioriX Generation Studio  
+**Programme:** Fiorify Generation Studio  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise — System `S21`, Client `200`  
 **Target Baseline:** `SAP_BASIS 7.58`, `SAP_UI 7.58`, `SAPUI5 1.120.0` (FPS01 LTS) / `1.114.0` (FPS00 Initial)  
 **Runtime Architecture:** Native Node.js 20 HTTP Backend + React 18 + TypeScript + Vite  
@@ -14,7 +14,7 @@
 
 ## 1. Executive Summary
 
-This Master Acceptance Report certifies the successful implementation, rigorous verification, and production-grade integration of the complete FioriX Generation Studio programme:
+This Master Acceptance Report certifies the successful implementation, rigorous verification, and production-grade integration of the complete Fiorify Generation Studio programme:
 1. **GEN-05 & GEN-06 Closure:** Full source-level audit, 4-profile differentiation (`MANAGED_RAP_WITH_DRAFT`, `MANAGED_RAP_DIRECT`, `UNMANAGED_RAP`, `READ_ONLY_QUERY`), SAP S/4HANA 2023 compatibility baselines, stale field detection, and explicit developer TODO inventory.
 2. **GEN-07 Local Preview & Mock OData V4:** In-process Node.js HTTP server binding strictly to `127.0.0.1` on ports `4050–4099`, serving dynamic OData V4 EDMX metadata, collection queries, CRUD mutations, profile-based mutation rejection, and mandatory permanent watermark injection.
 3. **GEN-08 Review, Governance & Export Packaging:** Pre-export multi-tier validation gates, unbroken requirement-to-UI Traceability Matrix, pure Node.js PKZIP archiver/extractor with CRC-32 and path traversal protection, and SHA-256 cryptographic manifest packaging.
@@ -95,7 +95,7 @@ npm --prefix frontend run build
 - Builds an unbroken audit matrix: Requirement -> Entity -> CDS -> Behavior -> Service -> UI Annotation.
 - Computes mathematical coverage metrics (Requirement Coverage %, Entity Coverage %, UI Annotation Coverage %, Composite Traceability Index).
 - Multi-tier validation gate enforces zero blocking errors and requires explicit admin acknowledgment for non-blocking warnings before export.
-- Generates `fiorix-export-manifest.json` containing SHA-256 cryptographic digests for every artifact and a confidentiality guarantee.
+- Generates `Fiorify-export-manifest.json` containing SHA-256 cryptographic digests for every artifact and a confidentiality guarantee.
 
 ### 4. Workstation Diagnostics & Developer Handover (GEN-09)
 - Non-invasive, read-only system inspection of Node.js, npm, Java JDK, Git, Eclipse IDE, ADT plugin, and SAP GUI.
@@ -116,4 +116,4 @@ npm --prefix frontend run build
 
 ## 6. Formal Sign-Off
 
-The FioriX Generation Studio programme (GEN-02 through GEN-09) is formally complete, tested, and accepted for developer preview and review.
+The Fiorify Generation Studio programme (GEN-02 through GEN-09) is formally complete, tested, and accepted for developer preview and review.

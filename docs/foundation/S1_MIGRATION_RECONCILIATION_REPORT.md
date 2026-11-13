@@ -1,4 +1,4 @@
-# FIORIX — PHASE S1 MIGRATION & RECONCILIATION REPORT
+# Fiorify — PHASE S1 MIGRATION & RECONCILIATION REPORT
 **Four-Store Legacy Data Migration, Cryptographic Hash Chain Audit & Reconciliation**
 
 **Date:** 2026-11-11  
@@ -40,7 +40,7 @@ Executed via `backend/src/infrastructure/db/scripts/migrateStores.js` and verifi
 
 ```
 ======================================================================
-                  FIORIX STORE RECONCILIATION SUMMARY
+                  Fiorify STORE RECONCILIATION SUMMARY
 ======================================================================
 Store 1 (Catalogue):          267 / 267 Unique Apps Reconciled (100%)
 Store 2 (Transaction Master): 21 / 21 Records Reconciled (100%)

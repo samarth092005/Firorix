@@ -1,4 +1,4 @@
-# FIORIX — COMPREHENSIVE REPOSITORY ARCHITECTURE AUDIT
+# Fiorify — COMPREHENSIVE REPOSITORY ARCHITECTURE AUDIT
 **Document ID:** AUDIT-ARCH-2026-001  
 **Status:** COMPLETE (READ-ONLY AUDIT BASELINE)  
 **Date:** 2026-11-08  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-This architecture audit establishes the definitive baseline of the FioriX SAP Discovery & Modernization platform prior to production finalization. The system provides automated discovery, technical evidence collection, catalogue matching, fit-gap analysis, governed decision formulation (Adopt / Configure / Extend / Build), and assessment handoff for SAP S/4HANA modernization.
+This architecture audit establishes the definitive baseline of the Fiorify SAP Discovery & Modernization platform prior to production finalization. The system provides automated discovery, technical evidence collection, catalogue matching, fit-gap analysis, governed decision formulation (Adopt / Configure / Extend / Build), and assessment handoff for SAP S/4HANA modernization.
 
 The audit verified:
 1. **Core Strengths:** A robust Node 20 LTS native HTTP backend with extensive automated test coverage (278 backend tests passing across 30 suites; 117 frontend tests passing across 10 suites); mathematically rigorous 6-dimension candidate matching (`fioriMatchingEngine.js`); 8-dimension fit-gap assessment (`fitGapAssessmentEngine.js`); SHA-256 tamper-evident assessment persistence (`assessmentStore.js`); official SAP Cloud SDK destination integration (`btpDestinationAdapter.js`); and an approved MCP client integration (`mcpService.js`).
@@ -48,7 +48,7 @@ The audit verified:
 
 ```mermaid
 flowchart TD
-    subgraph Frontend["FioriX Frontend (Vite / React 18 / Port 5173)"]
+    subgraph Frontend["Fiorify Frontend (Vite / React 18 / Port 5173)"]
         UI_DISC["Transaction Discovery Wizard"]
         UI_CHECK["Transaction Checker"]
         UI_CAT["Fiori Catalogue Browser"]
@@ -64,7 +64,7 @@ flowchart TD
         UI_SYS --> API_CLIENT
     end
 
-    subgraph Backend["FioriX Backend Service (Node 20 LTS / Port 4004)"]
+    subgraph Backend["Fiorify Backend Service (Node 20 LTS / Port 4004)"]
         ROUTER["Native HTTP Router (server.js)"]
         API_CLIENT -->|HTTP / CORS / Bearer Auth| ROUTER
         
@@ -326,8 +326,8 @@ flowchart TD
 1. **`.env` Exclusion:** Verified. `.env` is ignored by `.gitignore` in both repository root and `backend/`.
 2. **Git Tracking of Secrets:** Verified. No live SAP passwords, client secrets, or private keys are tracked in git.
 3. **Secret Scrubbing in Responses & Logs:** `sanitizeHeaders` and `sanitizeErrorMessage` in `btpDestinationAdapter.js` redact Bearer tokens, Basic auth hashes, and query secrets.
-4. **Client-Side Exposure:** Verified that frontend code (`frontend/src`) does not reference or bundle `FIORIX_ADMIN_SECRET`, `SAP_PASSWORD`, or BTP client secrets.
-5. **RBAC Enforcement:** Privileged endpoints (`/api/v1/gateway-smoke-test`, `/api/v1/fiori-catalogue/import`, `/api/v1/mcp/connect`, `/api/v1/assessments/:id/approve`) require `X-FioriX-Admin-Secret` or Bearer tokens mapped to `ADMIN` or `APPROVER` roles.
+4. **Client-Side Exposure:** Verified that frontend code (`frontend/src`) does not reference or bundle `Fiorify_ADMIN_SECRET`, `SAP_PASSWORD`, or BTP client secrets.
+5. **RBAC Enforcement:** Privileged endpoints (`/api/v1/gateway-smoke-test`, `/api/v1/fiori-catalogue/import`, `/api/v1/mcp/connect`, `/api/v1/assessments/:id/approve`) require `X-Fiorify-Admin-Secret` or Bearer tokens mapped to `ADMIN` or `APPROVER` roles.
 
 ---
 
@@ -351,5 +351,5 @@ flowchart TD
 | **Phase 14** | Acceptance Testing | Comprehensive 40-scenario test suite. | ALL |
 
 ---
-**Audit Approved by:** FioriX Architecture & Governance Team  
+**Audit Approved by:** Fiorify Architecture & Governance Team  
 **Next Step:** Proceed to Phase 1-14 implementation.

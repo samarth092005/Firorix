@@ -1,5 +1,5 @@
-# FioriX Open Questions & Technical Uncertainty Register
-**Project:** FioriX — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Generation Platform  
+# Fiorify Open Questions & Technical Uncertainty Register
+**Project:** Fiorify — SAP S/4HANA On-Premise Fiori App Discovery, Assessment and Generation Platform  
 **Document Version:** 1.0.0  
 **Phase:** Pre-Development / R&D Governance Phase  
 
@@ -36,7 +36,7 @@ This register tracks all unresolved technical, functional, architectural, and op
 #### Q-SAP-03: What specific authorization objects will be granted to the BTP technical communication user?
 - **Domain:** SAP Security & Governance
 - **Context & Impact:** Metadata discovery requires inspecting transaction tables (`TSTC`, `TADIR`, `DD02L`), programs (`S_DEVELOP` ACTVT 03), and SU24 authorization data (`USOBX_C`). Over-permissioning violates enterprise security; under-permissioning causes discovery jobs to fail with HTTP 403 / RFC authorization failures.
-- **Current Baseline Assumption:** A custom read-only role `Z_FIORIX_DISCOVERY_RO` will be created with display authorizations only.
+- **Current Baseline Assumption:** A custom read-only role `Z_Fiorify_DISCOVERY_RO` will be created with display authorizations only.
 - **Risk Level:** **HIGH**
 - **Blocking Status:** **BLOCKS SPRINT 1 EXIT**
 - **Assigned Owner:** SAP Security Architect
@@ -88,7 +88,7 @@ This register tracks all unresolved technical, functional, architectural, and op
 
 #### Q-BTP-02: What is the allocated memory quota for the Cloud Foundry space?
 - **Domain:** BTP Operations
-- **Context & Impact:** FioriX proposes hosting the App Router, CAP backend, and background workers in Cloud Foundry. If the space quota is constrained (e.g., 1 GB or 2 GB total), multiple application instances cannot run concurrently.
+- **Context & Impact:** Fiorify proposes hosting the App Router, CAP backend, and background workers in Cloud Foundry. If the space quota is constrained (e.g., 1 GB or 2 GB total), multiple application instances cannot run concurrently.
 - **Current Baseline Assumption:** At least 4 GB of CF runtime memory is available.
 - **Risk Level:** **MEDIUM**
 - **Blocking Status:** **BLOCKS SPRINT 5 (BTP Foundation)**
@@ -97,7 +97,7 @@ This register tracks all unresolved technical, functional, architectural, and op
 
 #### Q-BTP-03: What HANA Cloud instance plan and sizing are provisioned?
 - **Domain:** Database Infrastructure
-- **Context & Impact:** FioriX stores deep repository snapshots, JSON payloads, and audit trails. HANA Cloud instances are priced per Capacity Unit (CU). Under-sizing risks OOM errors; over-sizing incurs high costs.
+- **Context & Impact:** Fiorify stores deep repository snapshots, JSON payloads, and audit trails. HANA Cloud instances are priced per Capacity Unit (CU). Under-sizing risks OOM errors; over-sizing incurs high costs.
 - **Current Baseline Assumption:** Standard minimal HANA Cloud instance (1 compute unit, 30 GB RAM).
 - **Risk Level:** **MEDIUM**
 - **Blocking Status:** **NON-BLOCKING FOR SPRINT 1 (Verified during Sprint 4/5)**
@@ -117,7 +117,7 @@ This register tracks all unresolved technical, functional, architectural, and op
 - **Assigned Owner:** Principal Software Architect
 - **Resolution Action:** Formalize the DB-backed queue and polling architecture in ADR-0001 and deliver sequence diagrams in Sprint 4.
 
-#### Q-ARC-02: Should FioriX adopt native CAP OData V4 or custom REST endpoints for UI5 consumption?
+#### Q-ARC-02: Should Fiorify adopt native CAP OData V4 or custom REST endpoints for UI5 consumption?
 - **Domain:** Backend API Architecture
 - **Context & Impact:** `docs/15-api-contracts.md` specifies `/api/v1/systems` (REST), whereas SAPUI5 and CAP natively operate on OData V4 (`/odata/v4/assessment/Systems`). Forcing custom Express REST routes loses CAP's automated CQN queries, paging, sorting, and UI5 Smart Control integration.
 - **Current Baseline Assumption:** Hybrid model: CAP OData V4 for all entities; custom actions/REST solely for long-running job commands.
@@ -169,7 +169,7 @@ This register tracks all unresolved technical, functional, architectural, and op
 |---|---|---|---|
 | **Q-SAP-01** | Target S/4HANA & ABAP Release | Blocks Generation Templates | Record exact SPAM status from DEV sandbox |
 | **Q-SAP-02** | ADT Access over Cloud Connector | Blocks Technical Discovery | Whitelist `/sap/bc/adt` and ping from BTP |
-| **Q-SAP-03** | Least-Privilege Technical Role | Blocks SAP Connection | Finalize `Z_FIORIX_DISCOVERY_RO` role |
+| **Q-SAP-03** | Least-Privilege Technical Role | Blocks SAP Connection | Finalize `Z_Fiorify_DISCOVERY_RO` role |
 | **Q-SCP-01** | Pilot Transaction Selection | Blocks Discovery Target | Formal sign-off on pilot T-Code |
 
 All other questions are prioritized for resolution during Sprints 2–5 according to the approved Sprint Plan.

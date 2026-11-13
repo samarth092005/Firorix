@@ -8,7 +8,7 @@
 
 ## 1. REST API Surface Audit (52 Endpoints Cataloged)
 
-Every Generation Studio endpoint is registered under `/api/v1/generation/` and requires authenticated session identity with role permission `fiorix.generation.manage` (`PERMISSIONS.GENERATION_MANAGE`).
+Every Generation Studio endpoint is registered under `/api/v1/generation/` and requires authenticated session identity with role permission `Fiorify.generation.manage` (`PERMISSIONS.GENERATION_MANAGE`).
 
 ### 1.1 Complete Endpoint Matrix
 
@@ -95,6 +95,6 @@ Generation Studio persists project states under:
    - On startup or load, if `project.json` is corrupted or truncated, the store automatically falls back to `project.json.bak` and emits a recovery alert.
 
 ### 2.2 PostgreSQL vs. JSON Split (Architectural Discrepancy)
-- **The Finding:** FioriX S1 established a persistence foundation requiring PostgreSQL (`backend/src/infrastructure/repositories/generationProjectRepository.js`). However, Generation Studio (GEN-02 through GEN-09) writes canonically to filesystem JSON (`backend/data/generation-projects/`).
+- **The Finding:** Fiorify S1 established a persistence foundation requiring PostgreSQL (`backend/src/infrastructure/repositories/generationProjectRepository.js`). However, Generation Studio (GEN-02 through GEN-09) writes canonically to filesystem JSON (`backend/data/generation-projects/`).
 - **Impact:** In local development mode on Windows, the JSON store provides instant zero-dependency execution. However, in a horizontally scaled BTP Cloud Foundry container environment, ephemeral container filesystems will lose state upon container restarts unless mapped to a persistent volume or synchronized back to PostgreSQL.
 - **Audit Verdict:** The JSON persistence is production-grade for single-instance local developer execution, but a PostgreSQL synchronization adapter is required before multi-instance BTP deployment.

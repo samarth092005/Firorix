@@ -7,7 +7,7 @@ import { createServer } from '../src/server.js';
 import { AssessmentStore, LIFECYCLE_STATES } from '../src/services/assessmentStore.js';
 import { RECOMMENDATION_OUTCOMES } from '../src/engine/recommendationEngine.js';
 
-describe('FioriX PERSIST-02 & REC-01 — Lifecycle, Audit History & Recommendations Integration', () => {
+describe('Fiorify PERSIST-02 & REC-01 — Lifecycle, Audit History & Recommendations Integration', () => {
   let server;
   let baseUrl;
   let testStoragePath;
@@ -48,7 +48,7 @@ describe('FioriX PERSIST-02 & REC-01 — Lifecycle, Audit History & Recommendati
   before(async () => {
     testStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-test-lifecycle-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-lifecycle-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
     server = createServer({ assessmentStore });

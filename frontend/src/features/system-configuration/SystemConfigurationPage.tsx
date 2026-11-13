@@ -221,123 +221,7 @@ export const SystemConfigurationPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Separated Landscape Health Indicators (FX-003 Step 4) */}
-          <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--fiori-border, #E2E8F0)',
-              borderRadius: 'var(--radius-md, 10px)',
-              padding: '22px',
-              boxShadow: 'var(--fiori-shadow-card)'
-            }}
-          >
-            <SectionHeader
-              title="Separated Landscape Health Indicators"
-              description="Independent monitoring of backend services, SAP reachability, tunnel status, and Gateway."
-            />
-
-            {indicators ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {/* 1. Backend Health */}
-                <div style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)', backgroundColor: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '13px' }}>1. {indicators.backendHealth.label}</span>
-                    <StatusBadge
-                      status={indicators.backendHealth.status}
-                      variant={indicators.backendHealth.badgeVariant}
-                      customLabel={indicators.backendHealth.statusText}
-                      size="sm"
-                    />
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-                    {indicators.backendHealth.details}
-                  </div>
-                </div>
-
-                {/* 2. Configured SAP System Status */}
-                <div style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)', backgroundColor: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '13px' }}>2. {indicators.configuredSystem.label}</span>
-                    <StatusBadge
-                      status={indicators.configuredSystem.status}
-                      variant={indicators.configuredSystem.badgeVariant}
-                      customLabel={indicators.configuredSystem.statusText}
-                      size="sm"
-                    />
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-                    {indicators.configuredSystem.details}
-                  </div>
-                </div>
-
-                {/* 3. SAP Host Reachability */}
-                <div style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)', backgroundColor: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '13px' }}>3. {indicators.sapHostReachability.label}</span>
-                    <StatusBadge
-                      status={indicators.sapHostReachability.status}
-                      variant={indicators.sapHostReachability.badgeVariant}
-                      customLabel={indicators.sapHostReachability.statusText}
-                      size="sm"
-                    />
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-                    {indicators.sapHostReachability.details}
-                  </div>
-                </div>
-
-                {/* 4. Cloud Connector Availability */}
-                <div style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)', backgroundColor: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '13px' }}>4. {indicators.cloudConnector.label}</span>
-                    <StatusBadge
-                      status={indicators.cloudConnector.status}
-                      variant={indicators.cloudConnector.badgeVariant}
-                      customLabel={indicators.cloudConnector.statusText}
-                      size="sm"
-                    />
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-                    {indicators.cloudConnector.details}
-                  </div>
-                </div>
-
-                {/* 5. SAP Gateway Availability */}
-                <div style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)', backgroundColor: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '13px' }}>5. {indicators.sapGateway.label}</span>
-                    <StatusBadge
-                      status={indicators.sapGateway.status}
-                      variant={indicators.sapGateway.badgeVariant}
-                      customLabel={indicators.sapGateway.statusText}
-                      size="sm"
-                    />
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-                    {indicators.sapGateway.details}
-                  </div>
-                </div>
-
-                {/* 6. Gateway Service Catalogue */}
-                <div style={{ padding: '10px 14px', borderRadius: '6px', border: '1px solid var(--fiori-border, #E2E8F0)', backgroundColor: '#F8FAFC' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: 600, fontSize: '13px' }}>6. {indicators.gatewayCatalog.label}</span>
-                    <StatusBadge
-                      status={indicators.gatewayCatalog.status}
-                      variant={indicators.gatewayCatalog.badgeVariant}
-                      customLabel={indicators.gatewayCatalog.statusText}
-                      size="sm"
-                    />
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-                    {indicators.gatewayCatalog.details}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div style={{ fontSize: '12px', color: '#64748B' }}>Indicators loading...</div>
-            )}
-          </div>
+   
         </div>
 
         {/* Right: Software Component Levels & Gateway Catalog Explorer */}
@@ -411,7 +295,7 @@ export const SystemConfigurationPage: React.FC = () => {
               <div style={{ position: 'relative', flex: 1 }}>
                 <input
                   type="text"
-                  placeholder="Filter service by technical name (e.g. Z_FIORIX, EPM, SD)..."
+                  placeholder="Filter service by technical name (e.g. Z_Fiorify, EPM, SD)..."
                   value={catalogSearch}
                   onChange={(e) => setCatalogSearch(e.target.value)}
                   style={{
@@ -451,29 +335,7 @@ export const SystemConfigurationPage: React.FC = () => {
               </div>
             )}
 
-            {catalogState.status === 'UNAUTHORIZED' && (
-              <div
-                style={{
-                  padding: '14px 16px',
-                  borderRadius: '6px',
-                  backgroundColor: '#FFFBEB',
-                  border: '1px solid #FDE68A',
-                  color: '#92400E',
-                  fontSize: '12px'
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, marginBottom: '6px' }}>
-                  <Lock size={15} color="#D97706" />
-                  <span>Administrative Authentication Boundary (HTTP 401)</span>
-                </div>
-                <p style={{ margin: '0 0 6px 0', lineHeight: 1.5 }}>
-                  The backend Gateway catalog endpoint (<code>GET /api/v1/gateway/services</code>) requires administrative authorization (<code>FIORIX_ADMIN_SECRET</code>).
-                </p>
-                <p style={{ margin: 0, fontSize: '11px', color: '#B45309', lineHeight: 1.4 }}>
-                  <strong>Security Enforcement:</strong> In compliance with Clean Core governance, privileged administrative credentials are not exposed to client-side browser sessions. Live catalog synchronization is performed via authorized backend tasks.
-                </p>
-              </div>
-            )}
+            
 
             {catalogState.status === 'BACKEND_OFFLINE' && (
               <div
@@ -526,52 +388,11 @@ export const SystemConfigurationPage: React.FC = () => {
                   <span>Provenance: {catalogState.provenance}</span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '240px', overflowY: 'auto' }}>
-                  {catalogState.services.map((srv) => (
-                    <div
-                      key={srv.id || srv.technicalServiceName}
-                      style={{
-                        padding: '8px 12px',
-                        borderRadius: '4px',
-                        border: '1px solid #E2E8F0',
-                        backgroundColor: '#F8FAFC',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        fontSize: '11px'
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 600, fontFamily: 'var(--font-mono)', color: '#0F172A' }}>
-                          {srv.technicalServiceName}
-                        </div>
-                        <div style={{ color: '#64748B' }}>{srv.title || srv.description}</div>
-                      </div>
-                      <span
-                        style={{
-                          fontSize: '10px',
-                          padding: '2px 6px',
-                          borderRadius: '10px',
-                          backgroundColor: '#E0F2FE',
-                          color: '#0369A1',
-                          fontWeight: 600
-                        }}
-                      >
-                        v{srv.version || 1}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+
               </div>
             )}
           </div>
-
-
-      
-
-
-
-            
+  
           </div>
         </div>
       </div>

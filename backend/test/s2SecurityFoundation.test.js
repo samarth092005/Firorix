@@ -1,5 +1,5 @@
 /**
- * FioriX — Stage S2: Security Foundation Test Suite
+ * Fiorify — Stage S2: Security Foundation Test Suite
  *
  * Verifies the 14 mandatory security test cases:
  *  1. Unauthenticated request (401)
@@ -33,7 +33,7 @@ import { GenerationProjectStore } from '../src/generation/projects/generationPro
 import { GenerationProjectService } from '../src/generation/projects/generationProjectService.js';
 import DatabasePool from '../src/infrastructure/db/pool.js';
 
-describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () => {
+describe('Fiorify S2 Security Foundation — 14 Mandatory Security Controls', () => {
   let server;
   let baseUrl;
   let testStoragePath;
@@ -43,18 +43,18 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
   let projectService;
   let systemRegistry;
   let authService;
-  const JWT_SECRET = 'fiorix-test-security-secret-key-2026';
+  const JWT_SECRET = 'Fiorify-test-security-secret-key-2026';
 
   before(async () => {
     authService = new AuthService({ jwtSecret: JWT_SECRET });
 
     testStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-test-s2-assessments-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-s2-assessments-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
     testProjectStoragePath = path.join(
       os.tmpdir(),
-      `fiorix-test-s2-projects-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-s2-projects-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
 
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
@@ -161,7 +161,7 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
   it('5. Allows valid admin request with HTTP 200 and returns data', async () => {
     const adminToken = authService.generateToken({
       id: 'USR-ADMIN-01',
-      email: 'admin@fiorix.corp',
+      email: 'admin@Fiorify.corp',
       role: USER_ROLES.ADMIN,
       tenantId: 'DEFAULT-TENANT-S21'
     });
@@ -178,7 +178,7 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
   it('6. Rejects non-admin request to privileged administrative operation with HTTP 403', async () => {
     const viewerToken = authService.generateToken({
       id: 'USR-VIEW-01',
-      email: 'viewer@fiorix.corp',
+      email: 'viewer@Fiorify.corp',
       role: USER_ROLES.VIEWER,
       tenantId: 'DEFAULT-TENANT-S21'
     });
@@ -279,7 +279,7 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
 
   // 10. Missing permission check (403)
   it('10. Blocks user lacking required permission with HTTP 403 and audits rejection', async () => {
-    // Token without fiorix.audit.read permission
+    // Token without Fiorify.audit.read permission
     const requesterToken = authService.generateToken({
       id: 'USR-REQ-01',
       role: USER_ROLES.REQUESTER,
@@ -292,7 +292,7 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
     const body = await res.json();
     assert.strictEqual(res.status, 403);
     assert.strictEqual(body.statusCode, 'FORBIDDEN');
-    assert.ok(body.errorMessage.includes('fiorix.audit.read'));
+    assert.ok(body.errorMessage.includes('Fiorify.audit.read'));
   });
 
   // 11. Connection pool reuse across different tenants (no context leak)
@@ -330,7 +330,7 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
   });
 
   // 12. Export authorization check
-  it('12. Enforces fiorix.artifacts.export permission check on artifact download', async () => {
+  it('12. Enforces Fiorify.artifacts.export permission check on artifact download', async () => {
     // Project in same tenant
     const createRes = await projectService.createProject({
       projectName: 'Export Auth Test Project',
@@ -358,7 +358,7 @@ describe('FioriX S2 Security Foundation — 14 Mandatory Security Controls', () 
     );
     assert.strictEqual(deniedRes.status, 403);
 
-    // Admin with fiorix.artifacts.export permission
+    // Admin with Fiorify.artifacts.export permission
     const adminToken = authService.generateToken({
       id: 'USR-ADMIN-01',
       role: USER_ROLES.ADMIN,

@@ -41,7 +41,7 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
 
   // App Config
-  const [appId, setAppId] = useState<string>(`com.fiorix.custom.${project.projectId.toLowerCase().replace(/[^a-z0-9]/g, '')}`);
+  const [appId, setAppId] = useState<string>(`com.Fiorify.custom.${project.projectId.toLowerCase().replace(/[^a-z0-9]/g, '')}`);
   const [appTitle, setAppTitle] = useState<string>(project.projectName);
 
   useEffect(() => {

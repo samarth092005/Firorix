@@ -197,10 +197,10 @@ describe('GEN-07, GEN-08, GEN-09: Frontend Generation Studio Service Integration
       const mockExport: ExportPackageResult = {
         success: true,
         exportId: 'EXP-12345',
-        filename: 'FioriX_PRJ-TEST_12345.zip',
+        filename: 'Fiorify_PRJ-TEST_12345.zip',
         sizeBytes: 15420,
         zipSha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-        downloadUrl: '/api/v1/generation/projects/PRJ-TEST/exports/FioriX_PRJ-TEST_12345.zip/download',
+        downloadUrl: '/api/v1/generation/projects/PRJ-TEST/exports/Fiorify_PRJ-TEST_12345.zip/download',
         manifest: {
           confidentialityNotice: { containsSecrets: false }
         }
@@ -244,7 +244,7 @@ describe('GEN-07, GEN-08, GEN-09: Frontend Generation Studio Service Integration
           node: { name: 'Node.js Runtime', detected: true, version: 'v20.18.0', status: 'READY', details: 'v20' },
           adt: { name: 'ABAP Development Tools (ADT)', detected: true, version: '3.38.0', status: 'READY', details: 'ADT' }
         },
-        ports: [{ port: 4004, service: 'FioriX Backend', free: false }],
+        ports: [{ port: 4004, service: 'Fiorify Backend', free: false }],
         recommendations: []
       };
 

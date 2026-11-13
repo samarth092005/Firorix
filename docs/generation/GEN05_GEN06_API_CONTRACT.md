@@ -92,7 +92,7 @@ Authentication and tenant isolation strictly enforce:
   ```json
   {
     "floorplan": "ListReportObjectPage",
-    "namespace": "fiorix.payment",
+    "namespace": "Fiorify.payment",
     "appTitle": "Manage Payments S21",
     "description": "Modernized Payment Management Application"
   }

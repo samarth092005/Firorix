@@ -1,7 +1,7 @@
-# FioriX — Stage S2: Tenant Data Isolation & Boundary Verification
+# Fiorify — Stage S2: Tenant Data Isolation & Boundary Verification
 
 ## 1. Tenant Boundary Model
-FioriX enforces strict multi-tenant boundary controls across all storage, caching, and runtime layers.
+Fiorify enforces strict multi-tenant boundary controls across all storage, caching, and runtime layers.
 Every customer dataset must carry tenant provenance (`tenant_id`).
 
 ### Protected Resources:

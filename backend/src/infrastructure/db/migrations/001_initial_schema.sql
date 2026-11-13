@@ -1,5 +1,5 @@
 -- Migration: 001_initial_schema.sql
--- Description: Core schema for FioriX S1 Persistence Foundation
+-- Description: Core schema for Fiorify S1 Persistence Foundation
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 

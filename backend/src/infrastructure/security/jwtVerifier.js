@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 /**
- * FioriX Native JWT Verifier
+ * Fiorify Native JWT Verifier
  * Implements RFC 7519 JWT validation using native Node.js crypto.
  * Supports HS256 (HMAC-SHA256) and RS256 (RSA-SHA256).
  */
@@ -33,8 +33,8 @@ export class JwtVerifier {
     const finalPayload = {
       iat: now,
       exp: now + (options.expiresInSeconds || 86400),
-      iss: options.issuer || 'https://fiorix.corp/auth',
-      aud: options.audience || 'fiorix-platform',
+      iss: options.issuer || 'https://Fiorify.corp/auth',
+      aud: options.audience || 'Fiorify-platform',
       ...payload
     };
 

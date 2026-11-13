@@ -158,7 +158,7 @@ export const CandidateComparisonMatrix: React.FC<CandidateComparisonMatrixProps>
   const handleLaunchAssessment = () => {
     if (assessmentHandoff) {
       // Store in session storage so Assessment page / wizard can pick it up directly
-      sessionStorage.setItem('fiorix_pending_assessment_handoff', JSON.stringify(assessmentHandoff));
+      sessionStorage.setItem('Fiorify_pending_assessment_handoff', JSON.stringify(assessmentHandoff));
     }
     navigate(`/discovery?tcode=${encodeURIComponent(tcode)}&mode=wizard`);
   };

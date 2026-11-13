@@ -6,7 +6,7 @@
 The **GEN-05 RAP Subsystem** translates confirmed business requirements, entity models, and transactional semantics into a Clean Core (Tier 2 Cloud Development Model) RESTful Application Programming (RAP) backend artifact suite tailored specifically for **SAP S/4HANA 2023 On-Premise (FPS00 / Feature Pack Stack 0)**.
 
 In strict adherence to the **Non-Negotiable Protection Rules**:
-- **Zero SAP Writes / No Remote CTS Deployment:** All generated artifacts are produced locally as editable draft source files within the FioriX Generation Project persistence workspace.
+- **Zero SAP Writes / No Remote CTS Deployment:** All generated artifacts are produced locally as editable draft source files within the Fiorify Generation Project persistence workspace.
 - **Strictly Deterministic Generation:** Identical inputs yield identical AST representations, DDL statements, and checksums.
 - **Manual Edit Preservation:** Artifacts modified by an ABAP architect are preserved across subsequent regeneration runs, with template baseline diffs tracked.
 

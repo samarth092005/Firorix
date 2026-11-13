@@ -1,7 +1,7 @@
-# FIORIX — GENERATION TEMPLATE & DATA MODEL SPECIFICATION
+# Fiorify — GENERATION TEMPLATE & DATA MODEL SPECIFICATION
 
 **Document ID:** SPEC-GEN-2026-01  
-**Project:** FioriX — SAP Modernization Platform  
+**Project:** Fiorify — SAP Modernization Platform  
 **Target Architecture:** SAP S/4HANA & SAP BTP ABAP Environment  
 **Pattern:** SAP Fiori Elements List Report + Object Page (OData V4)  
 **Clean Core Standard:** Tier 1 Developer Extensibility (Cloud-Ready RAP)  
@@ -11,7 +11,7 @@
 
 ## 1. Supported Template Scope & Architecture Pattern
 
-The initial release of FioriX Generation Studio focuses on the most prevalent, robust, and clean-core-compliant enterprise pattern:
+The initial release of Fiorify Generation Studio focuses on the most prevalent, robust, and clean-core-compliant enterprise pattern:
 
 > **SAP Fiori Elements List Report and Object Page using OData V4**  
 > Backed by a **Managed RAP Business Object with Draft Capabilities**.
@@ -46,7 +46,7 @@ generated-project/
 ```
 
 ### Classification of Generated Deliverables
-To avoid misleading developers into believing that FioriX executes automated activation, all artifacts are explicitly categorized:
+To avoid misleading developers into believing that Fiorify executes automated activation, all artifacts are explicitly categorized:
 1. **Source Code Files (Ready for ADT / abapGit import):** `.cds`, `.bdef`, `.dcl`, `.srvd`, `manifest.json`, `Component.js`, `i18n.properties`.
 2. **Configuration Proposals (Reviewable metadata templates):** `.srvb.json` (Service Binding proposal; requires manual activation in ADT), `ui5.yaml`.
 3. **Audit & Governance Manifests (Read-only records):** `generation-manifest.json`, `validation-report.md`.
@@ -516,4 +516,4 @@ export interface BusinessEntityDefinition {
 ### Verification Safeguard for Unknown Source Objects
 - When the legacy transaction references database tables or structures that are not in the verified Master Index or SAP released C1 dictionary, the field/entity is flagged with `isVerifiedInTargetSystem: false`.
 - The Generation Studio displays a warning chip: **`Requires Target Sandbox Verification`**.
-- FioriX never invents fictitious table names or pretends an unreleased table is Clean Core compliant.
+- Fiorify never invents fictitious table names or pretends an unreleased table is Clean Core compliant.

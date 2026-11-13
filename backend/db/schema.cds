@@ -1,4 +1,4 @@
-namespace fiorix.discovery;
+namespace Fiorify.discovery;
 
 using { cuid, managed } from '@sap/cds/common';
 

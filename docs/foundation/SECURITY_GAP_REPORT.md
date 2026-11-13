@@ -1,4 +1,4 @@
-# FioriX — Security Gap & Vulnerability Assessment Report (Phase S0)
+# Fiorify — Security Gap & Vulnerability Assessment Report (Phase S0)
 
 **Document Version:** 1.0  
 **Phase:** S0 — Audit & Architecture Baseline  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-FioriX currently operates as a local-first engineering platform with developer-oriented authentication controls. As the platform transitions to multi-system enterprise deployment on SAP S/4HANA 2023 (Phase S1–S3), critical security controls must be upgraded to enterprise standards.
+Fiorify currently operates as a local-first engineering platform with developer-oriented authentication controls. As the platform transitions to multi-system enterprise deployment on SAP S/4HANA 2023 (Phase S1–S3), critical security controls must be upgraded to enterprise standards.
 
 This report documents the precise security gaps identified in the Phase S0 baseline and defines the remediation strategy for Phase S2.
 
@@ -19,8 +19,8 @@ This report documents the precise security gaps identified in the Phase S0 basel
 
 ### GAP-01: Static Shared Admin Secret Authentication
 - **Current State:**
-  - `server.js` verifies admin requests using the `X-FioriX-Admin-Secret` header via `crypto.timingSafeEqual()`.
-  - The secret is loaded from `process.env.FIORIX_ADMIN_SECRET` with a default development fallback (`dev-admin-secret-change-in-production`).
+  - `server.js` verifies admin requests using the `X-Fiorify-Admin-Secret` header via `crypto.timingSafeEqual()`.
+  - The secret is loaded from `process.env.Fiorify_ADMIN_SECRET` with a default development fallback (`dev-admin-secret-change-in-production`).
   - Read endpoints (`GET`) do not enforce authentication.
 - **Risk:**
   - Static shared secret is vulnerable to credential sharing, cannot be revoked per user, and lacks individual user accountability.
@@ -42,7 +42,7 @@ This report documents the precise security gaps identified in the Phase S0 basel
 
 ### GAP-03: Hardcoded Development Defaults in Frontend
 - **Current State:**
-  - `frontend/src/services/api/apiClient.ts` reads `import.meta.env.VITE_FIORIX_ADMIN_SECRET || 'dev-admin-secret-change-in-production'`.
+  - `frontend/src/services/api/apiClient.ts` reads `import.meta.env.VITE_Fiorify_ADMIN_SECRET || 'dev-admin-secret-change-in-production'`.
   - While suitable for local test runners, compiling admin secrets into production client-side bundles represents a critical security risk.
 - **Risk:**
   - Any user inspecting browser network traffic or decompiling JavaScript bundles can extract the administrative secret.

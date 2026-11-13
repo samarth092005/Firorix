@@ -1,5 +1,5 @@
 /**
- * FioriX — SAP Connectivity & Destination Provider (Stage S3)
+ * Fiorify — SAP Connectivity & Destination Provider (Stage S3)
  *
  * Implements decoupled provider architecture for SAP S/4HANA connectivity:
  * - SAP Cloud SDK destination integration

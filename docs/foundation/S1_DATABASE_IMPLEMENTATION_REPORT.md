@@ -1,4 +1,4 @@
-# FIORIX — PHASE S1 DATABASE IMPLEMENTATION REPORT
+# Fiorify — PHASE S1 DATABASE IMPLEMENTATION REPORT
 **Persistence Foundation: PostgreSQL 15+ Architecture & Repositories**
 
 **Date:** 2026-11-11  
@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-Phase S1 establishes a durable, transactional relational persistence layer for FioriX, replacing the legacy file-based JSON stores (`data/assessments.json`, `data/fiori_app_catalog_cache.json`, `data/transaction_master.json`, and `data/generation/projects/`). 
+Phase S1 establishes a durable, transactional relational persistence layer for Fiorify, replacing the legacy file-based JSON stores (`data/assessments.json`, `data/fiori_app_catalog_cache.json`, `data/transaction_master.json`, and `data/generation/projects/`). 
 
 All database operations are implemented using native Node.js (`pg` / `node-postgres`) connection pooling with parameterized SQL, ensuring strict prevention of SQL injection, full ACID compliance, and zero dependency on heavy ORMs (no Prisma, TypeORM, or SAP CAP).
 

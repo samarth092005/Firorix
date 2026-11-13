@@ -10,7 +10,7 @@ import {
 } from '../src/adapters/sapTransactionDiscoveryAdapter.js';
 import { createServer } from '../src/server.js';
 
-describe('FioriX Sprint 6 — Gateway Metadata & Transaction Discovery Unit Tests', () => {
+describe('Fiorify Sprint 6 — Gateway Metadata & Transaction Discovery Unit Tests', () => {
   const SAMPLE_EDMX_XML = `<?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
   <edmx:DataServices m:DataServiceVersion="2.0">
@@ -262,7 +262,7 @@ describe('FioriX Sprint 6 — Gateway Metadata & Transaction Discovery Unit Test
   });
 });
 
-describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
+describe('Fiorify Sprint 6 — HTTP Server New Endpoints Integration', () => {
   const TEST_ADMIN_SECRET = 'sprint6-secret-xyz123';
 
   const mockGatewayAdapter = {
@@ -320,8 +320,8 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
   };
 
   it('protects GET /api/v1/gateway/services and returns 401 when admin secret is missing', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -339,13 +339,13 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
       assert.strictEqual(data.statusCode, 'UNAUTHORIZED');
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 
-  it('allows GET /api/v1/gateway/services with 200 when valid X-FioriX-Admin-Secret is provided', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+  it('allows GET /api/v1/gateway/services with 200 when valid X-Fiorify-Admin-Secret is provided', async () => {
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -358,7 +358,7 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
 
     try {
       const res = await fetch(`http://localhost:${port}/api/v1/gateway/services?search=PAYMENT`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(res.status, 200);
       const data = await res.json();
@@ -366,13 +366,13 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
       assert.strictEqual(data.totalCount, 1);
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 
   it('allows GET /api/v1/gateway/services/:serviceId/metadata with 200 when authorized', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -385,7 +385,7 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
 
     try {
       const res = await fetch(`http://localhost:${port}/api/v1/gateway/services/FAP_PAYMENT_POST_SRV/metadata`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(res.status, 200);
       const data = await res.json();
@@ -394,13 +394,13 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
       assert.strictEqual(data.metadata.entitySetsCount, 5);
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 
   it('handles GET /api/v1/transaction-discovery/:tcode with 200 for F-53, 404 for ZNOTEXIST, and 400 for invalid', async () => {
-    const origSecret = process.env.FIORIX_ADMIN_SECRET;
-    process.env.FIORIX_ADMIN_SECRET = TEST_ADMIN_SECRET;
+    const origSecret = process.env.Fiorify_ADMIN_SECRET;
+    process.env.Fiorify_ADMIN_SECRET = TEST_ADMIN_SECRET;
 
     const server = createServer({
       btpAdapter: mockBtpAdapter,
@@ -414,7 +414,7 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
     try {
       // 1. Valid F-53
       const resF53 = await fetch(`http://localhost:${port}/api/v1/transaction-discovery/F-53`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(resF53.status, 200);
       const dataF53 = await resF53.json();
@@ -423,18 +423,18 @@ describe('FioriX Sprint 6 — HTTP Server New Endpoints Integration', () => {
 
       // 2. Nonexistent ZNOTEXIST
       const res404 = await fetch(`http://localhost:${port}/api/v1/transaction-discovery/ZNOTEXIST`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(res404.status, 404);
 
       // 3. Invalid
       const res400 = await fetch(`http://localhost:${port}/api/v1/transaction-discovery/INVALID$$$`, {
-        headers: { 'X-FioriX-Admin-Secret': TEST_ADMIN_SECRET }
+        headers: { 'X-Fiorify-Admin-Secret': TEST_ADMIN_SECRET }
       });
       assert.strictEqual(res400.status, 400);
     } finally {
       server.close();
-      process.env.FIORIX_ADMIN_SECRET = origSecret;
+      process.env.Fiorify_ADMIN_SECRET = origSecret;
     }
   });
 });

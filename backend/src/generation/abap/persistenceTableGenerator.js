@@ -1,5 +1,5 @@
 /**
- * FioriX — GEN-05: Persistence Table Generator
+ * Fiorify — GEN-05: Persistence Table Generator
  *
  * Generates ABAP Dictionary table definitions (define table) for Root, Child,
  * and Draft tables in compliance with SAP S/4HANA 2023 Clean Core standards.

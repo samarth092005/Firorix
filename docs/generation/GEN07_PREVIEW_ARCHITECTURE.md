@@ -1,4 +1,4 @@
-# FioriX — GEN-07: Local Preview & Mock OData V4 Runtime Architecture
+# Fiorify — GEN-07: Local Preview & Mock OData V4 Runtime Architecture
 
 **Milestone:** GEN-07 Local Preview  
 **Target Landscape:** SAP S/4HANA 2023 On-Premise (System S21, Client 200)  
@@ -25,7 +25,7 @@ GEN-07 establishes an isolated, in-process local runtime that serves generated S
 
 ```
                     ┌──────────────────────────────────────────────┐
-                    │       FioriX Generation Studio Frontend      │
+                    │       Fiorify Generation Studio Frontend      │
                     └───────────────────────┬──────────────────────┘
                                             │ Preview IFrame / Controls
                                             ▼
@@ -69,7 +69,7 @@ GEN-07 establishes an isolated, in-process local runtime that serves generated S
 
 The watermark banner is injected into the `<head>` or before `</body>` of `webapp/index.html`:
 ```html
-<div id="fiorix-preview-banner" style="position:fixed;top:0;left:0;right:0;height:28px;background:#c0392b;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:700;font-size:11px;letter-spacing:0.8px;display:flex;align-items:center;justify-content:center;z-index:2147483647;box-shadow:0 2px 6px rgba(0,0,0,0.3);text-transform:uppercase;user-select:none;pointer-events:none;">
+<div id="Fiorify-preview-banner" style="position:fixed;top:0;left:0;right:0;height:28px;background:#c0392b;color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-weight:700;font-size:11px;letter-spacing:0.8px;display:flex;align-items:center;justify-content:center;z-index:2147483647;box-shadow:0 2px 6px rgba(0,0,0,0.3);text-transform:uppercase;user-select:none;pointer-events:none;">
   &#9888; LOCAL MOCK PREVIEW — SYNTHETIC DATA ONLY — NOT CONNECTED TO SAP S21
 </div>
 <style>body { padding-top: 28px !important; }</style>

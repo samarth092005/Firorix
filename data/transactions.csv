@@ -1,8 +1,8 @@
 system_id,tcode,exists,classification,description,program,screen_number,package_name,original_system,software_component,metadata_status,lookup_behavior,evidence
 S4H-DEV-200,ME21N,1,STANDARD,Create Purchase Order (synthetic demo description),SAPLMEGUI_DEMO,0100,DEMO_MM_CORE,SAP,S4CORE,COMPLETE,SUCCESS,TSTC fixture; TSTCT fixture; repository fixture
 S4H-DEV-200,VA01,1,STANDARD,Create Sales Order (synthetic demo description),SAPMV45A_DEMO,0100,DEMO_SD_CORE,SAP,S4CORE,COMPLETE,SUCCESS,TSTC fixture; TSTCT fixture; repository fixture
-S4H-DEV-200,ZPURCHASE,1,CUSTOM,Custom Purchase Request Overview (synthetic),ZFIORIX_PURCHASE_DEMO,0100,ZDEMO_PURCHASE,DEV,HOME,COMPLETE,SUCCESS,Customer namespace; customer package; synthetic repository ownership
-S4H-DEV-200,ZREPORT01,1,CUSTOM,Custom Operational Report (synthetic),ZFIORIX_REPORT_DEMO,0100,ZDEMO_REPORTS,DEV,HOME,COMPLETE,SUCCESS,Customer namespace; customer package; synthetic repository ownership
+S4H-DEV-200,ZPURCHASE,1,CUSTOM,Custom Purchase Request Overview (synthetic),ZFiorify_PURCHASE_DEMO,0100,ZDEMO_PURCHASE,DEV,HOME,COMPLETE,SUCCESS,Customer namespace; customer package; synthetic repository ownership
+S4H-DEV-200,ZREPORT01,1,CUSTOM,Custom Operational Report (synthetic),ZFiorify_REPORT_DEMO,0100,ZDEMO_REPORTS,DEV,HOME,COMPLETE,SUCCESS,Customer namespace; customer package; synthetic repository ownership
 S4H-DEV-200,ZNOMATCH,1,STANDARD,Demo Transaction Without Curated App Mapping (synthetic),SAPLDEMO_NOMATCH,0100,DEMO_MISC,SAP,S4CORE,COMPLETE,SUCCESS,Synthetic standard repository fixture
 S4H-DEV-200,ZINCOMPLETE,1,CUSTOM,,,0100,ZDEMO_INCOMPLETE,DEV,HOME,INCOMPLETE,SUCCESS,Transaction exists; optional description/program omitted
 S4H-DEV-200,ZCONNERR,0,UNKNOWN,,,,,,NOT_AVAILABLE,CONNECTION_ERROR,Synthetic adapter fault

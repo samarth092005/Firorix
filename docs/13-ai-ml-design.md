@@ -4,10 +4,10 @@
 
 ## 1. Core Principle: Advisory & Optional
 
-FioriX is an **enterprise engineering and decision-governance workbench**, not an AI chatbot or conversational SaaS product.
+Fiorify is an **enterprise engineering and decision-governance workbench**, not an AI chatbot or conversational SaaS product.
 
 Deterministic rules, verified SAP technical metadata, and human consultant reviews govern all assessments:
-- **AI is Optional:** FioriX is 100% functionally complete and operational without an AI provider.
+- **AI is Optional:** Fiorify is 100% functionally complete and operational without an AI provider.
 - **AI is Advisory:** Any AI output is labeled `AI_ADVISORY` and must be confirmed by a human consultant.
 - **Provider-Independence:** AI capabilities are isolated behind an abstract interface (`IAIProvider`). The default implementation is a local, deterministic rule-based heuristic engine.
 
