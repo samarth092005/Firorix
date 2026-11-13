@@ -756,8 +756,37 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
               })}
             </div>
           ) : (
-            <div style={{ padding: '30px', textAlign: 'center', color: '#64748B', backgroundColor: '#F8FAFC', borderRadius: '6px' }}>
-              No official standard Fiori candidates identified for transaction {assessment.tcode}.
+            <div style={{ padding: '32px 24px', textAlign: 'center', backgroundColor: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <BookmarkCheck size={28} color="#64748B" />
+              <div>
+                <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginBottom: '4px' }}>
+                  No Official Standard Fiori Candidate for {assessment.tcode}
+                </div>
+                <div style={{ fontSize: '12.5px', color: '#64748B', maxWidth: '540px', lineHeight: 1.5 }}>
+                  The SAP Fiori Apps Reference Library contains no standard replacement application for transaction <strong>{assessment.tcode}</strong>.
+                  Under Clean Core governance, this requirement should be commissioned as a custom RAP application in <strong>Generation Studio</strong>.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('BUILD_STUDIO')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  backgroundColor: '#8C19C5',
+                  color: '#FFFFFF',
+                  padding: '9px 18px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 5px rgba(140, 25, 197, 0.25)'
+                }}
+              >
+                <Sparkles size={16} /> Proceed to Tab 4: Generation Studio BUILD
+              </button>
             </div>
           )}
 
@@ -1218,8 +1247,16 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
             </span>
           </div>
 
-          {/* Clean Core Guardrail Notice */}
-          {hasStandardMatch && (
+          {/* Clean Core Guardrail Notice / Custom Build Justification */}
+          {!hasStandardMatch ? (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px', borderRadius: '6px', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', color: '#166534', fontSize: '12.5px', lineHeight: 1.45 }}>
+              <CheckCircle2 size={18} style={{ flexShrink: 0, marginTop: '2px', color: '#16A34A' }} />
+              <div>
+                <strong>Clean Core Custom Build Formally Justified:</strong> No standard SAP Fiori successor exists for <strong>{assessment.tcode}</strong>.
+                Commissioning a custom SAP Fiori Elements / ABAP RESTful Application Programming Model (RAP) application under Clean Core Tier 2 (Cloud Developer Extensibility) is the recommended modernization path.
+              </div>
+            </div>
+          ) : (
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '14px 16px', borderRadius: '6px', backgroundColor: '#FEF9F1', border: '1px solid #FFDCB0', color: '#8A4300', fontSize: '12.5px', lineHeight: 1.45 }}>
               <ShieldAlert size={18} style={{ flexShrink: 0, marginTop: '2px', color: '#C25E00' }} />
               <div>

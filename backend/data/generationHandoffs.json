@@ -192,5 +192,52 @@
     "updatedAt": "2026-11-13T05:34:19.223Z",
     "createdBy": "USR-ADMIN-01",
     "creatorName": "Enterprise System Administrator"
+  },
+  {
+    "handoffId": "HND-1794548577115-C02F87",
+    "sourceAssessmentId": "ASM-1794547631363-ST22-9U6Y",
+    "tcode": "ST22",
+    "transactionDescription": "Assessment for ST22",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21-200",
+    "client": "200",
+    "programName": "SAPMS380",
+    "packageName": "SABP",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Enterprise System Administrator",
+      "approverId": "USR-ADMIN-01",
+      "timestamp": "2026-11-13T05:42:57.115Z",
+      "justification": "Proprietary transaction ST22 with 0 standard Fiori successor coverage. Custom RAP List Report required."
+    },
+    "cleanCoreJustification": "Proprietary transaction ST22 with 0 standard Fiori successor coverage. Custom RAP List Report required.",
+    "businessRequirements": {
+      "process": "General Core Processing",
+      "scenario": "Core Operations",
+      "criticality": "HIGH",
+      "requiredCapabilities": []
+    },
+    "identifiedGaps": [],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMS380",
+      "screenNumber": "0100",
+      "packageName": "SABP",
+      "softwareComponent": "SAP_BASIS"
+    },
+    "createdAt": "2026-11-13T05:42:57.115Z",
+    "updatedAt": "2026-11-13T05:42:57.115Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Enterprise System Administrator"
   }
 ]

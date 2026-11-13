@@ -109,9 +109,70 @@ export class PreviewManager {
       return statuses[index % statuses.length];
     }
 
-    // Dates
+    // Dates & Times
     if (field.type === 'abap.dats' || nameLower.includes('date')) {
-      return new Date(Date.now() + index * 86400000).toISOString().split('T')[0];
+      return new Date(Date.now() - (index - 1) * 86400000).toISOString().split('T')[0];
+    }
+    if (field.type === 'abap.tims' || nameLower.includes('time')) {
+      const hours = String((10 + index) % 24).padStart(2, '0');
+      const mins = String((index * 13) % 60).padStart(2, '0');
+      return `${hours}:${mins}:00`;
+    }
+
+    // Diagnostics & Basis (ST22 / Logs)
+    if (nameLower.includes('runtimeerror') || nameLower.includes('errorcode')) {
+      const errs = ['TSV_TNEW_PAGE_ALLOC_FAILED', 'CX_SY_OPEN_SQL_ERROR', 'TIME_OUT', 'DYNPRO_NOT_FOUND', 'MESSAGE_TYPE_X'];
+      return errs[index % errs.length];
+    }
+    if (nameLower.includes('exceptionclass')) {
+      const ex = ['CX_SY_SQL_ERROR', 'CX_SY_ARITHMETIC_OVERFLOW', 'CX_SY_REF_IS_INITIAL', 'CX_ROOT', 'CX_SY_NO_HANDLER'];
+      return ex[index % ex.length];
+    }
+    if (nameLower.includes('programname') || nameLower.includes('repid')) {
+      const progs = ['SAPMS380', 'SAPLMEGUI', 'SAPMV45A', 'SAPF110V', 'ZCUSTOM_BATCH_PRC'];
+      return progs[index % progs.length];
+    }
+    if (nameLower.includes('username') || nameLower.includes('uname')) {
+      const users = ['BCUSER', 'DEVELOPER01', 'SAP_BATCH', 'FIN_ANALYST', 'PURCH_LEAD'];
+      return users[index % users.length];
+    }
+    if (nameLower.includes('client') && field.length === 3) {
+      return '200';
+    }
+    if (nameLower.includes('servername') || nameLower.includes('server')) {
+      return `s21app0${(index % 2) + 1}_S21_00`;
+    }
+    if (nameLower.includes('shorttext') || nameLower.includes('errortext')) {
+      const texts = [
+        'Memory allocation error while fetching records',
+        'Open SQL statement threw an unexpected database exception',
+        'Maximum runtime of work process exceeded',
+        'Screen layout 0100 not found in program buffer',
+        'Critical runtime message type X triggered by SAP core'
+      ];
+      return texts[index % texts.length];
+    }
+
+    // Materials Management & Sales (MM & SD)
+    if (nameLower.includes('material') && !nameLower.includes('desc')) {
+      const mats = ['DXTR1000', 'EPAD1000', 'RAW_MAT_42', 'FG_PACK_01', 'CMP_MOTOR_99'];
+      return mats[index % mats.length];
+    }
+    if (nameLower.includes('materialdescription') || (nameLower.includes('description') && entity?.name?.toLowerCase().includes('item'))) {
+      const descs = ['Deluxe Touring Bicycle', 'Electronic Control Unit', 'Raw Casting Alloy', 'Protective Packaging Casing', 'Heavy Duty Stepper Motor'];
+      return descs[index % descs.length];
+    }
+
+    // Finance (FI)
+    if (nameLower.includes('glaccount') || nameLower.includes('hkont')) {
+      const gls = ['0000113100', '0000400000', '0000600000', '0000211000', '0000160000'];
+      return gls[index % gls.length];
+    }
+    if (nameLower.includes('debitcredit') || nameLower.includes('shkzg')) {
+      return index % 2 === 0 ? 'S' : 'H';
+    }
+    if (nameLower.includes('fiscalyear') || nameLower.includes('gjahr')) {
+      return '2026';
     }
 
     // Default string

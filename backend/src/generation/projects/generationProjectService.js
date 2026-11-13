@@ -18,6 +18,7 @@ import {
 import { defaultGenerationProjectStore } from './generationProjectStore.js';
 import { defaultAssessmentStore, LIFECYCLE_STATES } from '../../services/assessmentStore.js';
 import { defaultGenerationHandoffStore } from '../../services/generationHandoffStore.js';
+import { semanticArchetypeEngine } from '../datamodel/semanticArchetypeEngine.js';
 
 export class GenerationProjectService {
   constructor(options = {}) {
@@ -195,45 +196,17 @@ export class GenerationProjectService {
     const projectId = payload.projectId || `GEN-${sourceTCode}-${randSuffix}`;
 
     const cleanTcode = sourceTCode.replace(/[^A-Z0-9]/gi, '') || 'APP';
-    const rootEntityName = `Z_I_${cleanTcode}`;
 
-    // Pre-populate initial requirements from discovery facts
-    const initialRequirements = [
-      {
-        requirementId: `REQ-${cleanTcode}-001`,
-        title: `Modernize ${sourceTCode} (${assessment.description || 'Core Business Transaction'})`,
-        category: 'FUNCTIONAL',
-        priority: 'MUST_HAVE',
-        status: 'DRAFT',
-        sourceType: 'DISCOVERY_ASSESSMENT',
-        source: 'DISCOVERY_ASSESSMENT',
-        description: `Replace legacy SAP GUI transaction ${sourceTCode} with modern SAP Fiori Elements List Report and Object Page application.`,
-        acceptanceCriteria: [
-          `User can search and filter ${sourceTCode} records responsively.`,
-          `User can inspect record details with responsive facets on Object Page.`,
-          `Transactional processing handled via OData V4 service with draft capability.`
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        requirementId: `REQ-${cleanTcode}-002`,
-        title: 'Clean Core RAP Managed Architecture',
-        category: 'TECHNICAL',
-        priority: 'MUST_HAVE',
-        status: 'DRAFT',
-        sourceType: 'DISCOVERY_ASSESSMENT',
-        source: 'DISCOVERY_ASSESSMENT',
-        description: 'Implement ABAP RESTful Application Programming Model (RAP) Managed Scenario under Clean Core Tier 2 Cloud developer contract.',
-        acceptanceCriteria: [
-          'Root CDS view entity with standard audit fields (CreatedBy, CreatedAt, LastChangedAt).',
-          'Draft-enabled behavior definition with locking and early numbering.',
-          'Service definition and V4 service binding exposed for Fiori Elements.'
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
+    // Intelligently synthesize authentic enterprise domain archetype
+    const archetype = semanticArchetypeEngine.synthesizeArchetype({
+      tcode: sourceTCode,
+      description: assessment.description || payload.description || '',
+      businessArea: businessDomain || assessment.businessArea || '',
+      targetRelease
+    });
+
+    const rootEntityName = archetype.rootEntityName || `Z_I_${cleanTcode}`;
+    const initialRequirements = [...(archetype.initialRequirements || [])];
 
     if (Array.isArray(identifiedGaps)) {
       identifiedGaps.forEach((gap, idx) => {
@@ -243,7 +216,7 @@ export class GenerationProjectService {
           title: `Custom Requirement: ${gapTitle.slice(0, 60)}`,
           category: 'BUSINESS',
           priority: 'SHOULD_HAVE',
-          status: 'DRAFT',
+          status: 'CONFIRMED',
           sourceType: 'FIT_GAP_FINDING',
           source: 'FIT_GAP_FINDING',
           description: gapTitle,
@@ -256,42 +229,10 @@ export class GenerationProjectService {
       });
     }
 
-    // Pre-populate starter Clean Core data model
-    const starterDataModel = {
-      specVersion: 1,
-      rootEntity: rootEntityName,
-      entities: [
-        {
-          id: `ENT-${cleanTcode}-ROOT`,
-          name: rootEntityName,
-          description: assessment.description || `${sourceTCode} Header Entity`,
-          isRoot: true,
-          entityType: 'ROOT',
-          fields: [
-            { id: 'FLD-UUID', name: 'NodeUUID', abapType: 'UUID', isKey: true, isMandatory: true, semanticRole: 'IDENTIFIER', description: 'Technical Primary Key' },
-            { id: 'FLD-ID', name: `${cleanTcode}ID`, abapType: 'CHAR', length: 10, isKey: false, isMandatory: true, semanticRole: 'BUSINESS_KEY', description: 'Business Identifier' },
-            { id: 'FLD-DESC', name: 'Description', abapType: 'CHAR', length: 120, isKey: false, isMandatory: false, semanticRole: 'TEXT', description: 'Record Description' },
-            { id: 'FLD-STATUS', name: 'StatusCode', abapType: 'CHAR', length: 4, isKey: false, isMandatory: false, semanticRole: 'STATUS', description: 'Overall Status' },
-            { id: 'FLD-CRDAT', name: 'CreatedAt', abapType: 'DATS', isKey: false, isMandatory: false, semanticRole: 'CREATED_AT', description: 'Creation Date' },
-            { id: 'FLD-CRUSR', name: 'CreatedBy', abapType: 'CHAR', length: 12, isKey: false, isMandatory: false, semanticRole: 'CREATED_BY', description: 'Created By User' },
-            { id: 'FLD-CHGAT', name: 'LastChangedAt', abapType: 'TIMESTAMPL', isKey: false, isMandatory: false, semanticRole: 'LAST_CHANGED_AT', description: 'Last Changed Timestamp' }
-          ],
-          relationships: []
-        }
-      ],
-      relationships: [],
-      validationReport: {
-        isValid: true,
-        summary: { totalEntities: 1, totalFields: 7, totalRelationships: 0, errorCount: 0, warningCount: 0 },
-        issues: []
-      },
-      status: 'DRAFT_IN_PROGRESS'
-    };
-
-    // Pre-populate baseline architecture
+    const starterDataModel = archetype.starterDataModel;
     const starterArchitecture = {
-      specVersion: 1,
-      rapScenario: payload.architectureBaseline?.backendModel || handoffRecord?.architectureBaseline?.backendModel || 'RAP_MANAGED',
+      ...archetype.starterArchitecture,
+      rapScenario: payload.architectureBaseline?.backendModel || handoffRecord?.architectureBaseline?.backendModel || archetype.starterArchitecture.rapScenario || 'RAP_MANAGED',
       odataVersion: payload.architectureBaseline?.odataVersion || handoffRecord?.architectureBaseline?.odataVersion || 'ODATA_V4',
       uiPattern: payload.architectureBaseline?.uiPattern || handoffRecord?.architectureBaseline?.uiPattern || 'LIST_REPORT_OBJECT_PAGE',
       cleanCoreTier: payload.architectureBaseline?.cleanCoreTier || handoffRecord?.architectureBaseline?.cleanCoreTier || 'TIER_2_CLOUD_DEVELOPER',
@@ -379,6 +320,14 @@ export class GenerationProjectService {
 
     const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
     const projectId = payload.projectId || `GEN-STANDALONE-${randSuffix}`;
+    const tcode = payload.sourceTransactionCode ? payload.sourceTransactionCode.toUpperCase() : 'ZCUSTOM';
+
+    const archetype = semanticArchetypeEngine.synthesizeArchetype({
+      tcode,
+      description: payload.description || projectName,
+      businessArea: payload.businessDomain || 'Custom Application Development',
+      targetRelease: payload.targetRelease || 'SAP S/4HANA 2023 On-Premise'
+    });
 
     const projectPayload = {
       projectId,
@@ -393,6 +342,13 @@ export class GenerationProjectService {
       targetProduct: 'SAP S/4HANA',
       targetRelease: payload.targetRelease || 'SAP S/4HANA 2023 On-Premise',
       targetDeploymentModel: payload.targetDeploymentModel || TARGET_DEPLOYMENT_MODELS.ON_PREMISE,
+      requirementsSpec: {
+        specVersion: 1,
+        items: archetype.initialRequirements,
+        status: 'IN_PROGRESS'
+      },
+      dataModelSpec: archetype.starterDataModel,
+      architectureSpec: archetype.starterArchitecture,
       assessmentContext: {
         businessDomain: payload.businessDomain || 'Custom Application Development',
         programName: null,
