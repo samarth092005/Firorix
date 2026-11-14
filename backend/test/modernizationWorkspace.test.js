@@ -6,6 +6,7 @@ import os from 'node:os';
 import { createServer } from '../src/server.js';
 import { AssessmentStore, defaultAssessmentStore } from '../src/services/assessmentStore.js';
 import { GenerationHandoffStore } from '../src/services/generationHandoffStore.js';
+import { authService, DEFAULT_USERS, USER_ROLES } from '../src/services/authService.js';
 
 describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suite (16 Scenarios)', () => {
   let server;
@@ -14,6 +15,18 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
   let testHandoffStoragePath;
   let assessmentStore;
   let generationHandoffStore;
+
+  const architectUser = DEFAULT_USERS.find(u => u.role === USER_ROLES.LEAD_ARCHITECT) || {
+    id: 'USR-ARCH-01',
+    role: USER_ROLES.LEAD_ARCHITECT,
+    name: 'Lead Enterprise Architect',
+    scopes: ['BUILD_ARCHITECT_APPROVER']
+  };
+  const architectToken = authService.generateToken(architectUser);
+  const architectHeaders = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${architectToken}`
+  };
 
   const testAssessmentRecord = {
     id: 'ASM-MOD-TEST-001',
@@ -187,7 +200,7 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
 
     const res = await fetch(`${baseUrl}/api/v1/generation/handoff`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: architectHeaders,
       body: JSON.stringify(buildPayload)
     });
 
@@ -265,7 +278,7 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
   it('Scenario 7: Standard app exists and Build exception succeeds with justification and Architect sign-off', async () => {
     const res = await fetch(`${baseUrl}/api/v1/assessments/ASM-MOD-TEST-001/modernization-action`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: architectHeaders,
       body: JSON.stringify({
         actionType: 'BUILD_PROJECT',
         details: {
@@ -405,7 +418,7 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
 
     const res = await fetch(`${baseUrl}/api/v1/generation/handoff`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: architectHeaders,
       body: JSON.stringify(handoffPayload)
     });
 
@@ -421,7 +434,7 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
     // Create handoff first
     const createRes = await fetch(`${baseUrl}/api/v1/generation/handoff`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: architectHeaders,
       body: JSON.stringify({
         sourceAssessmentId: 'ASM-PROP-ZPAY-001',
         tcode: 'ZPAY_CUSTOM',

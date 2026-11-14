@@ -20,6 +20,8 @@
 import { btpDestinationAdapter, sanitizeErrorMessage } from './btpDestinationAdapter.js';
 import { sapGatewayMetadataAdapter } from './sapGatewayMetadataAdapter.js';
 import { sapTransactionDiscoveryAdapter } from './sapTransactionDiscoveryAdapter.js';
+import { SapSystemRepository } from '../infrastructure/db/repositories/sapSystemRepository.js';
+import { defaultSapConnectionHealthService, SapConnectionHealthService } from '../infrastructure/connectivity/sapConnectionHealthService.js';
 
 export const CONNECTIVITY_STATUSES = Object.freeze({
   CONNECTED: 'CONNECTED',
@@ -146,19 +148,73 @@ export class SystemRegistry {
     this.btpAdapter = options.btpAdapter || btpDestinationAdapter;
     this.gatewayAdapter = options.gatewayAdapter || sapGatewayMetadataAdapter;
     this.discoveryAdapter = options.discoveryAdapter || sapTransactionDiscoveryAdapter;
+    this.healthService = options.healthService || defaultSapConnectionHealthService;
+
+    const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || '').toLowerCase();
+    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres');
+    this.repository = options.repository || (this.useDatabase ? new SapSystemRepository() : null);
+    this.defaultTenantId = options.tenantId || 'DEFAULT-TENANT-S21';
   }
 
   /**
    * Retrieves all registered SAP system profiles.
    */
-  listSystems() {
+  async listSystems(tenantId = this.defaultTenantId) {
+    if (this.repository) {
+      try {
+        const dbList = await this.repository.list({}, tenantId);
+        if (dbList && dbList.length > 0) {
+          // Merge with memory map to preserve rich UI metadata
+          return dbList.map(dbItem => {
+            const memItem = this.systems.get(dbItem.systemId) || {};
+            return {
+              ...memItem,
+              ...dbItem,
+              connectivityStatus: dbItem.connectionState || dbItem.connectivityStatus || memItem.connectivityStatus
+            };
+          });
+        }
+      } catch (err) {
+        console.warn('[SystemRegistry] Database query error, falling back to memory:', err.message);
+      }
+    }
+    return Array.from(this.systems.values());
+  }
+
+  /**
+   * Synchronous list for backwards compatibility
+   */
+  listSystemsSync() {
     return Array.from(this.systems.values());
   }
 
   /**
    * Retrieves a specific SAP system profile by ID.
    */
-  getSystem(systemId) {
+  async getSystem(systemId, tenantId = this.defaultTenantId) {
+    if (!systemId) return null;
+    if (this.repository) {
+      try {
+        const dbItem = await this.repository.getById(systemId, tenantId);
+        if (dbItem) {
+          const memItem = this.systems.get(systemId) || {};
+          return {
+            ...memItem,
+            ...dbItem,
+            connectivityStatus: dbItem.connectionState || dbItem.connectivityStatus || memItem.connectivityStatus
+          };
+        }
+      } catch (err) {
+        console.warn('[SystemRegistry] Database get error, falling back to memory:', err.message);
+      }
+    }
+    return this.systems.get(systemId) || null;
+  }
+
+  /**
+   * Synchronous get for backwards compatibility
+   */
+  getSystemSync(systemId) {
     if (!systemId) return null;
     return this.systems.get(systemId) || null;
   }
@@ -166,38 +222,62 @@ export class SystemRegistry {
   /**
    * Registers or updates an SAP system profile.
    */
-  registerSystem(profile) {
-    if (!profile || !profile.systemId) {
+  async registerSystem(profile, tenantId = this.defaultTenantId) {
+    if (!profile || (!profile.systemId && !profile.system_id)) {
       throw new Error('System profile requires a non-empty systemId.');
     }
+    const systemId = String(profile.systemId || profile.system_id).trim();
     const sanitized = {
-      systemId: String(profile.systemId).trim(),
-      tenantId: profile.tenantId || 'DEFAULT-TENANT-S21',
-      displayName: String(profile.displayName || profile.systemId).trim(),
+      systemId,
+      tenantId: profile.tenantId || tenantId,
+      displayName: String(profile.displayName || profile.description || systemId).trim(),
+      description: String(profile.description || profile.displayName || `SAP S/4HANA ${systemId}`).trim(),
       environment: String(profile.environment || 'SANDBOX').toUpperCase(),
       product: String(profile.product || 'SAP S/4HANA').trim(),
-      deploymentEdition: String(profile.deploymentEdition || 'Private Edition').trim(),
-      release: String(profile.release || 'SAP S/4HANA 2023').trim(),
+      deploymentEdition: String(profile.deploymentEdition || profile.deployment_type || 'Private Edition').trim(),
+      deploymentType: String(profile.deploymentType || profile.deployment_type || 'Private Edition').trim(),
+      release: String(profile.release || 'SAP S/4HANA 2023 Private Edition').trim(),
       clientIdentifier: String(profile.clientIdentifier || profile.client || '200').trim(),
-      destinationName: String(profile.destinationName || profile.systemId).trim(),
-      gatewayCatalogService: profile.gatewayCatalogService || '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection',
-      adtDiscoveryEndpoint: profile.adtDiscoveryEndpoint || '/sap/bc/adt/discovery',
-      connectivityStatus: profile.connectivityStatus || CONNECTIVITY_STATUSES.UNKNOWN,
+      client: String(profile.client || profile.clientIdentifier || '200').trim(),
+      destinationName: String(profile.destinationName || profile.destination_name || systemId).trim(),
+      connectionMode: String(profile.connectionMode || profile.connection_mode || 'DIRECT_HTTP').toUpperCase(),
+      baseUrl: profile.baseUrl || profile.base_url || null,
+      gatewayCatalogService: profile.gatewayCatalogService || profile.gateway_catalog_path || '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection',
+      gatewayCatalogPath: profile.gatewayCatalogPath || profile.gateway_catalog_path || '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection',
+      adtDiscoveryEndpoint: profile.adtDiscoveryEndpoint || profile.adt_discovery_path || '/sap/bc/adt/discovery',
+      adtDiscoveryPath: profile.adtDiscoveryPath || profile.adt_discovery_path || '/sap/bc/adt/discovery',
+      authType: String(profile.authType || profile.auth_type || 'BASIC').toUpperCase(),
+      authSecretRef: profile.authSecretRef || profile.auth_secret_ref || null,
+      tlsConfig: profile.tlsConfig || profile.tls_config || { rejectUnauthorized: true },
+      isReadOnly: true, // Non-negotiable SAP safety directive
+      connectivityStatus: profile.connectivityStatus || profile.connection_state || CONNECTIVITY_STATUSES.UNKNOWN,
+      connectionState: profile.connectionState || profile.connectivityStatus || 'CONFIGURED',
       lastSuccessfulCheck: new Date().toISOString(),
       evidenceProvenance: profile.evidenceProvenance || EVIDENCE_PROVENANCE.USER_PROVIDED,
       configurationStatus: 'CONFIGURED',
       components: Array.isArray(profile.components) ? profile.components : ['S4CORE 108'],
       capabilities: Array.isArray(profile.capabilities) ? profile.capabilities : ['GATEWAY_CATALOG']
     };
+
     this.systems.set(sanitized.systemId, sanitized);
+
+    if (this.repository) {
+      try {
+        await this.repository.upsert(sanitized, sanitized.tenantId);
+      } catch (repoErr) {
+        console.warn('[SystemRegistry] Database upsert warning:', repoErr.message);
+      }
+    }
+
     return sanitized;
   }
 
   /**
    * Executes a controlled, read-only diagnostic check against a configured SAP system.
    */
-  async runDiagnostics(systemId) {
-    const system = this.getSystem(systemId);
+  async runDiagnostics(systemId, userContext = null) {
+    const tenantId = userContext?.tenantId || this.defaultTenantId;
+    const system = await this.getSystem(systemId, tenantId);
     if (!system) {
       return {
         success: false,
@@ -208,105 +288,129 @@ export class SystemRegistry {
     }
 
     const checkTimestamp = new Date().toISOString();
-    const checks = {
-      destinationResolution: { status: 'PENDING', details: '' },
-      authentication: { status: 'PENDING', details: '' },
-      networkReachability: { status: 'PENDING', details: '' },
-      cloudConnector: { status: 'PENDING', details: '' },
-      gatewayCatalog: { status: 'PENDING', details: '', serviceCount: 0 },
-      adtDiscovery: { status: 'PENDING', details: '', httpStatus: null, requiredAuthorizations: [] }
-    };
+    const startTime = Date.now();
 
-    // 1. Destination Configuration Check
-    const btpConfig = this.btpAdapter.validateConfiguration();
-    if (btpConfig.isValid) {
-      checks.destinationResolution = {
-        status: 'PASSED',
-        details: `Destination "${system.destinationName}" resolved via BTP destination service.`
+    // Execute through hardened SapConnectionHealthService
+    let healthReport;
+    if (system.mode === 'MOCK' || system.mode === 'DEMO' || process.env.Fiorify_DEMO_MODE === 'true') {
+      healthReport = {
+        success: true,
+        status: CONNECTIVITY_STATUSES.CONNECTED,
+        capabilities: {
+          DESTINATION_RESOLUTION: { tested: true, supported: true, status: 'VERIFIED', details: 'Mock destination resolved successfully' },
+          CLOUD_CONNECTOR_REACHABILITY: { tested: true, supported: true, status: 'VERIFIED', details: 'Mock network connection verified' },
+          AUTHENTICATION: { tested: true, supported: true, status: 'VERIFIED', details: 'Mock credentials validated' },
+          GATEWAY_CATALOG: { tested: true, supported: true, status: 'VERIFIED', details: 'Mock gateway catalog service verified' },
+          ADT_DISCOVERY: { tested: true, supported: true, status: 'VERIFIED', details: 'Mock ADT discovery verified' }
+        }
       };
     } else {
-      checks.destinationResolution = {
-        status: 'FAILED',
-        details: 'BTP destination service binding missing or unconfigured.'
-      };
-    }
-
-    // 2. Gateway Catalog Probe
-    let gatewayStatus = CONNECTIVITY_STATUSES.UNKNOWN;
-    try {
-      const catalogResult = await this.gatewayAdapter.getCatalog({ limit: 5 });
-      if (catalogResult.success) {
-        checks.networkReachability = { status: 'PASSED', details: 'Direct HTTP response from SAP Gateway host.' };
-        checks.authentication = { status: 'PASSED', details: 'Basic / Principal Propagation authentication accepted.' };
-        checks.cloudConnector = { status: 'PASSED', details: 'Virtual host mapping accessible.' };
-        checks.gatewayCatalog = {
-          status: 'PASSED',
-          details: `Gateway catalog service available (${catalogResult.totalCount || 1318} registered services).`,
-          serviceCount: catalogResult.totalCount || 1318
+      try {
+        healthReport = await this.healthService.runHealthCheck({
+          destinationName: system.destinationName || system.systemId,
+          connectionMode: system.connectionMode || (system.baseUrl ? 'DIRECT_HTTP' : 'BTP_DESTINATION'),
+          baseUrl: system.baseUrl,
+          sapClient: system.client,
+          gatewayCatalogPath: system.gatewayCatalogPath || system.gatewayCatalogService,
+          adtDiscoveryPath: system.adtDiscoveryPath || system.adtDiscoveryEndpoint,
+          release: system.release
+        });
+      } catch (healthErr) {
+        healthReport = {
+          success: false,
+          status: CONNECTIVITY_STATUSES.SERVICE_UNAVAILABLE,
+          capabilities: {},
+          errorMessage: sanitizeErrorMessage(healthErr.message)
         };
-        gatewayStatus = CONNECTIVITY_STATUSES.CONNECTED;
-      } else {
-        checks.gatewayCatalog = {
-          status: 'WARNING',
-          details: catalogResult.errorMessage || 'Live Gateway catalog unavailable. Served from cache.'
-        };
-        gatewayStatus = CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY;
       }
-    } catch (err) {
-      checks.networkReachability = {
-        status: 'WARNING',
-        details: `Network reachability check failed: ${sanitizeErrorMessage(err.message)}`
-      };
-      gatewayStatus = CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY;
     }
 
-    // 3. ADT Interface Probing (Inspect HTTP 403 authorization blocker)
-    try {
-      const adtProbe = await this.discoveryAdapter.probeAdtInterface();
-      checks.adtDiscovery = {
-        status: adtProbe.accessible ? 'PASSED' : (adtProbe.httpStatus === 403 ? 'BLOCKED_BY_AUTHORIZATION' : 'WARNING'),
-        httpStatus: adtProbe.httpStatus || 403,
-        details: adtProbe.message || 'ADT probing completed.',
-        requiredAuthorizations: adtProbe.requiredAuthorizations || [
-          'PFCG Authorization Object: S_ADT_RES (Activity 03: Display)',
-          'PFCG Authorization Object: S_DEVELOP (Activity 03: Display for PROG, TRAN, DEVC)'
-        ]
-      };
-    } catch (err) {
-      checks.adtDiscovery = {
-        status: 'WARNING',
-        httpStatus: 502,
-        details: sanitizeErrorMessage(err.message),
-        requiredAuthorizations: []
-      };
-    }
-
-    // Determine Overall Connectivity Status
-    let overallStatus = CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY;
-    if (checks.destinationResolution.status === 'PASSED' && checks.gatewayCatalog.status === 'PASSED') {
-      overallStatus = checks.adtDiscovery.status === 'PASSED'
-        ? CONNECTIVITY_STATUSES.CONNECTED
-        : CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY;
-    }
+    const responseTimeMs = Date.now() - startTime;
+    const overallStatus = healthReport.status || CONNECTIVITY_STATUSES.UNKNOWN;
+    const checks = {
+      destinationResolution: healthReport.capabilities?.DESTINATION_RESOLUTION || { status: 'PENDING' },
+      authentication: healthReport.capabilities?.AUTHENTICATION || { status: 'PENDING' },
+      networkReachability: healthReport.capabilities?.CLOUD_CONNECTOR_REACHABILITY || { status: 'PENDING' },
+      cloudConnector: healthReport.capabilities?.CLOUD_CONNECTOR_REACHABILITY || { status: 'PENDING' },
+      gatewayCatalog: healthReport.capabilities?.GATEWAY_CATALOG || { status: 'PENDING' },
+      adtDiscovery: healthReport.capabilities?.ADT_DISCOVERY || { status: 'PENDING' }
+    };
 
     // Update system record in memory
     system.connectivityStatus = overallStatus;
+    system.connectionState = overallStatus;
     system.lastSuccessfulCheck = checkTimestamp;
+    system.lastDiagnosticAt = checkTimestamp;
+    if (healthReport.success) {
+      system.lastSuccessfulConnectionAt = checkTimestamp;
+    }
 
-    return {
-      success: true,
+    const diagnosticResult = {
+      success: healthReport.success || overallStatus === CONNECTIVITY_STATUSES.CONNECTED || overallStatus === CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY,
       systemId: system.systemId,
       displayName: system.displayName,
       product: system.product,
       release: system.release,
       environment: system.environment,
+      connectionMode: system.connectionMode || 'DIRECT_HTTP',
       connectivityStatus: overallStatus,
+      connectionState: overallStatus,
       timestamp: checkTimestamp,
+      responseTimeMs,
       checks,
-      remediationGuidance: checks.adtDiscovery.status === 'BLOCKED_BY_AUTHORIZATION'
-        ? 'SAP Gateway is accessible, but ADT repository discovery is restricted. Request Basis administrator to grant S_ADT_RES display authorization to service user.'
-        : 'System is fully operational for transaction discovery and Fiori matching.'
+      remediationGuidance: checks.adtDiscovery?.status === 'AUTHORIZATION_FAILED' || checks.adtDiscovery?.status === 'BLOCKED_BY_AUTHORIZATION'
+        ? 'SAP Gateway is accessible, but ADT repository discovery is restricted. Request Basis administrator to grant S_ADT_RES display authorization.'
+        : (overallStatus === CONNECTIVITY_STATUSES.CONNECTED ? 'System is fully operational for read-only transaction discovery and Fiori catalogue matching.' : 'Review SAP connection parameters and network reachability.')
     };
+
+    // Persist to PostgreSQL if repository is active
+    if (this.repository) {
+      try {
+        await this.repository.updateDiagnostics(system.systemId, diagnosticResult, tenantId);
+        await this.repository.recordDiagnosticHistory({
+          systemProfileId: system.systemId,
+          connectionMode: system.connectionMode || 'DIRECT_HTTP',
+          connectionState: overallStatus,
+          gatewayStatus: checks.gatewayCatalog?.status || 'UNKNOWN',
+          adtStatus: checks.adtDiscovery?.status || 'UNKNOWN',
+          responseTimeMs,
+          diagnosticDetails: diagnosticResult,
+          errorMessage: healthReport.errorMessage || null,
+          executedBy: userContext?.id || 'SYSTEM'
+        }, tenantId);
+      } catch (persistErr) {
+        console.warn('[SystemRegistry] Diagnostic persistence error:', persistErr.message);
+      }
+    }
+
+    return diagnosticResult;
+  }
+
+  /**
+   * Retrieves diagnostic history for a system profile.
+   */
+  async getDiagnosticHistory(systemId, tenantId = this.defaultTenantId, limit = 20) {
+    if (this.repository) {
+      return await this.repository.getDiagnosticHistory(systemId, tenantId, limit);
+    }
+    return [];
+  }
+
+  /**
+   * Inspects OData $metadata for an allowlisted service endpoint
+   */
+  async inspectGatewayMetadata(systemId, servicePath, tenantId = this.defaultTenantId) {
+    const system = await this.getSystem(systemId, tenantId);
+    if (!system) {
+      return { success: false, statusCode: 'NOT_FOUND', errorMessage: `System "${systemId}" not found.` };
+    }
+
+    return await this.healthService.inspectGatewayMetadata(servicePath, {
+      destinationName: system.destinationName || system.systemId,
+      connectionMode: system.connectionMode || (system.baseUrl ? 'DIRECT_HTTP' : 'BTP_DESTINATION'),
+      baseUrl: system.baseUrl,
+      sapClient: system.client
+    });
   }
 }
 

@@ -432,6 +432,25 @@ class SystemHealthService implements ISystemHealthService {
     const testedAt = new Date().toISOString().replace('T', ' ').substring(0, 19);
 
     try {
+      // 0. Attempt backend system diagnostics API first
+      try {
+        const diagRes = await apiClient.runSystemDiagnostics(systemId);
+        if (diagRes && diagRes.connectivityStatus) {
+          const isSuccess = diagRes.connectivityStatus === 'CONNECTED' || diagRes.connectivityStatus === 'PARTIAL_CONNECTIVITY';
+          if (isSuccess) {
+            return {
+              success: true,
+              connectionState: 'CONNECTED',
+              message: `[${diagRes.connectionMode || 'DIRECT_HTTP'}] ${diagRes.remediationGuidance || 'Diagnostics completed.'}`,
+              testedAt,
+              details: `Gateway: ${diagRes.checks?.gatewayCatalog?.status || 'UNKNOWN'} | ADT: ${diagRes.checks?.adtDiscovery?.status || 'UNKNOWN'} | Roundtrip: ${diagRes.responseTimeMs || 0}ms`
+            };
+          }
+        }
+      } catch {
+        // Fall back to standard health check below
+      }
+
       // 1. Verify backend health first
       const health = await apiClient.getHealth();
       if (!health || health.status !== 'UP') {

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { GenerationProject, PreviewSessionInfo, PreviewRequestLog, StudioInternalView, GeneratedArtifact } from '../types';
 import { defaultFrontendGenerationProjectService } from '../services/generationProjectService';
+import '../GenerationStudio.css';
 
 interface PreviewValidationViewProps {
   project: GenerationProject;
@@ -532,141 +533,115 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
       {activePillarTab === 'PREVIEW' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Top Banner: Local Preview Status & Controls */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: '8px',
-              padding: '16px 20px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Top Banner: Local Preview Status & Controls */}
+          <div className="preview-banner-card">
+            <div className="preview-banner-info">
               <div
+                className="preview-banner-icon"
                 style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '8px',
                   backgroundColor: isRunning ? '#ECFDF5' : '#F1F5F9',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   color: isRunning ? '#10B981' : '#64748B'
                 }}
               >
                 {isRunning ? <Activity size={24} /> : <Server size={24} />}
               </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#0F172A' }}>
+              <div className="preview-banner-content">
+                <div className="preview-banner-title-row">
+                  <h2 className="preview-banner-title">
                     Local Fiori Elements Preview (Mock OData V4)
                   </h2>
                   <span
+                    className="preview-banner-badge"
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '5px',
-                      padding: '3px 10px',
-                      borderRadius: '12px',
-                      fontSize: '11px',
-                      fontWeight: 700,
                       backgroundColor: isRunning ? '#DEF7EC' : '#F3F4F6',
-                      color: isRunning ? '#03543F' : '#4B5563',
-                      textTransform: 'uppercase'
+                      color: isRunning ? '#03543F' : '#4B5563'
                     }}
                   >
                     <span
+                      className="preview-banner-badge-dot"
                       style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
                         backgroundColor: isRunning ? '#10B981' : '#9CA3AF'
                       }}
                     />
-                    {isRunning ? `RUNNING on Port ${session?.port}` : 'STOPPED'}
+                    {isRunning ? `RUNNING on Port ${session?.port || 4050}` : 'STOPPED'}
                   </span>
                 </div>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
+                <p className="preview-banner-desc">
                   In-process Node.js HTTP server serving synthesized Fiori Elements manifest, XML views, and mock OData V4 transactions.
                 </p>
               </div>
             </div>
 
             {/* Action Controls */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="preview-banner-actions">
               {isRunning ? (
                 <>
                   <button
-                    className="fiori-btn-secondary"
+                    type="button"
+                    className="preview-action-btn"
                     onClick={handleRestart}
                     disabled={loading}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
                     title="Restart Mock Server"
                   >
-                    <RotateCw size={14} /> Restart
+                    <RotateCw size={14} />
+                    <span>Restart</span>
                   </button>
                   <button
-                    className="fiori-btn-secondary"
+                    type="button"
+                    className="preview-action-btn"
                     onClick={handleResetData}
                     disabled={loading}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
                     title="Reset synthetic data to baseline"
                   >
-                    <RefreshCw size={14} /> Reset Data
+                    <RefreshCw size={14} />
+                    <span>Reset Data</span>
                   </button>
                   <button
-                    className="fiori-btn-secondary"
+                    type="button"
+                    className="preview-action-btn"
                     onClick={() => window.open(session?.previewUrl, '_blank')}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}
                     title="Open in new browser tab"
                   >
-                    <ExternalLink size={14} /> Open Tab
+                    <ExternalLink size={14} />
+                    <span>Open Tab</span>
                   </button>
                   <button
-                    className="fiori-btn-secondary"
+                    type="button"
+                    className="preview-action-btn preview-action-btn-danger"
                     onClick={handleStop}
                     disabled={loading}
-                    style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: '#DC2626', borderColor: '#FCA5A5' }}
+                    title="Stop Mock Server"
                   >
-                    <Square size={14} /> Stop Preview
+                    <Square size={13} fill="#DC2626" />
+                    <span>Stop Preview</span>
                   </button>
                 </>
               ) : (
                 <button
-                  className="fiori-btn-primary"
+                  type="button"
+                  className="preview-action-btn preview-action-btn-primary"
                   onClick={handleStart}
                   disabled={loading}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', backgroundColor: '#0066FF' }}
                 >
-                  <Play size={14} /> Launch Local Preview
+                  <Play size={14} />
+                  <span>Launch Local Preview</span>
                 </button>
               )}
 
               {onNavigateView && (
-                <button
-                  type="button"
-                  onClick={() => onNavigateView('review-export')}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '8px 14px',
-                    backgroundColor: '#10B981',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#FFFFFF',
-                    cursor: 'pointer'
-                  }}
-                  title="Proceed to export packaging and governance certificate"
-                >
-                  <span>Next: Review &amp; Export</span>
-                  <ArrowRight size={14} />
-                </button>
+                <>
+                  <div className="preview-divider" />
+                  <button
+                    type="button"
+                    className="preview-next-btn"
+                    onClick={() => onNavigateView('review-export')}
+                    title="Proceed to export packaging and governance certificate"
+                    style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+                  >
+                    <span style={{ whiteSpace: 'nowrap' }}>Next: Review &amp; Export</span>
+                    <ArrowRight size={14} />
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -695,27 +670,9 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Watermark Security Notice */}
               <div
-                style={{
-                  padding: '10px 16px',
-                  backgroundColor: '#FFFBEB',
-                  border: '1px solid #FDE68A',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  fontSize: '12px',
-                  color: '#92400E'
-                }}
+
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ShieldCheck size={16} color="#B45309" />
-                  <span>
-                    <strong>Interactive Sandbox:</strong> Running against synthetic OData V4 provider. Zero live SAP S/4HANA core write operations executed.
-                  </span>
-                </div>
-                <span style={{ fontWeight: 600, color: '#B45309', padding: '2px 8px', borderRadius: '4px', backgroundColor: '#FEF3C7' }}>
-                  LOCAL SANDBOX
-                </span>
+
               </div>
 
               {/* Embedded WebApp Frame */}

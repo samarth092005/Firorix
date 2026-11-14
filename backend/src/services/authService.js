@@ -269,7 +269,10 @@ export class AuthService {
    * Generate signed token (RFC 7519 standard JWT)
    */
   generateToken(user, options = {}) {
-    const tenantId = user.tenantId || options.tenantId || 'DEFAULT-TENANT-S21';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const tenantId = user.tenantId !== undefined
+      ? user.tenantId
+      : (options.tenantId !== undefined ? options.tenantId : (isProduction ? null : 'DEFAULT-TENANT-S21'));
     const payload = {
       id: user.id || user.userId,
       email: user.email,
@@ -341,9 +344,10 @@ export class AuthService {
         if (payload.exp && Date.now() > payload.exp) {
           return null;
         }
+        const isProduction = process.env.NODE_ENV === 'production';
         return {
           ...payload,
-          tenantId: payload.tenantId || 'DEFAULT-TENANT-S21',
+          tenantId: payload.tenantId || (isProduction ? null : 'DEFAULT-TENANT-S21'),
           scopes: payload.scopes || ROLE_PERMISSIONS[payload.role] || []
         };
       } catch {
@@ -364,9 +368,10 @@ export class AuthService {
     }
 
     const payload = result.payload;
+    const isProduction = process.env.NODE_ENV === 'production';
     return {
       ...payload,
-      tenantId: payload.tenantId || 'DEFAULT-TENANT-S21',
+      tenantId: payload.tenantId || (isProduction ? null : 'DEFAULT-TENANT-S21'),
       scopes: payload.scopes || ROLE_PERMISSIONS[payload.role] || []
     };
   }

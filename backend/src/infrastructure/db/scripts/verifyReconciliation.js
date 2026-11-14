@@ -5,6 +5,7 @@ import AssessmentRepository from '../repositories/assessmentRepository.js';
 import CatalogueRepository from '../repositories/catalogueRepository.js';
 import TransactionMasterRepository from '../repositories/transactionMasterRepository.js';
 import GenerationProjectRepository from '../repositories/generationProjectRepository.js';
+import GenerationHandoffRepository from '../repositories/generationHandoffRepository.js';
 
 import { resolveDataDir } from './createPreMigrationBackup.js';
 
@@ -16,6 +17,7 @@ export async function verifyReconciliation(options = {}) {
   const catalogueRepo = new CatalogueRepository();
   const txMasterRepo = new TransactionMasterRepository();
   const genProjectRepo = new GenerationProjectRepository();
+  const handoffRepo = new GenerationHandoffRepository();
 
   const reconciliation = {
     timestamp: new Date().toISOString(),
@@ -115,6 +117,22 @@ export async function verifyReconciliation(options = {}) {
       sourceCount: projectDirs.length,
       dbCount: dbProjects.length,
       matches: genMatches
+    };
+  }
+
+  // 5. Generation Handoffs Verification
+  const hndPath = path.join(dataDir, 'generationHandoffs.json');
+  if (fs.existsSync(hndPath)) {
+    const rawHandoffs = JSON.parse(fs.readFileSync(hndPath, 'utf8'));
+    const dbHandoffs = await handoffRepo.listHandoffs({}, tenantId);
+
+    const hndMatches = rawHandoffs.length === dbHandoffs.length;
+    if (!hndMatches) reconciliation.status = 'FAIL';
+
+    reconciliation.stores.generationHandoffs = {
+      sourceCount: rawHandoffs.length,
+      dbCount: dbHandoffs.length,
+      matches: hndMatches
     };
   }
 

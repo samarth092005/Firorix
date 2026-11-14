@@ -124,6 +124,9 @@ export interface CatalogueAppRecord {
   bspApplicationUrl?: string;
   semanticObject?: string;
   semanticAction?: string;
+  compatibilityMatrix?: Record<string, any>;
+  supportedCapabilities?: string[];
+  deploymentType?: string;
   leadingTransactionCodes?: string[];
   documentationUrl?: string;
   provenance: string;
@@ -749,6 +752,35 @@ export class ApiClient {
   }
 
   /**
+   * POST /api/v1/systems/:id/diagnostics
+   */
+  public async runSystemDiagnostics(systemId: string, options?: ApiRequestOptions): Promise<any> {
+    return this.post<any>(`/systems/${encodeURIComponent(systemId)}/diagnostics`, {}, options);
+  }
+
+  /**
+   * GET /api/v1/systems/:id/diagnostics/history
+   */
+  public async getSystemDiagnosticHistory(systemId: string, options?: ApiRequestOptions): Promise<any> {
+    return this.get<any>(`/systems/${encodeURIComponent(systemId)}/diagnostics/history`, options);
+  }
+
+  /**
+   * GET /api/v1/systems/:id/gateway/metadata
+   */
+  public async inspectGatewayMetadata(systemId: string, service?: string, options?: ApiRequestOptions): Promise<any> {
+    const params = service ? { service } : undefined;
+    return this.get<any>(`/systems/${encodeURIComponent(systemId)}/gateway/metadata`, { ...options, params });
+  }
+
+  /**
+   * GET /api/v1/systems/:id/adt/reachability
+   */
+  public async checkAdtReachability(systemId: string, options?: ApiRequestOptions): Promise<any> {
+    return this.get<any>(`/systems/${encodeURIComponent(systemId)}/adt/reachability`, options);
+  }
+
+  /**
    * Health status
    * GET /api/v1/health
    */
@@ -889,6 +921,102 @@ export class ApiClient {
     options?: ApiRequestOptions
   ): Promise<UnifiedDiscoveryMatchResult> {
     return this.post<UnifiedDiscoveryMatchResult>('/discovery/mcp-assisted', params, options);
+  }
+
+  // ==========================================
+  // S4 Discovery Engine Methods
+  // ==========================================
+
+  /**
+   * Execute batch transaction discovery on SAP system profile
+   * POST /api/v1/discovery/executions
+   */
+  public async triggerDiscoveryExecution(
+    params: {
+      systemProfileId: string;
+      scope?: 'ALL' | 'STANDARD' | 'CUSTOM' | 'PACKAGES';
+      packages?: string[];
+      initiatedBy?: string;
+    },
+    options?: ApiRequestOptions
+  ): Promise<any> {
+    return this.post<any>('/discovery/executions', params, options);
+  }
+
+  /**
+   * List historical transaction discovery executions
+   * GET /api/v1/discovery/executions
+   */
+  public async getDiscoveryExecutions(
+    params?: { systemProfileId?: string; limit?: number; offset?: number },
+    options?: ApiRequestOptions
+  ): Promise<any> {
+    const q = new URLSearchParams();
+    if (params?.systemProfileId) q.append('systemProfileId', params.systemProfileId);
+    if (params?.limit) q.append('limit', String(params.limit));
+    if (params?.offset) q.append('offset', String(params.offset));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.get<any>(`/discovery/executions${qs}`, options);
+  }
+
+  /**
+   * Get single discovery execution detail
+   * GET /api/v1/discovery/executions/:id
+   */
+  public async getDiscoveryExecutionById(
+    id: string,
+    options?: ApiRequestOptions
+  ): Promise<any> {
+    return this.get<any>(`/discovery/executions/${encodeURIComponent(id)}`, options);
+  }
+
+  /**
+   * List discovered transactions with technical object summaries
+   * GET /api/v1/discovery/transactions
+   */
+  public async getDiscoveredTransactions(
+    params?: {
+      search?: string;
+      category?: string;
+      hasFioriMatch?: boolean;
+      systemProfileId?: string;
+      limit?: number;
+      offset?: number;
+    },
+    options?: ApiRequestOptions
+  ): Promise<any> {
+    const q = new URLSearchParams();
+    if (params?.search) q.append('search', params.search);
+    if (params?.category) q.append('category', params.category);
+    if (params?.hasFioriMatch !== undefined) q.append('hasFioriMatch', String(params.hasFioriMatch));
+    if (params?.systemProfileId) q.append('systemProfileId', params.systemProfileId);
+    if (params?.limit) q.append('limit', String(params.limit));
+    if (params?.offset) q.append('offset', String(params.offset));
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.get<any>(`/discovery/transactions${qs}`, options);
+  }
+
+  /**
+   * Get single discovered transaction details and technical objects
+   * GET /api/v1/discovery/transactions/:tcode
+   */
+  public async getDiscoveredTransactionByTcode(
+    tcode: string,
+    options?: ApiRequestOptions
+  ): Promise<any> {
+    return this.get<any>(`/discovery/transactions/${encodeURIComponent(tcode)}`, options);
+  }
+
+  /**
+   * Compare two discovery snapshots
+   * GET /api/v1/discovery/compare
+   */
+  public async compareDiscoveryExecutions(
+    params: { baseExecutionId: string; targetExecutionId: string },
+    options?: ApiRequestOptions
+  ): Promise<any> {
+    const qs = `?baseExecutionId=${encodeURIComponent(params.baseExecutionId)}&targetExecutionId=${encodeURIComponent(params.targetExecutionId)}`;
+    return this.get<any>(`/discovery/compare${qs}`, options);
   }
 
   // ==========================================

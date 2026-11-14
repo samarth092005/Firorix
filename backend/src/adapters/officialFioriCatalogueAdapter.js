@@ -134,6 +134,19 @@ export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_L
     }
   }
 
+  const semanticObject = rawApp.SemanticObject || rawApp.semanticObject || (rawApp.ApplicationComponent ? rawApp.ApplicationComponent.replace(/[^A-Za-z0-9_]/g, '_') : null);
+  const semanticAction = rawApp.SemanticAction || rawApp.semanticAction || 'manage';
+  const compatibilityMatrix = rawApp.compatibilityMatrix || {
+    onPremise: true,
+    privateCloud: true,
+    publicCloud: rawApp.AvailableForPublicCloud === 'true' || false,
+    supportedReleases: [productVersion]
+  };
+  const supportedCapabilities = rawApp.supportedCapabilities || (
+    appType.toLowerCase().includes('analytic') ? ['ANALYTICS', 'REPORTING'] : ['TRANSACTIONAL', 'DATA_ENTRY']
+  );
+  const deploymentType = rawApp.deploymentType || 'ON_PREMISE';
+
   return {
     appId,
     appName,
@@ -151,6 +164,11 @@ export function normalizeCatalogueApp(rawApp, provenance = 'OFFICIAL_CATALOGUE_L
     odataServices,
     sapui5Component,
     leadingTransactionCodes: [...new Set(leadingTransactionCodes)],
+    semanticObject,
+    semanticAction,
+    compatibilityMatrix,
+    supportedCapabilities,
+    deploymentType,
     bspApplicationUrl: rawApp.BSPApplicationURL || undefined,
     documentationUrl: `https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('${encodeURIComponent(appId)}')/`,
     provenance,
@@ -454,6 +472,9 @@ export class OfficialFioriCatalogueAdapter {
       uiTechnology = '',
       odataService = '',
       appType = '',
+      semanticObject = '',
+      semanticAction = '',
+      deploymentType = '',
       limit = 20,
       page = 1,
       pageSize = undefined,
@@ -637,6 +658,15 @@ export class OfficialFioriCatalogueAdapter {
       finalApps = finalApps.filter((a) =>
         (a.odataServices || []).some((s) => s.toUpperCase().includes(odataService.toUpperCase()))
       );
+    }
+    if (semanticObject) {
+      finalApps = finalApps.filter((a) => (a.semanticObject || '').toUpperCase().includes(semanticObject.toUpperCase()));
+    }
+    if (semanticAction) {
+      finalApps = finalApps.filter((a) => (a.semanticAction || '').toUpperCase().includes(semanticAction.toUpperCase()));
+    }
+    if (deploymentType) {
+      finalApps = finalApps.filter((a) => (a.deploymentType || '').toUpperCase().includes(deploymentType.toUpperCase()));
     }
 
     const pageNum = Math.max(1, Number(page) || 1);

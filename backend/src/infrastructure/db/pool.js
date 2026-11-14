@@ -29,7 +29,8 @@ export class DatabasePool {
       config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : ((process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true') ? 54334 : 5432));
       config.user = customConfig.user || process.env.PGUSER || 'postgres';
       config.password = customConfig.password || process.env.PGPASSWORD || 'password';
-      config.database = customConfig.database || process.env.PGDATABASE || ((process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true') ? 'postgres' : 'fiorify');
+      const defaultDb = process.env.NODE_ENV === 'test' ? 'fiorify_test' : 'fiorify';
+      config.database = customConfig.database || process.env.PGDATABASE || defaultDb;
     }
 
     // Attempt direct connection to configured PostgreSQL
@@ -164,7 +165,7 @@ export class DatabasePool {
     const client = await pool.connect();
     try {
       await client.query('BEGIN;');
-      await client.query('SET LOCAL app.current_tenant = $1;', [tenantId]);
+      await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
       const result = await fn(client);
       await client.query('COMMIT;');
       return result;

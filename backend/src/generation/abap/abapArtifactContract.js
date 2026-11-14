@@ -46,7 +46,8 @@ export function createAbapArtifact({
   dependencies = [],
   limitations = [],
   version = 1,
-  manualEditStatus = 'ORIGINAL'
+  manualEditStatus = 'ORIGINAL',
+  ...rest
 }) {
   const generatedAt = new Date().toISOString();
   const checksum = computeSha256(content);
@@ -70,6 +71,7 @@ export function createAbapArtifact({
     validationStatus: 'PENDING_VALIDATION',
     manualEditStatus,
     dependencies,
-    limitations
+    limitations,
+    ...rest
   };
 }

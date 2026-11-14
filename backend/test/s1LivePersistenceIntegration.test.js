@@ -7,22 +7,26 @@ import { AssessmentStore } from '../src/services/assessmentStore.js';
 import { GenerationProjectStore } from '../src/generation/projects/generationProjectStore.js';
 import { AssessmentRepository } from '../src/infrastructure/db/repositories/assessmentRepository.js';
 import { GenerationProjectRepository } from '../src/infrastructure/db/repositories/generationProjectRepository.js';
+import { authService, DEFAULT_USERS, USER_ROLES } from '../src/services/authService.js';
 
 process.env.Fiorify_ADMIN_SECRET = 'test-s1-admin-secret-2026';
 
 function makeRequest(server, options, payload = null) {
   return new Promise((resolve, reject) => {
     const addr = server.address();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+    if (!headers['Authorization'] && !headers['authorization']) {
+      headers['X-Fiorify-Admin-Secret'] = 'test-s1-admin-secret-2026';
+    }
     const reqOptions = {
       hostname: '127.0.0.1',
       port: addr.port,
       path: options.path,
       method: options.method || 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Fiorify-Admin-Secret': 'test-s1-admin-secret-2026',
-        ...(options.headers || {})
-      }
+      headers
     };
 
     const req = http.request(reqOptions, (res) => {
@@ -146,9 +150,27 @@ test('Fiorify S1.4 — Live Persistence HTTP API Integration Tests (PostgreSQL)'
     assert.equal(subRes.status, 200, `Submit failed: ${subRes.raw}`);
     assert.equal(subRes.body.assessment.lifecycleStatus, 'PENDING_REVIEW');
 
+    const baseArchitect = DEFAULT_USERS.find(u => u.role === USER_ROLES.LEAD_ARCHITECT) || {
+      id: 'USR-ARCH-01',
+      role: USER_ROLES.LEAD_ARCHITECT,
+      name: 'Lead Enterprise Architect',
+      scopes: ['BUILD_ARCHITECT_APPROVER']
+    };
+    const architectUser = {
+      ...baseArchitect,
+      tenantId: testTenant
+    };
+    const architectToken = authService.generateToken(architectUser);
+
     const appRes = await makeRequest(
       server,
-      { method: 'POST', path: `/api/v1/assessments/${testAssessmentId}/approve` },
+      {
+        method: 'POST',
+        path: `/api/v1/assessments/${testAssessmentId}/approve`,
+        headers: {
+          'Authorization': `Bearer ${architectToken}`
+        }
+      },
       { comment: 'Approved for modernization project', isOverride: true }
     );
     assert.equal(appRes.status, 200, `Approve failed: ${appRes.raw}`);

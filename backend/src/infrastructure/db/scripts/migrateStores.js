@@ -7,6 +7,7 @@ import AssessmentRepository from '../repositories/assessmentRepository.js';
 import CatalogueRepository from '../repositories/catalogueRepository.js';
 import TransactionMasterRepository from '../repositories/transactionMasterRepository.js';
 import GenerationProjectRepository from '../repositories/generationProjectRepository.js';
+import GenerationHandoffRepository from '../repositories/generationHandoffRepository.js';
 import { createPreMigrationBackup, resolveDataDir } from './createPreMigrationBackup.js';
 
 export async function migrateAllStores(options = {}) {
@@ -38,6 +39,7 @@ export async function migrateAllStores(options = {}) {
     transactionMaster: { sourceCount: 0, imported: 0, errors: [] },
     assessments: { sourceCount: 0, imported: 0, quarantined: 0, errors: [] },
     generationProjects: { sourceCount: 0, imported: 0, quarantined: 0, errors: [] },
+    generationHandoffs: { sourceCount: 0, imported: 0, quarantined: 0, errors: [] },
     quarantine: []
   };
 
@@ -150,6 +152,36 @@ export async function migrateAllStores(options = {}) {
         report.generationProjects.imported++;
       } catch (err) {
         report.generationProjects.errors.push({ id: dir, error: err.message });
+      }
+    }
+  }
+
+  // 8. Ingest Generation Handoffs
+  const handoffRepo = new GenerationHandoffRepository();
+  const hndPath = path.join(dataDir, 'generationHandoffs.json');
+
+  if (fs.existsSync(hndPath)) {
+    const hndRaw = fs.readFileSync(hndPath, 'utf8');
+    const handoffs = JSON.parse(hndRaw);
+    report.generationHandoffs.sourceCount = handoffs.length;
+
+    for (const hnd of handoffs) {
+      try {
+        if (!hnd.handoffId || !hnd.tcode) {
+          report.generationHandoffs.quarantined++;
+          report.quarantine.push({
+            type: 'GENERATION_HANDOFF',
+            id: hnd.handoffId || 'UNKNOWN',
+            reason: 'Missing handoff ID or T-Code',
+            payload: hnd
+          });
+          continue;
+        }
+
+        await handoffRepo.createHandoff(hnd, tenantId);
+        report.generationHandoffs.imported++;
+      } catch (err) {
+        report.generationHandoffs.errors.push({ id: hnd.handoffId, error: err.message });
       }
     }
   }

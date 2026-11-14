@@ -1,5 +1,7 @@
 import { PERMISSIONS } from '../../services/authService.js';
 import { SECURITY_ACTIONS } from '../../infrastructure/security/securityAuditLogger.js';
+import { defaultGenerationReadinessEngine } from '../projects/generationReadinessEngine.js';
+import { defaultSpecificationVersioningService } from '../projects/specificationVersioningService.js';
 
 const MAX_BODY_SIZE = 100 * 1024; // 100KB limit
 
@@ -293,6 +295,132 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
 
   // 9. Single Project by ID routes: GET, PATCH, DELETE
   const singleProjectMatch = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)$/);
+
+  // S7 API: GET /api/v1/generation/projects/:id/readiness
+  if (req.method === 'GET' && url.pathname.endsWith('/readiness')) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/readiness'.length));
+    try {
+      const project = await generationProjectService.getProject(projectId, currentUser);
+      if (!project) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Project not found: ${projectId}` }));
+        return true;
+      }
+      const readiness = defaultGenerationReadinessEngine.evaluateReadiness(project);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, projectId, readiness }, null, 2));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: err.message }));
+    }
+    return true;
+  }
+
+  // S7 API: GET /api/v1/generation/projects/:id/versions - List specification versions
+  if (req.method === 'GET' && url.pathname.endsWith('/versions')) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/versions'.length));
+    try {
+      const versions = await defaultSpecificationVersioningService.listVersions(projectId);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, projectId, versions }, null, 2));
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: err.message }));
+    }
+    return true;
+  }
+
+  // S7 API: POST /api/v1/generation/projects/:id/versions - Snapshot current specification
+  if (req.method === 'POST' && url.pathname.endsWith('/versions')) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/versions'.length));
+    try {
+      const payload = await readJson();
+      const project = await generationProjectService.getProject(projectId, currentUser);
+      if (!project) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Project not found: ${projectId}` }));
+        return true;
+      }
+      const snapResult = await defaultSpecificationVersioningService.createVersionSnapshot(
+        project,
+        currentUser,
+        payload.changelog || 'Specification version snapshot'
+      );
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...snapResult }, null, 2));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+    }
+    return true;
+  }
+
+  // S7 API: GET /api/v1/generation/projects/:id/versions/compare - Diff two versions
+  if (req.method === 'GET' && url.pathname.includes('/versions/compare')) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const match = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/versions\/compare$/);
+    if (match) {
+      const projectId = decodeURIComponent(match[1]);
+      const v1 = parseInt(url.searchParams.get('v1') || '1', 10);
+      const v2 = parseInt(url.searchParams.get('v2') || '2', 10);
+      try {
+        const diff = await defaultSpecificationVersioningService.compareVersions(projectId, v1, v2);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, ...diff }, null, 2));
+      } catch (err) {
+        res.writeHead(err.code === 'NOT_FOUND' ? 404 : 400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+      }
+      return true;
+    }
+  }
+
+  // S7 API: POST /api/v1/generation/projects/:id/submit-review
+  if (req.method === 'POST' && url.pathname.endsWith('/submit-review')) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/submit-review'.length));
+    try {
+      const project = await generationProjectService.getProject(projectId, currentUser);
+      if (!project) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Project not found: ${projectId}` }));
+        return true;
+      }
+      const reviewResult = await defaultSpecificationVersioningService.submitForReview(project, currentUser);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...reviewResult }, null, 2));
+    } catch (err) {
+      res.writeHead(err.code === 'VALIDATION_FAILED' ? 422 : 400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+    }
+    return true;
+  }
+
+  // S7 API: POST /api/v1/generation/projects/:id/approve - Architectural review decision
+  if (req.method === 'POST' && url.pathname.endsWith('/approve')) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/approve'.length));
+    try {
+      const payload = await readJson();
+      const project = await generationProjectService.getProject(projectId, currentUser);
+      if (!project) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Project not found: ${projectId}` }));
+        return true;
+      }
+      const approvalResult = await defaultSpecificationVersioningService.processApproval(project, payload, currentUser);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...approvalResult }, null, 2));
+    } catch (err) {
+      const status = err.code === 'UNAUTHORIZED_APPROVAL' ? 403 : err.code === 'NOT_FOUND' ? 404 : 400;
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+    }
+    return true;
+  }
   if (singleProjectMatch) {
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
     const projectId = decodeURIComponent(singleProjectMatch[1]);

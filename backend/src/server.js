@@ -11,7 +11,7 @@ import { sapTransactionDiscoveryAdapter } from './adapters/sapTransactionDiscove
 import { officialFioriCatalogueAdapter } from './adapters/officialFioriCatalogueAdapter.js';
 import { fitGapAssessmentEngine } from './engine/fitGapAssessmentEngine.js';
 import { recommendationEngine } from './engine/recommendationEngine.js';
-import { defaultAssessmentStore } from './services/assessmentStore.js';
+import { defaultAssessmentStore, AssessmentStore } from './services/assessmentStore.js';
 import { defaultFalIngestionService } from './tools/ingestFAL.js';
 import { transactionDiscoveryEngine } from './engine/transactionDiscoveryEngine.js';
 import { technicalEvidenceEngine } from './engine/technicalEvidenceEngine.js';
@@ -22,12 +22,13 @@ import { defaultAuthService, USER_ROLES } from './services/authService.js';
 import { defaultSecurityAuditLogger, SECURITY_ACTIONS } from './infrastructure/security/securityAuditLogger.js';
 import { defaultSystemRegistry } from './adapters/systemRegistry.js';
 import { EnterpriseService } from './services/enterpriseService.js';
-import { defaultGenerationHandoffStore } from './services/generationHandoffStore.js';
+import { GenerationHandoffStore, defaultGenerationHandoffStore } from './services/generationHandoffStore.js';
 import { defaultGenerationProjectStore } from './generation/projects/generationProjectStore.js';
 import { GenerationProjectService } from './generation/projects/generationProjectService.js';
 import { RequirementsService } from './generation/requirements/requirementsService.js';
 import { DataModelService } from './generation/datamodel/dataModelService.js';
 import { defaultCdsReuseRegistry } from './generation/datamodel/cdsReuseRegistry.js';
+import { defaultTransactionDiscoveryService, TransactionDiscoveryService } from './services/transactionDiscoveryService.js';
 
 // Modular Route Handlers
 import { handleSystemRoutes } from './routes/systemRoutes.js';
@@ -97,7 +98,12 @@ export function createServer(options = {}) {
   const officialCatalogueAdapter = options.officialCatalogueAdapter || officialFioriCatalogueAdapter;
   const fitGapEngine = options.fitGapEngine || fitGapAssessmentEngine;
   const recommendationEngineInstance = options.recommendationEngine || recommendationEngine;
-  const assessmentStore = options.assessmentStore || defaultAssessmentStore;
+  const defaultTenantId = options.tenantId || process.env.Fiorify_TENANT_ID || 'DEFAULT-TENANT-S21';
+  const assessmentStore = options.assessmentStore || (
+    options.useDatabase
+      ? new AssessmentStore({ useDatabase: true, tenantId: defaultTenantId })
+      : defaultAssessmentStore
+  );
   const falIngestionService = options.falIngestionService || defaultFalIngestionService;
   const discoveryEngine = options.discoveryEngine || transactionDiscoveryEngine;
   const evidenceEngine = options.evidenceEngine || technicalEvidenceEngine;
@@ -106,11 +112,15 @@ export function createServer(options = {}) {
   const mcpDiscoveryOrchestrator = options.mcpDiscoveryOrchestrator || defaultMcpDiscoveryOrchestrator;
   const authService = options.authService || defaultAuthService;
   const securityAuditLogger = options.securityAuditLogger || defaultSecurityAuditLogger;
-  const enforceAuth = options.enforceAuth === true || process.env.Fiorify_ENFORCE_AUTH === 'true';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const enforceAuth = isProduction || options.enforceAuth === true || process.env.FIORIFY_ENFORCE_AUTH === 'true' || process.env.Fiorify_ENFORCE_AUTH === 'true';
   const systemRegistry = options.systemRegistry || defaultSystemRegistry;
-  const defaultTenantId = options.tenantId || process.env.Fiorify_TENANT_ID || 'DEFAULT-TENANT-S21';
   const enterpriseService = options.enterpriseService || new EnterpriseService({ assessmentStore, systemRegistry });
-  const generationHandoffStore = options.generationHandoffStore || defaultGenerationHandoffStore;
+  const generationHandoffStore = options.generationHandoffStore || (
+    (options.useDatabase || assessmentStore?.useDatabase)
+      ? new GenerationHandoffStore({ useDatabase: true, tenantId: defaultTenantId, assessmentStore })
+      : defaultGenerationHandoffStore
+  );
   if (options.assessmentStore && generationHandoffStore) {
     generationHandoffStore.assessmentStore = assessmentStore;
   }
@@ -128,6 +138,7 @@ export function createServer(options = {}) {
     projectStore: generationProjectStore
   });
   const cdsReuseRegistry = options.cdsReuseRegistry || defaultCdsReuseRegistry;
+  const discoveryService = options.discoveryService || defaultTransactionDiscoveryService;
   if (officialCatalogueAdapter && falIngestionService) {
     falIngestionService.adapter = officialCatalogueAdapter;
   }
@@ -144,42 +155,40 @@ export function createServer(options = {}) {
 
       const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
-    // Helper to resolve authenticated user context (SEC-01 + S2)
+    // Helper to resolve authenticated user context (SEC-01 + S2 + S13.1 REM-SEC-02)
     const resolveUser = () => {
       const authHeader = req.headers.authorization;
       const customSecret = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
-      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : undefined);
+      const devImpersonationUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'];
+      const devRole = req.headers['x-fiorify-dev-role'] || req.headers['x-fiorify-role'];
+
+      // Development impersonation is strictly forbidden in production
+      if (isProduction) {
+        if (customSecret || devImpersonationUser || devRole) {
+          return { isUnauthenticated: true, authError: 'DEV_IMPERSONATION_FORBIDDEN_IN_PRODUCTION' };
+        }
+      }
+
+      // If development impersonation headers are provided in dev/test, they REQUIRE a valid secret
+      if (!isProduction && (devImpersonationUser || devRole) && !customSecret) {
+        return { isUnauthenticated: true, authError: 'DEV_IMPERSONATION_REQUIRES_SECRET' };
+      }
+
+      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || (!isProduction ? 'dev-admin-secret-change-in-production' : undefined);
       const requestTenantId = req.headers['x-tenant-id'] || defaultTenantId;
 
       const isAdminSecretValid = (sec) => {
-        if (!sec) return false;
+        if (!sec || isProduction) return false;
         const clean = String(sec).trim();
         if (configuredSecret && clean === configuredSecret) return true;
         if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(clean)) return true;
         return false;
       };
 
-      if (customSecret) {
-        if (isAdminSecretValid(customSecret)) {
-          const adminUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01';
-          const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
-          const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
-          return {
-            id: adminUser,
-            name: adminName,
-            email: adminEmail,
-            role: USER_ROLES.ADMIN,
-            tenantId: requestTenantId,
-            department: 'SAP Architecture & Platform Governance'
-          };
-        }
-        return { isUnauthenticated: true, authError: 'INVALID_ADMIN_SECRET' };
-      }
-
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.slice(7).trim();
-        if (isAdminSecretValid(token)) {
-          const adminUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01';
+        if (!isProduction && isAdminSecretValid(token)) {
+          const adminUser = devImpersonationUser || 'USR-ADMIN-01';
           const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
           const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
           return {
@@ -187,13 +196,16 @@ export function createServer(options = {}) {
             name: adminName,
             email: adminEmail,
             role: USER_ROLES.ADMIN,
-            tenantId: requestTenantId,
+            tenantId: requestTenantId || defaultTenantId || 'DEFAULT-TENANT-S21',
             department: 'SAP Architecture & Platform Governance'
           };
         }
         const verified = authService.verifyToken(token);
         if (verified) {
           const tokenTenantId = verified.tenantId || verified.ext_attr?.zdn;
+          if (isProduction && !tokenTenantId && !req.headers['x-tenant-id']) {
+            return { isUnauthenticated: true, authError: 'MISSING_TENANT_CONTEXT' };
+          }
           const hasCrossTenantAdmin = Array.isArray(verified.scopes) && (
             verified.scopes.includes('Fiorify.admin.access') ||
             verified.scopes.includes('Fiorify.tenants.manage') ||
@@ -208,17 +220,36 @@ export function createServer(options = {}) {
         return { isUnauthenticated: true, authError: 'INVALID_TOKEN' };
       }
 
+      if (customSecret) {
+        if (!isProduction && isAdminSecretValid(customSecret)) {
+          const adminUser = devImpersonationUser || 'USR-ADMIN-01';
+          const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
+          const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
+          return {
+            id: adminUser,
+            name: adminName,
+            email: adminEmail,
+            role: USER_ROLES.ADMIN,
+            tenantId: requestTenantId || defaultTenantId || 'DEFAULT-TENANT-S21',
+            department: 'SAP Architecture & Platform Governance'
+          };
+        }
+        return { isUnauthenticated: true, authError: 'INVALID_ADMIN_SECRET' };
+      }
+
       if (enforceAuth) {
         return { isUnauthenticated: true, authError: 'MISSING_TOKEN' };
       }
 
+      // In non-production development with auth unenforced:
+      // Minimum-permission unauthenticated identity (VIEWER, never ADMIN)
       return {
-        id: 'USR-ADMIN-01',
-        name: 'Admin',
-        email: 'admin@Fiorify.corp',
-        role: USER_ROLES.ADMIN,
-        tenantId: defaultTenantId,
-        department: 'SAP Architecture & Platform Governance'
+        id: 'USR-DEV-VIEWER',
+        name: 'Development Viewer',
+        email: 'dev-viewer@fiorify.corp',
+        role: USER_ROLES.VIEWER,
+        tenantId: req.headers['x-tenant-id'] || defaultTenantId,
+        department: 'Development Sandbox'
       };
     };
 
@@ -249,8 +280,9 @@ export function createServer(options = {}) {
         JSON.stringify({
           success: false,
           statusCode: 'UNAUTHORIZED',
+          code: currentUser.authError || 'UNAUTHORIZED',
           error: 'Unauthorized',
-          errorMessage: 'Authentication required. Invalid or missing Bearer token.'
+          errorMessage: currentUser.authError ? `Authentication failed: ${currentUser.authError}` : 'Authentication required. Invalid or missing Bearer token.'
         })
       );
       return;
@@ -406,6 +438,7 @@ export function createServer(options = {}) {
       requirementsService,
       dataModelService,
       cdsReuseRegistry,
+      discoveryService,
       defaultTenantId,
       requestCounter
     };

@@ -7,6 +7,7 @@ import {
   LayoutTemplate,
   CheckCircle2,
   PackageCheck,
+  Send,
   Wrench,
   AlertCircle,
   HardDrive,
@@ -24,6 +25,8 @@ import { FioriUiGenerator } from './FioriUiGenerator';
 import { PreviewValidationView } from './PreviewValidationView';
 import { ReviewExportView } from './ReviewExportView';
 import { ToolchainView } from './ToolchainView';
+import { SpecificationLifecycleView } from './SpecificationLifecycleView';
+import { DeploymentWorkspaceView } from './DeploymentWorkspaceView';
 
 interface WorkspaceShellViewProps {
   viewId: StudioInternalView;
@@ -74,6 +77,16 @@ const VIEW_METADATA: Record<Exclude<StudioInternalView, 'projects'>, ViewMetadat
     emptyStateTitle: 'RAP Architecture Workspace Scheduled for Phase 4',
     emptyStateDescription: 'RAP Managed behavior definition, draft table configuration, and action definitions will be configured in Phase 4.'
   },
+  'spec-lifecycle': {
+    title: 'Specification Lifecycle & Governance',
+    icon: CheckCircle2,
+    phaseName: 'Phase 5: Specification Readiness, Versioning & Review',
+    phaseNumber: 5,
+    purpose: 'Verify 13 deterministic readiness gates, snapshot immutable versions, and govern Lead/Chief Architect approval.',
+    prerequisites: ['Phase 2-4: Requirements, Data Model and Architecture definitions'],
+    emptyStateTitle: 'Specification Lifecycle Active',
+    emptyStateDescription: '13-Gate Readiness, Immutable Version History & Architect Approvals.'
+  },
   'abap-generator': {
     title: 'ABAP Generator',
     icon: Code2,
@@ -113,6 +126,16 @@ const VIEW_METADATA: Record<Exclude<StudioInternalView, 'projects'>, ViewMetadat
     prerequisites: ['Phase 7: Validation passed with zero errors'],
     emptyStateTitle: 'Review & Export Manager Scheduled for Phase 8',
     emptyStateDescription: 'Final ZIP bundle packaging, checksum verification, and Clean Core sign-off certificate export will be available in Phase 8.'
+  },
+  deployment: {
+    title: 'SAP DEV Deployment',
+    icon: Send,
+    phaseName: 'Phase 10: SAP DEV Deployment & Verification',
+    phaseNumber: 10,
+    purpose: 'Execute preflight checks, generate dependency-ordered deployment plans, sign off approvals, and verify active SAP repository objects.',
+    prerequisites: ['Phase 9: Export package verified'],
+    emptyStateTitle: 'Deployment Orchestration Ready',
+    emptyStateDescription: 'Target landscape S21 / Client 200 ready for deployment plan staging.'
   },
   environment: {
     title: 'Environment & Toolchain',
@@ -171,6 +194,18 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
     );
   }
 
+  // S7: Specification Lifecycle & Review View
+  if (viewId === 'spec-lifecycle' && project) {
+    return (
+      <div className="workspace-canvas">
+        <SpecificationLifecycleView
+          project={project}
+          onProjectUpdated={(p) => onProjectUpdated && onProjectUpdated(p)}
+        />
+      </div>
+    );
+  }
+
   // If viewing abap-generator and project is active, render AbapGenerator (GEN-05)
   if (viewId === 'abap-generator' && project) {
     return (
@@ -217,6 +252,18 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
         <ReviewExportView
           project={project}
           onProjectUpdated={onProjectUpdated}
+        />
+      </div>
+    );
+  }
+
+  // If viewing deployment and project is active, render DeploymentWorkspaceView (Sprint 11)
+  if (viewId === 'deployment' && project) {
+    return (
+      <div className="workspace-canvas">
+        <DeploymentWorkspaceView
+          project={project}
+          onNavigateView={onNavigateView}
         />
       </div>
     );

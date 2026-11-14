@@ -52,7 +52,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
           <Layers size={20} color="#58B8D4" />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontWeight: 700, fontSize: '15px', letterSpacing: '0.5px', lineHeight: 1.1 }}>
-              Fiori<span style={{ color: '#58B8D4' }}>X</span>
+              Fiori<span style={{ color: '#58B8D4' }}>fy</span>
             </span>
             <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.65)', fontWeight: 400 }}>
               SAP Transaction &amp; Fiori Application Discovery

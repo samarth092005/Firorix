@@ -238,7 +238,13 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
 
   // 4. Landscape Registry & Multi-System Discovery (SAP-LIVE-01 & ENTERPRISE-01)
   if (req.method === 'GET' && url.pathname === '/api/v1/systems') {
-    const regSystems = systemRegistry ? systemRegistry.listSystems() : [];
+    const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
+    let regSystems = [];
+    if (systemRegistry) {
+      regSystems = typeof systemRegistry.listSystems === 'function'
+        ? await systemRegistry.listSystems(tenantId)
+        : systemRegistry.listSystemsSync();
+    }
     const mockSystems = mockSapAdapter.getAvailableSystems();
     const merged = [...regSystems];
     for (const ms of mockSystems) {
@@ -253,9 +259,126 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     return true;
   }
 
+  // Register / Update SAP System Configuration (S2)
+  if (req.method === 'POST' && url.pathname === '/api/v1/systems') {
+    if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN, USER_ROLES.LEAD_ARCHITECT])) return true;
+
+    let body = '';
+    req.on('data', (c) => (body += c));
+    await new Promise((resolve) => req.on('end', resolve));
+
+    let payload = {};
+    try {
+      payload = JSON.parse(body || '{}');
+    } catch {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
+      return true;
+    }
+
+    if (!payload.systemId && !payload.system_id) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'VALIDATION_ERROR', errorMessage: 'systemId is required.' }));
+      return true;
+    }
+
+    // Safety invariant: Never accept or store plaintext passwords
+    if (payload.password) {
+      delete payload.password;
+    }
+
+    try {
+      const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
+      const registered = await systemRegistry.registerSystem({
+        ...payload,
+        tenantId,
+        isReadOnly: true
+      }, tenantId);
+
+      if (securityAuditLogger) {
+        securityAuditLogger.logEvent({
+          actor: currentUser?.id || 'anonymous',
+          tenantId,
+          action: 'REGISTER_SAP_SYSTEM',
+          resource: `/api/v1/systems/${registered.systemId}`,
+          outcome: 'SUCCESS',
+          details: { systemId: registered.systemId, connectionMode: registered.connectionMode }
+        }).catch(() => {});
+      }
+
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, system: registered }, null, 2));
+    } catch (regErr) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'REGISTRATION_ERROR', errorMessage: regErr.message }));
+    }
+    return true;
+  }
+
+  // Diagnostic History Endpoint (S2)
+  if (req.method === 'GET' && url.pathname.startsWith('/api/v1/systems/') && url.pathname.endsWith('/diagnostics/history')) {
+    const systemId = decodeURIComponent(url.pathname.slice('/api/v1/systems/'.length, -'/diagnostics/history'.length));
+    const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
+    const limit = Number(url.searchParams.get('limit')) || 20;
+
+    try {
+      const history = await systemRegistry.getDiagnosticHistory(systemId, tenantId, limit);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, systemId, history }, null, 2));
+    } catch (histErr) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: histErr.message }));
+    }
+    return true;
+  }
+
+  // Gateway Metadata Test Endpoint (S2)
+  if (req.method === 'GET' && url.pathname.startsWith('/api/v1/systems/') && url.pathname.endsWith('/gateway/metadata')) {
+    const systemId = decodeURIComponent(url.pathname.slice('/api/v1/systems/'.length, -'/gateway/metadata'.length));
+    const servicePath = url.searchParams.get('service') || '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/$metadata';
+    const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
+
+    try {
+      const metadataResult = await systemRegistry.inspectGatewayMetadata(systemId, servicePath, tenantId);
+      res.writeHead(metadataResult.success ? 200 : (metadataResult.status || 502), { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(metadataResult, null, 2));
+    } catch (metaErr) {
+      res.writeHead(metaErr.statusCode === 'AUTHORIZATION_BLOCKED' ? 403 : 500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: metaErr.code || 'INTERNAL_ERROR', errorMessage: metaErr.message }));
+    }
+    return true;
+  }
+
+  // ADT Reachability Test Endpoint (S2)
+  if (req.method === 'GET' && url.pathname.startsWith('/api/v1/systems/') && url.pathname.endsWith('/adt/reachability')) {
+    const systemId = decodeURIComponent(url.pathname.slice('/api/v1/systems/'.length, -'/adt/reachability'.length));
+    const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
+
+    try {
+      const diagResult = await systemRegistry.runDiagnostics(systemId, currentUser);
+      const adtCheck = diagResult.checks?.adtDiscovery || {};
+      const httpCode = adtCheck.httpStatus || (adtCheck.status === 'VERIFIED' ? 200 : (adtCheck.status === 'AUTHORIZATION_FAILED' ? 403 : 502));
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: adtCheck.status === 'VERIFIED',
+        systemId,
+        endpoint: '/sap/bc/adt/discovery',
+        status: adtCheck.status,
+        httpStatus: httpCode,
+        error: adtCheck.error,
+        requiredAuthorizations: adtCheck.requiredAuthorizations || []
+      }, null, 2));
+    } catch (adtErr) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: adtErr.message }));
+    }
+    return true;
+  }
+
   if (req.method === 'GET' && url.pathname.startsWith('/api/v1/systems/') && !url.pathname.endsWith('/diagnostics')) {
     const systemId = decodeURIComponent(url.pathname.slice('/api/v1/systems/'.length));
-    const system = systemRegistry ? systemRegistry.getSystem(systemId) : null;
+    const tenantId = currentUser?.tenantId || 'DEFAULT-TENANT-S21';
+    const system = systemRegistry ? await systemRegistry.getSystem(systemId, tenantId) : null;
     if (!system) {
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `System "${systemId}" not found.` }));
@@ -287,10 +410,10 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
   }
 
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/systems/') && url.pathname.endsWith('/diagnostics')) {
-    if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN])) return true;
+    if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN, USER_ROLES.LEAD_ARCHITECT])) return true;
     const systemId = decodeURIComponent(url.pathname.slice('/api/v1/systems/'.length, -'/diagnostics'.length));
     try {
-      const diagnostics = await systemRegistry.runDiagnostics(systemId);
+      const diagnostics = await systemRegistry.runDiagnostics(systemId, currentUser);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(diagnostics, null, 2));
     } catch (diagErr) {

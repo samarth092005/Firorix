@@ -93,7 +93,7 @@ export const LandingPage: React.FC = () => {
           </div>
           <div>
             <span style={{ fontSize: '18px', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.3px' }}>
-              Fiori<span style={{ color: '#0066FF' }}>X</span>
+              Fiori<span style={{ color: '#0066FF' }}>fy</span>
             </span>
             <span
               style={{

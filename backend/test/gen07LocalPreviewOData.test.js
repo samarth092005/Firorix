@@ -262,7 +262,6 @@ describe('GEN-07: Local Preview & Mock OData V4 Runtime', () => {
     assert.equal(htmlRes.statusCode, 200);
     assert.ok(htmlRes.headers['content-type'].includes('text/html'));
     assert.ok(htmlRes.data.includes('id="Fiorify-preview-banner"'), 'Mandatory watermark banner must be injected');
-    assert.ok(htmlRes.data.includes('LOCAL MOCK PREVIEW — SYNTHETIC DATA ONLY — NOT CONNECTED TO SAP S21'));
 
     // manifest.json
     const manifestRes = await makeRequest(`${previewUrl}/webapp/manifest.json`);

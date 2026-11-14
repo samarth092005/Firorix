@@ -127,8 +127,8 @@ export async function handleFitGapRoutes(req, res, url, context = {}) {
     return true;
   }
 
-  // 2. POST /api/v1/recommendations/generate
-  if (req.method === 'POST' && url.pathname === '/api/v1/recommendations/generate') {
+  // 2. POST /api/v1/recommendations/generate or POST /api/v1/fitgap/recommend
+  if (req.method === 'POST' && (url.pathname === '/api/v1/recommendations/generate' || url.pathname === '/api/v1/fitgap/recommend')) {
     let body = '';
     let bodyLength = 0;
     let isAborted = false;

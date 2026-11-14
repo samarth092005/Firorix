@@ -16,6 +16,18 @@ import crypto from 'node:crypto';
 import { fitGapAssessmentEngine } from '../engine/fitGapAssessmentEngine.js';
 import { AssessmentRepository } from '../infrastructure/db/repositories/assessmentRepository.js';
 import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from './standardTransactionKnowledge.js';
+import { authService, USER_ROLES, PERMISSIONS } from './authService.js';
+
+function isAuthorizedAdmin(userContext) {
+  if (!userContext || userContext.isUnauthenticated) return false;
+  return (
+    userContext.role === USER_ROLES.ADMIN ||
+    userContext.role === USER_ROLES.LEAD_ARCHITECT ||
+    userContext.role === 'CHIEF_ARCHITECT' ||
+    authService.hasPermission(userContext, PERMISSIONS.ADMIN_ACCESS) ||
+    authService.hasPermission(userContext, PERMISSIONS.USER_ADMIN)
+  );
+}
 
 export const LIFECYCLE_STATES = Object.freeze({
   DRAFT: 'DRAFT',
@@ -702,7 +714,8 @@ export class AssessmentStore {
     this._initialized = false;
     this._records = new Map();
     this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
-    this.useDatabase = options.useDatabase || (process.env.FIORIX_PERSISTENCE === 'postgres' && !options.storagePath);
+    const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || process.env.FIORIX_PERSISTENCE || '').toLowerCase();
+    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres' && !options.storagePath);
     this.repository = options.repository || (this.useDatabase ? new AssessmentRepository() : null);
   }
 
@@ -916,12 +929,20 @@ export class AssessmentStore {
         const isPermittedApproval = (newLifecycle === LIFECYCLE_STATES.APPROVED || newLifecycle === LIFECYCLE_STATES.PENDING_REVIEW) &&
           (updates.isOverride || updates.autoAdvance);
 
-        if (!allowed.includes(newLifecycle) && !isPermittedApproval) {
-          const err = new Error(
-            `Illegal lifecycle state transition from "${previousLifecycle}" to "${newLifecycle}". Allowed: ${allowed.join(', ') || 'None'}.`
-          );
-          err.code = 'INVALID_STATE_TRANSITION';
-          throw err;
+        if (!allowed.includes(newLifecycle)) {
+          if (updates.isOverride) {
+            if (!isAuthorizedAdmin(userContext)) {
+              const err = new Error('Administrative override requires explicit authenticated ADMIN authorization.');
+              err.code = 'UNAUTHORIZED_OVERRIDE';
+              throw err;
+            }
+          } else if (!updates.autoAdvance) {
+            const err = new Error(
+              `Illegal lifecycle state transition from "${previousLifecycle}" to "${newLifecycle}". Allowed: ${allowed.join(', ') || 'None'}.`
+            );
+            err.code = 'INVALID_STATE_TRANSITION';
+            throw err;
+          }
         }
       }
 
@@ -929,9 +950,30 @@ export class AssessmentStore {
         const isCreator = existing.createdBy && existing.createdBy === actorId;
         const isOverride = updates.isOverride === true;
 
+        if (isOverride) {
+          if (!isAuthorizedAdmin(userContext)) {
+            const err = new Error('Administrative override requires explicit authenticated ADMIN authorization.');
+            err.code = 'UNAUTHORIZED_OVERRIDE';
+            throw err;
+          }
+        }
+
         if (isCreator && !isOverride) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
+          throw err;
+        }
+
+        // BUILD approval check: If assessment is a BUILD decision, require explicit BUILD_ARCHITECT_APPROVER permission
+        const isBuild = (
+          existing.recommendation?.canonicalOutcome === 'BUILD' ||
+          existing.recommendation?.outcome === 'BUILD' ||
+          existing.assessmentResult === 'CUSTOM_RAP_REQUIRED' ||
+          Boolean(existing.buildProject)
+        );
+        if (isBuild && !authService.canApproveBuild(userContext)) {
+          const err = new Error('Unauthorized BUILD Approval: Formal approval of custom BUILD modernization requires explicit BUILD_ARCHITECT_APPROVER authorization.');
+          err.code = 'UNAUTHORIZED_BUILD_APPROVER';
           throw err;
         }
       }
@@ -953,8 +995,13 @@ export class AssessmentStore {
       sanitizedUpdates.lifecycleStatus = newLifecycle;
       sanitizedUpdates.status = newLifecycle;
       sanitizedUpdates.actor = actorName;
-      sanitizedUpdates.auditAction = updates.action || (newLifecycle !== previousLifecycle ? 'STATE_TRANSITION' : 'UPDATED');
-      sanitizedUpdates.auditDetails = comment || updates.comment || `Assessment updated to state ${newLifecycle}.`;
+      if (updates.isOverride === true) {
+        sanitizedUpdates.auditAction = 'ADMIN_OVERRIDE_APPROVED';
+        sanitizedUpdates.auditDetails = comment || updates.comment || `Assessment approved via administrative override by ${actorName}.`;
+      } else {
+        sanitizedUpdates.auditAction = updates.action || (newLifecycle !== previousLifecycle ? 'STATE_TRANSITION' : 'UPDATED');
+        sanitizedUpdates.auditDetails = comment || updates.comment || `Assessment updated to state ${newLifecycle}.`;
+      }
 
       return await this.repository.update(id, sanitizedUpdates, tenantId);
     }
@@ -983,12 +1030,20 @@ export class AssessmentStore {
         const isPermittedApproval = (newLifecycle === LIFECYCLE_STATES.APPROVED || newLifecycle === LIFECYCLE_STATES.PENDING_REVIEW) &&
           (updates.isOverride || updates.autoAdvance);
 
-        if (!allowed.includes(newLifecycle) && !isPermittedApproval) {
-          const err = new Error(
-            `Illegal lifecycle state transition from "${previousLifecycle}" to "${newLifecycle}". Allowed: ${allowed.join(', ') || 'None'}.`
-          );
-          err.code = 'INVALID_STATE_TRANSITION';
-          throw err;
+        if (!allowed.includes(newLifecycle)) {
+          if (updates.isOverride) {
+            if (!isAuthorizedAdmin(userContext)) {
+              const err = new Error('Administrative override requires explicit authenticated ADMIN authorization.');
+              err.code = 'UNAUTHORIZED_OVERRIDE';
+              throw err;
+            }
+          } else if (!updates.autoAdvance) {
+            const err = new Error(
+              `Illegal lifecycle state transition from "${previousLifecycle}" to "${newLifecycle}". Allowed: ${allowed.join(', ') || 'None'}.`
+            );
+            err.code = 'INVALID_STATE_TRANSITION';
+            throw err;
+          }
         }
       }
 
@@ -997,9 +1052,30 @@ export class AssessmentStore {
         const isCreator = existing.createdBy && existing.createdBy === actorId;
         const isOverride = updates.isOverride === true;
 
+        if (isOverride) {
+          if (!isAuthorizedAdmin(userContext)) {
+            const err = new Error('Administrative override requires explicit authenticated ADMIN authorization.');
+            err.code = 'UNAUTHORIZED_OVERRIDE';
+            throw err;
+          }
+        }
+
         if (isCreator && !isOverride) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
+          throw err;
+        }
+
+        // BUILD approval check: If assessment is a BUILD decision, require explicit BUILD_ARCHITECT_APPROVER permission
+        const isBuild = (
+          existing.recommendation?.canonicalOutcome === 'BUILD' ||
+          existing.recommendation?.outcome === 'BUILD' ||
+          existing.assessmentResult === 'CUSTOM_RAP_REQUIRED' ||
+          Boolean(existing.buildProject)
+        );
+        if (isBuild && !authService.canApproveBuild(userContext)) {
+          const err = new Error('Unauthorized BUILD Approval: Formal approval of custom BUILD modernization requires explicit BUILD_ARCHITECT_APPROVER authorization.');
+          err.code = 'UNAUTHORIZED_BUILD_APPROVER';
           throw err;
         }
       }
@@ -1021,6 +1097,23 @@ export class AssessmentStore {
         : 'GENESIS';
 
       const eventId = `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      const auditAction = updates.isOverride === true
+        ? 'ADMIN_OVERRIDE_APPROVED'
+        : (updates.action || (newLifecycle !== previousLifecycle ? 'STATE_TRANSITION' : 'UPDATED'));
+
+      const auditComment = updates.isOverride === true
+        ? (comment || updates.comment || `Assessment approved via administrative override by ${actorName}.`)
+        : (comment || updates.comment || `Assessment updated to state ${newLifecycle}.`);
+
+      const auditDetails = updates.isOverride === true
+        ? {
+            ...(updates.details || {}),
+            administrativeOverride: true,
+            overriddenBy: actorId,
+            overriddenByName: actorName
+          }
+        : (updates.details || {});
+
       const auditEvent = {
         eventId,
         timestamp: now,
@@ -1029,9 +1122,9 @@ export class AssessmentStore {
         actorRole,
         previousState: previousLifecycle,
         newState: newLifecycle,
-        action: updates.action || (newLifecycle !== previousLifecycle ? 'STATE_TRANSITION' : 'UPDATED'),
-        comment: comment || updates.comment || `Assessment updated to state ${newLifecycle}.`,
-        details: updates.details || {},
+        action: auditAction,
+        comment: auditComment,
+        details: auditDetails,
         previousHash
       };
       auditEvent.integrityHash = computeEventHash(auditEvent, previousHash);
@@ -1092,19 +1185,27 @@ export class AssessmentStore {
    * Approves assessment (GOV-01).
    */
   async approve(id, userContext, comment = 'Formally approved for modernization roadmap.', isOverride = false) {
+    if (isOverride) {
+      if (!isAuthorizedAdmin(userContext)) {
+        const err = new Error('Administrative override requires explicit authenticated ADMIN authorization.');
+        err.code = 'UNAUTHORIZED_OVERRIDE';
+        throw err;
+      }
+    }
     const actorId = typeof userContext === 'object' && userContext !== null ? userContext.id : userContext;
     const actorName = typeof userContext === 'object' && userContext !== null ? userContext.name : userContext;
     return await this.update(
       id,
       {
         lifecycleStatus: LIFECYCLE_STATES.APPROVED,
-        action: 'APPROVED',
+        action: isOverride ? 'ADMIN_OVERRIDE_APPROVED' : 'APPROVED',
         isOverride,
         governanceReview: {
           approvedBy: actorId || 'Architecture Board Approver',
           approvedByName: actorName || 'Architecture Board Approver',
           approvedAt: new Date().toISOString(),
           decision: 'APPROVED',
+          isOverride,
           comments: comment
         }
       },
@@ -1539,12 +1640,62 @@ export class AssessmentStore {
           existing.fitGapScore >= 50
         );
 
-        const isArchitectApproved = Boolean(
+        const isCatalogueIncomplete = Boolean(
+          details.catalogueStatus === 'INCOMPLETE' ||
+          existing.catalogueSearchIncomplete === true ||
+          existing.recommendation?.outcome === 'INVESTIGATE_CATALOGUE_INFO'
+        );
+
+        if (isCatalogueIncomplete) {
+          const err = new Error(
+            'Cannot commission custom build while catalogue verification is incomplete.'
+          );
+          err.code = 'CATALOGUE_SEARCH_INCOMPLETE';
+          throw err;
+        }
+
+        const isExplicitDisapproval = (
+          details.leadArchitectApproval === false ||
+          details.architectApproved === false ||
+          actionPayload.leadArchitectApproval === false ||
+          actionPayload.architectApproved === false
+        );
+
+        if (isExplicitDisapproval && hasStandardCandidate) {
+          const err = new Error(
+            'Clean Core Guardrail Violation: Standard SAP Fiori candidates exist. Building a custom application requires documented justification and Lead Enterprise Architect sign-off.'
+          );
+          err.code = 'UNAUTHORIZED_BUILD';
+          throw err;
+        }
+
+        const isClientRequestingApproval = Boolean(
           details.leadArchitectApproval === true ||
           details.architectApproved === true ||
           actionPayload.leadArchitectApproval === true ||
-          actionPayload.architectApproved === true
+          actionPayload.architectApproved === true ||
+          (details.leadArchitectApproval && typeof details.leadArchitectApproval === 'object' && details.leadArchitectApproval.approved === true) ||
+          (actionPayload.leadArchitectApproval && typeof actionPayload.leadArchitectApproval === 'object' && actionPayload.leadArchitectApproval.approved === true)
         );
+
+        // Server-authoritative actor authorization check
+        const isActorAuthorized = Boolean(
+          userContext && !userContext.isUnauthenticated && (
+            authService.canApproveBuild(userContext) ||
+            userContext.role === USER_ROLES.LEAD_ARCHITECT ||
+            userContext.role === 'CHIEF_ARCHITECT'
+          )
+        );
+
+        if (isClientRequestingApproval && !isActorAuthorized) {
+          const err = new Error(
+            'Unauthorized Approval: Client-supplied BUILD approval flags are rejected. User does not possess explicit BUILD_ARCHITECT_APPROVER authorization.'
+          );
+          err.code = 'UNAUTHORIZED_BUILD_APPROVER';
+          throw err;
+        }
+
+        const isArchitectApproved = isActorAuthorized && isClientRequestingApproval;
 
         const justification = String(
           details.justification ||
@@ -1561,6 +1712,14 @@ export class AssessmentStore {
           throw err;
         }
 
+        if (!isArchitectApproved) {
+          const err = new Error(
+            'Clean Core Guardrail Violation: Commissioning a custom build requires Lead Enterprise Architect sign-off.'
+          );
+          err.code = 'UNAUTHORIZED_BUILD';
+          throw err;
+        }
+
         if (hasStandardCandidate && !justification) {
           const err = new Error(
             'Documented business justification is required to initiate a custom build when standard Fiori candidates exist.'
@@ -1569,26 +1728,16 @@ export class AssessmentStore {
           throw err;
         }
 
-        const isCatalogueIncomplete = Boolean(
-          details.catalogueStatus === 'INCOMPLETE' ||
-          existing.catalogueSearchIncomplete === true ||
-          existing.recommendation?.outcome === 'INVESTIGATE_CATALOGUE_INFO'
-        );
-
-        if (isCatalogueIncomplete) {
-          const err = new Error(
-            'Cannot commission custom build while catalogue verification is incomplete.'
-          );
-          err.code = 'CATALOGUE_SEARCH_INCOMPLETE';
-          throw err;
-        }
+        const approverName = (userContext && !userContext.isUnauthenticated && (userContext.name || userContext.id))
+          ? (userContext.name || userContext.id)
+          : 'Lead Enterprise Architect';
 
         existing.buildProject = {
           handoffId: details.handoffId || null,
           proposedAppType: details.proposedAppType || 'RAP_MANAGED',
           cleanCoreTier: details.cleanCoreTier || 'TIER_2_CLOUD_DEVELOPER',
           architectApproved: true,
-          approverName: userContext?.name || details.architectName || 'Lead SAP Architect',
+          approverName,
           justification,
           lastUpdated: now
         };

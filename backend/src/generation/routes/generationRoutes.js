@@ -20,6 +20,10 @@ import { generateDeveloperHandoverGuide } from '../toolchain/handoverGuideGenera
 import { ArtifactRegistry } from '../artifacts/artifactRegistry.js';
 import { PERMISSIONS } from '../../services/authService.js';
 import { SECURITY_ACTIONS } from '../../infrastructure/security/securityAuditLogger.js';
+import { defaultDeploymentOrchestrationService } from '../deployment/deploymentOrchestrationService.js';
+import { defaultSapPreflightService } from '../../infrastructure/connectivity/sapPreflightService.js';
+import { defaultSapArtifactCompatibilityEngine } from '../validation/sapArtifactCompatibilityEngine.js';
+import { defaultSapPostDeploymentVerifier } from '../deployment/sapPostDeploymentVerifier.js';
 
 const MAX_BODY_SIZE = 100 * 1024; // 100KB limit
 
@@ -1024,6 +1028,149 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
         'Content-Length': zipBuffer.length
       });
       res.end(zipBuffer);
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 53. GET /api/v1/generation/preflight
+  if (req.method === 'GET' && pathname === '/api/v1/generation/preflight') {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    try {
+      const preflightResult = await defaultSapPreflightService.runPreflight();
+      sendJson(res, 200, preflightResult);
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 54. GET /api/v1/generation/projects/:projectId/deployments/readiness
+  const deployReadinessMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/deployments\/readiness$/);
+  if (req.method === 'GET' && deployReadinessMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(deployReadinessMatch[1]);
+    try {
+      const project = await projectStore.getProject(projectId, currentUser.tenantId);
+      if (!project) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Project not found' }));
+        return true;
+      }
+      const readiness = await defaultDeploymentOrchestrationService.getDeploymentReadiness(project, currentUser.tenantId);
+      sendJson(res, 200, { success: true, readiness });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 55. POST /api/v1/generation/projects/:projectId/deployments/plan
+  const deployPlanMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/deployments\/plan$/);
+  if (req.method === 'POST' && deployPlanMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(deployPlanMatch[1]);
+    try {
+      const project = await projectStore.getProject(projectId, currentUser.tenantId);
+      if (!project) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Project not found' }));
+        return true;
+      }
+      const body = await readJsonBody(req);
+      const plan = await defaultDeploymentOrchestrationService.generateDeploymentPlan(project, body, currentUser);
+      sendJson(res, 201, { success: true, plan });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 56. GET /api/v1/generation/deployments/plans/:planId
+  const getPlanMatch = pathname.match(/^\/api\/v1\/generation\/deployments\/plans\/([^/]+)$/);
+  if (req.method === 'GET' && getPlanMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const planId = decodeURIComponent(getPlanMatch[1]);
+    try {
+      const plan = await defaultDeploymentOrchestrationService.repository.getDeploymentPlan(planId, currentUser.tenantId);
+      if (!plan) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Deployment plan not found' }));
+        return true;
+      }
+      const approval = await defaultDeploymentOrchestrationService.repository.getLatestApproval(planId, currentUser.tenantId);
+      sendJson(res, 200, { success: true, plan, latestApproval: approval });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 57. POST /api/v1/generation/deployments/plans/:planId/approve
+  const approvePlanMatch = pathname.match(/^\/api\/v1\/generation\/deployments\/plans\/([^/]+)\/approve$/);
+  if (req.method === 'POST' && approvePlanMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const planId = decodeURIComponent(approvePlanMatch[1]);
+    try {
+      const body = await readJsonBody(req);
+      const result = await defaultDeploymentOrchestrationService.approveDeploymentPlan(planId, body, currentUser);
+      sendJson(res, 200, { success: true, ...result });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 58. POST /api/v1/generation/deployments/plans/:planId/execute
+  const executePlanMatch = pathname.match(/^\/api\/v1\/generation\/deployments\/plans\/([^/]+)\/execute$/);
+  if (req.method === 'POST' && executePlanMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const planId = decodeURIComponent(executePlanMatch[1]);
+    try {
+      const body = await readJsonBody(req);
+      const result = await defaultDeploymentOrchestrationService.executeDeploymentPlan(planId, body, currentUser);
+      sendJson(res, 200, { success: true, execution: result });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 59. GET /api/v1/generation/deployments/executions/:executionId
+  const getExecMatch = pathname.match(/^\/api\/v1\/generation\/deployments\/executions\/([^/]+)$/);
+  if (req.method === 'GET' && getExecMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const executionId = decodeURIComponent(getExecMatch[1]);
+    try {
+      const execution = await defaultDeploymentOrchestrationService.repository.getExecution(executionId, currentUser.tenantId);
+      if (!execution) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Execution record not found' }));
+        return true;
+      }
+      sendJson(res, 200, { success: true, execution });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 60. POST /api/v1/generation/deployments/executions/:executionId/verify
+  const verifyExecMatch = pathname.match(/^\/api\/v1\/generation\/deployments\/executions\/([^/]+)\/verify$/);
+  if (req.method === 'POST' && verifyExecMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const executionId = decodeURIComponent(verifyExecMatch[1]);
+    try {
+      const execution = await defaultDeploymentOrchestrationService.repository.getExecution(executionId, currentUser.tenantId);
+      if (!execution) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Execution record not found' }));
+        return true;
+      }
+      const plan = await defaultDeploymentOrchestrationService.repository.getDeploymentPlan(execution.planId, currentUser.tenantId);
+      const verif = await defaultSapPostDeploymentVerifier.verifyDeployment(plan, { testGateway: true });
+      sendJson(res, 200, { success: true, verification: verif });
     } catch (err) {
       sendError(res, err);
     }

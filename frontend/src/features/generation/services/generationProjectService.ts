@@ -928,6 +928,73 @@ export class FrontendGenerationProjectService {
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch handover guide (HTTP ${res.status})`);
     return data;
   }
+
+  // =========================================================================
+  // Sprint 11: SAP DEV Deployment & Verification Methods
+  // =========================================================================
+
+  async getPreflightDiagnostics(): Promise<any> {
+    const res = await fetch(`${API_GEN_BASE}/preflight`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch SAP preflight diagnostics (HTTP ${res.status})`);
+    return data;
+  }
+
+  async getDeploymentReadiness(projectId: string): Promise<any> {
+    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/deployments/readiness`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch deployment readiness (HTTP ${res.status})`);
+    return data;
+  }
+
+  async generateDeploymentPlan(projectId: string, options: any = {}): Promise<any> {
+    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/deployments/plan`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(options)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to generate deployment plan (HTTP ${res.status})`);
+    return data;
+  }
+
+  async getDeploymentPlan(planId: string): Promise<any> {
+    const res = await fetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}`);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch deployment plan (HTTP ${res.status})`);
+    return data;
+  }
+
+  async approveDeploymentPlan(planId: string, approvalData: any = {}): Promise<any> {
+    const res = await fetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(approvalData)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to approve deployment plan (HTTP ${res.status})`);
+    return data;
+  }
+
+  async executeDeploymentPlan(planId: string, executionData: any = {}): Promise<any> {
+    const res = await fetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}/execute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(executionData)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to execute deployment plan (HTTP ${res.status})`);
+    return data;
+  }
+
+  async verifyDeployment(executionId: string): Promise<any> {
+    const res = await fetch(`${API_GEN_BASE}/deployments/executions/${encodeURIComponent(executionId)}/verify`, {
+      method: 'POST'
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to run post-deployment verification (HTTP ${res.status})`);
+    return data;
+  }
 }
 
 export const defaultFrontendGenerationProjectService = new FrontendGenerationProjectService();

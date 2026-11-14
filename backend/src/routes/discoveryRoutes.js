@@ -1,5 +1,6 @@
 import { mockSapAdapter } from '../adapters/mockSapAdapter.js';
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
+import { defaultTransactionDiscoveryService } from '../services/transactionDiscoveryService.js';
 
 const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
 
@@ -17,12 +18,177 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
     checkAdminAuth,
     transactionAdapter,
     discoveryEngine,
+    discoveryService = defaultTransactionDiscoveryService,
     matchingEngineInstance,
     catalogueAdapter: officialCatalogueAdapter,
-    mcpDiscoveryOrchestrator
+    mcpDiscoveryOrchestrator,
+    defaultTenantId = 'DEFAULT-TENANT-S21'
   } = context;
 
   let requestCounter = context.requestCounter || 1;
+
+  // S4 Discovery Engine Executions & Technical Objects API
+
+  // A. Trigger Discovery Execution (POST /api/v1/discovery/executions)
+  if (req.method === 'POST' && url.pathname === '/api/v1/discovery/executions') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    await new Promise(resolve => req.on('end', resolve));
+
+    let payload = {};
+    if (body.trim()) {
+      try { payload = JSON.parse(body); } catch {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
+        return true;
+      }
+    }
+
+    try {
+      const tenantId = req.headers['x-tenant-id'] || req.user?.tenantId || defaultTenantId;
+      const result = await discoveryService.executeDiscovery({
+        tenantId,
+        systemProfileId: payload.systemProfileId || 'S21-DEFAULT',
+        executionScope: payload.executionScope || 'ALL',
+        targetPackages: payload.targetPackages || [],
+        targetTcodes: payload.targetTcodes || [],
+        currentUser: req.user || { id: 'USR-DISC-01', name: 'Discovery Engineer' }
+      });
+
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result, null, 2));
+    } catch (err) {
+      const sanitized = sanitizeErrorMessage(err.message || 'Discovery execution failed');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: sanitized }, null, 2));
+    }
+    return true;
+  }
+
+  // B. List Discovery Executions (GET /api/v1/discovery/executions)
+  if (req.method === 'GET' && url.pathname === '/api/v1/discovery/executions') {
+    const tenantId = req.headers['x-tenant-id'] || req.user?.tenantId || defaultTenantId;
+    const systemProfileId = url.searchParams.get('systemProfileId') || null;
+    const limit = url.searchParams.get('limit') || 20;
+    const offset = url.searchParams.get('offset') || 0;
+
+    try {
+      const executions = await discoveryService.listExecutions({
+        tenantId,
+        systemProfileId,
+        limit,
+        offset
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, executions }, null, 2));
+    } catch (err) {
+      const sanitized = sanitizeErrorMessage(err.message || 'Failed to list discovery executions');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: sanitized }, null, 2));
+    }
+    return true;
+  }
+
+  // C. Compare Executions (GET /api/v1/discovery/compare)
+  if (req.method === 'GET' && url.pathname === '/api/v1/discovery/compare') {
+    const tenantId = req.headers['x-tenant-id'] || req.user?.tenantId || defaultTenantId;
+    const execution1 = url.searchParams.get('execution1');
+    const execution2 = url.searchParams.get('execution2');
+
+    if (!execution1 || !execution2) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'execution1 and execution2 query parameters are required.' }));
+      return true;
+    }
+
+    try {
+      const comparison = await discoveryService.compareExecutions(execution1, execution2, tenantId);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, comparison }, null, 2));
+    } catch (err) {
+      const sanitized = sanitizeErrorMessage(err.message || 'Execution comparison failed');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: sanitized }, null, 2));
+    }
+    return true;
+  }
+
+  // D. Get Discovery Execution Details (GET /api/v1/discovery/executions/:id)
+  if (req.method === 'GET' && url.pathname.startsWith('/api/v1/discovery/executions/')) {
+    const id = url.pathname.slice('/api/v1/discovery/executions/'.length);
+    const tenantId = req.headers['x-tenant-id'] || req.user?.tenantId || defaultTenantId;
+
+    try {
+      const execution = await discoveryService.getExecutionById(id, tenantId);
+      if (!execution) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Execution ${id} not found.` }, null, 2));
+        return true;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, execution }, null, 2));
+    } catch (err) {
+      const sanitized = sanitizeErrorMessage(err.message || 'Failed to retrieve execution');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: sanitized }, null, 2));
+    }
+    return true;
+  }
+
+  // E. List Discovered Transactions (GET /api/v1/discovery/transactions)
+  if (req.method === 'GET' && url.pathname === '/api/v1/discovery/transactions') {
+    const tenantId = req.headers['x-tenant-id'] || req.user?.tenantId || defaultTenantId;
+    const systemProfileId = url.searchParams.get('systemProfileId') || null;
+    const tcode = url.searchParams.get('tcode') || '';
+    const classification = url.searchParams.get('classification') || '';
+    const packageName = url.searchParams.get('packageName') || '';
+    const search = url.searchParams.get('search') || '';
+    const page = url.searchParams.get('page') || 1;
+    const pageSize = url.searchParams.get('pageSize') || url.searchParams.get('limit') || 20;
+
+    try {
+      const result = await discoveryService.getDiscoveredTransactions({
+        tenantId,
+        systemProfileId,
+        tcode,
+        classification,
+        packageName,
+        search,
+        page,
+        pageSize
+      });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...result }, null, 2));
+    } catch (err) {
+      const sanitized = sanitizeErrorMessage(err.message || 'Failed to list transactions');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: sanitized }, null, 2));
+    }
+    return true;
+  }
+
+  // F. Get Discovered Transaction Details (GET /api/v1/discovery/transactions/:tcode)
+  if (req.method === 'GET' && url.pathname.startsWith('/api/v1/discovery/transactions/')) {
+    const tcode = decodeURIComponent(url.pathname.slice('/api/v1/discovery/transactions/'.length));
+    const tenantId = req.headers['x-tenant-id'] || req.user?.tenantId || defaultTenantId;
+    const systemProfileId = url.searchParams.get('systemProfileId') || null;
+
+    try {
+      const tx = await discoveryService.getTransactionDetails(tcode, tenantId, systemProfileId);
+      if (!tx) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', errorMessage: `Transaction ${tcode} not found.` }, null, 2));
+        return true;
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, transaction: tx }, null, 2));
+    } catch (err) {
+      const sanitized = sanitizeErrorMessage(err.message || 'Failed to retrieve transaction');
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'INTERNAL_ERROR', errorMessage: sanitized }, null, 2));
+    }
+    return true;
+  }
 
   // 1. Live SAP Transaction Discovery (GET /api/v1/transaction-discovery/:tcode)
   if (req.method === 'GET' && url.pathname.startsWith('/api/v1/transaction-discovery/')) {

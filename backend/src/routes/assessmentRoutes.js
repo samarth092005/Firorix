@@ -1,5 +1,5 @@
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
-import { USER_ROLES } from '../services/authService.js';
+import { USER_ROLES, authService, PERMISSIONS } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
 
 const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
@@ -351,7 +351,7 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
         );
         return true;
       }
-      if (err.code === 'SEPARATION_OF_DUTIES_VIOLATION') {
+      if (err.code === 'SEPARATION_OF_DUTIES_VIOLATION' || err.code === 'UNAUTHORIZED_OVERRIDE') {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(
           JSON.stringify({
@@ -407,7 +407,7 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
 
   // 9. POST /api/v1/assessments/:id/approve
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/approve')) {
-    if (!requireRole([USER_ROLES.APPROVER, USER_ROLES.ADMIN])) return true;
+    if (!requireRole([USER_ROLES.APPROVER, USER_ROLES.ADMIN, USER_ROLES.LEAD_ARCHITECT])) return true;
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/approve'.length));
     let body = '';
     req.on('data', (c) => (body += c));
@@ -418,11 +418,30 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
       try { payload = JSON.parse(body); } catch { /* ignore */ }
     }
     try {
-      const updated = await assessmentStore.approve(assessmentId, currentUser, payload.comment || 'Formally approved for modernization roadmap.', payload.isOverride === true);
+      const isOverride = payload.isOverride === true;
+      if (isOverride) {
+        const isAdmin = currentUser && !currentUser.isUnauthenticated && (
+          currentUser.role === USER_ROLES.ADMIN ||
+          currentUser.role === USER_ROLES.LEAD_ARCHITECT ||
+          currentUser.role === 'CHIEF_ARCHITECT' ||
+          authService.hasPermission(currentUser, PERMISSIONS.ADMIN_ACCESS) ||
+          authService.hasPermission(currentUser, PERMISSIONS.USER_ADMIN)
+        );
+        if (!isAdmin) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            statusCode: 'UNAUTHORIZED_OVERRIDE',
+            errorMessage: 'Administrative override requires explicit authenticated ADMIN authorization.'
+          }));
+          return true;
+        }
+      }
+      const updated = await assessmentStore.approve(assessmentId, currentUser, payload.comment || 'Formally approved for modernization roadmap.', isOverride);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true, statusCode: 'APPROVED', assessment: updated }, null, 2));
     } catch (err) {
-      const status = err.code === 'NOT_FOUND' ? 404 : (err.code === 'SEPARATION_OF_DUTIES_VIOLATION' ? 403 : 400);
+      const status = err.code === 'NOT_FOUND' ? 404 : ((err.code === 'SEPARATION_OF_DUTIES_VIOLATION' || err.code === 'UNAUTHORIZED_BUILD_APPROVER' || err.code === 'UNAUTHORIZED_BUILD' || err.code === 'UNAUTHORIZED_OVERRIDE') ? 403 : 400);
       res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
     }
@@ -610,7 +629,7 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result, null, 2));
     } catch (err) {
-      const status = err.code === 'NOT_FOUND' ? 404 : (err.code === 'UNAUTHORIZED_BUILD' ? 403 : 400);
+      const status = err.code === 'NOT_FOUND' ? 404 : ((err.code === 'UNAUTHORIZED_BUILD' || err.code === 'UNAUTHORIZED_BUILD_APPROVER') ? 403 : 400);
       res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: false,

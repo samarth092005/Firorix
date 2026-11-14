@@ -12,7 +12,7 @@ export class AssessmentRepository {
   }
 
   async create(assessment, tenantId = 'DEFAULT-TENANT-S21') {
-    const client = await this.pool.getClient();
+    const client = typeof this.pool.getClient === 'function' ? await this.pool.getClient() : await this.pool.connect();
     try {
       await client.query('BEGIN;');
 
@@ -26,13 +26,23 @@ export class AssessmentRepository {
       // Ensure system profile exists if specified
       const sysId = assessment.systemId || assessment.systemContext?.systemId || 'S21';
       const clientNum = assessment.client || assessment.systemContext?.client || '200';
-      const profileId = assessment.systemProfileId || `${tenantId}-${sysId}-${clientNum}`;
 
-      await client.query(`
-        INSERT INTO sap_system_profiles (id, tenant_id, system_id, client, release, description)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (id) DO UPDATE SET updated_at = CURRENT_TIMESTAMP;
-      `, [profileId, tenantId, sysId, clientNum, assessment.targetRelease || 'SAP S/4HANA 2023 On-Premise', `SAP S/4HANA ${sysId} Client ${clientNum}`]);
+      const existingProfile = await client.query(
+        'SELECT id FROM sap_system_profiles WHERE tenant_id = $1 AND system_id = $2 AND client = $3 LIMIT 1;',
+        [tenantId, sysId, clientNum]
+      );
+
+      let profileId;
+      if (existingProfile.rowCount > 0) {
+        profileId = existingProfile.rows[0].id;
+      } else {
+        profileId = assessment.systemProfileId || `${tenantId}-${sysId}-${clientNum}`;
+        await client.query(`
+          INSERT INTO sap_system_profiles (id, tenant_id, system_id, client, release, description)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          ON CONFLICT (tenant_id, system_id, client) DO UPDATE SET updated_at = CURRENT_TIMESTAMP;
+        `, [profileId, tenantId, sysId, clientNum, assessment.targetRelease || 'SAP S/4HANA 2023 On-Premise', `SAP S/4HANA ${sysId} Client ${clientNum}`]);
+      }
 
       const tcode = assessment.tcode || assessment.transactionCode;
       const rec = assessment.recommendation || {};
@@ -56,17 +66,21 @@ export class AssessmentRepository {
           candidate_app_id, candidate_app_name, match_score,
           recommendation_action, recommendation_confidence, recommendation_justification,
           verification_status, lifecycle_status, fit_gap_score, score_coverage,
-          gaps_count, evidence_confidence, provenance, created_by, created_at, updated_at
+          gaps_count, evidence_confidence, provenance, readiness_state, scoring_breakdown,
+          created_by, created_at, updated_at
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
           $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
-          $21, $22, $23, $24, COALESCE($25::timestamptz, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP
+          $21, $22, $23, $24, $25,
+          $26, COALESCE($27::timestamptz, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP
         )
         ON CONFLICT (id) DO UPDATE SET
           description = EXCLUDED.description,
           lifecycle_status = EXCLUDED.lifecycle_status,
           recommendation_action = EXCLUDED.recommendation_action,
           fit_gap_score = EXCLUDED.fit_gap_score,
+          readiness_state = EXCLUDED.readiness_state,
+          scoring_breakdown = EXCLUDED.scoring_breakdown,
           updated_at = CURRENT_TIMESTAMP;
       `, [
         assessment.id, tenantId, assessment.requestId || null, tcode, assessment.description || null,
@@ -85,6 +99,8 @@ export class AssessmentRepository {
         assessment.gapsCount || 0,
         assessment.evidenceConfidence || 'MEDIUM',
         assessment.provenance || 'ASSESSMENT_ENGINE',
+        assessment.readinessState || rec.readinessState || rec.state || 'REVIEW',
+        JSON.stringify(assessment.scoringBreakdown || assessment.scores || rec.scoringBreakdown || {}),
         assessment.createdBy || 'admin',
         assessment.createdAt || new Date().toISOString()
       ]);
@@ -282,6 +298,8 @@ export class AssessmentRepository {
       gapsCount: row.gaps_count,
       evidenceConfidence: row.evidence_confidence,
       provenance: row.provenance,
+      readinessState: row.readiness_state || 'REVIEW',
+      scoringBreakdown: row.scoring_breakdown || {},
       dimensions,
       dimensionResults: dimensions,
       auditEvents: auditRes.rows.map(a => ({

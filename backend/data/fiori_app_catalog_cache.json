@@ -756,10 +756,25 @@
     "leadingTransactionCodes": [
       "F-28"
     ],
+    "semanticObject": "FI_FIO_AR_TRA",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1345')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
   },
   {
     "appId": "ME21N",
@@ -8494,10 +8509,25 @@
     "leadingTransactionCodes": [
       "F-53"
     ],
+    "semanticObject": "FI_FIO_AR_TRA",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_armanclear",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0773')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
   },
   {
     "appId": "F0984A",
@@ -8545,10 +8575,25 @@
     ],
     "sapui5Component": "k1471521020694 * ssuite.smartbusiness.runtime.s1",
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_FIO_AR_ANA",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "ANALYTICS",
+      "REPORTING"
+    ],
+    "deploymentType": "ON_PREMISE",
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/sbrt_appss1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1619')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
   },
   {
     "appId": "F2970",
@@ -8569,10 +8614,25 @@
     ],
     "sapui5Component": "gs.fin.il.collect.incoming.payments",
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_LOC_FI_IL",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Public Edition 2608"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_csilposting",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2970')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
   },
   {
     "appId": "F5588",
@@ -8593,10 +8653,25 @@
     ],
     "sapui5Component": "cus.o2c.incgpayt.analyze.s1",
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_CA_FIO",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/caincgpay_anls1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F5588')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
   },
   {
     "appId": "F9325",
@@ -8617,10 +8692,25 @@
     ],
     "sapui5Component": "gs.fin.ar.payment.post",
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_LOC_FI_JP_IVS",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Public Edition 2608"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F9325')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
   },
   {
     "appId": "FBZ1",
@@ -8638,9 +8728,24 @@
     "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
     "odataServices": [],
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_AP_AP_B",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ1')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
   },
   {
     "appId": "FBZ3",
@@ -8657,9 +8762,24 @@
     "technicalCatalog": "SAP_TC_FIN_FO_BE_APPS:S4FIN",
     "odataServices": [],
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_AP_AP_B",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ3')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
   },
   {
     "appId": "FPCPL",
@@ -8677,9 +8797,24 @@
     "technicalCatalog": "SAP_TC_FICA_PY_BE_APPS:S4FICA",
     "odataServices": [],
     "leadingTransactionCodes": [],
+    "semanticObject": "FI_CA",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FPCPL')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-13T17:32:26.423Z"
+    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
   },
   {
     "appId": "F7319",

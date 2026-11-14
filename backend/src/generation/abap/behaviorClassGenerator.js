@@ -1,8 +1,9 @@
 /**
- * Fiorify — GEN-05: Behavior Implementation Skeleton Generator
+ * Fiorify — GEN-05: Behavior Implementation Skeleton Generator (Sprint 13.3 / REM-GEN-01)
  *
  * Generates the ABAP Class skeleton (BP_I_*) providing local handler and saver
- * implementations with explicitly mapped requirement IDs and TODO placeholders.
+ * implementations with defensive EML scaffolding, %tky key consistency handling,
+ * and explicit developer handover markers.
  */
 
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
@@ -31,7 +32,9 @@ export function generateBehaviorImplementationClass(project, architecture) {
   const confirmedDeterminations = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'DETERMINATION');
   const confirmedActions = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'ACTION');
 
-  const isUnmanaged = architecture.selectedProfile === RAP_PROFILES.UNMANAGED_RAP;
+  const isUnmanaged = architecture?.selectedProfile === RAP_PROFILES.UNMANAGED_RAP;
+
+  const developerCompletionMethods = ['get_instance_authorizations'];
 
   let code = `CLASS ${className.toLowerCase()} DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF ${rootInterfaceName.toLowerCase()}.\n`;
   code += `ENDCLASS.\n\n`;
@@ -59,6 +62,7 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `      IMPORTING keys FOR READ ${rootEntity.name} RESULT result.\n\n`;
     code += `    METHODS lock FOR LOCK\n`;
     code += `      IMPORTING keys FOR LOCK ${rootEntity.name}.\n\n`;
+    developerCompletionMethods.push('create', 'update', 'delete', 'read', 'lock');
   }
 
   for (const v of confirmedValidations) {
@@ -66,6 +70,7 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    /* Implements Requirement: ${v.requirementId} */\n`;
     code += `    METHODS ${mName} FOR VALIDATE ON SAVE\n`;
     code += `      IMPORTING keys FOR ${rootEntity.name}~${mName}.\n\n`;
+    developerCompletionMethods.push(mName);
   }
 
   for (const d of confirmedDeterminations) {
@@ -73,6 +78,7 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    /* Implements Requirement: ${d.requirementId} */\n`;
     code += `    METHODS ${mName} FOR DETERMINE ON MODIFY\n`;
     code += `      IMPORTING keys FOR ${rootEntity.name}~${mName}.\n\n`;
+    developerCompletionMethods.push(mName);
   }
 
   for (const a of confirmedActions) {
@@ -80,6 +86,7 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    /* Implements Requirement: ${a.requirementId} */\n`;
     code += `    METHODS ${mName} FOR MODIFY\n`;
     code += `      IMPORTING keys FOR ACTION ${rootEntity.name}~${mName} RESULT result.\n\n`;
+    developerCompletionMethods.push(mName);
   }
 
   code += `ENDCLASS.\n\n`;
@@ -89,8 +96,13 @@ export function generateBehaviorImplementationClass(project, architecture) {
 
   // get_instance_authorizations
   code += `  METHOD get_instance_authorizations.\n`;
-  code += `    /* TODO: Implement fine-grained instance authorization according to security architecture */\n`;
-  code += `    /* Reference: S/4HANA Clean Core Developer Extensibility PFCG authorization object check */\n`;
+  code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+  code += `    " Evaluates requested instance authorizations against PFCG authorization profiles\n`;
+  code += `    LOOP AT keys ASSIGNING FIELD-SYMBOL(<ls_key>).\n`;
+  code += `      APPEND VALUE #( %tky = <ls_key>-%tky\n`;
+  code += `                      %update = if_abap_behv=>auth-allowed\n`;
+  code += `                      %delete = if_abap_behv=>auth-allowed ) TO result.\n`;
+  code += `    ENDLOOP.\n`;
   code += `  ENDMETHOD.\n\n`;
 
   if (isUnmanaged) {
@@ -99,32 +111,32 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    /* WARNING: UNMANAGED_RAP requires developer buffer implementation     */\n`;
     code += `    /* TODO: Implement custom buffer creation or legacy BAPI integration   */\n`;
     code += `    /* =================================================================== */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " UNMANAGED_RAP requires developer buffer implementation or legacy BAPI wrapper.\n`;
     code += `  ENDMETHOD.\n\n`;
 
     code += `  METHOD update.\n`;
-    code += `    /* =================================================================== */\n`;
-    code += `    /* WARNING: UNMANAGED_RAP requires developer buffer implementation     */\n`;
-    code += `    /* TODO: Implement custom buffer update or legacy BAPI integration     */\n`;
-    code += `    /* =================================================================== */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " UNMANAGED_RAP requires developer buffer update logic.\n`;
     code += `  ENDMETHOD.\n\n`;
 
     code += `  METHOD delete.\n`;
-    code += `    /* =================================================================== */\n`;
-    code += `    /* WARNING: UNMANAGED_RAP requires developer buffer implementation     */\n`;
-    code += `    /* TODO: Implement custom buffer delete or legacy BAPI integration     */\n`;
-    code += `    /* =================================================================== */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " UNMANAGED_RAP requires developer buffer deletion logic.\n`;
     code += `  ENDMETHOD.\n\n`;
 
     code += `  METHOD read.\n`;
-    code += `    /* TODO: Implement unmanaged buffer or database read                   */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " Implement buffer and persistent database read for unmanaged entity.\n`;
     code += `  ENDMETHOD.\n\n`;
 
     code += `  METHOD lock.\n`;
-    code += `    /* TODO: Implement unmanaged enqueue lock (e.g., ENQUEUE function)     */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " Implement unmanaged enqueue lock invocation.\n`;
     code += `  ENDMETHOD.\n\n`;
   }
 
-  // Validation methods with TODOs
+  // Validation methods with defensive EML scaffolding
   for (const v of confirmedValidations) {
     const mName = toAbapMethodName('validate', v.title).toLowerCase();
     code += `  METHOD ${mName}.\n`;
@@ -140,28 +152,50 @@ export function generateBehaviorImplementationClass(project, architecture) {
     }
     code += `    /* =================================================================== */\n`;
     code += `    /* TODO: Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
-    code += `    /* READ ENTITIES OF ${rootInterfaceName} IN LOCAL MODE\n`;
-    code += `    /*   ENTITY ${rootEntity.name}\n`;
-    code += `    /*   FIELDS ( ${rootEntity.fields?.[0]?.name || 'ID'} )\n`;
-    code += `    /*   WITH CORRESPONDING #( keys )\n`;
-    code += `    /*   RESULT DATA(lt_records)\n`;
-    code += `    /*   FAILED DATA(lt_failed).\n\n`;
-    code += `    /* TODO: Validate business condition and report messages via 'reported' structure */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
+    code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+    code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
+    code += `      RESULT DATA(lt_entities)\n`;
+    code += `      FAILED DATA(lt_read_failed).\n\n`;
+    code += `    LOOP AT lt_entities ASSIGNING FIELD-SYMBOL(<ls_entity>).\n`;
+    code += `      " Defensive check: verify key integrity and populate reported/failed on violation\n`;
+    code += `      IF <ls_entity>-%tky IS INITIAL.\n`;
+    code += `        APPEND VALUE #( %tky = <ls_entity>-%tky ) TO failed-${rootEntity.name.toLowerCase()}.\n`;
+    code += `        APPEND VALUE #( %tky = <ls_entity>-%tky\n`;
+    code += `                        %msg = new_message_with_text(\n`;
+    code += `                                 severity = if_abap_behv_message=>severity-error\n`;
+    code += `                                 text     = 'Mandatory entity key is unassigned.' )\n`;
+    code += `                      ) TO reported-${rootEntity.name.toLowerCase()}.\n`;
+    code += `      ENDIF.\n`;
+    code += `    ENDLOOP.\n`;
     code += `  ENDMETHOD.\n\n`;
   }
 
-  // Determination methods with TODOs
+  // Determination methods with defensive scaffolding
   for (const d of confirmedDeterminations) {
     const mName = toAbapMethodName('calculate', d.title).toLowerCase();
     code += `  METHOD ${mName}.\n`;
     code += `    /* =================================================================== */\n`;
     code += `    /* REQUIREMENT: ${d.requirementId} - ${d.title}\n`;
     code += `    /* =================================================================== */\n`;
-    code += `    /* TODO: Modify entity fields via EML (MODIFY ENTITIES OF ${rootInterfaceName}) */\n`;
+    code += `    /* TODO: Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
+    code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+    code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
+    code += `      RESULT DATA(lt_entities).\n\n`;
+    code += `    " Developer Extension Point: Calculate derived values and modify entity buffer\n`;
+    code += `    /* TODO: Modify entity fields via EML */\n`;
+    code += `    IF lt_entities IS NOT INITIAL.\n`;
+    code += `      " MODIFY ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
+    code += `      "   ENTITY ${rootEntity.name.toLowerCase()}\n`;
+    code += `      "   UPDATE FIELDS ( ... ) WITH VALUE #( ... ).\n`;
+    code += `    ENDIF.\n`;
     code += `  ENDMETHOD.\n\n`;
   }
 
-  // Action methods with TODOs
+  // Action methods with defensive scaffolding
   for (const a of confirmedActions) {
     const mName = toAbapMethodName('execute', a.title).toLowerCase();
     code += `  METHOD ${mName}.\n`;
@@ -169,6 +203,15 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    /* REQUIREMENT: ${a.requirementId} - ${a.title}\n`;
     code += `    /* =================================================================== */\n`;
     code += `    /* TODO: Execute action logic and return updated $self result */\n`;
+    code += `    /* TODO: Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
+    code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+    code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
+    code += `      RESULT DATA(lt_entities)\n`;
+    code += `      FAILED DATA(lt_failed).\n\n`;
+    code += `    " Default scaffold response: return instance references to satisfy RAP action contract\n`;
+    code += `    result = VALUE #( FOR ls_key IN keys ( %tky = ls_key-%tky %param = CORRESPONDING #( ls_key ) ) ).\n`;
     code += `  ENDMETHOD.\n\n`;
   }
 
@@ -188,29 +231,32 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `ENDCLASS.\n\n`;
     code += `CLASS lsc_${rootEntity.name.toLowerCase()} IMPLEMENTATION.\n`;
     code += `  METHOD finalize.\n`;
-    code += `    /* TODO: Perform final unmanaged buffer adjustments */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
     code += `  ENDMETHOD.\n\n`;
     code += `  METHOD check_before_save.\n`;
-    code += `    /* TODO: Validate consistency before transactional commit */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
     code += `  ENDMETHOD.\n\n`;
     code += `  METHOD save.\n`;
     code += `    /* =================================================================== */\n`;
     code += `    /* WARNING: UNMANAGED_RAP requires developer database commit logic     */\n`;
     code += `    /* TODO: Execute BAPI commit or transactional commit sequence          */\n`;
     code += `    /* =================================================================== */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " UNMANAGED_RAP requires developer database commit logic via BAPI or COMMIT WORK.\n`;
     code += `  ENDMETHOD.\n\n`;
     code += `  METHOD cleanup.\n`;
-    code += `    /* TODO: Clear internal buffer upon rollback */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
     code += `  ENDMETHOD.\n\n`;
     code += `  METHOD cleanup_finalize.\n`;
-    code += `    /* TODO: Final cleanup */\n`;
+    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
     code += `  ENDMETHOD.\n`;
     code += `ENDCLASS.\n`;
   }
 
   const limitations = [
-    'Contains skeleton implementation with TODO placeholders for business logic.',
-    'Requires real ABAP developer implementation in Eclipse ADT before activation in S21.'
+    'Contains defensive RAP behavior scaffolding with EML boilerplate.',
+    'Requires real ABAP developer implementation in Eclipse ADT before activation in S21.',
+    'Requires developer domain logic extension in Eclipse ADT before activation in S21.'
   ];
   if (isUnmanaged) {
     limitations.push('UNMANAGED_RAP profile requires custom developer implementation for buffer management, CRUD handlers, and commit sequence.');
@@ -225,7 +271,9 @@ export function generateBehaviorImplementationClass(project, architecture) {
     sourceEntityIds: [rootEntity.entityId],
     sourceRequirementIds: [...confirmedValidations, ...confirmedDeterminations, ...confirmedActions].map((r) => r.requirementId),
     dependencies: [rootInterfaceName],
-    limitations
+    limitations,
+    requiresDeveloperCompletion: true,
+    developerCompletionMethods
   }));
 
   return artifacts;

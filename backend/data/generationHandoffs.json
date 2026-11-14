@@ -12,7 +12,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -46,7 +46,15 @@
     "createdAt": "2026-11-13T04:54:40.368Z",
     "updatedAt": "2026-11-13T04:54:40.368Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T04:54:40.368Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-68F17D",
@@ -61,7 +69,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -95,7 +103,15 @@
     "createdAt": "2026-11-13T04:54:41.458Z",
     "updatedAt": "2026-11-13T04:54:41.458Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T04:54:41.458Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-1794547666452-E9576D",
@@ -110,7 +126,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -142,7 +158,15 @@
     "createdAt": "2026-11-13T05:27:46.452Z",
     "updatedAt": "2026-11-13T05:27:46.452Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T05:27:46.452Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ST22-22FC56",
@@ -157,7 +181,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -191,7 +215,15 @@
     "createdAt": "2026-11-13T05:34:19.223Z",
     "updatedAt": "2026-11-13T05:34:19.223Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T05:34:19.223Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-1794548577115-C02F87",
@@ -206,7 +238,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -238,7 +270,15 @@
     "createdAt": "2026-11-13T05:42:57.115Z",
     "updatedAt": "2026-11-13T05:42:57.115Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T05:42:57.115Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-FE1470",
@@ -253,7 +293,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -287,7 +327,15 @@
     "createdAt": "2026-11-13T06:33:06.275Z",
     "updatedAt": "2026-11-13T06:33:06.275Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T06:33:06.275Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-84DDD9",
@@ -302,7 +350,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -336,7 +384,15 @@
     "createdAt": "2026-11-13T06:33:07.208Z",
     "updatedAt": "2026-11-13T06:33:07.208Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T06:33:07.208Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-C6E646",
@@ -351,7 +407,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -385,7 +441,15 @@
     "createdAt": "2026-11-13T07:05:46.634Z",
     "updatedAt": "2026-11-13T07:05:46.634Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:05:46.634Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-FF3EC0",
@@ -400,7 +464,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -434,7 +498,15 @@
     "createdAt": "2026-11-13T07:16:07.385Z",
     "updatedAt": "2026-11-13T07:16:07.385Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:16:07.385Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-DA5D21",
@@ -449,7 +521,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -483,7 +555,15 @@
     "createdAt": "2026-11-13T07:16:53.794Z",
     "updatedAt": "2026-11-13T07:16:53.794Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:16:53.794Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-1794554216426-109990",
@@ -498,7 +578,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -530,7 +610,15 @@
     "createdAt": "2026-11-13T07:16:56.426Z",
     "updatedAt": "2026-11-13T07:16:56.426Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:16:56.426Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ST22-6C6674",
@@ -545,7 +633,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -579,7 +667,15 @@
     "createdAt": "2026-11-13T07:16:56.645Z",
     "updatedAt": "2026-11-13T07:16:56.645Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:16:56.645Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ST22-322121",
@@ -594,7 +690,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -628,7 +724,15 @@
     "createdAt": "2026-11-13T07:16:56.738Z",
     "updatedAt": "2026-11-13T07:16:56.738Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:16:56.738Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-1794556206709-39140E",
@@ -643,7 +747,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -675,7 +779,15 @@
     "createdAt": "2026-11-13T07:50:06.709Z",
     "updatedAt": "2026-11-13T07:50:06.709Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:50:06.709Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-F14682",
@@ -690,7 +802,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -724,7 +836,15 @@
     "createdAt": "2026-11-13T07:53:40.132Z",
     "updatedAt": "2026-11-13T07:53:40.132Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T07:53:40.132Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-9073C8",
@@ -739,7 +859,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -773,7 +893,15 @@
     "createdAt": "2026-11-13T08:36:26.607Z",
     "updatedAt": "2026-11-13T08:36:26.607Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T08:36:26.607Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-1794564693231-C9E7F4",
@@ -788,7 +916,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Enterprise System Administrator",
@@ -820,7 +948,15 @@
     "createdAt": "2026-11-13T10:11:33.231Z",
     "updatedAt": "2026-11-13T10:11:33.231Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Enterprise System Administrator",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Enterprise System Administrator",
+      "originalApprovedAt": "2026-11-13T10:11:33.231Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-FE8A70",
@@ -835,7 +971,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Enterprise System Administrator",
@@ -869,7 +1005,15 @@
     "createdAt": "2026-11-13T10:11:33.614Z",
     "updatedAt": "2026-11-13T10:11:33.614Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Enterprise System Administrator",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Enterprise System Administrator",
+      "originalApprovedAt": "2026-11-13T10:11:33.614Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-2D8A56",
@@ -884,7 +1028,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Enterprise System Administrator",
@@ -918,7 +1062,15 @@
     "createdAt": "2026-11-13T10:11:33.653Z",
     "updatedAt": "2026-11-13T10:11:33.653Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Enterprise System Administrator"
+    "creatorName": "Enterprise System Administrator",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Enterprise System Administrator",
+      "originalApprovedAt": "2026-11-13T10:11:33.653Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-1794565869686-A49709",
@@ -933,7 +1085,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -967,7 +1119,15 @@
     "createdAt": "2026-11-13T10:31:09.686Z",
     "updatedAt": "2026-11-13T10:31:09.686Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T10:31:09.686Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-F-31-978B17",
@@ -982,7 +1142,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "PENDING_REVALIDATION",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1016,7 +1176,15 @@
     "createdAt": "2026-11-13T10:31:09.785Z",
     "updatedAt": "2026-11-13T10:31:09.785Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "ORPHAN_UNVERIFIED",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T10:31:09.785Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-9C6817",
@@ -1031,7 +1199,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1065,7 +1233,15 @@
     "createdAt": "2026-11-13T11:27:30.596Z",
     "updatedAt": "2026-11-13T11:27:30.596Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T11:27:30.596Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-F93E23",
@@ -1080,7 +1256,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1114,7 +1290,15 @@
     "createdAt": "2026-11-13T15:02:57.684Z",
     "updatedAt": "2026-11-13T15:02:57.684Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T15:02:57.684Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-ME21N-9CE8B3",
@@ -1129,7 +1313,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1163,7 +1347,15 @@
     "createdAt": "2026-11-13T15:02:58.161Z",
     "updatedAt": "2026-11-13T15:02:58.161Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T15:02:58.161Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794583238612",
@@ -1178,7 +1370,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1215,7 +1407,15 @@
     "createdAt": "2026-11-13T15:20:40.235Z",
     "updatedAt": "2026-11-13T15:20:40.235Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T15:20:40.235Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794583336592",
@@ -1230,7 +1430,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1267,7 +1467,15 @@
     "createdAt": "2026-11-13T15:22:17.086Z",
     "updatedAt": "2026-11-13T15:22:17.086Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T15:22:17.086Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794583455464",
@@ -1282,7 +1490,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1319,7 +1527,15 @@
     "createdAt": "2026-11-13T15:24:16.759Z",
     "updatedAt": "2026-11-13T15:24:16.759Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T15:24:16.759Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794585337456",
@@ -1334,7 +1550,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1371,7 +1587,15 @@
     "createdAt": "2026-11-13T15:55:38.047Z",
     "updatedAt": "2026-11-13T15:55:38.047Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T15:55:38.047Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794585950840",
@@ -1386,7 +1610,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1423,7 +1647,15 @@
     "createdAt": "2026-11-13T16:05:51.419Z",
     "updatedAt": "2026-11-13T16:05:51.419Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T16:05:51.419Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794586100593",
@@ -1438,7 +1670,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1475,7 +1707,15 @@
     "createdAt": "2026-11-13T16:08:21.140Z",
     "updatedAt": "2026-11-13T16:08:21.140Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T16:08:21.140Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794587136521",
@@ -1490,7 +1730,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1527,7 +1767,15 @@
     "createdAt": "2026-11-13T16:25:37.122Z",
     "updatedAt": "2026-11-13T16:25:37.122Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T16:25:37.122Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794588118100",
@@ -1542,7 +1790,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1579,7 +1827,15 @@
     "createdAt": "2026-11-13T16:41:58.712Z",
     "updatedAt": "2026-11-13T16:41:58.712Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T16:41:58.712Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794589652076",
@@ -1594,7 +1850,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1631,7 +1887,15 @@
     "createdAt": "2026-11-13T17:07:32.658Z",
     "updatedAt": "2026-11-13T17:07:32.658Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T17:07:32.658Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794589784323",
@@ -1646,7 +1910,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1683,7 +1947,15 @@
     "createdAt": "2026-11-13T17:09:44.955Z",
     "updatedAt": "2026-11-13T17:09:44.955Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T17:09:44.955Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794590032723",
@@ -1698,7 +1970,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1735,7 +2007,15 @@
     "createdAt": "2026-11-13T17:13:53.305Z",
     "updatedAt": "2026-11-13T17:13:53.305Z",
     "createdBy": "USR-ADMIN-01",
-    "creatorName": "Admin"
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T17:13:53.305Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
   },
   {
     "handoffId": "HND-GEN-LIVE-S1-1794590983815",
@@ -1750,7 +2030,7 @@
     "classification": "STANDARD",
     "currentStage": "DRAFT",
     "proposedAppType": "RAP_MANAGED",
-    "approvalStatus": "APPROVED",
+    "approvalStatus": "DEMO_FIXTURE",
     "leadArchitectApproval": {
       "approved": true,
       "approver": "Admin",
@@ -1786,6 +2066,1414 @@
     },
     "createdAt": "2026-11-13T17:29:44.443Z",
     "updatedAt": "2026-11-13T17:29:44.443Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin",
+    "provenanceClassification": "DEMO_FIXTURE",
+    "historicalApproval": {
+      "originalApprovalStatus": "APPROVED",
+      "originalApprover": "Admin",
+      "originalApprovedAt": "2026-11-13T17:29:44.443Z",
+      "verifiedByArchitectPermission": false
+    },
+    "revalidationRequired": true
+  },
+  {
+    "handoffId": "HND-1794635217312-E76A62",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794635217285",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T05:46:57.312Z",
+      "timestamp": "2026-11-14T05:46:57.312Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794635217285",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T05:46:57.312Z",
+    "updatedAt": "2026-11-14T05:46:57.312Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794635415965",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794635415965",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T05:50:16.680Z",
+      "timestamp": "2026-11-14T05:50:16.680Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794635415965",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T05:50:16.680Z",
+    "updatedAt": "2026-11-14T05:50:16.680Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794635434742-6F7D89",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794635434684",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T05:50:34.742Z",
+      "timestamp": "2026-11-14T05:50:34.742Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794635434684",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T05:50:34.742Z",
+    "updatedAt": "2026-11-14T05:50:34.742Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794635607872",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794635607872",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T05:53:28.497Z",
+      "timestamp": "2026-11-14T05:53:28.497Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794635607872",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T05:53:28.497Z",
+    "updatedAt": "2026-11-14T05:53:28.497Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794635733480-094952",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794635733461",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T05:55:33.480Z",
+      "timestamp": "2026-11-14T05:55:33.480Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794635733461",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T05:55:33.480Z",
+    "updatedAt": "2026-11-14T05:55:33.480Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-1794635838347-5876C8",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794635838331",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T05:57:18.347Z",
+      "timestamp": "2026-11-14T05:57:18.347Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794635838331",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T05:57:18.347Z",
+    "updatedAt": "2026-11-14T05:57:18.347Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-1794636093026-21B077",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794636093007",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T06:01:33.026Z",
+      "timestamp": "2026-11-14T06:01:33.026Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794636093007",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T06:01:33.026Z",
+    "updatedAt": "2026-11-14T06:01:33.026Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-1794636336390-4995FE",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794636336373",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T06:05:36.389Z",
+      "timestamp": "2026-11-14T06:05:36.389Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794636336373",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T06:05:36.389Z",
+    "updatedAt": "2026-11-14T06:05:36.389Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-1794639099093-E32773",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794639099063",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T06:51:39.093Z",
+      "timestamp": "2026-11-14T06:51:39.093Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794639099063",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T06:51:39.093Z",
+    "updatedAt": "2026-11-14T06:51:39.093Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-1794640977645-CDC6E3",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794640977616",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T07:22:57.645Z",
+      "timestamp": "2026-11-14T07:22:57.645Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794640977616",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T07:22:57.645Z",
+    "updatedAt": "2026-11-14T07:22:57.645Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794642035059",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794642035059",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T07:40:36.102Z",
+      "timestamp": "2026-11-14T07:40:36.102Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794642035059",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T07:40:36.102Z",
+    "updatedAt": "2026-11-14T07:40:36.102Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794645396499",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794645396499",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T08:36:37.048Z",
+      "timestamp": "2026-11-14T08:36:37.048Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794645396499",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T08:36:37.048Z",
+    "updatedAt": "2026-11-14T08:36:37.048Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794646096521",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794646096521",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T08:48:17.754Z",
+      "timestamp": "2026-11-14T08:48:17.754Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794646096521",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T08:48:17.754Z",
+    "updatedAt": "2026-11-14T08:48:17.754Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794646853048",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794646853048",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T09:00:53.726Z",
+      "timestamp": "2026-11-14T09:00:53.726Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794646853048",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:00:53.726Z",
+    "updatedAt": "2026-11-14T09:00:53.726Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794647933981",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794647933981",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T09:18:54.537Z",
+      "timestamp": "2026-11-14T09:18:54.537Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794647933981",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:18:54.537Z",
+    "updatedAt": "2026-11-14T09:18:54.537Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794647960438",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794647960438",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T09:19:21.108Z",
+      "timestamp": "2026-11-14T09:19:21.108Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794647960438",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:19:21.108Z",
+    "updatedAt": "2026-11-14T09:19:21.108Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794649408404",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794649408404",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T09:43:29.621Z",
+      "timestamp": "2026-11-14T09:43:29.621Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794649408404",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:43:29.621Z",
+    "updatedAt": "2026-11-14T09:43:29.621Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794649788902-311CC5",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794649788884",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T09:49:48.902Z",
+      "timestamp": "2026-11-14T09:49:48.902Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794649788884",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:49:48.902Z",
+    "updatedAt": "2026-11-14T09:49:48.902Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794649832498",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794649832498",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T09:50:35.282Z",
+      "timestamp": "2026-11-14T09:50:35.282Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794649832498",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:50:35.282Z",
+    "updatedAt": "2026-11-14T09:50:35.282Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794649964448-70D14A",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794649964423",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T09:52:44.448Z",
+      "timestamp": "2026-11-14T09:52:44.448Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794649964423",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:52:44.448Z",
+    "updatedAt": "2026-11-14T09:52:44.448Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794650025398",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794650025398",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T09:53:48.337Z",
+      "timestamp": "2026-11-14T09:53:48.337Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794650025398",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:53:48.337Z",
+    "updatedAt": "2026-11-14T09:53:48.337Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794650249071-D46B99",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794650249048",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T09:57:29.071Z",
+      "timestamp": "2026-11-14T09:57:29.071Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794650249048",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T09:57:29.071Z",
+    "updatedAt": "2026-11-14T09:57:29.071Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794650403334",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794650403334",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T10:00:03.994Z",
+      "timestamp": "2026-11-14T10:00:03.994Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794650403334",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T10:00:03.994Z",
+    "updatedAt": "2026-11-14T10:00:03.994Z",
+    "createdBy": "USR-ADMIN-01",
+    "creatorName": "Admin"
+  },
+  {
+    "handoffId": "HND-1794650440962-D00A8F",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1794650440946",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-14T10:00:40.962Z",
+      "timestamp": "2026-11-14T10:00:40.962Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1794650440946",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect."
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T10:00:40.962Z",
+    "updatedAt": "2026-11-14T10:00:40.962Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect"
+  },
+  {
+    "handoffId": "HND-GEN-LIVE-S1-1794650524873",
+    "sourceAssessmentId": "ASM-LIVE-S1-1794650524873",
+    "tcode": "VA01",
+    "transactionDescription": "Live S1 Persistence Test for Sales Order Creation",
+    "targetRelease": "SAP S/4HANA 2023",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Admin",
+      "approverId": "USR-ADMIN-01",
+      "approvedAt": "2026-11-14T10:02:05.507Z",
+      "timestamp": "2026-11-14T10:02:05.507Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-LIVE-S1-1794650524873",
+      "assessmentVersion": 1,
+      "justification": "Custom RAP Managed build approved under Clean Core Tier 2."
+    },
+    "cleanCoreJustification": "Custom RAP Managed build approved under Clean Core Tier 2.",
+    "businessRequirements": {
+      "process": "Sales and Distribution",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-14T10:02:05.507Z",
+    "updatedAt": "2026-11-14T10:02:05.507Z",
     "createdBy": "USR-ADMIN-01",
     "creatorName": "Admin"
   }

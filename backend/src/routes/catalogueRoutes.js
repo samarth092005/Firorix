@@ -77,6 +77,9 @@ export async function handleCatalogueRoutes(req, res, url, context = {}) {
     const productSuite = url.searchParams.get('productSuite') || '';
     const uiTechnology = url.searchParams.get('uiTechnology') || '';
     const odataService = url.searchParams.get('odataService') || '';
+    const semanticObject = url.searchParams.get('semanticObject') || '';
+    const semanticAction = url.searchParams.get('semanticAction') || '';
+    const deploymentType = url.searchParams.get('deploymentType') || '';
     const query = url.searchParams.get('query') || '';
     const limit = url.searchParams.has('limit') ? Number(url.searchParams.get('limit')) : undefined;
     const page = url.searchParams.has('page') ? Number(url.searchParams.get('page')) : undefined;
@@ -95,6 +98,9 @@ export async function handleCatalogueRoutes(req, res, url, context = {}) {
         productSuite,
         uiTechnology,
         odataService,
+        semanticObject,
+        semanticAction,
+        deploymentType,
         query,
         limit: limit ?? (pageSize ?? 20),
         page: page ?? 1,

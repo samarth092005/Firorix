@@ -91,7 +91,7 @@ export const LoginPage: React.FC = () => {
               <Layers size={22} />
             </div>
             <span style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px' }}>
-              Fiori<span style={{ color: '#58B8D4' }}>X</span>
+              Fiori<span style={{ color: '#58B8D4' }}>fy</span>
             </span>
           </div>
 

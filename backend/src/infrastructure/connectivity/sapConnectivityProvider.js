@@ -51,6 +51,29 @@ export class SapConnectivityProvider {
    * Executes a read-only query against a relative SAP endpoint path
    */
   async executeQuery(path, options = {}) {
+    const connectionMode = options.connectionMode || (
+      options.baseUrl || process.env.SAP_URL_OVERRIDE ? 'DIRECT_HTTP' : 'BTP_DESTINATION'
+    );
+
+    if (connectionMode === 'DIRECT_HTTP') {
+      const baseUrl = (options.baseUrl || process.env.SAP_URL_OVERRIDE || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+      const cleanPath = path.startsWith('/') ? path : `/${path}`;
+      const targetUrl = `${baseUrl}${cleanPath}`;
+      const headers = { ...(options.headers || {}) };
+
+      const user = options.username || process.env.SAP_USER;
+      const pass = options.password || process.env.SAP_PASSWORD;
+      if (user && pass && !headers.Authorization && !headers.authorization) {
+        headers.Authorization = `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
+      }
+
+      return await this.httpClient.execute(targetUrl, {
+        method: options.method || 'GET',
+        headers,
+        sapClient: options.sapClient || this.defaultClient
+      });
+    }
+
     const destinationName = options.destinationName || this.defaultDestination;
     const resolved = await this.destinationProvider.resolve(destinationName);
 

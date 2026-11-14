@@ -42,6 +42,7 @@ export class SapConnectionHealthService {
    */
   async runHealthCheck(options = {}) {
     const destinationName = options.destinationName || this.destinationName;
+    const connectionMode = options.connectionMode || (options.baseUrl ? 'DIRECT_HTTP' : (process.env.SAP_CONNECTION_MODE === 'DIRECT_HTTP' ? 'DIRECT_HTTP' : 'BTP_DESTINATION'));
     const startTime = Date.now();
 
     const capabilities = {
@@ -57,18 +58,27 @@ export class SapConnectionHealthService {
       [CAPABILITY_KEYS.READ_ONLY_BOUNDARIES]: { tested: false, supported: false, status: 'NOT_RUN' }
     };
 
-    // 1. Probe: Destination Resolution
-    const destRes = await this.provider.destinationProvider.resolve(destinationName);
-    capabilities[CAPABILITY_KEYS.DESTINATION_RESOLUTION] = {
-      tested: true,
-      supported: destRes.success,
-      status: destRes.success ? 'VERIFIED' : destRes.statusCode || 'FAILED',
-      provenance: destRes.provenance,
-      error: destRes.errorMessage || null
-    };
+    // 1. Probe: Destination Resolution or Direct HTTP Resolution
+    if (connectionMode === 'DIRECT_HTTP') {
+      capabilities[CAPABILITY_KEYS.DESTINATION_RESOLUTION] = {
+        tested: true,
+        supported: true,
+        status: 'VERIFIED',
+        details: `Direct HTTP local connection to ${options.baseUrl || process.env.SAP_URL_OVERRIDE || 'http://127.0.0.1:8000'}`
+      };
+    } else {
+      const destRes = await this.provider.destinationProvider.resolve(destinationName);
+      capabilities[CAPABILITY_KEYS.DESTINATION_RESOLUTION] = {
+        tested: true,
+        supported: destRes.success,
+        status: destRes.success ? 'VERIFIED' : destRes.statusCode || 'FAILED',
+        provenance: destRes.provenance,
+        error: destRes.errorMessage || null
+      };
 
-    if (!destRes.success) {
-      return this._compileReport(capabilities, CONNECTIVITY_STATUSES.DESTINATION_NOT_FOUND, startTime, destinationName);
+      if (!destRes.success) {
+        return this._compileReport(capabilities, CONNECTIVITY_STATUSES.DESTINATION_NOT_FOUND, startTime, destinationName);
+      }
     }
 
     // 10. Probe: Read-Only Boundaries Enforcement (In-Memory Guardrail Verification)
@@ -90,7 +100,7 @@ export class SapConnectionHealthService {
     }
 
     // 6. Probe: System Echo (/sap/bc/echo)
-    const echoRes = await this.provider.executeQuery('/sap/bc/echo', { destinationName });
+    const echoRes = await this.provider.executeQuery('/sap/bc/echo', { ...options, destinationName, connectionMode });
     const isReachabilityError = echoRes.statusCode === 'TIMEOUT' || echoRes.statusCode === 'NETWORK_UNAVAILABLE';
 
     capabilities[CAPABILITY_KEYS.CLOUD_CONNECTOR_REACHABILITY] = {
@@ -111,7 +121,7 @@ export class SapConnectionHealthService {
     if (isReachabilityError) {
       return this._compileReport(
         capabilities,
-        CONNECTIVITY_STATUSES.CLOUD_CONNECTOR_UNAVAILABLE,
+        connectionMode === 'DIRECT_HTTP' ? CONNECTIVITY_STATUSES.NETWORK_UNREACHABLE : CONNECTIVITY_STATUSES.CLOUD_CONNECTOR_UNAVAILABLE,
         startTime,
         destinationName,
         echoRes.errorMessage
@@ -124,7 +134,7 @@ export class SapConnectionHealthService {
       tested: true,
       supported: !isAuthFailed,
       status: !isAuthFailed ? 'VERIFIED' : 'AUTHENTICATION_FAILED',
-      error: isAuthFailed ? 'SAP ICM rejected technical user credentials (HTTP 401 Unauthorized).' : null
+      error: isAuthFailed ? 'SAP ICM rejected credentials (HTTP 401 Unauthorized).' : null
     };
 
     if (isAuthFailed) {
@@ -133,26 +143,56 @@ export class SapConnectionHealthService {
         CONNECTIVITY_STATUSES.AUTHENTICATION_FAILED,
         startTime,
         destinationName,
-        'SAP authentication failed. Please verify credentials in BTP destination.'
+        'SAP authentication failed. Please verify credentials.'
       );
     }
 
     // 4. Probe: Gateway Catalog (/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection)
-    const catRes = await this.provider.executeQuery('/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection?$top=1', { destinationName });
+    const catPath = options.gatewayCatalogPath || '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection?$top=1';
+    const catRes = await this.provider.executeQuery(catPath, { ...options, destinationName, connectionMode });
+    let catStatus = catRes.success ? 'VERIFIED' : (catRes.statusCode || 'UNAVAILABLE');
+    let catError = catRes.errorMessage || null;
+    let requiredGatewayAuthorizations = [];
+    if (catRes.status === 403) {
+      catStatus = 'AUTHORIZATION_FAILED';
+      catError = 'HTTP 403 Forbidden on Gateway Catalog. User lacks authorization to query /IWFND/CATALOGSERVICE.';
+      requiredGatewayAuthorizations = ['S_SERVICE (SRV_NAME /IWFND/SG_MED_CATALOG, ACTVT 03)', 'S_RFC (RFC_NAME /IWFND/, ACTVT 16)'];
+    } else if (catRes.status === 401) {
+      catStatus = 'AUTHENTICATION_FAILED';
+      catError = 'HTTP 401 Unauthorized on Gateway Catalog.';
+    }
+
     capabilities[CAPABILITY_KEYS.GATEWAY_CATALOG] = {
       tested: true,
       supported: catRes.success,
-      status: catRes.success ? 'VERIFIED' : (catRes.statusCode || 'UNAVAILABLE'),
-      error: catRes.errorMessage || null
+      status: catStatus,
+      httpStatus: catRes.status,
+      error: catError,
+      requiredAuthorizations: requiredGatewayAuthorizations
     };
 
     // 5. Probe: ADT Discovery (/sap/bc/adt/discovery)
-    const adtRes = await this.provider.executeQuery('/sap/bc/adt/discovery', { destinationName });
+    const adtPath = options.adtDiscoveryPath || '/sap/bc/adt/discovery';
+    const adtRes = await this.provider.executeQuery(adtPath, { ...options, destinationName, connectionMode });
+    let adtStatus = adtRes.success ? 'VERIFIED' : (adtRes.statusCode || 'UNAVAILABLE');
+    let adtError = adtRes.errorMessage || null;
+    let requiredAdtAuthorizations = [];
+    if (adtRes.status === 403) {
+      adtStatus = 'AUTHORIZATION_FAILED';
+      adtError = 'HTTP 403 Forbidden on ADT endpoint. User lacks ABAP Development Tools authorizations.';
+      requiredAdtAuthorizations = ['S_ADT_RES (Field URI, ACTVT 03, 16)', 'S_RFC (RFC_NAME /BDL/, ACTVT 16)'];
+    } else if (adtRes.status === 401) {
+      adtStatus = 'AUTHENTICATION_FAILED';
+      adtError = 'HTTP 401 Unauthorized on ADT endpoint.';
+    }
+
     capabilities[CAPABILITY_KEYS.ADT_DISCOVERY] = {
       tested: true,
       supported: adtRes.success,
-      status: adtRes.success ? 'VERIFIED' : (adtRes.statusCode || 'UNAVAILABLE'),
-      error: adtRes.errorMessage || null
+      status: adtStatus,
+      httpStatus: adtRes.status,
+      error: adtError,
+      requiredAuthorizations: requiredAdtAuthorizations
     };
 
     // 7. Probe: Release Verification
@@ -160,7 +200,7 @@ export class SapConnectionHealthService {
       tested: true,
       supported: catRes.success || adtRes.success,
       status: (catRes.success || adtRes.success) ? 'VERIFIED' : 'UNVERIFIED',
-      targetRelease: 'SAP S/4HANA 2023 On-Premise',
+      targetRelease: options.release || 'SAP S/4HANA 2023 Private Edition',
       softwareComponent: 'S4CORE 108'
     };
 
@@ -182,9 +222,42 @@ export class SapConnectionHealthService {
 
     const overallStatus = (catRes.success && adtRes.success)
       ? CONNECTIVITY_STATUSES.CONNECTED
-      : (catRes.success || adtRes.success ? CONNECTIVITY_STATUSES.PARTIAL_ACCESS : CONNECTIVITY_STATUSES.AUTHORIZATION_BLOCKED);
+      : ((catRes.success || adtRes.success) ? CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY : (adtStatus === 'AUTHORIZATION_FAILED' || catStatus === 'AUTHORIZATION_FAILED' ? CONNECTIVITY_STATUSES.AUTHORIZATION_BLOCKED : CONNECTIVITY_STATUSES.SERVICE_UNAVAILABLE));
 
     return this._compileReport(capabilities, overallStatus, startTime, destinationName);
+  }
+
+  /**
+   * Inspects OData $metadata for an allowlisted service endpoint
+   */
+  async inspectGatewayMetadata(servicePath, options = {}) {
+    const cleanPath = servicePath.endsWith('/$metadata') ? servicePath : `${servicePath.replace(/\/+$/, '')}/$metadata`;
+    const res = await this.provider.executeQuery(cleanPath, options);
+    if (!res.success) {
+      return {
+        success: false,
+        status: res.status,
+        statusCode: res.statusCode,
+        errorMessage: res.errorMessage
+      };
+    }
+
+    const xml = typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
+    const isV4 = xml.includes('Version="4.0"') || xml.includes('edmx:Version="4.0"');
+    const isV2 = xml.includes('Version="1.0"') || xml.includes('DataServices m:DataServiceVersion="2.0"');
+    const version = isV4 ? 'ODATA_V4' : (isV2 ? 'ODATA_V2' : 'UNKNOWN');
+
+    const entitySetMatches = [...xml.matchAll(/<EntitySet\s+Name="([^"]+)"(?:\s+EntityType="([^"]+)")?/gi)];
+    const entitySets = entitySetMatches.map(m => ({ name: m[1], entityType: m[2] }));
+
+    return {
+      success: true,
+      servicePath: cleanPath,
+      odataVersion: version,
+      entitySetsCount: entitySets.length,
+      entitySets: entitySets.slice(0, 20),
+      rawLength: xml.length
+    };
   }
 
   _compileReport(capabilities, overallStatus, startTime, destinationName, summaryError = null) {
@@ -199,6 +272,7 @@ export class SapConnectionHealthService {
       targetSystem: 'S21 (Client 200)',
       targetRelease: 'SAP S/4HANA 2023 On-Premise',
       overallStatus,
+      status: overallStatus,
       supportedCapabilitiesCount: supportedCount,
       totalCapabilitiesCount: totalCount,
       coveragePercent: Math.round((supportedCount / totalCount) * 100),

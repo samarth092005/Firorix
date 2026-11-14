@@ -48,13 +48,15 @@ export class GenerationProjectRepository {
           source_assessment_id, source_transaction_code, source_system_id, source_client,
           target_product, target_release, target_deployment_model,
           lifecycle_status, current_phase, specification_version,
+          modernization_outcome, approved_by, approved_at,
           created_by, creator_id, created_at, updated_at
         ) VALUES (
           $1, $2, $3, $4, $5,
           $6, $7, $8, $9,
           $10, $11, $12,
           $13, $14, $15,
-          $16, $17, COALESCE($18::timestamptz, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP
+          $16, $17, $18,
+          $19, $20, COALESCE($21::timestamptz, CURRENT_TIMESTAMP), CURRENT_TIMESTAMP
         )
         ON CONFLICT (project_id) DO UPDATE SET
           project_name = EXCLUDED.project_name,
@@ -62,6 +64,9 @@ export class GenerationProjectRepository {
           lifecycle_status = EXCLUDED.lifecycle_status,
           current_phase = EXCLUDED.current_phase,
           specification_version = EXCLUDED.specification_version,
+          modernization_outcome = EXCLUDED.modernization_outcome,
+          approved_by = EXCLUDED.approved_by,
+          approved_at = EXCLUDED.approved_at,
           updated_at = CURRENT_TIMESTAMP;
       `, [
         projectId, tenantId, projectName, project.description || null, origin,
@@ -72,6 +77,9 @@ export class GenerationProjectRepository {
         project.lifecycleStatus || 'DRAFT',
         project.currentPhase || 'PHASE_1_WORKSPACE',
         project.specificationVersion || 1,
+        project.modernizationOutcome || 'BUILD',
+        project.approvedBy || null,
+        project.approvedAt || null,
         project.createdBy || 'Lead SAP Architect',
         project.creatorId || 'USR-CONS-01',
         project.createdAt || new Date().toISOString()
@@ -302,6 +310,9 @@ export class GenerationProjectRepository {
       })),
       createdBy: row.created_by,
       creatorId: row.creator_id,
+      modernizationOutcome: row.modernization_outcome || 'BUILD',
+      approvedBy: row.approved_by || null,
+      approvedAt: row.approved_at ? (row.approved_at.toISOString ? row.approved_at.toISOString() : row.approved_at) : null,
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString()
     };

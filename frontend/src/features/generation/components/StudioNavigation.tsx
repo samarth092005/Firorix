@@ -8,6 +8,7 @@ import {
   LayoutTemplate,
   CheckCircle2,
   PackageCheck,
+  Send,
   Wrench,
   LucideIcon
 } from 'lucide-react';
@@ -32,11 +33,13 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'requirements', label: '2. Requirements Designer', icon: FileText, requiresProject: true, phaseTag: 'Scope' },
   { id: 'data-model', label: '3. Data Model Designer', icon: Database, requiresProject: true, phaseTag: 'CDS' },
   { id: 'architecture', label: '4. Architecture Designer', icon: Cpu, requiresProject: true, phaseTag: 'RAP' },
-  { id: 'abap-generator', label: '5. ABAP Generator', icon: Code2, requiresProject: true, phaseTag: 'Source' },
-  { id: 'ui-generator', label: '6. Fiori UI Generator', icon: LayoutTemplate, requiresProject: true, phaseTag: 'Fiori' },
-  { id: 'preview-validation', label: '7. Preview & Validation', icon: CheckCircle2, requiresProject: true, phaseTag: 'Mock V4' },
-  { id: 'review-export', label: '8. Review & Export', icon: PackageCheck, requiresProject: true, phaseTag: 'ZIP' },
-  { id: 'environment', label: '9. Environment & Toolchain', icon: Wrench, requiresProject: false, phaseTag: 'Diagnostics' }
+  { id: 'spec-lifecycle', label: '5. Specification Lifecycle', icon: CheckCircle2, requiresProject: true, phaseTag: 'Governance' },
+  { id: 'abap-generator', label: '6. ABAP Generator', icon: Code2, requiresProject: true, phaseTag: 'Source' },
+  { id: 'ui-generator', label: '7. Fiori UI Generator', icon: LayoutTemplate, requiresProject: true, phaseTag: 'Fiori' },
+  { id: 'preview-validation', label: '8. Preview & Validation', icon: CheckCircle2, requiresProject: true, phaseTag: 'Mock V4' },
+  { id: 'review-export', label: '9. Review & Export', icon: PackageCheck, requiresProject: true, phaseTag: 'ZIP' },
+  { id: 'deployment', label: '10. SAP Deployment', icon: Send, requiresProject: true, phaseTag: 'SAP DEV' },
+  { id: 'environment', label: '11. Environment & Toolchain', icon: Wrench, requiresProject: false, phaseTag: 'Diagnostics' }
 ];
 
 export const StudioNavigation: React.FC<StudioNavigationProps> = ({

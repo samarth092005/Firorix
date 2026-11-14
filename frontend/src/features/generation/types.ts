@@ -29,10 +29,12 @@ export type StudioInternalView =
   | 'requirements'
   | 'data-model'
   | 'architecture'
+  | 'spec-lifecycle'
   | 'abap-generator'
   | 'ui-generator'
   | 'preview-validation'
   | 'review-export'
+  | 'deployment'
   | 'environment';
 
 export interface ActivityEvent {
@@ -468,6 +470,9 @@ export interface GenerationProject {
   lifecycleStatus: ProjectLifecycleStatus;
   currentPhase: string;
   specificationVersion: number;
+  modernizationOutcome?: string;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -627,4 +632,87 @@ export interface DeveloperHandoverGuide {
   abapSteps: Array<{ stepNumber: number; title: string; description: string }>;
   fioriSteps: Array<{ stepNumber: number; title: string; description: string }>;
   markdown: string;
+}
+
+export interface DeploymentCheck {
+  id: string;
+  name: string;
+  category: string;
+  status: 'PASSED' | 'WARNING' | 'FAILED' | 'SKIPPED';
+  latencyMs?: number;
+  details?: Record<string, any>;
+  remediation?: string | null;
+}
+
+export interface DeploymentPreflight {
+  success: boolean;
+  overallReadiness: 'READY' | 'READY_WITH_LIMITATIONS' | 'BLOCKED' | 'FAILED';
+  targetSystem: {
+    systemId: string;
+    client: string;
+    release: string;
+    softwareComponent: string;
+  };
+  summary: {
+    totalChecks: number;
+    passed: number;
+    warnings: number;
+    failed: number;
+  };
+  checks: DeploymentCheck[];
+}
+
+export interface DeploymentPlan {
+  id: string;
+  projectId: string;
+  targetSystem: string;
+  targetClient: string;
+  targetPackage: string;
+  targetNamespace: string;
+  transportRequest?: string | null;
+  specificationVersion: number;
+  generationVersion: number;
+  planHash: string;
+  artifactManifestHash: string;
+  status: 'PLANNED' | 'APPROVED' | 'STOPPED_AT_WRITE_BOUNDARY' | 'EXECUTED';
+  planDetails: {
+    operations: Array<{
+      sequence: number;
+      operationType: string;
+      artifactType: string;
+      objectName: string;
+      filePath: string;
+      targetPackage: string;
+    }>;
+    requiredAuthorizations: string[];
+    rollbackPlan: {
+      strategy: string;
+      explanation: string;
+      steps: string[];
+    };
+  };
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface DeploymentExecution {
+  id: string;
+  planId: string;
+  projectId: string;
+  lifecycleStatus: string;
+  executionBoundaryStatus: string;
+  operations: any[];
+  logs: Array<{ timestamp: string; level: string; message: string }>;
+  verificationResults: {
+    overallVerificationStatus: string;
+    checks: Array<{
+      id: string;
+      name: string;
+      status: string;
+      evidence: string;
+      endpoint: string;
+    }>;
+  };
+  startedAt: string;
+  completedAt?: string | null;
 }

@@ -3,7 +3,7 @@
  *
  * Implements server-side authoritative persistence for Generation Studio handoffs.
  * Ensures project context survives page refreshes, enforces Clean Core standard-first guardrails,
- * and maintains atomic, serialized file storage.
+ * and maintains atomic, serialized file and PostgreSQL storage.
  */
 
 import fs from 'node:fs';
@@ -13,18 +13,29 @@ import { fileURLToPath } from 'node:url';
 import { defaultAssessmentStore, LIFECYCLE_STATES } from './assessmentStore.js';
 import { STANDARD_TRANSACTION_CATALOG } from './standardTransactionKnowledge.js';
 import { authService, USER_ROLES, PERMISSIONS } from './authService.js';
+import { GenerationHandoffRepository } from '../infrastructure/db/repositories/generationHandoffRepository.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DEFAULT_STORAGE_PATH = path.resolve(__dirname, '../../data/generationHandoffs.json');
 
 export class GenerationHandoffStore {
-  constructor(storagePath = DEFAULT_STORAGE_PATH, assessmentStore = defaultAssessmentStore) {
-    this.storagePath = storagePath;
+  constructor(storagePath = DEFAULT_STORAGE_PATH, assessmentStore = defaultAssessmentStore, options = {}) {
+    if (typeof storagePath === 'object' && storagePath !== null && !options.assessmentStore && !(storagePath instanceof String)) {
+      options = storagePath;
+      storagePath = options.storagePath || DEFAULT_STORAGE_PATH;
+      assessmentStore = options.assessmentStore || defaultAssessmentStore;
+    }
+    this.storagePath = typeof storagePath === 'string' ? storagePath : DEFAULT_STORAGE_PATH;
     this.assessmentStore = assessmentStore;
     this._handoffs = new Map();
     this._writeLock = Promise.resolve();
     this._isLoaded = false;
+    this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
+
+    const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || process.env.FIORIX_PERSISTENCE || '').toLowerCase();
+    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres');
+    this.repository = options.repository || (this.useDatabase ? new GenerationHandoffRepository() : null);
   }
 
   async _withWriteLock(operation) {
@@ -38,7 +49,7 @@ export class GenerationHandoffStore {
   async _ensureLoaded() {
     if (this._isLoaded) return;
     try {
-      if (fs.existsSync(this.storagePath)) {
+      if (this.storagePath && fs.existsSync(this.storagePath)) {
         const raw = await fs.promises.readFile(this.storagePath, 'utf8');
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
@@ -57,6 +68,7 @@ export class GenerationHandoffStore {
   }
 
   async _persist() {
+    if (!this.storagePath) return;
     const dir = path.dirname(this.storagePath);
     if (!fs.existsSync(dir)) {
       await fs.promises.mkdir(dir, { recursive: true });
@@ -107,16 +119,13 @@ export class GenerationHandoffStore {
     }
 
     // Check Clean Core guardrail:
-    // If standard Fiori app candidate exists or assessment fit-gap outcome is not strictly BUILD,
-    // custom build requires explicit Lead Enterprise Architect approval and documented justification.
     const hasStandardCandidate = Boolean(
       (assessment.matchingFioriApp && assessment.matchingFioriApp.appId) ||
       (assessment.candidateApps && assessment.candidateApps.length > 0) ||
       assessment.fitGapScore >= 50
     );
 
-    // Derive architect approval authoritatively:
-    // 1. Cross-assessment approval check: approval must belong to this exact assessment
+    // 1. Cross-assessment approval check
     if (payload.leadArchitectApproval?.assessmentId && payload.leadArchitectApproval.assessmentId !== assessment.id) {
       const err = new Error(
         `Architectural Approval Mismatch: Provided approval is linked to assessment "${payload.leadArchitectApproval.assessmentId}", which does not match target assessment "${assessment.id}". Cross-assessment approval reuse is strictly prohibited.`
@@ -125,15 +134,13 @@ export class GenerationHandoffStore {
       throw err;
     }
 
-    // 2. If client explicitly sets architectApproved: false, or payload.leadArchitectApproval?.approved === false, reject immediately
+    // 2. Explicit rejection check
     if (payload.architectApproved === false || payload.leadArchitectApproval?.approved === false) {
-      if (hasStandardCandidate) {
-        const err = new Error(
-          'Clean Core Guardrail Violation: Standard SAP Fiori candidates exist. Initiating custom Generation Studio build requires documented justification and Lead Enterprise Architect sign-off.'
-        );
-        err.code = 'UNAUTHORIZED_BUILD';
-        throw err;
-      }
+      const err = new Error(
+        'Clean Core Guardrail Violation: Initiating custom Generation Studio build requires documented justification and Lead Enterprise Architect sign-off.'
+      );
+      err.code = 'UNAUTHORIZED_BUILD';
+      throw err;
     }
 
     // 3. Approval Invalidation Check: If material requirements or evidence changed after approval was granted
@@ -145,9 +152,19 @@ export class GenerationHandoffStore {
       throw err;
     }
 
-    // 4. Approval Scope Check: Approval must explicitly cover BUILD
+    const targetVersion = assessment.version !== undefined ? assessment.version : 1;
+
+    // 4. Validate approval object (scope, version binding, expiration)
     const approvalObj = assessment.leadArchitectApproval || payload.leadArchitectApproval;
     if (approvalObj && approvalObj.approved === true) {
+      if (approvalObj.assessmentId && approvalObj.assessmentId !== assessment.id) {
+        const err = new Error(
+          `Architectural Approval Mismatch: Provided approval is linked to assessment "${approvalObj.assessmentId}", which does not match target assessment "${assessment.id}". Cross-assessment approval reuse is strictly prohibited.`
+        );
+        err.code = 'APPROVAL_ASSESSMENT_MISMATCH';
+        throw err;
+      }
+
       const scope = String(approvalObj.scope || approvalObj.approvalScope || approvalObj.decision || 'BUILD').toUpperCase();
       if (!['BUILD', 'CUSTOM_DEVELOPMENT'].includes(scope)) {
         const err = new Error(
@@ -157,8 +174,6 @@ export class GenerationHandoffStore {
         throw err;
       }
 
-      // 5. Version Binding Check: Approval must match exact assessment version
-      const targetVersion = assessment.version !== undefined ? assessment.version : 1;
       if (approvalObj.assessmentVersion !== undefined && approvalObj.assessmentVersion !== targetVersion) {
         const err = new Error(
           `Approval Version Mismatch: Approval is bound to assessment version ${approvalObj.assessmentVersion}, but target assessment version is ${targetVersion}. Fresh architect approval required.`
@@ -167,7 +182,6 @@ export class GenerationHandoffStore {
         throw err;
       }
 
-      // 6. Approval Expiration Check
       if (approvalObj.expiresAt) {
         const expiresAt = new Date(approvalObj.expiresAt).getTime();
         if (!isNaN(expiresAt) && expiresAt < Date.now()) {
@@ -180,12 +194,14 @@ export class GenerationHandoffStore {
       }
     }
 
+    // Server-Authoritative Actor Authorization Check
+    // Never trust client-provided author, architectName, or approvalObj.approver strings!
     const isActorAuthorizedArchitect = Boolean(
-      authService.canApproveBuild(userContext) ||
-      (userContext && (userContext.role === 'ARCHITECT' || userContext.role === 'LEAD_ARCHITECT' || userContext.role === USER_ROLES.LEAD_ARCHITECT)) ||
-      (payload.author && /architect/i.test(payload.author)) ||
-      (payload.architectName && /architect/i.test(payload.architectName)) ||
-      (approvalObj && approvalObj.approver && /architect/i.test(approvalObj.approver))
+      userContext && !userContext.isUnauthenticated && (
+        authService.canApproveBuild(userContext) ||
+        userContext.role === USER_ROLES.LEAD_ARCHITECT ||
+        userContext.role === 'CHIEF_ARCHITECT'
+      )
     );
 
     const isAssessmentAuthoritativelyApproved = Boolean(
@@ -195,7 +211,6 @@ export class GenerationHandoffStore {
       assessment.buildProject?.architectApproved === true
     );
 
-    // If client supplied approval flags without server-side approval, only allow if actor is an authenticated architect
     const isClientSuppliedApproval = Boolean(
       payload.architectApproved === true ||
       payload.leadArchitectApproval?.approved === true ||
@@ -211,8 +226,8 @@ export class GenerationHandoffStore {
       throw err;
     }
 
-    // Strict rule: Client cannot unilaterally authorize BUILD if the assessment itself is not authoritatively approved (when standard candidates exist)
-    const isArchitectApproved = isAssessmentAuthoritativelyApproved || (isClientSuppliedApproval && (!hasStandardCandidate || isActorAuthorizedArchitect));
+    // Strict rule: BUILD handoff requires either an authoritatively approved assessment or an authorized architect actor
+    const isArchitectApproved = isAssessmentAuthoritativelyApproved || (isClientSuppliedApproval && isActorAuthorizedArchitect);
 
     const justification = String(
       payload.cleanCoreJustification ||
@@ -224,6 +239,14 @@ export class GenerationHandoffStore {
     if (hasStandardCandidate && !isArchitectApproved) {
       const err = new Error(
         'Clean Core Guardrail Violation: Standard SAP Fiori candidates exist. Initiating custom Generation Studio build requires documented justification and Lead Enterprise Architect sign-off.'
+      );
+      err.code = 'UNAUTHORIZED_BUILD';
+      throw err;
+    }
+
+    if (!isArchitectApproved) {
+      const err = new Error(
+        'Clean Core Guardrail Violation: Initiating custom Generation Studio build requires documented justification and Lead Enterprise Architect sign-off.'
       );
       err.code = 'UNAUTHORIZED_BUILD';
       throw err;
@@ -254,8 +277,13 @@ export class GenerationHandoffStore {
         }
       }
 
-      const actorName = userContext?.name || payload.architectName || payload.createdBy || 'Lead SAP Architect';
-      const actorId = userContext?.id || payload.actorId || `USR-${crypto.createHash('md5').update(actorName).digest('hex').slice(0, 8).toUpperCase()}`;
+      // Authoritative actor identity resolution (never forge from client strings)
+      const actorName = (userContext && !userContext.isUnauthenticated && (userContext.name || userContext.id))
+        ? (userContext.name || userContext.id)
+        : (isAssessmentAuthoritativelyApproved ? (assessment.leadArchitectApproval?.approver || assessment.governanceReview?.approvedByName || 'Authorized Lead Architect') : 'Authorized Lead Architect');
+      const actorId = (userContext && !userContext.isUnauthenticated && userContext.id)
+        ? userContext.id
+        : (isAssessmentAuthoritativelyApproved ? (assessment.leadArchitectApproval?.approverId || assessment.governanceReview?.approvedBy || 'USR-ARCH-01') : 'USR-ARCH-01');
 
       const handoffRecord = {
         handoffId,
@@ -281,7 +309,11 @@ export class GenerationHandoffStore {
           approved: isArchitectApproved,
           approver: actorName,
           approverId: actorId,
+          approvedAt: now,
           timestamp: now,
+          scope: 'BUILD',
+          assessmentId: assessment.id,
+          assessmentVersion: targetVersion,
           justification: justification || 'Custom RAP Managed Application approved by Lead Architect.'
         },
         cleanCoreJustification: justification,
@@ -313,6 +345,17 @@ export class GenerationHandoffStore {
         creatorName: actorName
       };
 
+      // 1. Authoritative persistence in PostgreSQL if active
+      if (this.repository) {
+        try {
+          const tenantId = userContext?.tenantId || this.tenantId;
+          await this.repository.createHandoff(handoffRecord, tenantId);
+        } catch (dbErr) {
+          console.warn('[GenerationHandoffStore] DB persistence notice:', dbErr.message);
+        }
+      }
+
+      // 2. Persistence in memory/file store
       this._handoffs.set(handoffId, handoffRecord);
       await this._persist();
 
@@ -392,49 +435,65 @@ export class GenerationHandoffStore {
   }
 
   /**
-   * Retrieves a Generation Studio Handoff by its unique ID.
+   * Retrieves a handoff by its ID.
    */
-  async getHandoff(handoffId) {
-    if (!handoffId || typeof handoffId !== 'string') {
-      return null;
-    }
-    await this._ensureLoaded();
-    return this._handoffs.get(handoffId.trim()) || null;
-  }
+  async getHandoff(handoffId, userContext = null) {
+    if (!handoffId) return null;
+    const tenantId = userContext?.tenantId || this.tenantId;
 
-  /**
-   * Lists all persisted Generation Studio handoffs.
-   */
-  async listHandoffs(filters = {}) {
-    await this._ensureLoaded();
-    let records = Array.from(this._handoffs.values());
-    if (filters.assessmentId) {
-      records = records.filter((h) => h.sourceAssessmentId === filters.assessmentId);
-    }
-    if (filters.tcode) {
-      records = records.filter((h) => h.tcode.toUpperCase() === filters.tcode.toUpperCase());
-    }
-    return records;
-  }
-
-  /**
-   * Clears generation handoffs and resets storage.
-   * If tenantId is passed, clears only handoffs belonging to that tenant.
-   */
-  async resetDemoHandoffs(tenantId = null) {
-    return await this._withWriteLock(async () => {
-      if (tenantId) {
-        for (const [id, handoff] of this._handoffs.entries()) {
-          if (handoff.tenantId === tenantId || (handoff.createdBy && handoff.createdBy.includes(tenantId))) {
-            this._handoffs.delete(id);
-          }
-        }
-      } else {
-        this._handoffs.clear();
+    if (this.repository) {
+      try {
+        const fromDb = await this.repository.getHandoff(handoffId, tenantId);
+        if (fromDb) return fromDb;
+      } catch (err) {
+        console.warn('[GenerationHandoffStore] DB read fallback:', err.message);
       }
-      this._isLoaded = true;
+    }
+
+    await this._ensureLoaded();
+    return this._handoffs.get(handoffId) || null;
+  }
+
+  /**
+   * Lists all handoffs matching optional query filters.
+   */
+  async listHandoffs(filters = {}, userContext = null) {
+    const tenantId = userContext?.tenantId || this.tenantId;
+
+    if (this.repository) {
+      try {
+        return await this.repository.listHandoffs(filters, tenantId);
+      } catch (err) {
+        console.warn('[GenerationHandoffStore] DB list fallback:', err.message);
+      }
+    }
+
+    await this._ensureLoaded();
+    let all = Array.from(this._handoffs.values());
+
+    if (filters.assessmentId || filters.sourceAssessmentId) {
+      const aid = filters.assessmentId || filters.sourceAssessmentId;
+      all = all.filter((h) => h.sourceAssessmentId === aid);
+    }
+
+    if (filters.tcode) {
+      all = all.filter((h) => h.tcode && h.tcode.toUpperCase() === filters.tcode.toUpperCase());
+    }
+
+    if (filters.approvalStatus) {
+      all = all.filter((h) => h.approvalStatus && h.approvalStatus.toUpperCase() === filters.approvalStatus.toUpperCase());
+    }
+
+    return all;
+  }
+
+  /**
+   * Clears the store (used for test isolation).
+   */
+  async clear() {
+    return await this._withWriteLock(async () => {
+      this._handoffs.clear();
       await this._persist();
-      return { success: true };
     });
   }
 }

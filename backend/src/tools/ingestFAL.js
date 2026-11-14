@@ -308,6 +308,19 @@ export function normalizeImportRecord(rawRecord, options = {}) {
   const implementationPrerequisites = mapped.implementationPrerequisites || rawRecord.implementationPrerequisites || undefined;
   const configurationPrerequisites = mapped.configurationPrerequisites || rawRecord.configurationPrerequisites || undefined;
 
+  const semanticObject = mapped.semanticObject || rawRecord.semanticObject || rawRecord.SemanticObject || (applicationComponent ? applicationComponent.replace(/[^A-Za-z0-9_]/g, '_') : null);
+  const semanticAction = mapped.semanticAction || rawRecord.semanticAction || rawRecord.SemanticAction || 'manage';
+  const compatibilityMatrix = rawRecord.compatibilityMatrix || {
+    onPremise: true,
+    privateCloud: true,
+    publicCloud: rawRecord.AvailableForPublicCloud === 'true' || false,
+    supportedReleases: [productVersion]
+  };
+  const supportedCapabilities = rawRecord.supportedCapabilities || (
+    appType.toLowerCase().includes('analytic') ? ['ANALYTICS', 'REPORTING'] : ['TRANSACTIONAL', 'DATA_ENTRY']
+  );
+  const deploymentType = rawRecord.deploymentType || 'ON_PREMISE';
+
   const provenance = rawRecord.provenance || mapped.provenance || options.provenance || 'OFFICIAL_FAL_EXPORT';
   const sourceVersion = options.sourceVersion || mapped.sourceVersion || rawRecord.sourceVersion || productVersion;
   const importTimestamp = new Date().toISOString();
@@ -338,6 +351,11 @@ export function normalizeImportRecord(rawRecord, options = {}) {
     icfServices: icfServices ? (Array.isArray(icfServices) ? icfServices : [icfServices]) : [],
     implementationPrerequisites,
     configurationPrerequisites,
+    semanticObject,
+    semanticAction,
+    compatibilityMatrix,
+    supportedCapabilities,
+    deploymentType,
     extensibilityInformation,
     successorInformation,
     sapui5Component,
