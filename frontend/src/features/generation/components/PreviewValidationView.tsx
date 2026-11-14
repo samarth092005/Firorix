@@ -670,9 +670,38 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {/* Watermark Security Notice */}
               <div
-
+                style={{
+                  padding: '10px 16px',
+                  backgroundColor: '#FFFBEB',
+                  border: '1px solid #FDE68A',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  fontSize: '12px',
+                  color: '#92400E'
+                }}
               >
-
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={16} color="#B45309" />
+                  <span>
+                    <strong>Interactive Sandbox:</strong> Running against synthetic OData V4 provider. Zero live SAP S/4HANA core write operations executed.
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontWeight: 600,
+                    color: '#B45309',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    backgroundColor: '#FEF3C7',
+                    fontSize: '11px',
+                    letterSpacing: '0.03em',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  Local Sandbox
+                </span>
               </div>
 
               {/* Embedded WebApp Frame */}

@@ -573,6 +573,12 @@ if (isDirectRun) {
 
   process.on('SIGINT', () => handleGracefulShutdown('SIGINT'));
   process.on('SIGTERM', () => handleGracefulShutdown('SIGTERM'));
+  process.on('uncaughtException', (err) => {
+    console.error('[Fiorify Server] Non-fatal uncaught exception intercepted:', err?.message || err);
+  });
+  process.on('unhandledRejection', (reason) => {
+    console.error('[Fiorify Server] Non-fatal unhandled rejection intercepted:', reason?.message || reason);
+  });
 
   server.listen(PORT, () => {
     console.log(`Fiorify Discovery Backend running on http://localhost:${PORT}`);

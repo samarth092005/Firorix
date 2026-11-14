@@ -12,6 +12,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { GenerationProject } from '../types';
+import { authFetch } from '../services/generationProjectService';
 
 interface SpecificationLifecycleViewProps {
   project: GenerationProject;
@@ -38,8 +39,8 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
     setActionError(null);
     try {
       const [readRes, verRes] = await Promise.all([
-        fetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/readiness`).then(r => r.json()),
-        fetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/versions`).then(r => r.json())
+        authFetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/readiness`).then(r => r.json()),
+        authFetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/versions`).then(r => r.json())
       ]);
       if (readRes.success) setReadiness(readRes.readiness);
       if (verRes.success) setVersions(verRes.versions || []);
@@ -57,7 +58,7 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
   const handleSnapshot = async () => {
     try {
       setActionError(null);
-      const res = await fetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/versions`, {
+      const res = await authFetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/versions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ changelog: changelogInput || 'Manual architectural specification snapshot' })
@@ -75,7 +76,7 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
   const handleSubmitReview = async () => {
     try {
       setActionError(null);
-      const res = await fetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/submit-review`, {
+      const res = await authFetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/submit-review`, {
         method: 'POST'
       }).then(r => r.json());
 
@@ -90,7 +91,7 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
   const handleApproval = async (decision: 'APPROVED' | 'CHANGES_REQUESTED' | 'REJECTED') => {
     try {
       setActionError(null);
-      const res = await fetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/approve`, {
+      const res = await authFetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ decision, comments: approvalComments })
@@ -110,7 +111,7 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
 
   const handleCompare = async () => {
     try {
-      const res = await fetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/versions/compare?v1=${selectedV1}&v2=${selectedV2}`).then(r => r.json());
+      const res = await authFetch(`/api/v1/generation/projects/${encodeURIComponent(project.projectId)}/versions/compare?v1=${selectedV1}&v2=${selectedV2}`).then(r => r.json());
       if (res.success) setDiffResult(res.differences);
     } catch (err: any) {
       setActionError(`Comparison failed: ${err.message}`);

@@ -39,6 +39,44 @@ import {
 const API_PROJECTS = '/api/v1/generation/projects';
 const API_GEN_BASE = '/api/v1/generation';
 
+function getAuthHeaders(headers?: HeadersInit): HeadersInit | undefined {
+  if (typeof window === 'undefined') return headers;
+  try {
+    const token = localStorage.getItem('fiorify_auth_token');
+    if (!token) return headers;
+
+    if (!headers) {
+      return { Authorization: `Bearer ${token}` };
+    }
+    if (headers instanceof Headers) {
+      if (!headers.has('Authorization') && !headers.has('authorization')) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      return headers;
+    }
+    if (Array.isArray(headers)) {
+      return [['Authorization', `Bearer ${token}`], ...headers];
+    }
+    const plain = { ...headers } as Record<string, string>;
+    if (!plain['Authorization'] && !plain['authorization']) {
+      plain['Authorization'] = `Bearer ${token}`;
+    }
+    return plain;
+  } catch {
+    return headers;
+  }
+}
+
+export async function authFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('fiorify_auth_token') : null;
+  if (!token) {
+    return init !== undefined ? fetch(input, init) : fetch(input);
+  }
+  const headers = getAuthHeaders(init?.headers);
+  const options: RequestInit = init ? { ...init, headers } : { headers };
+  return fetch(input, options);
+}
+
 export interface ListProjectsParams {
   search?: string;
   lifecycleStatus?: ProjectLifecycleStatus | 'ALL';
@@ -71,7 +109,7 @@ export class FrontendGenerationProjectService {
     if (params.sortOrder) query.set('sortOrder', params.sortOrder);
 
     const url = `${API_PROJECTS}${query.toString() ? `?${query.toString()}` : ''}`;
-    const res = await fetch(url);
+    const res = await authFetch(url);
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       const fallbackMsg = (res.status >= 500 && !errData.errorMessage)
@@ -92,7 +130,7 @@ export class FrontendGenerationProjectService {
       throw new Error('Project ID is required.');
     }
 
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}`);
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.errorMessage || `Project "${projectId}" not found (HTTP ${res.status})`);
@@ -106,7 +144,7 @@ export class FrontendGenerationProjectService {
    * Creates a new generation project (Standalone or from Approved Assessment Handoff).
    */
   async createProject(payload: CreateProjectPayload): Promise<{ project: GenerationProject; alreadyExists?: boolean; message?: string }> {
-    const res = await fetch(API_PROJECTS, {
+    const res = await authFetch(API_PROJECTS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -128,7 +166,7 @@ export class FrontendGenerationProjectService {
    * Updates project metadata or specification.
    */
   async updateProject(projectId: string, patch: Record<string, any>): Promise<GenerationProject> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch)
@@ -146,7 +184,7 @@ export class FrontendGenerationProjectService {
    * Retrieves project summary telemetry.
    */
   async getProjectSummary(projectId: string): Promise<ProjectSummary> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/summary`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/summary`);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.errorMessage || `Failed to fetch project summary (HTTP ${res.status})`);
@@ -160,7 +198,7 @@ export class FrontendGenerationProjectService {
    * Duplicates an existing project.
    */
   async duplicateProject(projectId: string, payload: { newProjectName?: string } = {}): Promise<GenerationProject> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/duplicate`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/duplicate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -178,7 +216,7 @@ export class FrontendGenerationProjectService {
    * Retrieves activity history for a project.
    */
   async getProjectActivity(projectId: string): Promise<{ count: number; activityHistory: ActivityEvent[]; activity: ActivityEvent[] }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/activity`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/activity`);
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       throw new Error(data.errorMessage || `Failed to fetch activity history (HTTP ${res.status})`);
@@ -197,7 +235,7 @@ export class FrontendGenerationProjectService {
    * Archives a project.
    */
   async archiveProject(projectId: string, reason?: string): Promise<GenerationProject> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/archive`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/archive`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason })
@@ -215,7 +253,7 @@ export class FrontendGenerationProjectService {
    * Restores an archived project back to DRAFT.
    */
   async restoreProject(projectId: string, reason?: string): Promise<GenerationProject> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/restore`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}/restore`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ reason })
@@ -234,7 +272,7 @@ export class FrontendGenerationProjectService {
    */
   async deleteProject(projectId: string, confirmed: boolean = false): Promise<boolean> {
     const query = confirmed ? '?confirmed=true' : '';
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}${query}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId.trim())}${query}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ confirmed })
@@ -259,7 +297,7 @@ export class FrontendGenerationProjectService {
     if (!handoffId || !handoffId.trim()) {
       throw new Error('Handoff ID is required.');
     }
-    const res = await fetch(`${API_GEN_BASE}/handoff/${encodeURIComponent(handoffId.trim())}`);
+    const res = await authFetch(`${API_GEN_BASE}/handoff/${encodeURIComponent(handoffId.trim())}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to retrieve handoff "${handoffId}" (HTTP ${res.status})`);
@@ -274,7 +312,7 @@ export class FrontendGenerationProjectService {
     if (!handoffId || !handoffId.trim()) {
       throw new Error('Handoff ID is required to provision a project.');
     }
-    const res = await fetch(API_PROJECTS, {
+    const res = await authFetch(API_PROJECTS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -301,7 +339,7 @@ export class FrontendGenerationProjectService {
    * Resolves server-authoritative assessment context and BUILD eligibility.
    */
   async getAssessmentContext(assessmentId: string): Promise<AssessmentHandoffContext> {
-    const res = await fetch(`${API_GEN_BASE}/context/${encodeURIComponent(assessmentId.trim())}`);
+    const res = await authFetch(`${API_GEN_BASE}/context/${encodeURIComponent(assessmentId.trim())}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to resolve assessment context (HTTP ${res.status})`);
@@ -317,7 +355,7 @@ export class FrontendGenerationProjectService {
    * Lists requirements for a project along with summary stats.
    */
   async listRequirements(projectId: string): Promise<{ requirements: GenerationRequirement[]; summary: RequirementsSummary }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to list requirements (HTTP ${res.status})`);
@@ -343,7 +381,7 @@ export class FrontendGenerationProjectService {
    * Creates a new manual requirement.
    */
   async createRequirement(projectId: string, payload: Partial<GenerationRequirement>): Promise<{ requirement: GenerationRequirement }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -359,7 +397,7 @@ export class FrontendGenerationProjectService {
    * Updates an existing requirement.
    */
   async updateRequirement(projectId: string, requirementId: string, patch: Partial<GenerationRequirement>): Promise<{ requirement: GenerationRequirement }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/${encodeURIComponent(requirementId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/${encodeURIComponent(requirementId)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch)
@@ -375,7 +413,7 @@ export class FrontendGenerationProjectService {
    * Deletes a requirement.
    */
   async deleteRequirement(projectId: string, requirementId: string): Promise<boolean> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/${encodeURIComponent(requirementId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/${encodeURIComponent(requirementId)}`, {
       method: 'DELETE'
     });
     const data = await res.json().catch(() => ({}));
@@ -389,7 +427,7 @@ export class FrontendGenerationProjectService {
    * Imports functional requirements and confirmed gaps from the Discovery assessment.
    */
   async importRequirementsFromAssessment(projectId: string, assessmentId?: string): Promise<{ importedCount: number; requirements: GenerationRequirement[] }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/import`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/import`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assessmentId })
@@ -413,7 +451,7 @@ export class FrontendGenerationProjectService {
     action: 'CONFIRM' | 'DEFER' | 'REJECT' | 'REQUEST_CLARIFICATION',
     comment?: string
   ): Promise<{ requirement: GenerationRequirement; summary: RequirementsSummary }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/${encodeURIComponent(requirementId)}/confirm`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/requirements/${encodeURIComponent(requirementId)}/confirm`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, reason: comment, comment })
@@ -436,7 +474,7 @@ export class FrontendGenerationProjectService {
    * Retrieves the current data model specification for a project.
    */
   async getDataModel(projectId: string): Promise<{ dataModel: DataModelSpec }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to get data model (HTTP ${res.status})`);
@@ -455,7 +493,7 @@ export class FrontendGenerationProjectService {
    * Saves the entire data model specification for a project.
    */
   async saveDataModel(projectId: string, dataModel: Partial<DataModelSpec>): Promise<{ dataModel: DataModelSpec }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dataModel)
@@ -484,7 +522,7 @@ export class FrontendGenerationProjectService {
       };
     };
   }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/suggest`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/suggest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(options)
@@ -500,7 +538,7 @@ export class FrontendGenerationProjectService {
    * Adds an entity to the data model.
    */
   async addEntity(projectId: string, entity: Partial<GenerationEntity>): Promise<{ entity: GenerationEntity }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entity)
@@ -516,7 +554,7 @@ export class FrontendGenerationProjectService {
    * Updates an existing entity.
    */
   async updateEntity(projectId: string, entityId: string, patch: Partial<GenerationEntity>): Promise<{ entity: GenerationEntity }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch)
@@ -532,7 +570,7 @@ export class FrontendGenerationProjectService {
    * Deletes an entity.
    */
   async deleteEntity(projectId: string, entityId: string): Promise<boolean> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}`, {
       method: 'DELETE'
     });
     const data = await res.json().catch(() => ({}));
@@ -546,7 +584,7 @@ export class FrontendGenerationProjectService {
    * Adds a field to an entity.
    */
   async addField(projectId: string, entityId: string, field: Partial<GenerationField>): Promise<{ field: GenerationField }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}/fields`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}/fields`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(field)
@@ -562,7 +600,7 @@ export class FrontendGenerationProjectService {
    * Updates a field on an entity.
    */
   async updateField(projectId: string, entityId: string, fieldId: string, patch: Partial<GenerationField>): Promise<{ field: GenerationField }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}/fields/${encodeURIComponent(fieldId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}/fields/${encodeURIComponent(fieldId)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch)
@@ -578,7 +616,7 @@ export class FrontendGenerationProjectService {
    * Deletes a field from an entity.
    */
   async deleteField(projectId: string, entityId: string, fieldId: string): Promise<boolean> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}/fields/${encodeURIComponent(fieldId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/entities/${encodeURIComponent(entityId)}/fields/${encodeURIComponent(fieldId)}`, {
       method: 'DELETE'
     });
     const data = await res.json().catch(() => ({}));
@@ -592,7 +630,7 @@ export class FrontendGenerationProjectService {
    * Adds a relationship between entities.
    */
   async addRelationship(projectId: string, relationship: Partial<GenerationRelationship>): Promise<{ relationship: GenerationRelationship }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/relationships`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/relationships`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(relationship)
@@ -608,7 +646,7 @@ export class FrontendGenerationProjectService {
    * Deletes a relationship.
    */
   async deleteRelationship(projectId: string, relationshipId: string): Promise<boolean> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/relationships/${encodeURIComponent(relationshipId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/relationships/${encodeURIComponent(relationshipId)}`, {
       method: 'DELETE'
     });
     const data = await res.json().catch(() => ({}));
@@ -622,7 +660,7 @@ export class FrontendGenerationProjectService {
    * Validates the data model against structural, relationship, SAP compatibility, and business rules.
    */
   async validateDataModel(projectId: string): Promise<{ validationReport: DataModelValidationReport }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/validate`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/data-model/validate`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -639,7 +677,7 @@ export class FrontendGenerationProjectService {
     const q = new URLSearchParams();
     if (query) q.set('query', query);
     if (category) q.set('category', category);
-    const res = await fetch(`${API_GEN_BASE}/cds-registry?${q.toString()}`);
+    const res = await authFetch(`${API_GEN_BASE}/cds-registry?${q.toString()}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to query CDS registry (HTTP ${res.status})`);
@@ -655,7 +693,7 @@ export class FrontendGenerationProjectService {
    * Evaluates or recalculates the RAP architecture specification.
    */
   async evaluateArchitecture(projectId: string, overrides: any = {}): Promise<{ architecture: ArchitectureSpec; lifecycleStatus: string }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/architecture/evaluate`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/architecture/evaluate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(overrides)
@@ -671,7 +709,7 @@ export class FrontendGenerationProjectService {
    * Retrieves the architecture specification for a project.
    */
   async getArchitecture(projectId: string): Promise<{ architecture: ArchitectureSpec; lifecycleStatus: string }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/architecture`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/architecture`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to fetch architecture (HTTP ${res.status})`);
@@ -683,7 +721,7 @@ export class FrontendGenerationProjectService {
    * Updates user-defined architecture configuration.
    */
   async updateArchitecture(projectId: string, patch: any): Promise<{ architecture: ArchitectureSpec; lifecycleStatus: string }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/architecture`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/architecture`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch)
@@ -699,7 +737,7 @@ export class FrontendGenerationProjectService {
    * Synthesizes all ABAP RAP artifacts.
    */
   async generateAbap(projectId: string, options: any = {}): Promise<{ totalGenerated: number; artifacts: GeneratedArtifact[]; runRecord: GenerationRun }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/abap/generate`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/abap/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(options)
@@ -715,7 +753,7 @@ export class FrontendGenerationProjectService {
    * Regenerates ABAP artifacts, supporting selective single-artifact regeneration.
    */
   async regenerateAbap(projectId: string, options: any = {}): Promise<{ totalGenerated: number; artifacts: GeneratedArtifact[]; runRecord: GenerationRun }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/abap/regenerate`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/abap/regenerate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(options)
@@ -731,7 +769,7 @@ export class FrontendGenerationProjectService {
    * Synthesizes SAP Fiori Elements application.
    */
   async generateFiori(projectId: string, config: any = {}): Promise<{ totalGenerated: number; artifacts: GeneratedArtifact[]; runRecord: GenerationRun }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/fiori/generate`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/fiori/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
@@ -747,7 +785,7 @@ export class FrontendGenerationProjectService {
    * Retrieves all generated artifacts from the shared registry.
    */
   async getArtifacts(projectId: string): Promise<{ count: number; artifacts: GeneratedArtifact[]; version: number }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/artifacts`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/artifacts`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to fetch artifacts (HTTP ${res.status})`);
@@ -759,7 +797,7 @@ export class FrontendGenerationProjectService {
    * Updates an artifact's content, tracking developer manual edits.
    */
   async updateArtifact(projectId: string, artifactId: string, content: string): Promise<{ artifact: GeneratedArtifact; manualEditStatus: string }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/artifacts/${encodeURIComponent(artifactId)}`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/artifacts/${encodeURIComponent(artifactId)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content })
@@ -775,7 +813,7 @@ export class FrontendGenerationProjectService {
    * Restores a manually modified artifact back to its original generated template version.
    */
   async restoreArtifact(projectId: string, artifactId: string): Promise<{ artifact: GeneratedArtifact }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/artifacts/${encodeURIComponent(artifactId)}/restore`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/artifacts/${encodeURIComponent(artifactId)}/restore`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -789,7 +827,7 @@ export class FrontendGenerationProjectService {
    * Retrieves generation execution runs history.
    */
   async getGenerationRuns(projectId: string): Promise<{ generationRuns: GenerationRun[] }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/generation-runs`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/generation-runs`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to fetch generation runs (HTTP ${res.status})`);
@@ -801,7 +839,7 @@ export class FrontendGenerationProjectService {
    * Retrieves the requirements-to-artifacts traceability matrix.
    */
   async getTraceability(projectId: string): Promise<{ traceabilityMatrix: TraceabilityItem[] }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/traceability`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/traceability`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       throw new Error(data.errorMessage || `Failed to fetch traceability (HTTP ${res.status})`);
@@ -813,7 +851,7 @@ export class FrontendGenerationProjectService {
    * Runs the static validation engine across all project artifacts.
    */
   async validateGeneration(projectId: string): Promise<{ validationReport: StaticValidationReport }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/validate-generation`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/validate-generation`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -828,7 +866,7 @@ export class FrontendGenerationProjectService {
   // =========================================================================
 
   async startPreview(projectId: string): Promise<{ session: PreviewSessionInfo }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/start`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/start`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -837,7 +875,7 @@ export class FrontendGenerationProjectService {
   }
 
   async stopPreview(projectId: string): Promise<{ result: any }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/stop`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/stop`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -846,7 +884,7 @@ export class FrontendGenerationProjectService {
   }
 
   async restartPreview(projectId: string): Promise<{ session: PreviewSessionInfo }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/restart`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/restart`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -855,21 +893,21 @@ export class FrontendGenerationProjectService {
   }
 
   async getPreviewStatus(projectId: string): Promise<{ previewStatus: PreviewSessionInfo }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/status`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/status`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch preview status (HTTP ${res.status})`);
     return data;
   }
 
   async getPreviewRequests(projectId: string): Promise<{ requests: PreviewRequestLog[] }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/requests`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/requests`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch preview requests (HTTP ${res.status})`);
     return data;
   }
 
   async resetSyntheticData(projectId: string): Promise<{ result: any }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/synthetic-data/reset`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/synthetic-data/reset`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));
@@ -883,21 +921,21 @@ export class FrontendGenerationProjectService {
 
   async getExportReadiness(projectId: string, acknowledgedWarnings = false): Promise<{ readiness: ExportReadinessResult }> {
     const query = acknowledgedWarnings ? '?acknowledgedWarnings=true' : '';
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/review/readiness${query}`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/review/readiness${query}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to check export readiness (HTTP ${res.status})`);
     return data;
   }
 
   async getTraceabilityReport(projectId: string): Promise<{ report: FullTraceabilityReport }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/traceability-matrix`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/traceability-matrix`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch traceability matrix (HTTP ${res.status})`);
     return data;
   }
 
   async packageExport(projectId: string, options: { acknowledgedWarnings?: boolean } = {}): Promise<ExportPackageResult> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/export`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/export`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(options)
@@ -916,14 +954,14 @@ export class FrontendGenerationProjectService {
   // =========================================================================
 
   async getToolchainStatus(): Promise<{ toolchain: ToolchainReport }> {
-    const res = await fetch(`${API_GEN_BASE}/toolchain/status`);
+    const res = await authFetch(`${API_GEN_BASE}/toolchain/status`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch toolchain status (HTTP ${res.status})`);
     return data;
   }
 
   async getHandoverGuide(projectId: string): Promise<{ handoverGuide: DeveloperHandoverGuide }> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/handover-guide`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/handover-guide`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch handover guide (HTTP ${res.status})`);
     return data;
@@ -934,21 +972,21 @@ export class FrontendGenerationProjectService {
   // =========================================================================
 
   async getPreflightDiagnostics(): Promise<any> {
-    const res = await fetch(`${API_GEN_BASE}/preflight`);
+    const res = await authFetch(`${API_GEN_BASE}/preflight`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch SAP preflight diagnostics (HTTP ${res.status})`);
     return data;
   }
 
   async getDeploymentReadiness(projectId: string): Promise<any> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/deployments/readiness`);
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/deployments/readiness`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch deployment readiness (HTTP ${res.status})`);
     return data;
   }
 
   async generateDeploymentPlan(projectId: string, options: any = {}): Promise<any> {
-    const res = await fetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/deployments/plan`, {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/deployments/plan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(options)
@@ -959,14 +997,14 @@ export class FrontendGenerationProjectService {
   }
 
   async getDeploymentPlan(planId: string): Promise<any> {
-    const res = await fetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}`);
+    const res = await authFetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}`);
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to fetch deployment plan (HTTP ${res.status})`);
     return data;
   }
 
   async approveDeploymentPlan(planId: string, approvalData: any = {}): Promise<any> {
-    const res = await fetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}/approve`, {
+    const res = await authFetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(approvalData)
@@ -977,7 +1015,7 @@ export class FrontendGenerationProjectService {
   }
 
   async executeDeploymentPlan(planId: string, executionData: any = {}): Promise<any> {
-    const res = await fetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}/execute`, {
+    const res = await authFetch(`${API_GEN_BASE}/deployments/plans/${encodeURIComponent(planId)}/execute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(executionData)
@@ -988,7 +1026,7 @@ export class FrontendGenerationProjectService {
   }
 
   async verifyDeployment(executionId: string): Promise<any> {
-    const res = await fetch(`${API_GEN_BASE}/deployments/executions/${encodeURIComponent(executionId)}/verify`, {
+    const res = await authFetch(`${API_GEN_BASE}/deployments/executions/${encodeURIComponent(executionId)}/verify`, {
       method: 'POST'
     });
     const data = await res.json().catch(() => ({}));

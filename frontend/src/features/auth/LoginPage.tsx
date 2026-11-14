@@ -45,8 +45,7 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    setTimeout(() => {
-      authService.login(email, password);
+    authService.login(email, password).finally(() => {
       setIsLoading(false);
       // Navigate to redirect target, transaction discovery if tcode was passed, or overview
       if (redirectTarget) {
@@ -56,7 +55,7 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate('/overview');
       }
-    }, 400);
+    });
   };
 
   const handleInstantDemoLogin = () => {
@@ -64,8 +63,7 @@ export const LoginPage: React.FC = () => {
     setEmail(DEMO_USER.email);
     setPassword('demo-session-2026');
 
-    setTimeout(() => {
-      authService.loginWithDemo();
+    authService.loginWithDemo().finally(() => {
       setIsLoading(false);
       if (redirectTarget) {
         navigate(redirectTarget);
@@ -74,7 +72,7 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate('/overview');
       }
-    }, 350);
+    });
   };
 
   return (

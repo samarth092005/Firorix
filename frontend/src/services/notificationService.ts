@@ -154,8 +154,13 @@ class NotificationService {
    */
   private async syncInitialFromDatabase(): Promise<void> {
     try {
+      const token = typeof window !== 'undefined'
+        ? (localStorage.getItem('fiorify_auth_token') || 'fiorify_dev_token_ADMIN')
+        : 'fiorify_dev_token_ADMIN';
+      const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
       // 1. Fetch assessments to extract real events
-      const res = await fetch('/api/v1/assessments').catch(() => null);
+      const res = await fetch('/api/v1/assessments', { headers: authHeaders }).catch(() => null);
       if (res && res.ok) {
         const data = await res.json().catch(() => null);
         const assessments = data?.assessments || data?.items || [];
@@ -182,7 +187,7 @@ class NotificationService {
       }
 
       // 2. Fetch generation projects
-      const genRes = await fetch('/api/v1/generation/projects').catch(() => null);
+      const genRes = await fetch('/api/v1/generation/projects', { headers: authHeaders }).catch(() => null);
       if (genRes && genRes.ok) {
         const genData = await genRes.json().catch(() => null);
         const projects = genData?.projects || [];

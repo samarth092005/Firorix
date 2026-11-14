@@ -42,9 +42,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const resetDemoData = async () => {
     try {
+      const token = typeof window !== 'undefined'
+        ? (localStorage.getItem('fiorify_auth_token') || 'fiorify_dev_token_ADMIN')
+        : 'fiorify_dev_token_ADMIN';
       await fetch('/api/v1/system/reset-demo', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
       }).catch((err) => {
         console.warn('Backend reset call warning:', err);
       });

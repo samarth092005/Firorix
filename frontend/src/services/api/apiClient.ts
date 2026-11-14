@@ -570,9 +570,17 @@ export class ApiClient {
       }
     }
 
+    let token: string | null = null;
+    try {
+      if (typeof window !== 'undefined') {
+        token = localStorage.getItem('fiorify_auth_token');
+      }
+    } catch {}
+
     const headers: Record<string, string> = {
       Accept: 'application/json, text/plain, */*',
       'X-Correlation-ID': correlationId,
+      ...(token && !options?.headers?.['Authorization'] && !options?.headers?.['authorization'] ? { Authorization: `Bearer ${token}` } : {}),
       ...this.config.defaultHeaders,
       ...options?.headers
     };
