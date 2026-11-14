@@ -67,17 +67,15 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
 }) => {
   const navigate = useNavigate();
 
-  // Normalize outcome to canonical values
-  const canonicalOutcome: 'ADOPT' | 'CONFIGURE' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION' =
-    recommendationOutcome === 'ADOPT' || recommendationOutcome === 'USE_STANDARD_FIORI_SUCCESSOR'
-      ? (availability?.serviceRegistrationStatus === 'PENDING_BASIS_CHECK' || availability?.roleAssignmentStatus === 'PENDING_VERIFICATION' ? 'CONFIGURE' : 'ADOPT')
-      : recommendationOutcome === 'CONFIGURE' || recommendationOutcome === 'USE_CLASSIC_TRANSACTION_LAUNCHPAD'
-      ? 'CONFIGURE'
-      : recommendationOutcome === 'BUILD' || recommendationOutcome === 'TECHNICAL_ANALYSIS_REQUIRED'
+  // Normalize outcome to canonical values: Exactly 2 outcomes (ADD_AND_CONFIGURE vs BUILD) plus internal governance states
+  const canonicalOutcome: 'ADD_AND_CONFIGURE' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION' =
+    recommendationOutcome === 'BUILD' || recommendationOutcome === 'TECHNICAL_ANALYSIS_REQUIRED'
       ? 'BUILD'
       : recommendationOutcome === 'PENDING_VERIFICATION' || recommendationOutcome === 'INVESTIGATE_CATALOGUE_INFO'
       ? 'PENDING_VERIFICATION'
-      : 'INSUFFICIENT_EVIDENCE';
+      : recommendationOutcome === 'INSUFFICIENT_EVIDENCE'
+      ? 'INSUFFICIENT_EVIDENCE'
+      : 'ADD_AND_CONFIGURE';
 
   const isBuildRecommended = canonicalOutcome === 'BUILD' || (!assessment.matchingFioriApp && candidates.length === 0);
 
@@ -410,21 +408,18 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
                 fontWeight: 700,
                 boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 backgroundColor:
-                  canonicalOutcome === 'ADOPT' ? '#EDF9F0' :
-                  canonicalOutcome === 'CONFIGURE' ? '#EAF3FE' :
+                  canonicalOutcome === 'ADD_AND_CONFIGURE' ? '#EDF9F0' :
                   canonicalOutcome === 'BUILD' ? '#F7EDFD' : '#F1F5F9',
                 color:
-                  canonicalOutcome === 'ADOPT' ? '#107E3E' :
-                  canonicalOutcome === 'CONFIGURE' ? '#0070F2' :
+                  canonicalOutcome === 'ADD_AND_CONFIGURE' ? '#107E3E' :
                   canonicalOutcome === 'BUILD' ? '#8C19C5' : '#475569',
                 border: `1px solid ${
-                  canonicalOutcome === 'ADOPT' ? '#BCE6C6' :
-                  canonicalOutcome === 'CONFIGURE' ? '#B8D7FF' :
+                  canonicalOutcome === 'ADD_AND_CONFIGURE' ? '#BCE6C6' :
                   canonicalOutcome === 'BUILD' ? '#E3BFFF' : '#CBD5E1'
                 }`
               }}
             >
-              {canonicalOutcome}
+              {canonicalOutcome === 'ADD_AND_CONFIGURE' ? 'ADD & CONFIGURE' : canonicalOutcome}
             </span>
           </div>
         </div>
@@ -574,7 +569,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
                 1. Verdict & Recommendation
               </span>
               <span style={{ fontSize: '13px', fontWeight: 700, color: '#107E3E' }}>
-                ADOPT_STANDARD_FIORI
+                ADD_AND_CONFIGURE
               </span>
               <span style={{ fontSize: '11px', color: '#64748B' }}>
                 Standard successor confirmed in Reference Library

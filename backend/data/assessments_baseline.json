@@ -64,7 +64,7 @@
     "scoringBreakdown": null,
     "identifiedGaps": [],
     "recommendation": {
-      "outcome": "CONFIGURE",
+      "outcome": "ADD_AND_CONFIGURE",
       "recommendedAction": "Deploy and configure standard SAP Fiori application F0773 (Manage Outgoing Payments). Complete Basis service activation and PFCG role assignment.",
       "supportingEvidence": [
         "F0773 is the official standard successor for F-53 in SAP Fiori Apps Reference Library.",
@@ -316,7 +316,7 @@
     "scoringBreakdown": null,
     "identifiedGaps": [],
     "recommendation": {
-      "outcome": "ADOPT",
+      "outcome": "ADD_AND_CONFIGURE",
       "recommendedAction": "Deploy standard Fiori app Manage Purchase Orders"
     },
     "remediationPlan": [],

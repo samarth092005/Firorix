@@ -51,9 +51,7 @@ export class EnterpriseService {
     let pendingApprovals = 0;
 
     const outcomes = {
-      [RECOMMENDATION_OUTCOMES.ADOPT]: 0,
-      [RECOMMENDATION_OUTCOMES.CONFIGURE]: 0,
-      [RECOMMENDATION_OUTCOMES.EXTEND]: 0,
+      [RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE]: 0,
       [RECOMMENDATION_OUTCOMES.BUILD]: 0,
       [RECOMMENDATION_OUTCOMES.REVIEW]: 0,
       [RECOMMENDATION_OUTCOMES.PENDING_VERIFICATION]: 0,
@@ -132,6 +130,15 @@ export class EnterpriseService {
       averageFitGapScore: averageScore,
       recommendationsByOutcome: outcomes,
       byOutcome: outcomes,
+      businessOutcomes: {
+        ADD_AND_CONFIGURE: outcomes.ADD_AND_CONFIGURE || 0,
+        BUILD: outcomes.BUILD || 0
+      },
+      governanceStates: {
+        REVIEW: outcomes.REVIEW || 0,
+        PENDING_VERIFICATION: outcomes.PENDING_VERIFICATION || 0,
+        INSUFFICIENT_EVIDENCE: outcomes.INSUFFICIENT_EVIDENCE || 0
+      },
       bySystem,
       cleanCoreTiers,
       evidenceCoveragePercent: assessments.length > 0
@@ -157,17 +164,9 @@ export class EnterpriseService {
       let businessImpact = 'MEDIUM';
       let technicalImpact = 'MEDIUM';
 
-      if (outcome === RECOMMENDATION_OUTCOMES.ADOPT) {
+      if (outcome === RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE) {
         priority = 'HIGH';
         businessImpact = 'HIGH';
-        technicalImpact = 'LOW';
-      } else if (outcome === RECOMMENDATION_OUTCOMES.CONFIGURE) {
-        priority = 'HIGH';
-        businessImpact = 'HIGH';
-        technicalImpact = 'MEDIUM';
-      } else if (outcome === RECOMMENDATION_OUTCOMES.EXTEND) {
-        priority = 'MEDIUM';
-        businessImpact = 'MEDIUM';
         technicalImpact = 'MEDIUM';
       } else if (outcome === RECOMMENDATION_OUTCOMES.BUILD) {
         priority = 'CRITICAL';
@@ -192,7 +191,7 @@ export class EnterpriseService {
         priority,
         businessImpact,
         technicalImpact,
-        responsibleRole: outcome === 'BUILD' ? 'Lead ABAP Architect' : (outcome === 'CONFIGURE' ? 'Security / Basis Team' : 'SAP Functional Consultant'),
+        responsibleRole: outcome === 'BUILD' ? 'Lead ABAP Architect' : (outcome === 'ADD_AND_CONFIGURE' ? 'SAP Functional & Basis Team' : 'Enterprise Architect'),
         approvalState: asm.lifecycleStatus,
         plannedStatus: asm.lifecycleStatus === 'APPROVED' ? 'SCHEDULED_FOR_SPRINT' : 'PENDING_APPROVAL',
         deploymentStage: asm.deploymentReadiness?.stage || 'DEV_READINESS',
@@ -209,10 +208,9 @@ export class EnterpriseService {
     workItems.sort((a, b) => (priorityOrder[a.priority] || 5) - (priorityOrder[b.priority] || 5));
 
     const phases = {
-      wave1_standardAdoption: workItems.filter(w => w.recommendationOutcome === 'ADOPT'),
-      wave2_configureAndExtend: workItems.filter(w => w.recommendationOutcome === 'CONFIGURE' || w.recommendationOutcome === 'EXTEND'),
-      wave3_cleanCoreBuild: workItems.filter(w => w.recommendationOutcome === 'BUILD'),
-      wave4_assessmentReview: workItems.filter(w => !['ADOPT', 'CONFIGURE', 'EXTEND', 'BUILD'].includes(w.recommendationOutcome))
+      wave1_addAndConfigure: workItems.filter(w => w.recommendationOutcome === RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE),
+      wave2_cleanCoreBuild: workItems.filter(w => w.recommendationOutcome === RECOMMENDATION_OUTCOMES.BUILD),
+      wave3_governanceReview: workItems.filter(w => ![RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE, RECOMMENDATION_OUTCOMES.BUILD].includes(w.recommendationOutcome))
     };
 
     return {
@@ -376,9 +374,9 @@ export class EnterpriseService {
       `- **Average Fit-Gap Score:** ${e.averageFitGapScore || 0}%`,
       '',
       '## Modernization Roadmap Overview',
-      `- **Wave 1 (Standard Fiori Adoption):** ${report.roadmap?.phases?.wave1_standardAdoption?.length || 0} initiatives`,
-      `- **Wave 2 (Configure & Low-Code Extensibility):** ${report.roadmap?.phases?.wave2_configureAndExtend?.length || 0} initiatives`,
-      `- **Wave 3 (Clean Core Custom Applications):** ${report.roadmap?.phases?.wave3_cleanCoreBuild?.length || 0} initiatives`,
+      `- **Wave 1 (Add & Configure Standard Fiori):** ${report.roadmap?.phases?.wave1_addAndConfigure?.length || 0} initiatives`,
+      `- **Wave 2 (Clean Core Custom Applications):** ${report.roadmap?.phases?.wave2_cleanCoreBuild?.length || 0} initiatives`,
+      `- **Wave 3 (Governance & Architecture Review):** ${report.roadmap?.phases?.wave3_governanceReview?.length || 0} initiatives`,
       '',
       '## Assessment Inventory',
       '| Assessment ID | Transaction | System | Lifecycle | Outcome | Fit Score | Candidate App |',

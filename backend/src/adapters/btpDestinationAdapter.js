@@ -78,7 +78,7 @@ export function sanitizeHeaders(headers = {}) {
     'client_secret',
     'password',
     'token',
-    'x-Fiorify-admin-secret'
+    'x-fiorify-admin-secret'
   ];
 
   for (const [key, value] of Object.entries(headers)) {

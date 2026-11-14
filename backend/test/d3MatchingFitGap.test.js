@@ -93,10 +93,10 @@ describe('Workstream D3 — Matching Engine and Fit-Gap Finalization Tests', () 
         candidate: { appId: 'F0842A', appType: 'Transactional', uiTechnology: 'SAP Fiori elements' }
       });
 
-      assert.strictEqual(rec.outcome, RECOMMENDATION_OUTCOMES.ADOPT);
+      assert.strictEqual(rec.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     });
 
-    it('recommends CONFIGURE when standard app requires role/catalog enablement only', () => {
+    it('recommends ADD_AND_CONFIGURE when standard app requires role/catalog enablement only', () => {
       const assessment = {
         overallStatus: ASSESSMENT_STATUSES.PARTIAL_FIT,
         overallScore: 78,
@@ -118,10 +118,10 @@ describe('Workstream D3 — Matching Engine and Fit-Gap Finalization Tests', () 
         candidate: { appId: 'F1612', appType: 'Transactional', uiTechnology: 'SAP Fiori elements' }
       });
 
-      assert.strictEqual(rec.outcome, RECOMMENDATION_OUTCOMES.CONFIGURE);
+      assert.strictEqual(rec.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     });
 
-    it('recommends EXTEND when standard app covers core flow but requires key-user/developer extensibility', () => {
+    it('recommends ADD_AND_CONFIGURE when standard app covers core flow but requires key-user/developer extensibility', () => {
       const assessment = {
         overallStatus: ASSESSMENT_STATUSES.PARTIAL_FIT,
         overallScore: 62,
@@ -143,7 +143,7 @@ describe('Workstream D3 — Matching Engine and Fit-Gap Finalization Tests', () 
         candidate: { appId: 'F1873', appType: 'Transactional', uiTechnology: 'SAP Fiori elements' }
       });
 
-      assert.strictEqual(rec.outcome, RECOMMENDATION_OUTCOMES.EXTEND);
+      assert.strictEqual(rec.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     });
 
     it('strictly prevents premature BUILD when evidence is missing or preconditions fail', () => {

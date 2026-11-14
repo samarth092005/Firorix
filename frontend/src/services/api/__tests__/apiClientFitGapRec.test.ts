@@ -40,10 +40,10 @@ describe('ApiClient Fit-Gap, Recommendation & Lifecycle Methods (FITGAP-02, REC-
     const mockRec = {
       success: true,
       requestId: 'REQ-REC-000001',
-      outcome: 'ADOPT',
+      outcome: 'ADD_AND_CONFIGURE',
       confidence: 'HIGH',
       recommendation: {
-        outcome: 'ADOPT',
+        outcome: 'ADD_AND_CONFIGURE',
         rationale: 'Fully verified standard Fiori application.',
         actionableRemediationPlan: [{ step: 1, title: 'Assign Role', responsibleRole: 'Security' }]
       }
@@ -66,7 +66,7 @@ describe('ApiClient Fit-Gap, Recommendation & Lifecycle Methods (FITGAP-02, REC-
     const [url, init] = mockFetch.mock.calls[0];
     expect(url).toContain('/recommendations/generate');
     expect(init.method).toBe('POST');
-    expect(result.outcome).toBe('ADOPT');
+    expect(result.outcome).toBe('ADD_AND_CONFIGURE');
     expect(result.recommendation.actionableRemediationPlan.length).toBe(1);
   });
 

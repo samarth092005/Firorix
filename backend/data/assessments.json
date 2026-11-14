@@ -64,7 +64,7 @@
     "scoringBreakdown": null,
     "identifiedGaps": [],
     "recommendation": {
-      "outcome": "CONFIGURE",
+      "outcome": "ADD_AND_CONFIGURE",
       "recommendedAction": "Deploy and configure standard SAP Fiori application F0773 (Manage Outgoing Payments). Complete Basis service activation and PFCG role assignment.",
       "supportingEvidence": [
         "F0773 is the official standard successor for F-53 in SAP Fiori Apps Reference Library.",
@@ -316,7 +316,7 @@
     "scoringBreakdown": null,
     "identifiedGaps": [],
     "recommendation": {
-      "outcome": "ADOPT",
+      "outcome": "ADD_AND_CONFIGURE",
       "recommendedAction": "Deploy standard Fiori app Manage Purchase Orders"
     },
     "remediationPlan": [],
@@ -630,7 +630,7 @@
     "scoringBreakdown": null,
     "identifiedGaps": [],
     "recommendation": {
-      "outcome": "ADOPT",
+      "outcome": "ADD_AND_CONFIGURE",
       "recommendedAction": "Adopt official standard SAP Fiori application F2229. Activate OData service MM_PUR_PR_PROFNL_MAINTAIN_SRV and assign business role SAP_BR_PURCHASER.",
       "supportingEvidence": [
         "Designated successor in SAP Fiori Apps Reference Library.",

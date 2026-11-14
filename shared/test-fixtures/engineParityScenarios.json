@@ -1,0 +1,684 @@
+[
+  {
+    "id": "SCN-01",
+    "index": 1,
+    "name": "Standard candidate with complete evidence & no critical gap",
+    "description": "Verified standard Fiori application with complete compatibility, activation, and role evidence produces ADD_AND_CONFIGURE.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-01",
+        "assessmentId": "ASM-01",
+        "tcode": "F-53",
+        "overallStatus": "VERIFIED_FIT",
+        "overallScore": 92,
+        "confidence": "HIGH",
+        "identifiedGaps": [],
+        "missingEvidence": [],
+        "conflictingEvidence": [],
+        "assessmentResult": "EXPLICIT_SUCCESSOR",
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments",
+          "appType": "SAP Fiori elements",
+          "uiTechnology": "SAP Fiori elements",
+          "releaseCompatibility": "COMPATIBLE"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "appType": "Transactional",
+        "uiTechnology": "SAP Fiori elements",
+        "productVersion": "SAP S/4HANA 2023",
+        "releaseCompatibility": "COMPATIBLE",
+        "supportedCapabilities": ["PAYMENT_PROCESSING", "OPEN_ITEM_CLEARING"]
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" }
+      }
+    },
+    "expected": {
+      "outcome": "ADD_AND_CONFIGURE",
+      "businessOutcome": "ADD_AND_CONFIGURE",
+      "governanceState": null,
+      "isBusinessOutcome": true
+    }
+  },
+  {
+    "id": "SCN-02",
+    "index": 2,
+    "name": "Standard candidate with configuration-resolvable gaps",
+    "description": "Standard application with non-critical configuration/authorization gaps produces ADD_AND_CONFIGURE with configuration guidance.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-02",
+        "assessmentId": "ASM-02",
+        "tcode": "F-53",
+        "overallStatus": "PARTIAL_FIT",
+        "overallScore": 78,
+        "confidence": "HIGH",
+        "identifiedGaps": [
+          { "gapId": "GAP-CFG-01", "category": "AUTHORIZATION", "severity": "MEDIUM", "description": "Role assignment needed in PFCG" }
+        ],
+        "missingEvidence": [],
+        "conflictingEvidence": [],
+        "assessmentResult": "EXPLICIT_SUCCESSOR",
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments",
+          "appType": "SAP Fiori elements",
+          "uiTechnology": "SAP Fiori elements",
+          "releaseCompatibility": "COMPATIBLE"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "appType": "Transactional",
+        "uiTechnology": "SAP Fiori elements",
+        "productVersion": "SAP S/4HANA 2023",
+        "releaseCompatibility": "COMPATIBLE",
+        "supportedCapabilities": ["PAYMENT_PROCESSING", "OPEN_ITEM_CLEARING"]
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" }
+      }
+    },
+    "expected": {
+      "outcome": "ADD_AND_CONFIGURE",
+      "businessOutcome": "ADD_AND_CONFIGURE",
+      "governanceState": null,
+      "isBusinessOutcome": true
+    }
+  },
+  {
+    "id": "SCN-03",
+    "index": 3,
+    "name": "Standard candidate with mandatory gaps & all BUILD requirements satisfied (Path A)",
+    "description": "Standard candidate with confirmed critical functional gaps, valid architect approval, and all 9 BUILD preconditions satisfied produces BUILD.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-03",
+        "assessmentId": "ASM-03",
+        "tcode": "F-53",
+        "version": 1,
+        "overallStatus": "PARTIAL_FIT",
+        "confidence": "HIGH",
+        "identifiedGaps": [
+          {
+            "gapId": "GAP-CRIT-01",
+            "category": "FUNCTIONAL_CAPABILITY",
+            "severity": "CRITICAL",
+            "description": "Direct proprietary clearing engine unavailable in standard app"
+          }
+        ],
+        "missingEvidence": [],
+        "conflictingEvidence": [],
+        "dimensionResults": {
+          "functionalFit": {
+            "status": "NO_FIT",
+            "missingCapabilities": ["Direct proprietary clearing engine"]
+          }
+        },
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments",
+          "appType": "SAP Fiori elements",
+          "uiTechnology": "SAP Fiori elements",
+          "releaseCompatibility": "COMPATIBLE"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "appType": "Transactional",
+        "uiTechnology": "SAP Fiori elements",
+        "productVersion": "SAP S/4HANA 2023",
+        "releaseCompatibility": "COMPATIBLE",
+        "supportedCapabilities": ["PAYMENT_PROCESSING", "OPEN_ITEM_CLEARING"]
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": {
+          "approved": true,
+          "assessmentId": "ASM-03",
+          "assessmentVersion": 1,
+          "scope": "BUILD",
+          "approver": "Chief Enterprise Architect"
+        }
+      }
+    },
+    "expected": {
+      "outcome": "BUILD",
+      "businessOutcome": "BUILD",
+      "governanceState": null,
+      "isBusinessOutcome": true
+    }
+  },
+  {
+    "id": "SCN-04",
+    "index": 4,
+    "name": "No standard candidate, completed catalogue search & verified technical evidence (Path B)",
+    "description": "Zero standard Fiori candidates, verified catalogue search execution (COMPLETED_ZERO_MATCHES), verified DDIC evidence, documented configuration and Clean Core insufficiency, and valid architect approval produces BUILD.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-04",
+        "assessmentId": "ASM-04",
+        "tcode": "ZPAY_CUSTOM",
+        "version": 1,
+        "classification": "CUSTOM",
+        "overallStatus": "NO_FIT",
+        "overallScore": 20,
+        "confidence": "HIGH",
+        "verificationStatus": "VERIFIED",
+        "programName": "ZPAY_DISBURSE",
+        "packageName": "Z_FIN_CUSTOM",
+        "exists": true,
+        "assessmentResult": "NO_VERIFIED_MATCH",
+        "catalogueSearch": {
+          "officialSourceId": "SAP_FIORI_APPS_REFERENCE_LIBRARY",
+          "searchExecutionId": "SRCH-ZPAY-20261113-001",
+          "searchScope": "SAP Fiori Apps Reference Library 2023 FPS02",
+          "targetRelease": "SAP S/4HANA 2023",
+          "query": "ZPAY_CUSTOM",
+          "timestamp": "2026-11-13T10:00:00Z",
+          "searchCompletionStatus": "COMPLETED_ZERO_MATCHES",
+          "resultCount": 0,
+          "sourceProvenance": "LOCAL_SNAPSHOT",
+          "catalogueVersion": "2023-FPS02",
+          "noMatchFound": true,
+          "standardAlternativesEvaluated": true,
+          "genericCapabilitiesEvaluated": true,
+          "companionAppsEvaluated": true,
+          "webGuiFallbackEvaluated": true,
+          "configurationEvaluated": true,
+          "configurationInsufficient": true,
+          "cleanCoreExtensionEvaluated": true,
+          "extensionAlternativesEvaluated": true
+        },
+        "standardAlternativesEvaluated": true,
+        "genericCapabilitiesEvaluated": true,
+        "companionAppsEvaluated": true,
+        "webGuiFallbackEvaluated": true,
+        "configurationEvaluated": true,
+        "configurationInsufficient": true,
+        "cleanCoreExtensionEvaluated": true,
+        "extensionAlternativesEvaluated": true,
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "Zero standard successors available" }
+        ],
+        "missingEvidence": [],
+        "conflictingEvidence": []
+      },
+      "requirement": {
+        "id": "REQ-04",
+        "tcode": "ZPAY_CUSTOM",
+        "title": "Custom High-Volume Payment Engine",
+        "statement": "Proprietary automated clearing engine with external banking APIs"
+      },
+      "candidate": null,
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": {
+          "approved": true,
+          "assessmentId": "ASM-04",
+          "assessmentVersion": 1,
+          "scope": "BUILD",
+          "approver": "Enterprise Architect"
+        }
+      }
+    },
+    "expected": {
+      "outcome": "BUILD",
+      "businessOutcome": "BUILD",
+      "governanceState": null,
+      "isBusinessOutcome": true
+    }
+  },
+  {
+    "id": "SCN-05",
+    "index": 5,
+    "name": "No standard candidate but incomplete discovery -> REVIEW",
+    "description": "Missing catalogue search execution and unverified DDIC evidence prevents premature BUILD and retains assessment in REVIEW.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-05",
+        "assessmentId": "ASM-05",
+        "tcode": "ZMES_INT",
+        "overallStatus": "NO_FIT",
+        "confidence": "LOW",
+        "verificationStatus": "UNVERIFIED",
+        "missingEvidence": ["TADIR object entry unverified", "Catalogue search not recorded"]
+      },
+      "requirement": {
+        "id": "REQ-05",
+        "tcode": "ZMES_INT",
+        "statement": "Shop floor PLC terminal"
+      },
+      "candidate": null,
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-06",
+    "index": 6,
+    "name": "Candidate exists but release compatibility unverified -> REVIEW",
+    "description": "Standard candidate with unverified release compatibility triggers governance REVIEW to prevent deployment failures.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-06",
+        "assessmentId": "ASM-06",
+        "tcode": "F-53",
+        "overallStatus": "PARTIAL_FIT"
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "UNVERIFIED"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-07",
+    "index": 7,
+    "name": "Candidate metadata is stale -> REVIEW",
+    "description": "Candidate metadata marked stale requires official library refresh, preventing decisions on obsolete specifications.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-07",
+        "assessmentId": "ASM-07",
+        "tcode": "F-53",
+        "overallStatus": "VERIFIED_FIT"
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "isStale": true
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-08",
+    "index": 8,
+    "name": "Missing functional requirements -> REVIEW",
+    "description": "Placeholder functional requirement text ('TBD') prevents decision formulation and holds assessment in REVIEW.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-08",
+        "assessmentId": "ASM-08",
+        "tcode": "F-53",
+        "overallStatus": "PARTIAL_FIT"
+      },
+      "requirement": {
+        "id": "REQ-08",
+        "tcode": "F-53",
+        "statement": "TBD"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-09",
+    "index": 9,
+    "name": "Configuration insufficiency not established -> REVIEW",
+    "description": "Precondition 6 fails when configuration is not proven insufficient, blocking custom BUILD and returning REVIEW.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-09",
+        "assessmentId": "ASM-09",
+        "tcode": "F-53",
+        "overallStatus": "NO_FIT",
+        "configurationInsufficient": false,
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "User role parameter not set" }
+        ],
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": { "approved": true, "assessmentId": "ASM-09", "scope": "BUILD", "approver": "Lead Architect" }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-10",
+    "index": 10,
+    "name": "Clean Core extension alternatives not evaluated -> REVIEW",
+    "description": "Precondition 7 fails when Clean Core extension alternatives are unexamined, blocking custom BUILD and returning REVIEW.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-10",
+        "assessmentId": "ASM-10",
+        "tcode": "F-53",
+        "overallStatus": "NO_FIT",
+        "cleanCoreExtensionEvaluated": false,
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "Field extension needed" }
+        ],
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": { "approved": true, "assessmentId": "ASM-10", "scope": "BUILD", "approver": "Lead Architect" }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-11",
+    "index": 11,
+    "name": "Architect approval is pending -> REVIEW",
+    "description": "Custom development with critical functional gaps but pending Lead Architect approval is held in REVIEW.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-11",
+        "assessmentId": "ASM-11",
+        "tcode": "F-53",
+        "overallStatus": "NO_FIT",
+        "approvalStatus": "PENDING",
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "Proprietary engine required" }
+        ],
+        "dimensionResults": {
+          "functionalFit": {
+            "status": "NO_FIT",
+            "missingCapabilities": ["Proprietary clearing engine"]
+          }
+        },
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "approvalStatus": "PENDING"
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-12",
+    "index": 12,
+    "name": "Old EXTEND approval without explicit BUILD scope -> REVIEW",
+    "description": "Historical approval scoped strictly to obsolete EXTEND decision does not authorize BUILD; triggers REVIEW for fresh BUILD authorization.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-12",
+        "assessmentId": "ASM-12",
+        "tcode": "F-53",
+        "overallStatus": "NO_FIT",
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "Custom extension needed" }
+        ],
+        "dimensionResults": {
+          "functionalFit": {
+            "status": "NO_FIT",
+            "missingCapabilities": ["Custom clearing exit"]
+          }
+        },
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": {
+          "approved": true,
+          "assessmentId": "ASM-12",
+          "scope": "EXTEND",
+          "approver": "Legacy Architect"
+        }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-13",
+    "index": 13,
+    "name": "Approval belongs to different assessment -> REVIEW",
+    "description": "Approval linked to a mismatched assessment ID is rejected by cross-assessment reuse guardrails, retaining assessment in REVIEW.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-13",
+        "assessmentId": "ASM-13",
+        "tcode": "F-53",
+        "overallStatus": "NO_FIT",
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "Custom extension needed" }
+        ],
+        "dimensionResults": {
+          "functionalFit": {
+            "status": "NO_FIT",
+            "missingCapabilities": ["Custom clearing exit"]
+          }
+        },
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": {
+          "approved": true,
+          "assessmentId": "ASM-OTHER-99",
+          "scope": "BUILD",
+          "approver": "Chief Architect"
+        }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  },
+  {
+    "id": "SCN-14",
+    "index": 14,
+    "name": "Assessment changes after approval -> require reapproval (REVIEW)",
+    "description": "Material requirement modifications or evidence changes after approval invalidate prior authorization and require fresh review.",
+    "inputs": {
+      "assessment": {
+        "id": "ASM-14",
+        "assessmentId": "ASM-14",
+        "tcode": "F-53",
+        "overallStatus": "NO_FIT",
+        "materialRequirementsChanged": true,
+        "identifiedGaps": [
+          { "category": "FUNCTIONAL_CAPABILITY", "severity": "CRITICAL", "description": "Custom extension needed" }
+        ],
+        "dimensionResults": {
+          "functionalFit": {
+            "status": "NO_FIT",
+            "missingCapabilities": ["Custom clearing exit"]
+          }
+        },
+        "matchingFioriApp": {
+          "appId": "F0773",
+          "appName": "Manage Outgoing Payments"
+        }
+      },
+      "requirement": {
+        "id": "REQ-01",
+        "tcode": "F-53",
+        "title": "Post Outgoing Payments",
+        "statement": "Process supplier open items and disburse outgoing payments"
+      },
+      "candidate": {
+        "appId": "F0773",
+        "appName": "Manage Outgoing Payments",
+        "releaseCompatibility": "COMPATIBLE"
+      },
+      "context": {
+        "targetSystem": { "systemId": "S21", "client": "200", "release": "SAP S/4HANA 2023" },
+        "leadArchitectApproval": {
+          "approved": true,
+          "assessmentId": "ASM-14",
+          "scope": "BUILD",
+          "approver": "Chief Architect"
+        }
+      }
+    },
+    "expected": {
+      "outcome": "REVIEW",
+      "businessOutcome": null,
+      "governanceState": "REVIEW",
+      "isBusinessOutcome": false
+    }
+  }
+]

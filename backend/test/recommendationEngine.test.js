@@ -44,21 +44,21 @@ describe('Fiorify REC-01 — Governed Recommendation Engine Unit Tests', () => {
     userAuthorizations: ['ACCOUNTS PAYABLE ACCOUNTANT']
   };
 
-  it('formulates ADOPT outcome for fully verified standard Fiori application with 0 critical gaps', () => {
+  it('formulates ADD_AND_CONFIGURE outcome for fully verified standard Fiori application with 0 critical gaps', () => {
     const result = recommendationEngine.generate({
       requirement: baseReq,
       candidate: idealCandidate,
       context: fullyVerifiedContext
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADOPT);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.strictEqual(result.confidence, 'HIGH');
     assert.ok(result.overallScore >= 80);
     assert.strictEqual(result.riskAssessment.overallRisk, 'LOW');
     assert.ok(result.actionableRemediationPlan.length >= 2);
   });
 
-  it('formulates CONFIGURE outcome when app fits but user lacks role or service activation is pending', () => {
+  it('formulates ADD_AND_CONFIGURE outcome when app fits but user lacks role or service activation is pending', () => {
     const contextNeedingConfig = {
       targetSystem: { systemId: 'S21', release: 'SAP S/4HANA 2023' },
       activeServices: [], // Missing activation in Gateway
@@ -76,11 +76,11 @@ describe('Fiorify REC-01 — Governed Recommendation Engine Unit Tests', () => {
       context: contextNeedingConfig
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.CONFIGURE);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(result.actionableRemediationPlan.some((step) => step.responsibleRole === 'Security / Authorizations Team'));
   });
 
-  it('formulates EXTEND outcome and enforces Clean Core Tier 1/2 when customization is required', () => {
+  it('formulates ADD_AND_CONFIGURE outcome and enforces Clean Core Tier 1/2 adaptation when customization is required', () => {
     const reqWithCustomization = {
       ...baseReq,
       customizationRequirements: ['Add custom vendor withholding tax rule']
@@ -92,7 +92,7 @@ describe('Fiorify REC-01 — Governed Recommendation Engine Unit Tests', () => {
       context: fullyVerifiedContext
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.EXTEND);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(result.governanceOverridesApplied.includes(GOVERNANCE_OVERRIDES.CLEAN_CORE_EXTENSIBILITY_ENFORCED));
     assert.strictEqual(result.extensibilityStrategy.tier, EXTENSIBILITY_TIERS.TIER_1_KEY_USER);
     assert.ok(result.extensibilityStrategy.cleanCoreCompliant);
@@ -157,7 +157,7 @@ describe('Fiorify REC-01 — Governed Recommendation Engine Unit Tests', () => {
     assert.strictEqual(result.riskAssessment.overallRisk, 'CRITICAL');
   });
 
-  it('handles Classic GUI tile with LEGACY_GUI_FALLBACK override and CONFIGURE outcome', () => {
+  it('handles Classic GUI tile with LEGACY_GUI_FALLBACK override and ADD_AND_CONFIGURE outcome', () => {
     const classicGuiCandidate = {
       appId: 'F-53',
       appName: 'Post Outgoing Payments - For Suppliers',
@@ -174,7 +174,7 @@ describe('Fiorify REC-01 — Governed Recommendation Engine Unit Tests', () => {
       context: fullyVerifiedContext
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.CONFIGURE);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(result.governanceOverridesApplied.includes(GOVERNANCE_OVERRIDES.LEGACY_GUI_FALLBACK_RECOMMENDED));
     assert.strictEqual(result.extensibilityStrategy.cleanCoreCompliant, false);
   });

@@ -681,11 +681,11 @@ export const AssessmentResultsPage: React.FC = () => {
               </div>
               <div>
                 <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: isStandardMatch ? '#15803D' : '#8C19C5', letterSpacing: '0.5px' }}>
-                  STRATEGIC VERDICT: {isStandardMatch ? 'ADOPT_STANDARD_FIORI' : 'BUILD_CUSTOM_RAP'}
+                  STRATEGIC VERDICT: {isStandardMatch ? 'ADD_AND_CONFIGURE' : 'BUILD'}
                 </div>
                 <h2 style={{ margin: '4px 0 6px 0', fontSize: '18px', fontWeight: 700, color: '#0F172A' }}>
                   {isStandardMatch
-                    ? `Adopt Standard SAP Fiori Application (${primaryCandidate?.appId} — ${primaryCandidate?.appName})`
+                    ? `Add & Configure Standard SAP Fiori Application (${primaryCandidate?.appId} — ${primaryCandidate?.appName})`
                     : `Custom Clean Core RAP Modernization Required (${assessment.tcode})`}
                 </h2>
                 <p style={{ margin: 0, fontSize: '13px', color: '#475569', maxWidth: '720px', lineHeight: 1.5 }}>

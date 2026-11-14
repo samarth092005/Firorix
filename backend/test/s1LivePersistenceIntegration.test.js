@@ -97,6 +97,7 @@ test('Fiorify S1.4 — Live Persistence HTTP API Integration Tests (PostgreSQL)'
     await pool.query('DELETE FROM assessment_audit_events WHERE assessment_id = $1;', [testAssessmentId]);
     await pool.query('DELETE FROM fit_gap_dimensions WHERE assessment_id = $1;', [testAssessmentId]);
     await pool.query('DELETE FROM assessments WHERE id = $1;', [testAssessmentId]);
+    await DatabasePool.close();
   });
 
   // Step 1: Create test assessment via POST /api/v1/assessments

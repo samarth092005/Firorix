@@ -24,6 +24,8 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     switch (normalized) {
       case 'EXPLICIT_SUCCESSOR':
       case 'DIRECT_MATCH':
+      case 'ADD_AND_CONFIGURE':
+      case 'ADD_&_CONFIGURE':
       case 'ADOPT':
       case 'SUPPORTED':
       case 'VERIFIED':
@@ -36,7 +38,6 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         computedVariant = 'success';
         break;
 
-      case 'EXTEND':
       case 'PARTIAL':
       case 'INFERRED':
       case 'WARNING':

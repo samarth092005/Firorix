@@ -950,33 +950,26 @@ export class EvidenceEngine {
   }
 
   /**
-   * Maps any legacy recommendation outcome or assessment status to one of the 6 canonical outcomes:
-   * ADOPT, CONFIGURE, EXTEND, BUILD, INSUFFICIENT_EVIDENCE, PENDING_VERIFICATION.
+   * Maps recommendation outcomes to canonical business outcomes (ADD_AND_CONFIGURE, BUILD)
+   * or internal governance states (REVIEW, PENDING_VERIFICATION, INSUFFICIENT_EVIDENCE).
    */
   public mapToCanonicalOutcome(
     outcome: RecommendationOutcome,
     availability?: SystemAvailabilityAudit
-  ): 'ADOPT' | 'CONFIGURE' | 'EXTEND' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION' {
-    if (outcome === 'ADOPT' || outcome === 'CONFIGURE' || outcome === 'EXTEND' || outcome === 'BUILD' || outcome === 'INSUFFICIENT_EVIDENCE' || outcome === 'PENDING_VERIFICATION') {
+  ): 'ADD_AND_CONFIGURE' | 'BUILD' | 'REVIEW' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION' {
+    if (outcome === 'ADD_AND_CONFIGURE' || outcome === 'BUILD' || outcome === 'REVIEW' || outcome === 'INSUFFICIENT_EVIDENCE' || outcome === 'PENDING_VERIFICATION') {
       return outcome;
     }
 
-    if (outcome === 'USE_STANDARD_FIORI_SUCCESSOR') {
-      // If service registration or role assignment is pending, governance mandates CONFIGURE rather than unconditional ADOPT
-      if (availability?.serviceRegistrationStatus === 'PENDING_BASIS_CHECK' ||
-          availability?.roleAssignmentStatus === 'PENDING_VERIFICATION' ||
-          availability?.activationStatus === 'PENDING_VERIFICATION') {
-        return 'CONFIGURE';
-      }
-      return 'ADOPT';
-    }
-
-    if (outcome === 'USE_CLASSIC_TRANSACTION_LAUNCHPAD') {
-      return 'CONFIGURE';
-    }
-
-    if (outcome === 'EVALUATE_FUNCTIONAL_ALTERNATIVE') {
-      return 'EXTEND';
+    if (
+      outcome === 'ADOPT' ||
+      outcome === 'CONFIGURE' ||
+      (outcome as any) === 'EXTEND' ||
+      outcome === 'USE_STANDARD_FIORI_SUCCESSOR' ||
+      outcome === 'USE_CLASSIC_TRANSACTION_LAUNCHPAD' ||
+      (outcome as any) === 'EVALUATE_FUNCTIONAL_ALTERNATIVE'
+    ) {
+      return 'ADD_AND_CONFIGURE';
     }
 
     if (outcome === 'INVESTIGATE_CATALOGUE_INFO') {
@@ -994,8 +987,8 @@ export class EvidenceEngine {
    * Generates a structured final recommendation with traceable supporting evidence,
    * known limitations, outstanding checks, and required next steps.
    *
-   * Maintains legacy 'outcome' string for backward compatibility, while always providing
-   * the canonical outcome ('ADOPT' | 'CONFIGURE' | 'EXTEND' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION').
+   * Formulates one of two canonical business outcomes:
+   * ADD_AND_CONFIGURE or BUILD (with internal states REVIEW, PENDING_VERIFICATION, INSUFFICIENT_EVIDENCE).
    */
   public generateRecommendation(
     assessment: AssessmentRecord,
@@ -1007,17 +1000,229 @@ export class EvidenceEngine {
     const appId = candidate?.appId || assessment.matchingFioriApp?.appId;
     const appName = candidate?.appName || assessment.matchingFioriApp?.appName;
 
-    // Outcome A: Standard Fiori Successor
-    if (assessment.assessmentResult === 'EXPLICIT_SUCCESSOR' && appId) {
-      const canonicalOutcome = (availability.serviceRegistrationStatus === 'PENDING_BASIS_CHECK' ||
-        availability.roleAssignmentStatus === 'PENDING_VERIFICATION')
-        ? 'CONFIGURE'
-        : 'ADOPT';
+    // 0. Pre-Flight Governance Checks (Release Blocker, Insufficient Evidence, Conflicts, Pending Approval)
 
+    // Check 0A: Insufficient Evidence or Missing Essential Metadata
+    if (
+      assessment.overallStatus === 'INSUFFICIENT_EVIDENCE' ||
+      assessment.confidence === 'VERY_LOW'
+    ) {
       return {
-        outcome: 'USE_STANDARD_FIORI_SUCCESSOR',
-        canonicalOutcome,
-        recommendedAction: `Deploy and configure standard SAP Fiori application ${appId} ("${appName}") as the primary modern successor to classic transaction ${cleanTcode}. Complete Basis service activation and PFCG role assignment in S21 client 200.`,
+        outcome: 'INSUFFICIENT_EVIDENCE',
+        canonicalOutcome: 'INSUFFICIENT_EVIDENCE',
+        businessOutcome: null,
+        governanceState: 'INSUFFICIENT_EVIDENCE',
+        isBusinessOutcome: false,
+        recommendedAction: `Capture complete requirement specifications and verify technical metadata in S21 for ${cleanTcode}. Missing evidence prevents architectural recommendations.`,
+        supportingEvidence: ['Essential business requirement parameters or candidate application specifications are missing or unverified.'],
+        knownLimitations: ['Inconclusive assessment findings.'],
+        outstandingChecks: ['Execute guided discovery and verify DDIC / Gateway service catalog.'],
+        requiredNextSteps: ['Conduct requirements refinement workshop.']
+      };
+    }
+
+    // Check 0B: Pending Target Landscape Verification
+    if (
+      assessment.overallStatus === 'PENDING_VERIFICATION' ||
+      assessment.assessmentResult === 'PENDING_VERIFICATION' ||
+      assessment.verificationStatus === 'PENDING_VERIFICATION' ||
+      compatibility?.status === 'PENDING_VERIFICATION'
+    ) {
+      return {
+        outcome: 'PENDING_VERIFICATION',
+        canonicalOutcome: 'PENDING_VERIFICATION',
+        businessOutcome: null,
+        governanceState: 'PENDING_VERIFICATION',
+        isBusinessOutcome: false,
+        recommendedAction: `Conduct technical investigation in S21 client 200 to establish whether a specialized Fiori app or classic WebGUI tile is preferred for ${cleanTcode}.`,
+        supportingEvidence: [
+          `Transaction ${cleanTcode} exists in S21 dictionary (program ${assessment.programName}), but catalog matching remains unconfirmed.`,
+          `Candidate application exists in related modules but requires activation confirmation.`
+        ],
+        knownLimitations: [
+          'No verified standard Fiori mapping is currently locked into the baseline.',
+          'Operational dependency on classic transaction persists until verified.'
+        ],
+        outstandingChecks: [
+          `Query S21 Launchpad Content Manager for tiles referencing ${cleanTcode}.`,
+          `Inspect SAP Simplification List for specific migration guidance.`
+        ],
+        requiredNextSteps: [
+          'Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
+          'Determine whether classic WebGUI or Fiori elements reporting fits best.'
+        ]
+      };
+    }
+
+    // Check 0B-1: Missing Functional Requirements
+    const reqText = String((assessment as any).requirementStatement || (assessment as any).requirementTitle || (assessment as any).rationale || '').trim();
+    const isPlaceholderReq = /^(tbd|n\/a|none|placeholder|test)$/i.test(reqText);
+    if (
+      (assessment as any).missingFunctionalRequirements === true ||
+      isPlaceholderReq
+    ) {
+      return {
+        outcome: 'REVIEW',
+        canonicalOutcome: 'REVIEW',
+        businessOutcome: null,
+        governanceState: 'REVIEW',
+        isBusinessOutcome: false,
+        recommendedAction: `Functional requirements are missing or specified with placeholder text for ${cleanTcode}. Retained in REVIEW for requirement elaboration.`,
+        supportingEvidence: ['Proceeding without verified functional requirements risks delivering misaligned business capability.'],
+        knownLimitations: ['Functional scope undefined.'],
+        outstandingChecks: ['Conduct requirements refinement workshop and capture complete capability statements.'],
+        requiredNextSteps: ['Document business capability statements with process owners.']
+      };
+    }
+
+    // Check 0B-2: Stale Candidate Metadata
+    if (
+      (candidate as any)?.isStale === true ||
+      (assessment as any).candidateStale === true
+    ) {
+      return {
+        outcome: 'REVIEW',
+        canonicalOutcome: 'REVIEW',
+        businessOutcome: null,
+        governanceState: 'REVIEW',
+        isBusinessOutcome: false,
+        recommendedAction: `Candidate "${appName || appId}" metadata is stale or out of synchronization with target SAP release. Retained in REVIEW for catalogue refresh.`,
+        supportingEvidence: ['Stale candidate metadata may not reflect recent deprecations, UI5 changes, or backend service updates.'],
+        knownLimitations: ['Metadata currency cannot be guaranteed.'],
+        outstandingChecks: ['Refresh candidate metadata from official SAP Fiori Apps Reference Library.'],
+        requiredNextSteps: ['Synchronize local catalogue cache with SAP Reference Library.']
+      };
+    }
+
+    // Check 0C: Release Incompatibility Blocker
+    if (
+      compatibility?.status === 'INCOMPATIBLE' ||
+      assessment.assessmentResult === 'RELEASE_INCOMPATIBLE' ||
+      assessment.matchingFioriApp?.releaseCompatibility === 'INCOMPATIBLE'
+    ) {
+      return {
+        outcome: 'REVIEW',
+        canonicalOutcome: 'REVIEW',
+        businessOutcome: null,
+        governanceState: 'REVIEW',
+        isBusinessOutcome: false,
+        recommendedAction: `Standard application "${appName || appId}" is incompatible with target SAP release. Direct adoption is blocked; retained in REVIEW.`,
+        supportingEvidence: ['Deploying release-incompatible Fiori apps causes runtime UI crashes and missing Gateway entities.'],
+        knownLimitations: ['Release incompatibility detected against target landscape baseline.'],
+        outstandingChecks: ['Inspect SAP Fiori Apps Library for release-specific successor components.'],
+        requiredNextSteps: ['Coordinate with SAP Basis team regarding upcoming SPS upgrade schedule.']
+      };
+    }
+
+    // Check 0D: Conflicting Evidence or Unverified Z-Service Aliases
+    const hasConflictingEvidence = Boolean(
+      assessment.hasConflictingEvidence ||
+      (Array.isArray(assessment.conflictingEvidence) && assessment.conflictingEvidence.length > 0)
+    );
+    if (hasConflictingEvidence) {
+      return {
+        outcome: 'REVIEW',
+        canonicalOutcome: 'REVIEW',
+        businessOutcome: null,
+        governanceState: 'REVIEW',
+        isBusinessOutcome: false,
+        recommendedAction: `Conflicting evidence detected for ${cleanTcode}: Customer namespace service alias requires formal EDMX contract verification before adoption.`,
+        supportingEvidence: ['Customer Z-service aliases or conflicting catalog entries may diverge from standard contracts.'],
+        knownLimitations: ['Potential contract mismatch between standard UI components and customer backend.'],
+        outstandingChecks: ['Compare EDMX $metadata between standard service and customer Z-service alias.'],
+        requiredNextSteps: ['Conduct technical service interface review.']
+      };
+    }
+
+    // Check 0E: Lead Architect Approval & Precondition Validation for BUILD
+    const approval = (assessment as any).leadArchitectApproval || (assessment as any).approval;
+    let isApprovalValidForBuild = false;
+    let approvalInvalidReason: string | null = null;
+
+    if (approval && typeof approval === 'object' && approval.approved === true) {
+      const currentAssessmentId = assessment.id;
+      const currentVersion = (assessment as any).version !== undefined ? (assessment as any).version : 1;
+      if (approval.assessmentId && currentAssessmentId && approval.assessmentId !== currentAssessmentId) {
+        approvalInvalidReason = `Approval belongs to assessment "${approval.assessmentId}", which does not match target assessment "${currentAssessmentId}".`;
+      } else if (approval.scope && !['BUILD', 'CUSTOM_DEVELOPMENT'].includes(String(approval.scope).toUpperCase())) {
+        approvalInvalidReason = `Approval was scoped to "${approval.scope}", not BUILD. Custom development requires explicit BUILD authorization.`;
+      } else if (approval.assessmentVersion !== undefined && approval.assessmentVersion !== currentVersion) {
+        approvalInvalidReason = `Approval was bound to assessment version ${approval.assessmentVersion}, but current version is ${currentVersion}. Fresh architect approval required.`;
+      } else if (approval.expiresAt && new Date(approval.expiresAt).getTime() < Date.now()) {
+        approvalInvalidReason = `Architectural approval expired at ${approval.expiresAt}. Fresh architect review required.`;
+      } else if (!approval.approver || /^(unknown|tbd|n\/a|none)$/i.test(String(approval.approver).trim())) {
+        approvalInvalidReason = 'Approval approver identity is missing or invalid.';
+      } else if ((assessment as any).materialRequirementsChanged === true || (assessment as any).evidenceModifiedAfterApproval === true) {
+        approvalInvalidReason = 'Assessment evidence or material requirements changed after approval was granted. Fresh architect review required.';
+      } else {
+        isApprovalValidForBuild = true;
+      }
+    }
+
+    const isApprovalPending = Boolean(
+      !isApprovalValidForBuild && (
+        assessment.approvalStatus === 'PENDING' ||
+        (assessment.approvalStatus as string) === 'PENDING_APPROVAL' ||
+        assessment.lifecycleStatus === 'PENDING_REVIEW' ||
+        (assessment.lifecycleStatus as string) === 'PENDING_APPROVAL' ||
+        (approval && approval.approved === false)
+      )
+    );
+
+    const hasCriticalFunctionalGap = Boolean(
+      assessment.hasCriticalFunctionalGap ||
+      (Array.isArray(assessment.identifiedGaps) && assessment.identifiedGaps.some(g => (g.category === 'FUNCTIONAL_CAPABILITY' || g.category === 'FUNCTIONAL_GAP') && (g.severity === 'CRITICAL' || g.severity === 'BLOCKER')))
+    );
+
+    // If critical functional gap exists on standard app candidate
+    if (hasCriticalFunctionalGap && appId) {
+      if (isApprovalPending || approvalInvalidReason || (assessment as any).configurationInsufficient === false || (assessment as any).cleanCoreExtensionEvaluated === false) {
+        const reasonText = approvalInvalidReason
+          ? `approval is invalid: ${approvalInvalidReason}`
+          : (assessment as any).configurationInsufficient === false
+          ? 'configuration insufficiency not established'
+          : (assessment as any).cleanCoreExtensionEvaluated === false
+          ? 'Clean Core extension alternatives not evaluated'
+          : 'Lead Architect approval is pending';
+        return {
+          outcome: 'REVIEW',
+          canonicalOutcome: 'REVIEW',
+          businessOutcome: null,
+          governanceState: 'REVIEW',
+          isBusinessOutcome: false,
+          recommendedAction: `Critical functional gaps detected on standard candidate "${appName}", but ${reasonText}. Retained in REVIEW for architectural authorization.`,
+          supportingEvidence: ['Standard application candidate fails to fulfill mandatory business capabilities.'],
+          knownLimitations: ['Custom development requires Lead Architect sign-off and complete precondition verification.'],
+          outstandingChecks: ['Obtain Lead Architect approval for Clean Core Tier 2 custom development.'],
+          requiredNextSteps: ['Submit assessment to Enterprise Architecture Board for approval.']
+        };
+      }
+      return {
+        outcome: 'BUILD',
+        canonicalOutcome: 'BUILD',
+        businessOutcome: 'BUILD',
+        governanceState: null,
+        isBusinessOutcome: true,
+        recommendedAction: `Build custom SAP Fiori Elements / RAP application for ${cleanTcode} due to confirmed critical functional gaps in standard candidate ${appId}. Custom BUILD justified under Clean Core Tier 2.`,
+        supportingEvidence: [
+          `Critical functional gaps confirmed on standard candidate ${appId} ("${appName}").`,
+          `Lead Architect sign-off verified for custom Clean Core RAP development.`
+        ],
+        knownLimitations: ['Custom application introduces lifecycle maintenance overhead.'],
+        outstandingChecks: ['Design CDS data model and RAP behavior definitions in Generation Studio.'],
+        requiredNextSteps: ['Transition to Generation Studio to model CDS entities and generate ABAP/Fiori deliverables.']
+      };
+    }
+
+    // Outcome A: Standard Fiori Successor -> ADD_AND_CONFIGURE
+    if (assessment.assessmentResult === 'EXPLICIT_SUCCESSOR' && appId) {
+      return {
+        outcome: 'ADD_AND_CONFIGURE',
+        canonicalOutcome: 'ADD_AND_CONFIGURE',
+        businessOutcome: 'ADD_AND_CONFIGURE',
+        governanceState: null,
+        isBusinessOutcome: true,
+        recommendedAction: `Add and configure standard SAP Fiori application ${appId} ("${appName}") as the primary modern successor to classic transaction ${cleanTcode}. Complete Basis service activation and PFCG role assignment in S21 client 200.`,
         supportingEvidence: [
           `Official SAP Fiori Apps Reference Library explicitly designates ${appId} as the modern successor for ${cleanTcode}.`,
           `Target release compatibility confirmed: S4CORE 108 SP0003 and SAP_BASIS 758 SP0003 satisfy all minimum prerequisite levels.`,
@@ -1040,12 +1245,15 @@ export class EvidenceEngine {
       };
     }
 
-    // Outcome B: Classic SAP GUI through Fiori Launchpad
+    // Outcome B: Classic SAP GUI through Fiori Launchpad -> ADD_AND_CONFIGURE
     if (assessment.assessmentResult === 'SAP_GUI_HTML') {
       return {
-        outcome: 'USE_CLASSIC_TRANSACTION_LAUNCHPAD',
-        canonicalOutcome: 'CONFIGURE',
-        recommendedAction: `Retain classic transaction ${cleanTcode} hosted inside SAP Fiori Launchpad via WebGUI runtime (SAP GUI for HTML).`,
+        outcome: 'ADD_AND_CONFIGURE',
+        canonicalOutcome: 'ADD_AND_CONFIGURE',
+        businessOutcome: 'ADD_AND_CONFIGURE',
+        governanceState: null,
+        isBusinessOutcome: true,
+        recommendedAction: `Add and configure classic transaction ${cleanTcode} hosted inside SAP Fiori Launchpad via WebGUI runtime (SAP GUI for HTML).`,
         supportingEvidence: [
           `No separate Fiori elements application is required; classic Dynpro ${assessment.screenNumber} is fully supported in Fiori Launchpad WebGUI.`,
           `Full feature parity with desktop SAP GUI including all existing authorization objects and document display logic.`,
@@ -1066,12 +1274,15 @@ export class EvidenceEngine {
       };
     }
 
-    // Outcome C: Functional Alternative
+    // Outcome C: Functional Alternative -> ADD_AND_CONFIGURE with Clean Core Adaptation
     if (assessment.assessmentResult === 'FUNCTIONAL_ALTERNATIVE' && appId) {
       return {
-        outcome: 'EVALUATE_FUNCTIONAL_ALTERNATIVE',
-        canonicalOutcome: 'EXTEND',
-        recommendedAction: `Evaluate application ${appId} ("${appName}") as a modern functional alternative, while retaining ${cleanTcode} for legacy edge cases.`,
+        outcome: 'ADD_AND_CONFIGURE',
+        canonicalOutcome: 'ADD_AND_CONFIGURE',
+        businessOutcome: 'ADD_AND_CONFIGURE',
+        governanceState: null,
+        isBusinessOutcome: true,
+        recommendedAction: `Add and configure standard application ${appId} ("${appName}") as a modern functional successor, applying Clean Core adaptation where specific business rules require customization.`,
         supportingEvidence: [
           `Application ${appId} covers the core business scenarios of ${cleanTcode} with enhanced usability and real-time validation.`,
           `Recommended by SAP as the primary transaction path for general accounting operations.`
@@ -1091,31 +1302,6 @@ export class EvidenceEngine {
       };
     }
 
-    // Outcome E: Missing Catalogue Information / Pending Verification
-    if (assessment.assessmentResult === 'PENDING_VERIFICATION') {
-      return {
-        outcome: 'INVESTIGATE_CATALOGUE_INFO',
-        canonicalOutcome: 'PENDING_VERIFICATION',
-        recommendedAction: `Conduct technical investigation in S21 client 200 to establish whether a specialized Fiori app or classic WebGUI tile is preferred for ${cleanTcode}.`,
-        supportingEvidence: [
-          `Transaction ${cleanTcode} exists in S21 dictionary (program ${assessment.programName}), but catalog matching remains unconfirmed.`,
-          `Candidate application exists in related modules but requires activation confirmation.`
-        ],
-        knownLimitations: [
-          'No verified standard Fiori mapping is currently locked into the baseline.',
-          'Operational dependency on classic transaction persists until verified.'
-        ],
-        outstandingChecks: [
-          `Query S21 Launchpad Content Manager for tiles referencing ${cleanTcode}.`,
-          `Inspect SAP Simplification List for specific migration guidance.`
-        ],
-        requiredNextSteps: [
-          'Run transaction /UI2/FLIA in S21 to analyze Launchpad app intent.',
-          'Determine whether classic WebGUI or Fiori elements reporting fits best.'
-        ]
-      };
-    }
-
     // Outcome D: Custom Transaction / No Standard Match -> AUTHORITATIVE BUILD DECISION
     if (
       assessment.classification === 'CUSTOM' ||
@@ -1124,9 +1310,80 @@ export class EvidenceEngine {
       (!candidate && !assessment.matchingFioriApp) ||
       (!candidate && (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') || assessment.businessArea === 'Custom Extension'))
     ) {
+      const catSearch = (assessment as any).catalogueSearch;
+      const isSearchFailedOrIncomplete = Boolean(
+        catSearch && (
+          ['FAILED', 'INCOMPLETE', 'ERROR', 'TIMED_OUT'].includes(String(catSearch.searchCompletionStatus || catSearch.status).toUpperCase()) ||
+          catSearch.failed === true ||
+          catSearch.incomplete === true
+        )
+      );
+
+      const isSearchRecorded = Boolean(
+        catSearch &&
+        (catSearch.searchExecutionId || catSearch.executionId || catSearch.searchScope) &&
+        !isSearchFailedOrIncomplete
+      );
+
+      const isMissingEvidence = Array.isArray(assessment.missingEvidence) && assessment.missingEvidence.length > 0;
+      const isUnverified = assessment.verificationStatus === 'UNVERIFIED' || assessment.confidence === 'LOW';
+      const hasArchitectApproval = isApprovalValidForBuild;
+
+      const isPathBInvalid = Boolean(
+        !hasArchitectApproval ||
+        approvalInvalidReason ||
+        !isSearchRecorded ||
+        isSearchFailedOrIncomplete ||
+        isMissingEvidence ||
+        isUnverified ||
+        (assessment as any).configurationInsufficient === false ||
+        (assessment as any).cleanCoreExtensionEvaluated === false ||
+        (assessment as any).standardAlternativesEvaluated === false ||
+        (assessment as any).webGuiFallbackEvaluated === false
+      );
+
+      if (isPathBInvalid) {
+        const reasonText = approvalInvalidReason
+          ? `approval is invalid: ${approvalInvalidReason}`
+          : !hasArchitectApproval
+          ? 'Lead Architect approval is required for custom BUILD'
+          : !isSearchRecorded
+          ? 'recorded catalogue search execution is missing'
+          : isSearchFailedOrIncomplete
+          ? 'catalogue search execution failed or is incomplete'
+          : isMissingEvidence || isUnverified
+          ? 'essential technical evidence is unverified or missing'
+          : (assessment as any).configurationInsufficient === false
+          ? 'configuration insufficiency not established'
+          : (assessment as any).cleanCoreExtensionEvaluated === false
+          ? 'Clean Core extension alternatives not evaluated'
+          : (assessment as any).standardAlternativesEvaluated === false
+          ? 'standard alternatives not evaluated'
+          : (assessment as any).webGuiFallbackEvaluated === false
+          ? 'WebGUI fallback not evaluated'
+          : isApprovalPending
+          ? 'Lead Architect approval is pending'
+          : 'precondition verification is pending';
+
+        return {
+          outcome: 'REVIEW',
+          canonicalOutcome: 'REVIEW',
+          businessOutcome: null,
+          governanceState: 'REVIEW',
+          isBusinessOutcome: false,
+          recommendedAction: `No standard Fiori successor exists for ${cleanTcode}, but ${reasonText}. Retained in REVIEW for architectural authorization.`,
+          supportingEvidence: [`Transaction ${cleanTcode} verified with zero standard replacement apps in Fiori Library.`],
+          knownLimitations: ['Custom BUILD cannot be authorized without Lead Architect sign-off and complete precondition verification.'],
+          outstandingChecks: ['Obtain Lead Architect approval for Clean Core Tier 2 custom development.'],
+          requiredNextSteps: ['Submit assessment to Enterprise Architecture Board for approval.']
+        };
+      }
       return {
         outcome: 'BUILD',
         canonicalOutcome: 'BUILD',
+        businessOutcome: 'BUILD',
+        governanceState: null,
+        isBusinessOutcome: true,
         recommendedAction: `Modernize transaction ${cleanTcode} into a Clean Core Tier 2 ABAP RESTful Application Programming Model (RAP) Business Object and SAP Fiori Elements application. S21 DDIC verified with 0% standard Fiori successor coverage in SAP Fiori Apps Reference Library.`,
         supportingEvidence: [
           `Transaction ${cleanTcode} verified in S21 DDIC (Program: ${assessment.programName || 'SAPMS380'}, Package: ${assessment.packageName || 'SABP'}, Component: ${assessment.softwareComponent || 'SAP_BASIS'}).`,
@@ -1148,11 +1405,14 @@ export class EvidenceEngine {
       };
     }
 
-    // Outcome F: Release Incompatible or Default
+    // Outcome F: Release Incompatible or Default -> REVIEW
     return {
-      outcome: 'VALIDATE_RELEASE_INCOMPATIBILITY',
-      canonicalOutcome: 'INSUFFICIENT_EVIDENCE',
-      recommendedAction: `Validate release prerequisites or defer deployment of application until target support package is applied.`,
+      outcome: 'REVIEW',
+      canonicalOutcome: 'REVIEW',
+      businessOutcome: null,
+      governanceState: 'REVIEW',
+      isBusinessOutcome: false,
+      recommendedAction: `Conduct architectural review of release prerequisites and deferred deployment requirements for ${cleanTcode}.`,
       supportingEvidence: [
         `Assessment flagged release or technical compatibility constraints for ${cleanTcode}.`
       ],

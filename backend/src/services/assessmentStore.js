@@ -45,7 +45,7 @@ export const ALLOWED_TRANSITIONS = Object.freeze({
 export const MODERNIZATION_ACTION_TYPES = Object.freeze({
   ADD_FOUND: 'ADD_FOUND',
   CONFIGURE_ADOPT_READINESS: 'CONFIGURE_ADOPT_READINESS',
-  EXTEND_PLAN: 'EXTEND_PLAN',
+  ADD_AND_CONFIGURE: 'ADD_AND_CONFIGURE',
   BUILD_PROJECT: 'BUILD_PROJECT'
 });
 
@@ -162,6 +162,120 @@ export function validateAssessmentRecord(payload) {
   }
 
   return { isValid: true };
+}
+
+/**
+ * Evaluates legacy EXTEND records based on genuine evidence, standard candidate presence,
+ * functional gaps, and architect approval rather than blindly converting to ADD_AND_CONFIGURE.
+ *
+ * Requirements (Phase 3):
+ * 1. Preserves original outcome in legacyOriginalOutcome and audit history.
+ * 2. Maps to ADD_AND_CONFIGURE only when evidence establishes an existing standard app
+ *    can fulfill the requirement via supported configuration/in-app adaptation.
+ * 3. Maps to BUILD only when evidence establishes a genuine mandatory gap requiring custom
+ *    RAP development AND all BUILD governance conditions (architect sign-off) are satisfied.
+ * 4. Otherwise maps to REVIEW (as an internal governance state, businessOutcome: null).
+ */
+export function resolveLegacyExtendRecord(input, rawOutcome, rawCanon) {
+  const isExtend = rawOutcome === 'EXTEND' || rawCanon === 'EXTEND';
+  if (!isExtend) return null;
+
+  const legacyOriginalOutcome = 'EXTEND';
+  const cand = input.matchingFioriApp || (Array.isArray(input.candidateApps) && input.candidateApps[0]) || (Array.isArray(input.candidates) && input.candidates[0]);
+  const hasStandardCandidate = Boolean(cand && (cand.appId || cand.candidateAppId));
+  const identifiedGaps = Array.isArray(input.identifiedGaps) ? input.identifiedGaps : [];
+
+  const hasCriticalFunctionalGap = identifiedGaps.some(
+    (g) => (g.category === 'FUNCTIONAL_CAPABILITY' || g.category === 'FUNCTIONAL_GAP' || g.gapClassification === 'FUNCTIONAL_GAP') &&
+           (g.severity === 'CRITICAL' || g.severity === 'BLOCKER')
+  );
+
+  // Determine whether the approval explicitly covered custom development (BUILD)
+  const approval = input.leadArchitectApproval;
+  const decisions = Array.isArray(input.modernizationDecisions) ? input.modernizationDecisions : [];
+
+  let isExplicitlyScopedToBuild = false;
+  if (approval && typeof approval === 'object' && approval.approved === true) {
+    const scope = String(approval.scope || approval.approvalScope || approval.decision || approval.targetOutcome || '').toUpperCase();
+    if (scope === 'BUILD' || scope === 'CUSTOM_DEVELOPMENT' || approval.customDevelopmentApproved === true || approval.buildApproved === true) {
+      isExplicitlyScopedToBuild = true;
+    }
+  }
+
+  const explicitScope = String(input.approvalScope || input.architectApprovalScope || '').toUpperCase();
+  if (explicitScope === 'BUILD' || explicitScope === 'CUSTOM_DEVELOPMENT') {
+    isExplicitlyScopedToBuild = true;
+  }
+
+  if (input.buildProject && input.buildProject.architectApproved === true) {
+    isExplicitlyScopedToBuild = true;
+  }
+
+  for (const dec of decisions) {
+    const dOutcome = String(dec.decisionOutcome || dec.outcome || '').toUpperCase();
+    if (dOutcome === 'BUILD' && (dec.architectApproved === true || dec.approved === true)) {
+      isExplicitlyScopedToBuild = true;
+    }
+  }
+
+  // Condition 1: Mandatory functional gap requiring custom development AND explicit architect approval for BUILD
+  if (hasCriticalFunctionalGap && isExplicitlyScopedToBuild) {
+    return {
+      outcome: 'BUILD',
+      canonicalOutcome: 'BUILD',
+      businessOutcome: 'BUILD',
+      governanceState: null,
+      isBusinessOutcome: true,
+      legacyOriginalOutcome,
+      migrationRationale: 'Migrated from legacy EXTEND to BUILD due to verified critical functional gap and explicit architect sign-off for custom development.'
+    };
+  }
+
+  // Condition 2: Critical functional gap present, BUT approval is missing OR only scoped to legacy EXTEND decision
+  if (hasCriticalFunctionalGap) {
+    const hasLegacyApproval = Boolean(
+      input.lifecycleStatus === 'APPROVED' ||
+      input.leadArchitectApproval?.approved === true ||
+      input.approvalStatus === 'APPROVED'
+    );
+    return {
+      outcome: 'REVIEW',
+      canonicalOutcome: 'REVIEW',
+      businessOutcome: null,
+      governanceState: 'REVIEW',
+      isBusinessOutcome: false,
+      legacyOriginalOutcome,
+      requiresFreshApproval: true,
+      migrationRationale: hasLegacyApproval
+        ? 'Migrated from legacy EXTEND to REVIEW: historical approval was scoped to EXTEND. Custom development (BUILD) requires fresh architect approval.'
+        : 'Migrated from legacy EXTEND to REVIEW: critical functional gap identified but architect approval for custom development is missing.'
+    };
+  }
+
+  // Condition 3: Standard application exists, no critical functional gap, and verification is sound -> ADD_AND_CONFIGURE
+  const hasMissingEvidence = Array.isArray(input.missingEvidence) && input.missingEvidence.length > 0;
+  if (hasStandardCandidate && !hasCriticalFunctionalGap && input.verificationStatus !== 'UNVERIFIED' && !hasMissingEvidence) {
+    return {
+      outcome: 'ADD_AND_CONFIGURE',
+      canonicalOutcome: 'ADD_AND_CONFIGURE',
+      businessOutcome: 'ADD_AND_CONFIGURE',
+      governanceState: null,
+      isBusinessOutcome: true,
+      legacyOriginalOutcome,
+      migrationRationale: 'Migrated from legacy EXTEND to ADD_AND_CONFIGURE: verified standard candidate available for Clean Core in-app adaptation.'
+    };
+  }
+
+  // Condition 4: Incomplete evidence, unverified metadata, or missing candidate -> REVIEW (governance state)
+  return {
+    outcome: 'REVIEW',
+    canonicalOutcome: 'REVIEW',
+    businessOutcome: null,
+    governanceState: 'REVIEW',
+    isBusinessOutcome: false,
+    legacyOriginalOutcome,
+    migrationRationale: 'Migrated from legacy EXTEND to REVIEW: evidence is incomplete or requires architectural determination.'
+  };
 }
 
 /**
@@ -365,8 +479,104 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
     initialAuditEvents = [initialEvent];
   }
 
-  // 14. Recommendation preservation
-  const recommendation = input.recommendation || assessmentObj.recommendation || null;
+  // 14. Recommendation preservation and two-outcome normalization (ADD_AND_CONFIGURE vs BUILD)
+  let rawRec = input.recommendation || assessmentObj.recommendation || null;
+  let recommendation = null;
+  let legacyOriginalOutcome = input.legacyOriginalOutcome || null;
+  let migrationRationale = input.migrationRationale || null;
+
+  if (rawRec && typeof rawRec === 'object') {
+    recommendation = { ...rawRec };
+    const rawOutcome = String(recommendation.outcome || '').toUpperCase();
+    const rawCanon = String(recommendation.canonicalOutcome || '').toUpperCase();
+
+    if (rawOutcome === 'EXTEND' || rawCanon === 'EXTEND') {
+      const extendResolution = resolveLegacyExtendRecord(input, rawOutcome, rawCanon);
+      if (extendResolution) {
+        recommendation.outcome = extendResolution.outcome;
+        recommendation.canonicalOutcome = extendResolution.canonicalOutcome;
+        recommendation.businessOutcome = extendResolution.businessOutcome;
+        recommendation.governanceState = extendResolution.governanceState;
+        recommendation.isBusinessOutcome = extendResolution.isBusinessOutcome;
+        legacyOriginalOutcome = extendResolution.legacyOriginalOutcome;
+        migrationRationale = extendResolution.migrationRationale;
+      }
+    } else {
+      if (['ADOPT', 'CONFIGURE', 'EVALUATE_FUNCTIONAL_ALTERNATIVE', 'USE_STANDARD_FIORI_SUCCESSOR', 'USE_CLASSIC_TRANSACTION_LAUNCHPAD'].includes(rawOutcome)) {
+        recommendation.outcome = 'ADD_AND_CONFIGURE';
+        recommendation.canonicalOutcome = 'ADD_AND_CONFIGURE';
+        recommendation.businessOutcome = 'ADD_AND_CONFIGURE';
+        recommendation.governanceState = null;
+        recommendation.isBusinessOutcome = true;
+      } else if (rawOutcome === 'BUILD') {
+        recommendation.outcome = 'BUILD';
+        recommendation.canonicalOutcome = 'BUILD';
+        recommendation.businessOutcome = 'BUILD';
+        recommendation.governanceState = null;
+        recommendation.isBusinessOutcome = true;
+      } else if (['REVIEW', 'PENDING_VERIFICATION', 'INSUFFICIENT_EVIDENCE'].includes(rawOutcome)) {
+        recommendation.outcome = rawOutcome;
+        recommendation.canonicalOutcome = rawOutcome;
+        recommendation.businessOutcome = null;
+        recommendation.governanceState = rawOutcome;
+        recommendation.isBusinessOutcome = false;
+      } else if (recommendation.outcome) {
+        const isBiz = recommendation.outcome === 'ADD_AND_CONFIGURE' || recommendation.outcome === 'BUILD';
+        recommendation.businessOutcome = isBiz ? recommendation.outcome : null;
+        recommendation.governanceState = isBiz ? null : recommendation.outcome;
+        recommendation.isBusinessOutcome = isBiz;
+      }
+
+      if (['ADOPT', 'CONFIGURE', 'EVALUATE_FUNCTIONAL_ALTERNATIVE', 'USE_STANDARD_FIORI_SUCCESSOR', 'USE_CLASSIC_TRANSACTION_LAUNCHPAD'].includes(rawCanon)) {
+        recommendation.canonicalOutcome = 'ADD_AND_CONFIGURE';
+      } else if (rawCanon === 'BUILD') {
+        recommendation.canonicalOutcome = 'BUILD';
+      }
+    }
+
+    if (legacyOriginalOutcome && !recommendation.legacyOriginalOutcome) {
+      recommendation.legacyOriginalOutcome = legacyOriginalOutcome;
+    }
+    if (migrationRationale && !recommendation.migrationRationale) {
+      recommendation.migrationRationale = migrationRationale;
+    }
+
+    if (recommendation.decisionExplanations && typeof recommendation.decisionExplanations === 'object') {
+      recommendation.decisionExplanations = { ...recommendation.decisionExplanations };
+      const rawExpOutcome = String(recommendation.decisionExplanations.outcome || '').toUpperCase();
+      if (['ADOPT', 'CONFIGURE', 'EXTEND', 'EVALUATE_FUNCTIONAL_ALTERNATIVE'].includes(rawExpOutcome)) {
+        recommendation.decisionExplanations.outcome = recommendation.canonicalOutcome || 'ADD_AND_CONFIGURE';
+      }
+    }
+  }
+
+  // Two-outcome modernization decisions normalization
+  const modernizationDecisions = (Array.isArray(input.modernizationDecisions) ? input.modernizationDecisions : []).map((dec) => {
+    const item = { ...dec };
+    if (item.actionType === 'EXTEND_PLAN' || item.actionType === 'EXTEND') {
+      item.legacyActionType = item.actionType;
+      item.actionType = 'ADD_AND_CONFIGURE';
+    }
+    const decOutcome = String(item.outcome || item.canonicalOutcome || '').toUpperCase();
+    if (decOutcome === 'EXTEND') {
+      item.legacyOriginalOutcome = 'EXTEND';
+      const res = resolveLegacyExtendRecord(input, decOutcome, decOutcome);
+      item.outcome = res?.outcome || 'ADD_AND_CONFIGURE';
+      item.canonicalOutcome = res?.canonicalOutcome || 'ADD_AND_CONFIGURE';
+      item.businessOutcome = res?.businessOutcome || 'ADD_AND_CONFIGURE';
+      item.governanceState = res?.governanceState || null;
+    } else if (['ADOPT', 'CONFIGURE', 'EVALUATE_FUNCTIONAL_ALTERNATIVE'].includes(decOutcome)) {
+      item.canonicalOutcome = 'ADD_AND_CONFIGURE';
+      item.outcome = 'ADD_AND_CONFIGURE';
+      item.businessOutcome = 'ADD_AND_CONFIGURE';
+      item.governanceState = null;
+    } else if (decOutcome === 'BUILD') {
+      item.businessOutcome = 'BUILD';
+      item.governanceState = null;
+    }
+    return item;
+  });
+
   const remediationPlan = input.remediationPlan || input.actionableRemediationPlan || recommendation?.actionableRemediationPlan || [];
 
   return {
@@ -389,6 +599,8 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
     gapsCount,
     evidenceConfidence,
     provenance,
+    legacyOriginalOutcome,
+    migrationRationale,
     createdAt,
     updatedAt,
     createdBy: actorId,
@@ -475,7 +687,11 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
     applicationRequirements: input.applicationRequirements || null,
     discoveryMetadata: input.discoveryMetadata || null,
     evidenceNotes: Array.isArray(input.evidenceNotes) ? input.evidenceNotes : [],
-    leadArchitectApproval: input.leadArchitectApproval || null
+    leadArchitectApproval: input.leadArchitectApproval || null,
+    modernizationDecisions,
+    modernizationDecision: modernizationDecisions[modernizationDecisions.length - 1] || null,
+    outcome: recommendation?.outcome || null,
+    canonicalOutcome: recommendation?.canonicalOutcome || null
   };
 }
 
@@ -1178,8 +1394,10 @@ export class AssessmentStore {
 
     const rawType = String(actionPayload.actionType || actionPayload.type || '').toUpperCase();
     let actionType = rawType;
-    if (rawType === 'CONFIGURE_ADOPT') actionType = MODERNIZATION_ACTION_TYPES.CONFIGURE_ADOPT_READINESS;
-    if (rawType === 'EXTEND') actionType = MODERNIZATION_ACTION_TYPES.EXTEND_PLAN;
+    if (rawType === 'CONFIGURE_ADOPT' || rawType === 'ADD_CONFIGURE') actionType = MODERNIZATION_ACTION_TYPES.CONFIGURE_ADOPT_READINESS;
+    if (rawType === 'ADD_AND_CONFIGURE' || rawType === 'ADD_AND_CONFIGURE_PLAN' || rawType === 'EXTEND' || rawType === 'EXTEND_PLAN') {
+      actionType = MODERNIZATION_ACTION_TYPES.ADD_AND_CONFIGURE;
+    }
     if (rawType === 'BUILD') actionType = MODERNIZATION_ACTION_TYPES.BUILD_PROJECT;
 
     if (!Object.values(MODERNIZATION_ACTION_TYPES).includes(actionType)) {
@@ -1286,20 +1504,33 @@ export class AssessmentStore {
           approvedForDeployment: false,
           lastUpdated: now
         };
-      } else if (actionType === MODERNIZATION_ACTION_TYPES.EXTEND_PLAN) {
+      } else if (actionType === MODERNIZATION_ACTION_TYPES.ADD_AND_CONFIGURE) {
         const targetApp = details.targetApp || details.appId || existing.matchingFioriApp?.appId;
-        if (!targetApp) {
-          const err = new Error('Target SAP Fiori application is required to formulate an extension plan.');
-          err.code = 'VALIDATION_ERROR';
-          throw err;
-        }
+        const tier = details.tier || details.cleanCoreTier || 'TIER_1_KEY_USER';
         existing.extensionPlan = {
-          targetApp,
-          cleanCoreTier: details.tier || details.cleanCoreTier || 'TIER_1_KEY_USER',
-          notes: details.notes || actionPayload.comment || 'Extension plan documented.',
+          targetApp: targetApp || 'STANDARD_FIORI_APP',
+          cleanCoreTier: tier,
+          notes: details.notes || actionPayload.comment || 'Add and configure plan documented.',
           missingCapabilities: Array.isArray(details.missingCapabilities) ? details.missingCapabilities : [],
           lastUpdated: now
         };
+        existing.cleanCoreAdaptation = {
+          targetApp: targetApp || 'STANDARD_FIORI_APP',
+          cleanCoreTier: tier,
+          notes: details.notes || actionPayload.comment || 'Add and configure plan documented.',
+          missingCapabilities: Array.isArray(details.missingCapabilities) ? details.missingCapabilities : [],
+          lastUpdated: now
+        };
+        if (!existing.recommendation) {
+          existing.recommendation = {
+            outcome: 'ADD_AND_CONFIGURE',
+            canonicalOutcome: 'ADD_AND_CONFIGURE',
+            recommendationType: 'ADD_AND_CONFIGURE'
+          };
+        } else {
+          existing.recommendation.outcome = 'ADD_AND_CONFIGURE';
+          existing.recommendation.canonicalOutcome = 'ADD_AND_CONFIGURE';
+        }
       } else if (actionType === MODERNIZATION_ACTION_TYPES.BUILD_PROJECT) {
         // Clean Core standard-first guardrail
         const hasStandardCandidate = Boolean(

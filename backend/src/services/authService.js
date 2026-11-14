@@ -17,6 +17,7 @@ import { JwtVerifier } from '../infrastructure/security/jwtVerifier.js';
 
 export const USER_ROLES = Object.freeze({
   ADMIN: 'ADMIN',
+  LEAD_ARCHITECT: 'LEAD_ARCHITECT',
   SAP_CONSULTANT: 'SAP_CONSULTANT',
   REQUESTER: 'REQUESTER',
   APPROVER: 'APPROVER',
@@ -41,6 +42,9 @@ export const PERMISSIONS = Object.freeze({
   MCP_MANAGE: 'MCP_MANAGE',
   MCP_TOOL_EXECUTE: 'MCP_TOOL_EXECUTE',
   USER_ADMIN: 'USER_ADMIN',
+
+  // Explicit permission for BUILD architectural approval (GOV-BUILD-01)
+  BUILD_ARCHITECT_APPROVER: 'BUILD_ARCHITECT_APPROVER',
 
   // S2 Foundation Enterprise Permissions
   ADMIN_ACCESS: 'Fiorify.admin.access',
@@ -108,6 +112,19 @@ export const ROLE_PERMISSIONS = Object.freeze({
     'Fiorify.artifacts.export',
     'Fiorify.assessments.manage'
   ],
+  [USER_ROLES.LEAD_ARCHITECT]: [
+    PERMISSIONS.BUILD_ARCHITECT_APPROVER,
+    PERMISSIONS.ASSESSMENT_VIEW,
+    PERMISSIONS.ASSESSMENT_EDIT,
+    PERMISSIONS.ASSESSMENT_APPROVE,
+    PERMISSIONS.ASSESSMENT_REJECT,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.RECOMMENDATION_GENERATE,
+    PERMISSIONS.CATALOGUE_VIEW,
+    'Fiorify.assessments.manage',
+    'Fiorify.generation.manage',
+    'Fiorify.artifacts.export'
+  ],
   [USER_ROLES.APPROVER]: [
     PERMISSIONS.ASSESSMENT_VIEW,
     PERMISSIONS.ASSESSMENT_APPROVE,
@@ -155,6 +172,15 @@ export const DEFAULT_USERS = Object.freeze([
     department: 'Enterprise Governance Committee',
     tenantId: 'DEFAULT-TENANT-S21',
     passwordHash: hashPassword('ApproverPass@2026')
+  },
+  {
+    id: 'USR-ARCH-01',
+    email: 'architect@fiorify.corp',
+    name: 'Lead Enterprise Architect',
+    role: USER_ROLES.LEAD_ARCHITECT,
+    department: 'Enterprise Architecture Board',
+    tenantId: 'DEFAULT-TENANT-S21',
+    passwordHash: hashPassword('ArchitectPass@2026')
   },
   {
     id: 'USR-REQ-01',
@@ -377,10 +403,29 @@ export class AuthService {
       permissions = ROLE_PERMISSIONS[roleOrUser] || [];
     } else if (Array.isArray(roleOrUser.scopes)) {
       permissions = roleOrUser.scopes;
+    } else if (Array.isArray(roleOrUser.permissions)) {
+      permissions = roleOrUser.permissions;
     } else {
       permissions = ROLE_PERMISSIONS[roleOrUser.role] || [];
     }
     return permissions.includes(permission) || permissions.includes(PERMISSIONS[permission]);
+  }
+
+  /**
+   * Specifically validates whether user or role has explicit authorization to approve BUILD outcomes.
+   * Generic ADMIN or APPROVER access is NOT sufficient unless explicitly granted BUILD_ARCHITECT_APPROVER.
+   */
+  canApproveBuild(roleOrUser) {
+    if (!roleOrUser) return false;
+    if (typeof roleOrUser === 'object') {
+      if (roleOrUser.isBuildArchitectApprover === true) return true;
+      if (roleOrUser.role === USER_ROLES.LEAD_ARCHITECT || roleOrUser.role === 'CHIEF_ARCHITECT') return true;
+      if (Array.isArray(roleOrUser.scopes) && roleOrUser.scopes.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER)) return true;
+      if (Array.isArray(roleOrUser.permissions) && roleOrUser.permissions.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER)) return true;
+      if (Array.isArray(roleOrUser.policies) && roleOrUser.policies.includes('BUILD_ARCHITECT_APPROVER')) return true;
+      if (roleOrUser.authorizationPolicy?.canApproveBuild === true) return true;
+    }
+    return this.hasPermission(roleOrUser, PERMISSIONS.BUILD_ARCHITECT_APPROVER);
   }
 
   /**
@@ -392,7 +437,7 @@ export class AuthService {
       'password',
       'secret',
       'authorization',
-      'x-Fiorify-admin-secret',
+      'x-fiorify-admin-secret',
       'clientsecret',
       'token',
       'btp_password',

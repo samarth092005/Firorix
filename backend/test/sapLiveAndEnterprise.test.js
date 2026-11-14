@@ -165,7 +165,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
       client: '200',
       targetRelease: 'SAP S/4HANA 2023',
       businessArea: 'Sales',
-      recommendation: { outcome: 'ADOPT' },
+      recommendation: { outcome: 'ADD_AND_CONFIGURE' },
       lifecycleStatus: 'APPROVED'
     });
 
@@ -176,7 +176,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
       client: '100',
       targetRelease: 'SAP ECC 6.0 EHP8',
       businessArea: 'Sourcing and Procurement',
-      recommendation: { outcome: 'EXTEND' },
+      recommendation: { outcome: 'ADD_AND_CONFIGURE' },
       lifecycleStatus: 'PENDING_REVIEW'
     });
 
@@ -193,8 +193,7 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     assert.strictEqual(body.portfolio.totalAssessments, 2);
     assert.strictEqual(body.portfolio.bySystem['S21-200'].total, 1);
     assert.strictEqual(body.portfolio.bySystem['ECC-100'].total, 1);
-    assert.strictEqual(body.portfolio.byOutcome['ADOPT'], 1);
-    assert.strictEqual(body.portfolio.byOutcome['EXTEND'], 1);
+    assert.strictEqual(body.portfolio.byOutcome['ADD_AND_CONFIGURE'], 2);
   });
 
   it('6. GET /api/v1/enterprise/roadmap generates prioritized modernization roadmap', async () => {
@@ -209,8 +208,8 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
     assert.strictEqual(body.success, true);
     assert.ok(body.roadmap);
     assert.ok(body.roadmap.phases);
-    assert.ok(Array.isArray(body.roadmap.phases.wave1_standardAdoption));
-    assert.ok(Array.isArray(body.roadmap.phases.wave2_configureAndExtend));
+    assert.ok(Array.isArray(body.roadmap.phases.wave1_addAndConfigure || body.roadmap.phases.wave1_standardAdoption));
+    assert.ok(Array.isArray(body.roadmap.phases.wave2_cleanCoreBuild || body.roadmap.phases.wave2_configureAndExtend));
   });
 
   it('7. POST /api/v1/enterprise/assessments/process creates parent-child process assessment', async () => {
@@ -220,9 +219,9 @@ describe('SAP-LIVE-01, CAT-04 & ENTERPRISE-01 Integration', () => {
       systemId: 'S21-200',
       businessArea: 'Order to Cash',
       transactions: [
-        { tcode: 'VA01', recommendation: { outcome: 'ADOPT' } },
-        { tcode: 'VL01N', recommendation: { outcome: 'CONFIGURE' } },
-        { tcode: 'VF01', recommendation: { outcome: 'ADOPT' } }
+        { tcode: 'VA01', recommendation: { outcome: 'ADD_AND_CONFIGURE' } },
+        { tcode: 'VL01N', recommendation: { outcome: 'ADD_AND_CONFIGURE' } },
+        { tcode: 'VF01', recommendation: { outcome: 'ADD_AND_CONFIGURE' } }
       ]
     };
 

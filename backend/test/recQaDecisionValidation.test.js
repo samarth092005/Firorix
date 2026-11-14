@@ -44,25 +44,25 @@ describe('REC-QA-01 — Recommendation Quality & Decision Validation Suite', () 
     userAuthorizations: ['ACCOUNTS PAYABLE ACCOUNTANT']
   };
 
-  // Outcome 1: ADOPT
-  it('1. ADOPT: validates preconditions and generates structured explanations', () => {
+  // Outcome 1: ADD_AND_CONFIGURE (Standard Fit)
+  it('1. ADD_AND_CONFIGURE: validates preconditions and generates structured explanations', () => {
     const result = recommendationEngine.generate({
       requirement: baseReq,
       candidate: fullyVerifiedCandidate,
       context: fullyVerifiedContext
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADOPT);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.strictEqual(result.riskAssessment.overallRisk, 'LOW');
     assert.ok(result.decisionExplanations);
-    assert.strictEqual(result.decisionExplanations.outcome, RECOMMENDATION_OUTCOMES.ADOPT);
-    assert.ok(result.decisionExplanations.selectionReason.includes('Immediate adoption is recommended'));
+    assert.strictEqual(result.decisionExplanations.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
+    assert.ok(result.decisionExplanations.selectionReason.includes('Recommend ADD & CONFIGURE'));
     assert.ok(result.decisionExplanations.rejectedAlternatives.length > 0);
     assert.ok(result.decisionExplanations.supportingEvidence.length > 0);
   });
 
-  // Outcome 2: CONFIGURE
-  it('2. CONFIGURE: requires role/activation enablement and provides configuration steps', () => {
+  // Outcome 2: ADD_AND_CONFIGURE (Configuration Needed)
+  it('2. ADD_AND_CONFIGURE: requires role/activation enablement and provides configuration steps', () => {
     const candPendingConfig = {
       ...fullyVerifiedCandidate,
       verifiedODataServices: [] // Missing Gateway activation
@@ -78,14 +78,14 @@ describe('REC-QA-01 — Recommendation Quality & Decision Validation Suite', () 
       }
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.CONFIGURE);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(result.governanceOverridesApplied.includes(GOVERNANCE_OVERRIDES.UNREGISTERED_GATEWAY_SERVICE_REQUIRES_CONFIG));
     assert.ok(result.actionableRemediationPlan.some((s) => s.responsibleRole === 'Basis Administrator'));
     assert.ok(result.actionableRemediationPlan.some((s) => s.responsibleRole === 'Security / Authorizations Team'));
   });
 
-  // Outcome 3: EXTEND
-  it('3. EXTEND: identifies custom variant and classifies Clean Core Tier 1 Key User extensibility', () => {
+  // Outcome 3: ADD_AND_CONFIGURE (Clean Core Adaptation)
+  it('3. ADD_AND_CONFIGURE: identifies custom variant and classifies Clean Core Tier 1 Key User extensibility', () => {
     const reqWithCustomization = {
       ...baseReq,
       customizationRequirements: ['Custom withholding tax calculation for local statutory requirement']
@@ -97,10 +97,10 @@ describe('REC-QA-01 — Recommendation Quality & Decision Validation Suite', () 
       context: fullyVerifiedContext
     });
 
-    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.EXTEND);
+    assert.strictEqual(result.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.strictEqual(result.extensibilityStrategy.tier, EXTENSIBILITY_TIERS.TIER_1_KEY_USER);
     assert.strictEqual(result.extensibilityStrategy.cleanCoreCompliant, true);
-    assert.ok(result.decisionExplanations.selectionReason.includes('Clean Core extensibility'));
+    assert.ok(result.decisionExplanations.selectionReason.includes('Clean Core'));
   });
 
   // Outcome 4: BUILD (Strict 9-point preconditions)

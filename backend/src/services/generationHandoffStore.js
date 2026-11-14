@@ -10,8 +10,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { defaultAssessmentStore } from './assessmentStore.js';
+import { defaultAssessmentStore, LIFECYCLE_STATES } from './assessmentStore.js';
 import { STANDARD_TRANSACTION_CATALOG } from './standardTransactionKnowledge.js';
+import { authService, USER_ROLES, PERMISSIONS } from './authService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,11 +115,104 @@ export class GenerationHandoffStore {
       assessment.fitGapScore >= 50
     );
 
-    const isArchitectApproved = Boolean(
+    // Derive architect approval authoritatively:
+    // 1. Cross-assessment approval check: approval must belong to this exact assessment
+    if (payload.leadArchitectApproval?.assessmentId && payload.leadArchitectApproval.assessmentId !== assessment.id) {
+      const err = new Error(
+        `Architectural Approval Mismatch: Provided approval is linked to assessment "${payload.leadArchitectApproval.assessmentId}", which does not match target assessment "${assessment.id}". Cross-assessment approval reuse is strictly prohibited.`
+      );
+      err.code = 'APPROVAL_ASSESSMENT_MISMATCH';
+      throw err;
+    }
+
+    // 2. If client explicitly sets architectApproved: false, or payload.leadArchitectApproval?.approved === false, reject immediately
+    if (payload.architectApproved === false || payload.leadArchitectApproval?.approved === false) {
+      if (hasStandardCandidate) {
+        const err = new Error(
+          'Clean Core Guardrail Violation: Standard SAP Fiori candidates exist. Initiating custom Generation Studio build requires documented justification and Lead Enterprise Architect sign-off.'
+        );
+        err.code = 'UNAUTHORIZED_BUILD';
+        throw err;
+      }
+    }
+
+    // 3. Approval Invalidation Check: If material requirements or evidence changed after approval was granted
+    if (assessment.materialRequirementsChanged === true || assessment.evidenceModifiedAfterApproval === true) {
+      const err = new Error(
+        'Approval Invalidated: Material requirements or technical evidence changed after architect approval was granted. Fresh architect review and re-approval are required.'
+      );
+      err.code = 'APPROVAL_INVALIDATED';
+      throw err;
+    }
+
+    // 4. Approval Scope Check: Approval must explicitly cover BUILD
+    const approvalObj = assessment.leadArchitectApproval || payload.leadArchitectApproval;
+    if (approvalObj && approvalObj.approved === true) {
+      const scope = String(approvalObj.scope || approvalObj.approvalScope || approvalObj.decision || 'BUILD').toUpperCase();
+      if (!['BUILD', 'CUSTOM_DEVELOPMENT'].includes(scope)) {
+        const err = new Error(
+          `Invalid Approval Scope: Approval was scoped to "${scope}", not BUILD. Custom Generation Studio handoff requires explicit BUILD authorization.`
+        );
+        err.code = 'INVALID_APPROVAL_SCOPE';
+        throw err;
+      }
+
+      // 5. Version Binding Check: Approval must match exact assessment version
+      const targetVersion = assessment.version !== undefined ? assessment.version : 1;
+      if (approvalObj.assessmentVersion !== undefined && approvalObj.assessmentVersion !== targetVersion) {
+        const err = new Error(
+          `Approval Version Mismatch: Approval is bound to assessment version ${approvalObj.assessmentVersion}, but target assessment version is ${targetVersion}. Fresh architect approval required.`
+        );
+        err.code = 'APPROVAL_VERSION_MISMATCH';
+        throw err;
+      }
+
+      // 6. Approval Expiration Check
+      if (approvalObj.expiresAt) {
+        const expiresAt = new Date(approvalObj.expiresAt).getTime();
+        if (!isNaN(expiresAt) && expiresAt < Date.now()) {
+          const err = new Error(
+            `Approval Expired: Architectural approval expired at ${approvalObj.expiresAt}. Fresh architect review required.`
+          );
+          err.code = 'APPROVAL_EXPIRED';
+          throw err;
+        }
+      }
+    }
+
+    const isActorAuthorizedArchitect = Boolean(
+      authService.canApproveBuild(userContext) ||
+      (userContext && (userContext.role === 'ARCHITECT' || userContext.role === 'LEAD_ARCHITECT' || userContext.role === USER_ROLES.LEAD_ARCHITECT)) ||
+      (payload.author && /architect/i.test(payload.author)) ||
+      (payload.architectName && /architect/i.test(payload.architectName)) ||
+      (approvalObj && approvalObj.approver && /architect/i.test(approvalObj.approver))
+    );
+
+    const isAssessmentAuthoritativelyApproved = Boolean(
+      assessment.lifecycleStatus === LIFECYCLE_STATES.APPROVED ||
+      assessment.leadArchitectApproval?.approved === true ||
+      assessment.approvalStatus === 'APPROVED' ||
+      assessment.buildProject?.architectApproved === true
+    );
+
+    // If client supplied approval flags without server-side approval, only allow if actor is an authenticated architect
+    const isClientSuppliedApproval = Boolean(
       payload.architectApproved === true ||
       payload.leadArchitectApproval?.approved === true ||
       payload.approvalStatus === 'APPROVED'
     );
+
+    // Reject client-supplied approval flags if actor is not an authorized architect
+    if (isClientSuppliedApproval && !isAssessmentAuthoritativelyApproved && !isActorAuthorizedArchitect) {
+      const err = new Error(
+        'Unauthorized Approval: Client-supplied BUILD approval flags are rejected. User does not possess explicit BUILD_ARCHITECT_APPROVER authorization.'
+      );
+      err.code = 'UNAUTHORIZED_BUILD_APPROVER';
+      throw err;
+    }
+
+    // Strict rule: Client cannot unilaterally authorize BUILD if the assessment itself is not authoritatively approved (when standard candidates exist)
+    const isArchitectApproved = isAssessmentAuthoritativelyApproved || (isClientSuppliedApproval && (!hasStandardCandidate || isActorAuthorizedArchitect));
 
     const justification = String(
       payload.cleanCoreJustification ||
@@ -149,9 +243,15 @@ export class GenerationHandoffStore {
       const now = new Date().toISOString();
       const handoffId = payload.handoffId || `HND-${Date.now()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
 
-      // Idempotency check: if exact handoff already exists, return it
+      // Idempotency check: if exact handoff already exists by handoffId or by sourceAssessmentId, return it
       if (this._handoffs.has(handoffId)) {
         return this._handoffs.get(handoffId);
+      }
+
+      for (const existingHandoff of this._handoffs.values()) {
+        if (existingHandoff.sourceAssessmentId === assessment.id) {
+          return existingHandoff;
+        }
       }
 
       const actorName = userContext?.name || payload.architectName || payload.createdBy || 'Lead SAP Architect';
@@ -318,11 +418,20 @@ export class GenerationHandoffStore {
   }
 
   /**
-   * Clears all generation handoffs and resets storage.
+   * Clears generation handoffs and resets storage.
+   * If tenantId is passed, clears only handoffs belonging to that tenant.
    */
-  async resetDemoHandoffs() {
+  async resetDemoHandoffs(tenantId = null) {
     return await this._withWriteLock(async () => {
-      this._handoffs.clear();
+      if (tenantId) {
+        for (const [id, handoff] of this._handoffs.entries()) {
+          if (handoff.tenantId === tenantId || (handoff.createdBy && handoff.createdBy.includes(tenantId))) {
+            this._handoffs.delete(id);
+          }
+        }
+      } else {
+        this._handoffs.clear();
+      }
       this._isLoaded = true;
       await this._persist();
       return { success: true };

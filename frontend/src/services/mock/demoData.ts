@@ -156,7 +156,7 @@ export const INITIAL_ASSESSMENTS: Assessment[] = [
     ownerName: 'Elena Rostova (Lead SAP Consultant)',
     createdDate: '2026-11-01 09:30:00',
     updatedDate: '2026-11-02 17:45:00',
-    recommendationOutcome: 'EXTEND',
+    recommendationOutcome: 'ADD_AND_CONFIGURE',
     businessProcess: 'Order-to-Cash (O2C)',
     targetRelease: 'SAP S/4HANA 2022 FPS02',
     isDemoRecord: true
@@ -173,7 +173,8 @@ export const INITIAL_ASSESSMENTS: Assessment[] = [
     ownerName: 'Marcus Vance (Procurement Architect)',
     createdDate: '2026-11-01 14:15:00',
     updatedDate: '2026-11-02 11:20:00',
-    recommendationOutcome: 'REVIEW',
+    recommendationOutcome: null,
+    governanceState: 'REVIEW',
     businessProcess: 'Procure-to-Pay (P2P)',
     targetRelease: 'SAP S/4HANA 2022 FPS02',
     isDemoRecord: true
@@ -456,8 +457,8 @@ export const INITIAL_FIT_GAP: FitGapResult[] = [
 export const INITIAL_RECOMMENDATIONS: Recommendation[] = [
   {
     assessmentId: 'ASM-2026-001',
-    outcome: 'EXTEND',
-    rationale: 'Standard SAP Fiori application F1814 (Manage Sales Orders) satisfies 100% of critical core order creation requirements. The custom dispute reason flagging is fully feasible via SAP standard in-app custom fields and BAdI extensibility (BADI_SD_SALES_ITEM). Custom application generation is NOT justified.',
+    outcome: 'ADD_AND_CONFIGURE',
+    rationale: 'Standard SAP Fiori application F1814 (Manage Sales Orders) satisfies 100% of critical core order creation requirements. The custom dispute reason flagging is fully feasible via SAP standard in-app custom fields and Clean Core adaptation (BADI_SD_SALES_ITEM). Custom application generation is NOT justified.',
     criticalRequirementsMet: 2,
     totalRequirements: 2,
     unresolvedQuestions: [
@@ -729,7 +730,7 @@ export const INITIAL_AUDIT_EVENTS: AuditEvent[] = [
     entityId: 'ASM-2026-001',
     systemId: 'SYS-001',
     outcome: 'SUCCESS',
-    details: 'Recorded decision EXTEND for VA01 based on standard F1814 extensibility.',
+    details: 'Recorded decision ADD_AND_CONFIGURE for VA01 based on standard F1814.',
     correlationId: 'corr-5d3e218a-f4'
   },
   {

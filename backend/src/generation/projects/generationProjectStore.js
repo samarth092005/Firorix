@@ -47,7 +47,8 @@ export class GenerationProjectStore {
     this._writeLocks = new Map();
     this._globalLock = Promise.resolve();
     this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
-    this.useDatabase = options.useDatabase || (process.env.Fiorify_PERSISTENCE === 'postgres' && storageDir === DEFAULT_PROJECTS_DIR);
+    const persistenceMode = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || '').toLowerCase();
+    this.useDatabase = options.useDatabase || (persistenceMode === 'postgres' && storageDir === DEFAULT_PROJECTS_DIR);
     this.repository = options.repository || (this.useDatabase ? new GenerationProjectRepository() : null);
   }
 
@@ -785,14 +786,35 @@ export class GenerationProjectStore {
   }
 
   /**
-   * Purges all generated studio projects and resets storage to a clean baseline.
+   * Purges generated studio projects and resets storage to a clean baseline for the specified tenant.
+   * If tenantId is specified, restricts PostgreSQL deletion strictly to that tenant instead of global TRUNCATE.
    */
-  async resetDemoProjects() {
+  async resetDemoProjects(tenantId = null) {
     if (this.repository && this.repository.pool) {
       try {
-        await this.repository.pool.query(
-          'TRUNCATE TABLE generation_artifacts, generation_specifications, generation_projects CASCADE'
-        );
+        if (tenantId) {
+          // Tenant-scoped deletion avoiding global cross-tenant truncation
+          await this.repository.pool.query(
+            'DELETE FROM generation_artifacts WHERE project_id IN (SELECT project_id FROM generation_projects WHERE tenant_id = $1);',
+            [tenantId]
+          );
+          await this.repository.pool.query(
+            'DELETE FROM generation_specifications WHERE project_id IN (SELECT project_id FROM generation_projects WHERE tenant_id = $1);',
+            [tenantId]
+          );
+          await this.repository.pool.query(
+            'DELETE FROM generation_activity_events WHERE project_id IN (SELECT project_id FROM generation_projects WHERE tenant_id = $1);',
+            [tenantId]
+          );
+          await this.repository.pool.query(
+            'DELETE FROM generation_projects WHERE tenant_id = $1;',
+            [tenantId]
+          );
+        } else {
+          await this.repository.pool.query(
+            'TRUNCATE TABLE generation_artifacts, generation_specifications, generation_projects CASCADE'
+          );
+        }
       } catch (err) {
         console.warn('[GenerationProjectStore] Postgres purge note:', err.message);
       }
@@ -805,8 +827,22 @@ export class GenerationProjectStore {
       for (const entry of entries) {
         if (entry.isDirectory()) {
           const dirPath = path.join(this.storageDir, entry.name);
-          await fs.promises.rm(dirPath, { recursive: true, force: true });
-          purgedCount++;
+          const manifestPath = path.join(dirPath, 'project.json');
+          let shouldDelete = true;
+          if (tenantId && fs.existsSync(manifestPath)) {
+            try {
+              const meta = JSON.parse(await fs.promises.readFile(manifestPath, 'utf8'));
+              if (meta.tenantId && meta.tenantId !== tenantId) {
+                shouldDelete = false;
+              }
+            } catch {
+              // ignore
+            }
+          }
+          if (shouldDelete) {
+            await fs.promises.rm(dirPath, { recursive: true, force: true });
+            purgedCount++;
+          }
         }
       }
     } catch (err) {

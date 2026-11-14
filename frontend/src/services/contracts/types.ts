@@ -399,17 +399,32 @@ export interface SystemAvailabilityAudit {
   overallS21Availability: 'VERIFIED_READY' | 'PENDING_VERIFICATION' | 'CONFIGURATION_REQUIRED' | 'UNAVAILABLE';
 }
 
+/**
+ * Canonical Business Decision Outcomes (Strictly 2 outcomes per architecture).
+ */
+export type BusinessDecisionOutcome = 'ADD_AND_CONFIGURE' | 'BUILD';
+
+/**
+ * Assessment Governance and Readiness States (NOT business outcomes).
+ */
+export type AssessmentGovernanceState =
+  | 'REVIEW'
+  | 'PENDING_VERIFICATION'
+  | 'INSUFFICIENT_EVIDENCE'
+  | 'PENDING_ARCHITECT_APPROVAL'
+  | 'RELEASE_BLOCKED';
+
+/**
+ * Recommendation outcome represents the business decisions or active governance states.
+ */
 export type RecommendationOutcome =
+  | BusinessDecisionOutcome
+  | AssessmentGovernanceState
+  // Legacy inputs normalized to ADD_AND_CONFIGURE
   | 'ADOPT'
   | 'CONFIGURE'
-  | 'EXTEND'
-  | 'BUILD'
-  | 'INSUFFICIENT_EVIDENCE'
-  | 'PENDING_VERIFICATION'
-  // Legacy aliases supported for backward compatibility
   | 'USE_STANDARD_FIORI_SUCCESSOR'
   | 'USE_CLASSIC_TRANSACTION_LAUNCHPAD'
-  | 'EVALUATE_FUNCTIONAL_ALTERNATIVE'
   | 'INVESTIGATE_CATALOGUE_INFO'
   | 'VALIDATE_RELEASE_INCOMPATIBILITY'
   | 'TECHNICAL_ANALYSIS_REQUIRED';
@@ -533,7 +548,7 @@ export interface ImplementationReadinessChecklist {
   [key: string]: ChecklistItemStatus | undefined;
 }
 
-export type ModernizationActionType = 'ADD_FOUND' | 'CONFIGURE_ADOPT_READINESS' | 'EXTEND_PLAN' | 'BUILD_PROJECT';
+export type ModernizationActionType = 'ADD_FOUND' | 'CONFIGURE_ADOPT_READINESS' | 'ADD_AND_CONFIGURE' | 'BUILD_PROJECT';
 
 export interface ModernizationDecisionRecord {
   actionId: string;
@@ -549,7 +564,10 @@ export interface ModernizationDecisionRecord {
 
 export interface AssessmentRecommendation {
   outcome: RecommendationOutcome;
-  canonicalOutcome?: 'ADOPT' | 'CONFIGURE' | 'EXTEND' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION';
+  businessOutcome?: BusinessDecisionOutcome | null;
+  governanceState?: AssessmentGovernanceState | null;
+  isBusinessOutcome?: boolean;
+  canonicalOutcome?: BusinessDecisionOutcome | AssessmentGovernanceState;
   recommendedAction: string;
   supportingEvidence: string[];
   knownLimitations: string[];

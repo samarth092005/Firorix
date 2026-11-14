@@ -128,11 +128,13 @@ export interface FitGapResult {
   reviewedTimestamp?: string;
 }
 
-export type DecisionOutcome = 'ADOPT' | 'EXTEND' | 'BUILD' | 'REVIEW';
+export type DecisionOutcome = 'ADD_AND_CONFIGURE' | 'BUILD';
+export type AssessmentGovernanceStatus = 'REVIEW' | 'PENDING_VERIFICATION' | 'INSUFFICIENT_EVIDENCE';
 
 export interface Recommendation {
   assessmentId: string;
-  outcome: DecisionOutcome;
+  outcome: DecisionOutcome | null;
+  governanceStatus?: AssessmentGovernanceStatus;
   rationale: string;
   criticalRequirementsMet: number;
   totalRequirements: number;
@@ -225,7 +227,8 @@ export interface Assessment {
   ownerName: string;
   createdDate: string;
   updatedDate: string;
-  recommendationOutcome?: DecisionOutcome;
+  recommendationOutcome?: DecisionOutcome | null;
+  governanceState?: AssessmentGovernanceStatus;
   businessProcess: string;
   targetRelease: string;
   isDemoRecord: boolean;

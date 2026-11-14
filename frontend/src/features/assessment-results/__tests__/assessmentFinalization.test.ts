@@ -42,7 +42,7 @@ describe('Fiorify SPRINT S0 / ASSESSMENT RESULTS FINALIZATION — 16 REGRESSION 
   });
 
   // Test 2: Recommendation recalculation without auto-adopt
-  it('Scenario 2: Recommendation recalculation without auto-adopt — maps to CONFIGURE when live activation is pending', async () => {
+  it('Scenario 2: Recommendation recalculation without auto-adopt — maps to ADD_AND_CONFIGURE when live activation is pending', async () => {
     const assessment = await assessmentService.getAssessmentByTCode('F-53');
     if (!assessment) return;
 
@@ -55,7 +55,7 @@ describe('Fiorify SPRINT S0 / ASSESSMENT RESULTS FINALIZATION — 16 REGRESSION 
 
     // Generates canonical recommendation
     const canonicalRec = evidenceEngine.generateCanonicalRecommendation(assessment, candidates[0], compat, avail);
-    expect(canonicalRec.outcome).toBe('CONFIGURE');
+    expect(canonicalRec.outcome).toBe('ADD_AND_CONFIGURE');
     expect(canonicalRec.recommendedAction).toContain('F0773');
     expect(canonicalRec.outstandingChecks.length).toBeGreaterThan(0);
   });
@@ -264,8 +264,8 @@ describe('Fiorify SPRINT S0 / ASSESSMENT RESULTS FINALIZATION — 16 REGRESSION 
     expect(readinessEvent.details.noSapWritesPerformed).toBe(true);
   });
 
-  // Test 12: Stage 4 EXTEND plan creation
-  it('Scenario 12: Stage 4 EXTEND plan creation — records Clean Core extensibility tier and reviewable notes', async () => {
+  // Test 12: Stage 4 ADD & CONFIGURE Clean Core adaptation
+  it('Scenario 12: Stage 4 ADD & CONFIGURE Clean Core adaptation — records Clean Core extensibility tier and reviewable notes', async () => {
     const assessment = await assessmentService.getAssessmentByTCode('F-53');
     if (!assessment) return;
 

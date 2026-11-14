@@ -46,7 +46,7 @@ describe('Fiorify Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recom
     const compat = evidenceEngine.evaluateReleaseCompatibility(assessment, candidates[0]);
     const avail = evidenceEngine.evaluateSystemAvailability(assessment, candidates[0]);
     const rec = evidenceEngine.generateRecommendation(assessment, candidates[0], compat, avail);
-    expect(rec.outcome).toBe('USE_STANDARD_FIORI_SUCCESSOR');
+    expect(rec.outcome).toBe('ADD_AND_CONFIGURE');
     expect(rec.recommendedAction).toContain('F0773');
     expect(rec.supportingEvidence.length).toBeGreaterThan(0);
     expect(rec.requiredNextSteps.length).toBeGreaterThan(0);
@@ -76,7 +76,7 @@ describe('Fiorify Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recom
     const compat = evidenceEngine.evaluateReleaseCompatibility(assessment, candidates[0]);
     const avail = evidenceEngine.evaluateSystemAvailability(assessment, candidates[0]);
     const rec = evidenceEngine.generateRecommendation(assessment, candidates[0], compat, avail);
-    expect(rec.outcome).toBe('USE_STANDARD_FIORI_SUCCESSOR');
+    expect(rec.outcome).toBe('ADD_AND_CONFIGURE');
   });
 
   // 3. FS00 Manage G/L Account Master Data Assessment
@@ -127,7 +127,7 @@ describe('Fiorify Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recom
     const compat = evidenceEngine.evaluateReleaseCompatibility(assessment, candidates[0] || null);
     const avail = evidenceEngine.evaluateSystemAvailability(assessment, candidates[0] || null);
     const rec = evidenceEngine.generateRecommendation(assessment, candidates[0] || null, compat, avail);
-    expect(rec.outcome).toBe('USE_CLASSIC_TRANSACTION_LAUNCHPAD');
+    expect(rec.outcome).toBe('ADD_AND_CONFIGURE');
   });
 
   // 6. FBL1N Scenario (Pending Verification)
@@ -142,7 +142,7 @@ describe('Fiorify Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recom
     const compat = evidenceEngine.evaluateReleaseCompatibility(assessment, null);
     const avail = evidenceEngine.evaluateSystemAvailability(assessment, null);
     const rec = evidenceEngine.generateRecommendation(assessment, null, compat, avail);
-    expect(rec.outcome).toBe('INVESTIGATE_CATALOGUE_INFO');
+    expect(rec.outcome).toBe('PENDING_VERIFICATION');
   });
 
   // 7. Custom Transaction Scenario (ZFIN_CUSTOM)
@@ -225,7 +225,7 @@ describe('Fiorify Sprint 4 - Assessment Workspace, Evidence Engine & Fiori Recom
     expect(details?.assessment.id).toBe('ASM-S21-F53');
     expect(details?.evidence.length).toBeGreaterThan(0);
     expect(details?.candidates.length).toBeGreaterThan(0);
-    expect(details?.recommendation.outcome).toBe('USE_STANDARD_FIORI_SUCCESSOR');
+    expect(details?.recommendation.outcome).toBe('ADD_AND_CONFIGURE');
 
     const evidenceOnly = await assessmentService.getAssessmentEvidence('ASM-S21-F53');
     expect(evidenceOnly.length).toBeGreaterThan(0);

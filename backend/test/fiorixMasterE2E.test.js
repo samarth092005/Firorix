@@ -110,7 +110,7 @@ describe('Fiorify TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios
 
     assert.strictEqual(recRes.status, 200);
     const recBody = await recRes.json();
-    assert.strictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.ADOPT);
+    assert.strictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.strictEqual(recBody.confidence, 'HIGH');
     assert.strictEqual(recBody.recommendation.riskAssessment.overallRisk, 'LOW');
     assert.ok(recBody.recommendation.actionableRemediationPlan.some((step) => step.responsibleRole === 'Security / Authorizations Team'));
@@ -163,7 +163,7 @@ describe('Fiorify TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios
 
     assert.strictEqual(recRes.status, 200);
     const recBody = await recRes.json();
-    assert.strictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.CONFIGURE);
+    assert.strictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(recBody.recommendation.governanceOverridesApplied.includes(GOVERNANCE_OVERRIDES.LEGACY_GUI_FALLBACK_RECOMMENDED));
     assert.strictEqual(recBody.recommendation.extensibilityStrategy.cleanCoreCompliant, false);
     assert.ok(recBody.recommendation.rationale.includes('Classic SAP GUI for HTML WebGUI tile provides 100% functional fallback'));
@@ -311,7 +311,7 @@ describe('Fiorify TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios
     const recBody = await recRes.json();
     // Governance Guardrail: Missing evidence MUST NEVER result in BUILD
     assert.notStrictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.BUILD);
-    assert.ok([RECOMMENDATION_OUTCOMES.PENDING_VERIFICATION, RECOMMENDATION_OUTCOMES.CONFIGURE, RECOMMENDATION_OUTCOMES.REVIEW].includes(recBody.outcome));
+    assert.ok([RECOMMENDATION_OUTCOMES.PENDING_VERIFICATION, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE, RECOMMENDATION_OUTCOMES.REVIEW].includes(recBody.outcome));
   });
 
   // =========================================================================
@@ -361,7 +361,7 @@ describe('Fiorify TEST-01 — Master End-to-End Acceptance Test Suite (Scenarios
 
     assert.strictEqual(recRes.status, 200);
     const recBody = await recRes.json();
-    assert.strictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.EXTEND);
+    assert.strictEqual(recBody.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(recBody.recommendation.governanceOverridesApplied.includes(GOVERNANCE_OVERRIDES.CLEAN_CORE_EXTENSIBILITY_ENFORCED));
     assert.strictEqual(recBody.recommendation.extensibilityStrategy.tier, EXTENSIBILITY_TIERS.TIER_1_KEY_USER);
     assert.ok(recBody.recommendation.actionableRemediationPlan.some((step) => step.title.includes('Clean Core Extension Logic')));

@@ -1387,7 +1387,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                       <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11.5px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                           <span style={{ fontSize: '10px', fontWeight: 700, padding: '1px 6px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#166534' }}>1. VERDICT</span>
-                          <span style={{ color: '#1E293B', fontWeight: 600 }}>ADOPT_STANDARD_FIORI</span>
+                          <span style={{ color: '#1E293B', fontWeight: 600 }}>ADD_AND_CONFIGURE</span>
                           <span style={{ color: '#64748B' }}>— Official Fiori successor {selectedCandidate.appId} verified.</span>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

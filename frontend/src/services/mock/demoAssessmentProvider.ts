@@ -352,6 +352,24 @@ export const DEMO_ASSESSMENT_RECORDS: AssessmentRecord[] = [
     matchingFioriApp: null,
     lastAssessed: '2026-10-31 15:45',
     status: 'COMPLETED',
+    lifecycleStatus: 'APPROVED',
+    approvalStatus: 'APPROVED',
+    leadArchitectApproval: {
+      approved: true,
+      assessmentId: 'ASM-S21-ZFIN_CUSTOM',
+      scope: 'BUILD',
+      approver: 'Lead Enterprise Architect'
+    },
+    catalogueSearch: {
+      officialSourceId: 'SAP_FIORI_APPS_REFERENCE_LIBRARY',
+      searchExecutionId: 'SRCH-ZFIN-01',
+      searchScope: 'Official SAP Fiori Apps Reference Library',
+      targetRelease: 'SAP S/4HANA 2023',
+      query: 'ZFIN_CUSTOM',
+      timestamp: '2026-10-31 15:45',
+      searchCompletionStatus: 'COMPLETED_ZERO_MATCHES',
+      resultCount: 0
+    },
     systemId: 'S21',
     client: '200',
     release: 'SAP S/4HANA 2023 Private Edition',

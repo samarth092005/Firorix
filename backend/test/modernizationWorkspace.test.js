@@ -35,7 +35,7 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
       sourceLabel: 'Official SAP Fiori Apps Reference Library'
     },
     recommendation: {
-      outcome: 'ADOPT',
+      outcome: 'ADD_AND_CONFIGURE',
       rationale: 'Standard Fiori application F0773 matches outgoing payment processing.'
     }
   };
@@ -76,13 +76,13 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
     }
   });
 
-  // Scenario 1: ADOPT recommendation
-  it('Scenario 1: ADOPT recommendation provides standard app context and compatible status', async () => {
+  // Scenario 1: ADD_AND_CONFIGURE recommendation
+  it('Scenario 1: ADD_AND_CONFIGURE recommendation provides standard app context and compatible status', async () => {
     const res = await fetch(`${baseUrl}/api/v1/assessments/ASM-MOD-TEST-001`);
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.success, true);
-    assert.strictEqual(data.assessment.recommendation.outcome, 'ADOPT');
+    assert.strictEqual(data.assessment.recommendation.outcome, 'ADD_AND_CONFIGURE');
     assert.strictEqual(data.assessment.matchingFioriApp.appId, 'F0773');
   });
 
@@ -121,10 +121,10 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
     assert.strictEqual(data.assessment.readinessChecklist.serviceRegistration, 'PENDING');
   });
 
-  // Scenario 3: EXTEND recommendation
-  it('Scenario 3: EXTEND recommendation captures Clean Core extension tier without inventing BAdIs', async () => {
+  // Scenario 3: ADD_AND_CONFIGURE captures Clean Core adaptation tier without inventing BAdIs
+  it('Scenario 3: ADD_AND_CONFIGURE captures Clean Core adaptation tier without inventing BAdIs', async () => {
     const extendPayload = {
-      actionType: 'EXTEND_PLAN',
+      actionType: 'ADD_AND_CONFIGURE',
       details: {
         targetApp: 'F0773',
         tier: 'TIER_1_KEY_USER',
@@ -145,8 +145,8 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
     assert.strictEqual(res.status, 200);
     const data = await res.json();
     assert.strictEqual(data.success, true);
-    assert.strictEqual(data.action.actionType, 'EXTEND_PLAN');
-    assert.strictEqual(data.assessment.extensionPlan.cleanCoreTier, 'TIER_1_KEY_USER');
+    assert.strictEqual(data.action.actionType, 'ADD_AND_CONFIGURE');
+    assert.strictEqual(data.assessment.cleanCoreAdaptation.cleanCoreTier, 'TIER_1_KEY_USER');
   });
 
   // Scenario 4: BUILD recommendation
@@ -370,13 +370,13 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
     assert.strictEqual(data.assessment.readinessChecklist.userAuthorization, 'VERIFIED');
   });
 
-  // Scenario 11: Extension specification persistence
-  it('Scenario 11: Extension specification persists tier, notes, and missing capabilities', async () => {
+  // Scenario 11: Clean Core adaptation specification persistence
+  it('Scenario 11: Clean Core adaptation specification persists tier, notes, and missing capabilities', async () => {
     const res = await fetch(`${baseUrl}/api/v1/assessments/ASM-MOD-TEST-001/modernization-action`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        actionType: 'EXTEND_PLAN',
+        actionType: 'ADD_AND_CONFIGURE',
         details: {
           targetApp: 'F1367',
           tier: 'TIER_2_CLOUD_DEVELOPER',
@@ -388,8 +388,8 @@ describe('MW-01, MW-02, MW-03 — Modernization Workspace Master Regression Suit
 
     assert.strictEqual(res.status, 200);
     const data = await res.json();
-    assert.strictEqual(data.assessment.extensionPlan.cleanCoreTier, 'TIER_2_CLOUD_DEVELOPER');
-    assert.strictEqual(data.assessment.extensionPlan.targetApp, 'F1367');
+    assert.strictEqual(data.assessment.cleanCoreAdaptation.cleanCoreTier, 'TIER_2_CLOUD_DEVELOPER');
+    assert.strictEqual(data.assessment.cleanCoreAdaptation.targetApp, 'F1367');
   });
 
   // Scenario 12: Generation project creation

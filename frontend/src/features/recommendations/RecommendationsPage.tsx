@@ -14,17 +14,16 @@ export const RecommendationsPage: React.FC = () => {
       <div style={{ marginBottom: '20px' }}>
         <h1 className="fiori-page-title">Architectural Recommendations Workspace</h1>
         <p className="fiori-page-subtitle">
-          Formal decision records evaluating whether to Adopt standard Fiori, Extend via in-app/developer BAdIs, Build custom RAP apps, or Review missing evidence.
+          Formal decision records evaluating whether to Add and Configure standard Fiori apps, Build custom RAP apps under Clean Core, or Review missing evidence.
         </p>
       </div>
 
       <MessageStrip type="info">
         <strong>Decision Policy Rule:</strong>
         <ul style={{ paddingLeft: '18px', marginTop: '4px' }}>
-          <li><strong>ADOPT:</strong> Standard app meets all critical confirmed requirements.</li>
-          <li><strong>EXTEND:</strong> Standard app meets core flow; gaps are covered by standard BAdI or in-app custom fields.</li>
-          <li><strong>BUILD:</strong> Material functional gaps confirmed; custom RAP / Fiori Elements build justified.</li>
-          <li><strong>REVIEW:</strong> Missing evidence or unconfirmed requirements. Never default to BUILD on uncertainty.</li>
+          <li><strong>ADD & CONFIGURE:</strong> Standard Fiori app satisfies business requirements through supported addition, configuration, or Clean Core adaptation.</li>
+          <li><strong>BUILD:</strong> Material functional gaps confirmed; custom RAP / Fiori Elements build justified under Clean Core governance.</li>
+          <li><strong>REVIEW:</strong> Missing evidence, conflicting matches, or unconfirmed requirements. Internal governance state — never default to BUILD on uncertainty.</li>
         </ul>
       </MessageStrip>
 
@@ -37,7 +36,7 @@ export const RecommendationsPage: React.FC = () => {
                 <span style={{ fontWeight: 700, fontSize: '15px' }}>
                   Assessment {rec.assessmentId}
                 </span>
-                <StatusBadge status={rec.outcome} size="md" />
+                <StatusBadge status={rec.outcome || rec.governanceStatus || 'REVIEW'} size="md" />
                 <span
                   style={{
                     fontSize: '11px',

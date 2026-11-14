@@ -45,7 +45,7 @@ describe('MW-01 + MW-02 + MW-03: Modernization Workspace Frontend & Integration 
       odataServices: ['FAR_OUTGOING_PAYMENT_SRV']
     },
     recommendation: {
-      outcome: 'ADOPT',
+      outcome: 'ADD_AND_CONFIGURE',
       rationale: 'Standard SAP Fiori app F0773 satisfies clearing requirements.',
       actionableRemediationPlan: []
     },
@@ -62,8 +62,8 @@ describe('MW-01 + MW-02 + MW-03: Modernization Workspace Frontend & Integration 
     updatedAt: new Date().toISOString()
   };
 
-  // Scenario 1: ADOPT recommendation
-  it('Scenario 1: ADOPT recommendation provides standard app context and compatible status', async () => {
+  // Scenario 1: ADD_AND_CONFIGURE recommendation
+  it('Scenario 1: ADD_AND_CONFIGURE recommendation provides standard app context and compatible status', async () => {
     const assessment = await assessmentService.getAssessmentByTCode('F-53');
     expect(assessment).toBeDefined();
     expect(assessment?.matchingFioriApp?.appId).toBe('F0773');
@@ -116,13 +116,13 @@ describe('MW-01 + MW-02 + MW-03: Modernization Workspace Frontend & Integration 
     expect(result.action.actionType).toBe('CONFIGURE_ADOPT_READINESS');
   });
 
-  // Scenario 3: EXTEND recommendation
-  it('Scenario 3: EXTEND recommendation captures Clean Core extension tier without inventing BAdIs', async () => {
+  // Scenario 3: ADD_AND_CONFIGURE with Clean Core adaptation
+  it('Scenario 3: ADD_AND_CONFIGURE captures Clean Core extension tier without inventing BAdIs', async () => {
     const spy = vi.spyOn(apiClient, 'recordModernizationAction').mockResolvedValueOnce({
       success: true,
       action: {
         actionId: 'ACT-EXT-001',
-        actionType: 'EXTEND_PLAN',
+        actionType: 'ADD_AND_CONFIGURE',
         details: {
           targetApp: 'F0773',
           tier: 'TIER_1_KEY_USER',
@@ -133,7 +133,7 @@ describe('MW-01 + MW-02 + MW-03: Modernization Workspace Frontend & Integration 
     });
 
     const result = await assessmentService.recordModernizationAction(mockAssessment.id, {
-      actionType: 'EXTEND_PLAN',
+      actionType: 'ADD_AND_CONFIGURE',
       details: {
         targetApp: 'F0773',
         tier: 'TIER_1_KEY_USER'
@@ -316,13 +316,13 @@ describe('MW-01 + MW-02 + MW-03: Modernization Workspace Frontend & Integration 
     expect(result.assessment.readinessChecklist.userAuthorization).toBe('VERIFIED');
   });
 
-  // Scenario 11: Extension specification persistence
-  it('Scenario 11: Extension specification persists tier and notes', async () => {
+  // Scenario 11: Clean Core adaptation specification persistence
+  it('Scenario 11: Clean Core adaptation specification persists tier and notes', async () => {
     vi.spyOn(apiClient, 'recordModernizationAction').mockResolvedValueOnce({
       success: true,
       action: {
         actionId: 'ACT-EXT-002',
-        actionType: 'EXTEND_PLAN',
+        actionType: 'ADD_AND_CONFIGURE',
         details: {
           tier: 'TIER_2_CLOUD_DEVELOPER',
           notes: 'Developer extension in ADT'
@@ -332,7 +332,7 @@ describe('MW-01 + MW-02 + MW-03: Modernization Workspace Frontend & Integration 
     });
 
     const result = await assessmentService.recordModernizationAction(mockAssessment.id, {
-      actionType: 'EXTEND_PLAN',
+      actionType: 'ADD_AND_CONFIGURE',
       details: { tier: 'TIER_2_CLOUD_DEVELOPER' }
     });
 

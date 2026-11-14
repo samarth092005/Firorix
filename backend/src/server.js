@@ -147,8 +147,8 @@ export function createServer(options = {}) {
     // Helper to resolve authenticated user context (SEC-01 + S2)
     const resolveUser = () => {
       const authHeader = req.headers.authorization;
-      const customSecret = req.headers['x-Fiorify-admin-secret'];
-      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : undefined);
+      const customSecret = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
+      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-admin-secret-change-in-production' : undefined);
       const requestTenantId = req.headers['x-tenant-id'] || defaultTenantId;
 
       const isAdminSecretValid = (sec) => {
@@ -161,10 +161,13 @@ export function createServer(options = {}) {
 
       if (customSecret) {
         if (isAdminSecretValid(customSecret)) {
+          const adminUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01';
+          const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
+          const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
           return {
-            id: req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01',
-            name: req.headers['x-Fiorify-admin-name'] || 'Admin',
-            email: req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp',
+            id: adminUser,
+            name: adminName,
+            email: adminEmail,
             role: USER_ROLES.ADMIN,
             tenantId: requestTenantId,
             department: 'SAP Architecture & Platform Governance'
@@ -176,10 +179,13 @@ export function createServer(options = {}) {
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.slice(7).trim();
         if (isAdminSecretValid(token)) {
+          const adminUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01';
+          const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
+          const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
           return {
-            id: req.headers['x-Fiorify-admin-user'] || 'USR-ADMIN-01',
-            name: req.headers['x-Fiorify-admin-name'] || 'Admin',
-            email: req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp',
+            id: adminUser,
+            name: adminName,
+            email: adminEmail,
             role: USER_ROLES.ADMIN,
             tenantId: requestTenantId,
             department: 'SAP Architecture & Platform Governance'
@@ -303,8 +309,9 @@ export function createServer(options = {}) {
     const checkAdminAuth = () => {
       const authHeader = req.headers.authorization;
       const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-      const customHeaderSecret = req.headers['x-Fiorify-admin-secret']
-        ? String(req.headers['x-Fiorify-admin-secret']).trim()
+      const rawCustomHeader = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
+      const customHeaderSecret = rawCustomHeader
+        ? String(rawCustomHeader).trim()
         : null;
       const providedSecret = customHeaderSecret || bearerSecret;
 
@@ -312,7 +319,7 @@ export function createServer(options = {}) {
         return false;
       }
 
-      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
+      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
       if (providedSecret === configuredSecret) return true;
       if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(providedSecret)) return true;
       return false;

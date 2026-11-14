@@ -111,14 +111,14 @@ export class AssessmentExportService {
 **Target Transaction:** ${assessment.tcode} — ${assessment.description || 'SAP Transaction'}
 **Target Landscape:** ${exportMetadata.platform}
 **Generated Date:** ${new Date().toLocaleDateString()}
-**Advisory Verdict:** ${recommendation.outcome || 'ADOPT'} (Fit Score: ${assessment.fitScore || 92}%)
+**Advisory Verdict:** ${recommendation.outcome || 'ADD_AND_CONFIGURE'} (Fit Score: ${assessment.fitScore || 92}%)
 
 ---
 
 ## 1. Executive Summary
 - **Transaction:** \`${assessment.tcode}\` — ${assessment.description || 'SAP Transaction'}
-- **Outcome:** ${recommendation.outcome || 'ADOPT'} (${assessment.assessmentResult || 'EVALUATED'})
-- **Decision Rationale:** ${recommendation.recommendedAction || 'Adopt standard SAP Fiori successor.'}
+- **Outcome:** ${recommendation.outcome || 'ADD_AND_CONFIGURE'} (${assessment.assessmentResult || 'EVALUATED'})
+- **Decision Rationale:** ${recommendation.recommendedAction || 'Add and configure standard SAP Fiori successor.'}
 - **Evidence Completeness:** ${evidenceScore?.totalScore || 92}/100 (${evidenceScore?.completenessLabel || 'COMPREHENSIVE'})
 - **Recommended App:** **${candidateAppId}** (${primaryCandidate?.appName || 'Standard Successor'})
 - **Release Compatibility:** ${compatibility.status || 'COMPATIBLE'} (${effectiveRelease})
@@ -163,7 +163,7 @@ ${evidence.map((e, idx) => `${idx + 1}. **${e.title || 'Evidence Record'}**: ${e
 
 ---
 
-## 7. Recommendation Rationale: ${recommendation.outcome || 'ADOPT'}
+## 7. Recommendation Rationale: ${recommendation.outcome || 'ADD_AND_CONFIGURE'}
 **Recommended Action:** ${recommendation.recommendedAction}
 
 ${nextStepsList ? `### Required Next Steps:\n${nextStepsList}` : ''}
@@ -218,7 +218,7 @@ Provenances: ${assessment.isDemo ? 'CURATED_DEMO_FIXTURE (Pending Live Verificat
     doc.setTextColor(30, 41, 59);
     doc.text(`Transaction Code: ${assessment.tcode}`, 14, 52);
     doc.text(`Description: ${assessment.description || 'SAP Transaction'}`, 14, 58);
-    doc.text(`Modernization Verdict: ${recommendation.outcome || 'ADOPT'}`, 14, 64);
+    doc.text(`Modernization Verdict: ${recommendation.outcome || 'ADD_AND_CONFIGURE'}`, 14, 64);
     doc.text(`Evidence Completeness: ${evidenceScore?.totalScore || 92}/100`, 14, 70);
 
     // Section 2: Recommended Fiori Application

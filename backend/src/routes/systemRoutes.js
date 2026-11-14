@@ -84,16 +84,17 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     if (!requireRole([USER_ROLES.ADMIN])) return true;
     try {
       let purgedProjectsCount = 0;
+      const targetTenantId = currentUser?.tenantId || context.defaultTenantId || 'DEFAULT-TENANT-S21';
 
-      // 1. Reset Generation Projects
+      // 1. Reset Generation Projects (Tenant-scoped)
       if (context.projectStore && typeof context.projectStore.resetDemoProjects === 'function') {
-        const pRes = await context.projectStore.resetDemoProjects();
+        const pRes = await context.projectStore.resetDemoProjects(targetTenantId);
         purgedProjectsCount = pRes.purgedCount || 0;
       }
 
-      // 2. Reset Generation Handoffs
+      // 2. Reset Generation Handoffs (Tenant-scoped)
       if (context.handoffStore && typeof context.handoffStore.resetDemoHandoffs === 'function') {
-        await context.handoffStore.resetDemoHandoffs();
+        await context.handoffStore.resetDemoHandoffs(targetTenantId);
       }
 
       // 3. Reset Assessments to pristine baseline
@@ -119,11 +120,11 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
       if (securityAuditLogger) {
         securityAuditLogger.logEvent({
           actor: currentUser?.id || 'USR-ADMIN-01',
-          tenantId: context.defaultTenantId || 'DEFAULT-TENANT-S21',
+          tenantId: targetTenantId,
           action: 'SYSTEM_DEMO_RESET',
           resource: '/api/v1/system/reset-demo',
           outcome: 'SUCCESS',
-          details: { purgedProjectsCount }
+          details: { purgedProjectsCount, targetTenantId }
         }).catch(() => {});
       }
 
@@ -133,6 +134,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
           success: true,
           message: 'Fiorify demonstration environment successfully reset to pristine Clean Core baseline.',
           purged: {
+            tenantId: targetTenantId,
             projectsCount: purgedProjectsCount,
             assessmentsReset: true,
             handoffsReset: true
@@ -302,8 +304,9 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
   if (req.method === 'GET' && url.pathname === '/api/v1/gateway-smoke-test') {
     const authHeader = req.headers.authorization;
     const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-    const customHeaderSecret = req.headers['x-Fiorify-admin-secret']
-      ? String(req.headers['x-Fiorify-admin-secret']).trim()
+    const rawAdminSecret = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
+    const customHeaderSecret = rawAdminSecret
+      ? String(rawAdminSecret).trim()
       : null;
     const providedSecret = customHeaderSecret || bearerSecret;
 

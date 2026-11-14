@@ -57,7 +57,7 @@ export const ApprovalsPage: React.FC = () => {
                   <code style={{ fontSize: '13px', fontWeight: 700 }}>{item.assessmentId}</code>
                 </td>
                 <td>
-                  <StatusBadge status={item.outcome} size="md" />
+                  <StatusBadge status={item.outcome || item.governanceStatus || 'PENDING_REVIEW'} size="md" />
                 </td>
                 <td style={{ fontSize: '12px', maxWidth: '420px', lineHeight: 1.4 }}>
                   {item.rationale}

@@ -236,7 +236,7 @@ describe('Fiorify PERSIST-02 & REC-01 — Lifecycle, Audit History & Recommendat
 
     const body = await res.json();
     assert.strictEqual(body.success, true);
-    assert.strictEqual(body.outcome, RECOMMENDATION_OUTCOMES.ADOPT);
+    assert.strictEqual(body.outcome, RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE);
     assert.ok(body.recommendation);
     assert.ok(body.recommendation.actionableRemediationPlan.length > 0);
     assert.strictEqual(body.recommendation.riskAssessment.overallRisk, 'LOW');

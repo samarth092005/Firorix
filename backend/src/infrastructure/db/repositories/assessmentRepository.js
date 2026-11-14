@@ -185,12 +185,91 @@ export class AssessmentRepository {
       targetRelease: row.target_release,
       lifecycleStatus: row.lifecycle_status,
       status: row.lifecycle_status,
-      recommendation: {
-        action: row.recommendation_action,
-        outcome: row.recommendation_action,
-        confidence: row.recommendation_confidence,
-        justification: row.recommendation_justification
-      },
+      ...(() => {
+        const rawAction = String(row.recommendation_action || '').toUpperCase();
+        let resolvedAction = rawAction;
+        let resolvedOutcome = rawAction;
+        let resolvedCanonical = rawAction;
+        let legacyOriginal = null;
+        let migrationRationale = null;
+
+        if (rawAction === 'EXTEND') {
+          legacyOriginal = 'EXTEND';
+          const hasCand = Boolean(row.candidate_app_id || row.candidate_app_name);
+          const isVerified = row.verification_status !== 'UNVERIFIED';
+          const hasGaps = (row.gaps_count || 0) > 0;
+
+          let isExplicitBuildApproval = false;
+          let approvalObj = null;
+          try {
+            if (row.lead_architect_approval) {
+              approvalObj = typeof row.lead_architect_approval === 'string'
+                ? JSON.parse(row.lead_architect_approval)
+                : row.lead_architect_approval;
+            }
+          } catch (e) {
+            approvalObj = null;
+          }
+
+          if (approvalObj && approvalObj.approved === true) {
+            const scope = String(approvalObj.scope || approvalObj.approvalScope || approvalObj.decision || approvalObj.targetOutcome || '').toUpperCase();
+            if (scope === 'BUILD' || scope === 'CUSTOM_DEVELOPMENT' || approvalObj.customDevelopmentApproved === true || approvalObj.buildApproved === true) {
+              isExplicitBuildApproval = true;
+            }
+          }
+
+          if (row.approval_scope) {
+            const scope = String(row.approval_scope).toUpperCase();
+            if (scope === 'BUILD' || scope === 'CUSTOM_DEVELOPMENT') {
+              isExplicitBuildApproval = true;
+            }
+          }
+
+          if (hasCand && isVerified && !hasGaps) {
+            resolvedAction = 'ADD_AND_CONFIGURE';
+            resolvedOutcome = 'ADD_AND_CONFIGURE';
+            resolvedCanonical = 'ADD_AND_CONFIGURE';
+            migrationRationale = 'Migrated from legacy EXTEND to ADD_AND_CONFIGURE: verified standard candidate available for adaptation.';
+          } else if (hasGaps && isExplicitBuildApproval) {
+            resolvedAction = 'BUILD';
+            resolvedOutcome = 'BUILD';
+            resolvedCanonical = 'BUILD';
+            migrationRationale = 'Migrated from legacy EXTEND to BUILD due to identified gaps and explicit architect sign-off for custom development.';
+          } else if (hasGaps && row.lifecycle_status === 'APPROVED' && !isExplicitBuildApproval) {
+            resolvedAction = 'REVIEW';
+            resolvedOutcome = 'REVIEW';
+            resolvedCanonical = 'REVIEW';
+            migrationRationale = 'Migrated from legacy EXTEND to REVIEW: historical approval was scoped to EXTEND. Custom development (BUILD) requires fresh architect approval.';
+          } else {
+            resolvedAction = 'REVIEW';
+            resolvedOutcome = 'REVIEW';
+            resolvedCanonical = 'REVIEW';
+            migrationRationale = 'Migrated from legacy EXTEND to REVIEW: evidence requires verification.';
+          }
+        } else if (['ADOPT', 'CONFIGURE', 'EVALUATE_FUNCTIONAL_ALTERNATIVE', 'USE_STANDARD_FIORI_SUCCESSOR', 'USE_CLASSIC_TRANSACTION_LAUNCHPAD'].includes(rawAction)) {
+          resolvedAction = 'ADD_AND_CONFIGURE';
+          resolvedOutcome = 'ADD_AND_CONFIGURE';
+          resolvedCanonical = 'ADD_AND_CONFIGURE';
+        }
+
+        const isBusiness = resolvedOutcome === 'ADD_AND_CONFIGURE' || resolvedOutcome === 'BUILD';
+
+        return {
+          legacyOriginalOutcome: legacyOriginal,
+          migrationRationale,
+          recommendation: {
+            action: resolvedAction,
+            outcome: resolvedOutcome,
+            canonicalOutcome: resolvedCanonical,
+            businessOutcome: isBusiness ? resolvedOutcome : null,
+            governanceState: isBusiness ? null : resolvedOutcome,
+            isBusinessOutcome: isBusiness,
+            confidence: row.recommendation_confidence,
+            justification: row.recommendation_justification,
+            ...(legacyOriginal ? { legacyOriginalOutcome: legacyOriginal } : {})
+          }
+        };
+      })(),
       assessmentResult: row.recommendation_action,
       matchingFioriApp: (row.candidate_app_id || row.candidate_app_name) ? {
         appId: row.candidate_app_id || row.candidate_app_name,

@@ -50,7 +50,7 @@ export async function handleHandoffRoutes(req, res, url, context = {}) {
     } catch (err) {
       const status = err.code === 'NOT_FOUND'
         ? 404
-        : err.code === 'UNAUTHORIZED_BUILD'
+        : (err.code === 'UNAUTHORIZED_BUILD' || err.code === 'UNAUTHORIZED_BUILD_APPROVER')
         ? 403
         : 400;
       res.writeHead(status, { 'Content-Type': 'application/json' });

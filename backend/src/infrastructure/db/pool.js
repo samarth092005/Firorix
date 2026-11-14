@@ -26,10 +26,10 @@ export class DatabasePool {
       config.connectionString = connectionString;
     } else {
       config.host = customConfig.host || process.env.PGHOST || '127.0.0.1';
-      config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' ? 54334 : 5432));
+      config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : ((process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true') ? 54334 : 5432));
       config.user = customConfig.user || process.env.PGUSER || 'postgres';
       config.password = customConfig.password || process.env.PGPASSWORD || 'password';
-      config.database = customConfig.database || process.env.PGDATABASE || (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' ? 'postgres' : 'Fiorify');
+      config.database = customConfig.database || process.env.PGDATABASE || ((process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true') ? 'postgres' : 'fiorify');
     }
 
     // Attempt direct connection to configured PostgreSQL
@@ -43,7 +43,7 @@ export class DatabasePool {
       return globalPool;
     } catch (directConnErr) {
       // If direct connection failed and local embedded auto-start is permitted (e.g. tests or local dev)
-      if (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.NODE_ENV === 'test') {
+      if (process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true' || process.env.NODE_ENV === 'test') {
         pool.end().catch(() => {});
         return await DatabasePool.initEmbedded(customConfig);
       }
@@ -112,7 +112,7 @@ export class DatabasePool {
       activeConfig = config;
 
       // Ensure target database exists
-      const targetDb = options.database || process.env.PGDATABASE || 'Fiorify';
+      const targetDb = (options.database || process.env.PGDATABASE || 'fiorify').toLowerCase();
       if (targetDb !== 'postgres') {
         const adminClient = await globalPool.connect();
         const checkDb = await adminClient.query(
@@ -120,7 +120,8 @@ export class DatabasePool {
           [targetDb]
         );
         if (checkDb.rowCount === 0) {
-          await adminClient.query(`CREATE DATABASE ${targetDb};`);
+          // PostgreSQL identifier quoting for safety
+          await adminClient.query(`CREATE DATABASE "${targetDb}";`);
         }
         adminClient.release();
         await globalPool.end();
@@ -140,7 +141,7 @@ export class DatabasePool {
 
       return globalPool;
     } catch (err) {
-      throw new Error(`Failed to initialize embedded PostgreSQL: ${err.message}`);
+      throw new Error(`Failed to initialize embedded PostgreSQL: ${err?.message || err}`);
     }
   }
 

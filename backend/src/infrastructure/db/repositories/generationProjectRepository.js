@@ -219,6 +219,45 @@ export class GenerationProjectRepository {
       [projectId]
     );
 
+    const artifactsRes = await this.pool.query(
+      'SELECT id, artifact_name, artifact_type, storage_driver, storage_path, content_hash, file_size_bytes, metadata, created_at FROM generation_artifacts WHERE project_id = $1 ORDER BY id ASC;',
+      [projectId]
+    );
+
+    const artifactRegistry = {
+      artifacts: {},
+      generationRuns: [],
+      version: 1,
+      lastGeneratedAt: null
+    };
+
+    for (const art of artifactsRes.rows) {
+      const meta = typeof art.metadata === 'string' ? JSON.parse(art.metadata) : (art.metadata || {});
+      const artifactKey = art.artifact_name;
+      artifactRegistry.artifacts[artifactKey] = {
+        id: meta.id || `ART-${art.id}`,
+        artifactName: art.artifact_name,
+        name: art.artifact_name,
+        type: art.artifact_type,
+        artifactType: art.artifact_type,
+        category: meta.category || (art.artifact_type.includes('ABAP') ? 'BACKEND' : 'FRONTEND'),
+        layer: meta.layer || (art.artifact_type.includes('ABAP') ? 'ABAP' : 'UI5'),
+        storagePath: art.storage_path,
+        path: art.storage_path,
+        content: meta.content || '',
+        checksum: art.content_hash,
+        contentHash: art.content_hash,
+        fileSizeBytes: Number(art.file_size_bytes) || 0,
+        manualEdit: meta.manualEdit || false,
+        version: meta.version || 1,
+        createdAt: art.created_at?.toISOString ? art.created_at.toISOString() : art.created_at,
+        metadata: meta
+      };
+      if (art.created_at) {
+        artifactRegistry.lastGeneratedAt = art.created_at?.toISOString ? art.created_at.toISOString() : art.created_at;
+      }
+    }
+
     return {
       projectId: row.project_id,
       id: row.project_id,
@@ -250,6 +289,7 @@ export class GenerationProjectRepository {
       requirementsSpec: specsByType['REQUIREMENTS'] || null,
       dataModelSpec: specsByType['DATA_MODEL'] || null,
       architectureSpec: specsByType['ARCHITECTURE'] || null,
+      artifactRegistry,
       activityHistory: eventsRes.rows.map(e => ({
         eventId: e.event_id,
         timestamp: e.timestamp.toISOString(),

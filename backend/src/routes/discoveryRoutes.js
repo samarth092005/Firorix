@@ -236,7 +236,10 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
       const legacyTx = {
         tcode: effectiveDiscovery.tcode,
-        exists: effectiveDiscovery.transactionIdentity?.sapExistenceVerification?.status !== 'NOT_FOUND',
+        exists: effectiveDiscovery.exists !== undefined
+          ? effectiveDiscovery.exists
+          : (effectiveDiscovery.transactionIdentity?.sapExistenceVerification?.status !== 'NOT_FOUND' &&
+             effectiveDiscovery.transactionIdentity?.sapExistenceVerification?.status !== 'UNINDEXED'),
         classification: effectiveDiscovery.classification || 'STANDARD',
         description: effectiveDiscovery.description || effectiveDiscovery.transactionDescription,
         program: effectiveDiscovery.program || effectiveDiscovery.programName,
@@ -244,7 +247,7 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
         packageName: effectiveDiscovery.package || effectiveDiscovery.packageName,
         originalSystem: effectiveDiscovery.classification === 'CUSTOM' ? (systemId.split('-')[0] || 'S21') : 'SAP',
         softwareComponent: effectiveDiscovery.softwareComponent || 'S4CORE 108',
-        metadataStatus: effectiveDiscovery.missingEvidence?.length > 0 ? 'INCOMPLETE' : 'COMPLETE',
+        metadataStatus: effectiveDiscovery.exists === false ? 'NOT_AVAILABLE' : (effectiveDiscovery.missingEvidence?.length > 0 ? 'INCOMPLETE' : 'COMPLETE'),
         evidence: effectiveDiscovery.evidence ? effectiveDiscovery.evidence.map(e => typeof e === 'string' ? e : `[${e.sourceName || e.evidenceType}] ${e.sourceRecordId || ''}: ${e.confidence || ''}`) : [],
         classificationDetails: effectiveDiscovery.classificationDetails
       };
