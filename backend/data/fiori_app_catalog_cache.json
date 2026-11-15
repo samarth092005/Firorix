@@ -774,7 +774,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1345')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "ME21N",
@@ -8527,7 +8527,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_armanclear",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0773')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "F0984A",
@@ -8593,7 +8593,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/sbrt_appss1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1619')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "F2970",
@@ -8632,7 +8632,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_csilposting",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2970')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.173Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "F5588",
@@ -8671,7 +8671,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/caincgpay_anls1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F5588')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "F9325",
@@ -8710,7 +8710,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F9325')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "FBZ1",
@@ -8745,7 +8745,7 @@
     "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ1')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "FBZ3",
@@ -8779,7 +8779,7 @@
     "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ3')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "FPCPL",
@@ -8814,7 +8814,7 @@
     "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FPCPL')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-14T10:04:09.174Z"
+    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
   },
   {
     "appId": "F7319",

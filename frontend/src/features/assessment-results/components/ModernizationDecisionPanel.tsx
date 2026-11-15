@@ -383,7 +383,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 8px', backgroundColor: '#EAF3FE', color: '#0070F2', border: '1px solid #C2DCFF', borderRadius: '4px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-              Stage 4 of 4 • Modernization Decision & Transition
+              Stage 3 of 3 • Modernization Decision
             </div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#0F233A', margin: '0 0 4px 0' }}>
               Modernization Decision & Enablement Workbench
@@ -425,7 +425,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
         </div>
 
         {/* Metadata Ribbon */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', paddingTop: '14px', borderTop: '1px solid #EDF0F2' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', paddingTop: '14px', borderTop: '1px solid #EDF0F2' }}>
           <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', color: '#64748B' }}>Transaction</span>
             <span style={{ fontSize: '12.5px', fontWeight: 700, fontFamily: 'monospace', color: '#0070F2' }}>{assessment.tcode}</span>
@@ -458,7 +458,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
       </div>
 
       {/* 2. Sub-Tabs Selector (Workbench Navigation - 2 Canonical Strategic Paths) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '14px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
         {/* Path 1: Adopt & Configure Standard Fiori App */}
         <button
           type="button"
@@ -559,61 +559,6 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
                 Clean Core Recommended Path
               </span>
             )}
-          </div>
-
-          {/* 4 Strategic Pillars for Standard Adoption & Configuration */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-            {/* Pillar 1: Verdict & Recommendation */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                1. Verdict & Recommendation
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#107E3E' }}>
-                ADD_AND_CONFIGURE
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
-                Standard successor confirmed in Reference Library
-              </span>
-            </div>
-
-            {/* Pillar 2: Fit-Gap & Scope Matrix */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                2. Fit-Gap & Scope Matrix
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#0070F2' }}>
-                FIT_VERIFIED ({assessment.fitGapScore || 95}%)
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {activeCandidate?.appName || 'Standard List Report / Object Page'}
-              </span>
-            </div>
-
-            {/* Pillar 3: Technical & Audit Proof */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                3. Technical & Audit Proof
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-                S21 DDIC + FAL Certified
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
-                {currentSystemId}-{currentClient} • {resolvedCatalog}
-              </span>
-            </div>
-
-            {/* Pillar 4: Modernization Decision */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                4. Modernization Decision
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#107E3E' }}>
-                ACTIVATE_AND_CONFIGURE
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
-                Zero custom code • Launchpad space & catalog mapping
-              </span>
-            </div>
           </div>
 
           {/* Section A: Candidate Association */}
@@ -881,7 +826,7 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
                     <span style={{ fontSize: '10.5px', fontWeight: 600, padding: '2px 8px', borderRadius: '4px', backgroundColor: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0' }}>Basis & Gateway</span>
                   </div>
                   <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.45, margin: 0 }}>
-                    Activate OData service in transaction <code style={{ color: '#0070F2', fontWeight: 600 }}>/IWFND/MAINT_SERVICE</code> with system alias <code style={{ color: '#0070F2', fontWeight: 600 }}>LOCAL</code>.
+                    {resolvedODataService.includes('None') ? 'Standard WebGUI transaction runs on native ICF ITS runtime; zero custom OData service activation required.' : 'Activate OData service in transaction /IWFND/MAINT_SERVICE with system alias LOCAL.'}
                   </p>
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '6px 12px', fontFamily: 'monospace', fontSize: '12px', color: '#0050B3' }}>
@@ -1009,61 +954,6 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
             <span style={{ padding: '4px 10px', borderRadius: '4px', backgroundColor: isBuildRecommended ? '#F7EDFD' : '#FEF4E8', color: isBuildRecommended ? '#8C19C5' : '#C25E00', border: `1px solid ${isBuildRecommended ? '#E3BFFF' : '#FFDCB0'}`, fontSize: '12px', fontWeight: 700 }}>
               {isBuildRecommended ? 'BUILD Justified' : 'Clean Core Gate Active'}
             </span>
-          </div>
-
-          {/* 4 Strategic Pillars for Custom RAP Generation */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-            {/* Pillar 1: Verdict & Recommendation */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                1. Verdict & Recommendation
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#8C19C5' }}>
-                BUILD_CUSTOM_RAP
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
-                Clean Core Custom Application Commissioned
-              </span>
-            </div>
-
-            {/* Pillar 2: Fit-Gap & Scope Matrix */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                2. Fit-Gap & Scope Matrix
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#C25E00' }}>
-                100% Functional Gap
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
-                Legacy Dynpro to Clean Core Fiori Elements
-              </span>
-            </div>
-
-            {/* Pillar 3: Technical & Audit Proof */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                3. Technical & Audit Proof
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-                S21 DDIC Verified
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B', fontFamily: 'monospace' }}>
-                {assessment.programName || 'SAPMS380'} ({assessment.packageName || 'SABP'}) • {assessment.softwareComponent || 'SAP_BASIS'}
-              </span>
-            </div>
-
-            {/* Pillar 4: Modernization Decision */}
-            <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontSize: '10.5px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                4. Modernization Decision
-              </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#8C19C5' }}>
-                PROCEED_TO_GENERATION_STUDIO
-              </span>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
-                ABAP CDS View Entities + RAP Managed Behavior
-              </span>
-            </div>
           </div>
 
           {/* Clean Core Guardrail Notice / Custom Build Justification */}
