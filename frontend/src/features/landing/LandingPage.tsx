@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiorifyLogo } from '../../components/common/FiorifyLogo';
+import { LandingProductPreview } from './LandingProductPreview';
 import {
   Layers,
   SearchCode,
@@ -25,7 +26,9 @@ import {
   Shield,
   Eye,
   Server,
-  FileCheck
+  FileCheck,
+  Copy,
+  Check
 } from 'lucide-react';
 import './LandingPage.css';
 
@@ -131,17 +134,65 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeScenario, setActiveScenario] = useState<DemoTCodeScenario>(DEMO_SCENARIOS[0]);
   const [activeStudioTab, setActiveStudioTab] = useState<'CDS' | 'BEHAVIOR' | 'PREVIEW' | 'HANDOVER'>('CDS');
+  const [copiedCode, setCopiedCode] = useState<boolean>(false);
 
   const handleLaunchDemo = (targetUrl: string = '/overview') => {
     navigate(`/login?mode=demo&redirect=${encodeURIComponent(targetUrl)}`);
   };
 
+  const handleCopyCode = (codeText: string) => {
+    navigator.clipboard?.writeText(codeText);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const CDS_CODE = `@EndUserText.label: 'Purchase Order Projection View'
+@AccessControl.authorizationCheck: #CHECK
+@Metadata.allowExtensions: true
+define root view entity ZC_PurchaseOrder
+  provider contract transactional_query
+  as projection on ZI_PurchaseOrder
+{
+  key PurchaseOrderUUID,
+      PurchaseOrderNumber,
+      @Consumption.valueHelpDefinition: [{ entity: { name: 'I_CompanyCode', element: 'CompanyCode' } }]
+      CompanyCode,
+      @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Supplier', element: 'Supplier' } }]
+      Supplier,
+      TotalNetAmount,
+      DocumentCurrency,
+      OrderStatus,
+      /* Compositions */
+      _Item : redirected to composition child ZC_PurchaseOrderItem
+}`;
+
+  const BEHAVIOR_CODE = `METHOD validateSupplier.
+  READ ENTITIES OF zi_purchaseorder IN LOCAL MODE
+    ENTITY PurchaseOrder
+      FIELDS ( Supplier ) WITH CORRESPONDING #( keys )
+    RESULT DATA(lt_orders).
+
+  LOOP AT lt_orders INTO DATA(ls_order).
+    IF ls_order-Supplier IS INITIAL.
+      APPEND VALUE #( %tky = ls_order-%tky ) TO failed-purchaseorder.
+      APPEND VALUE #( %tky = ls_order-%tky
+                      %msg = new_message_with_text(
+                               severity = if_abap_behv_message=>severity-error
+                               text     = 'Supplier is mandatory under Clean Core purchasing policy.' )
+                      %element-Supplier = if_abap_behv=>mk-on ) TO reported-purchaseorder.
+    ENDIF.
+  ENDLOOP.
+ENDMETHOD.`;
+
   return (
     <div className="landing-root">
-      {/* 1. Enterprise Navigation Bar */}
+      {/* ====================================================================
+          1. NAVIGATION HEADER
+          ==================================================================== */}
       <header className="landing-nav">
-        <div className="landing-brand" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+        <div className="landing-brand-area" onClick={() => navigate('/')}>
           <FiorifyLogo variant="compact" size="md" />
+          <span className="nav-version-badge">Enterprise Edition</span>
         </div>
 
         <nav className="landing-nav-links">
@@ -183,72 +234,80 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* 2. Hero Section */}
-      <section className="landing-hero">
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-          <FiorifyLogo variant="full" size="xl" />
+      {/* ====================================================================
+          2. HERO SECTION — BALANCED TWO-COLUMN ENTERPRISE COMPOSITION
+          ==================================================================== */}
+      <section className="landing-hero-two-col">
+        <div className="hero-content-left">
+          <div className="hero-pill-badge">
+            <span className="pulse-dot" />
+            <span>The Enterprise Modernization Accelerator for SAP S/4HANA</span>
+          </div>
+
+          <h1 className="hero-headline">
+            Eliminate SAP GUI Legacy Debt. Accelerate <span className="landing-brand-accent">Clean Core Fiori</span> Adoption.
+          </h1>
+
+          <p className="hero-subheadline">
+            Automate transaction discovery, match against the official SAP Fiori catalog, enforce standard-first governance, and generate production-grade ABAP RAP and Fiori Elements applications.
+          </p>
+
+          <div className="hero-cta-group">
+            <button
+              type="button"
+              className="btn-hero-primary"
+              onClick={() => handleLaunchDemo('/overview')}
+            >
+              <Zap size={17} />
+              <span>Enter Enterprise Workspace</span>
+              <ArrowRight size={15} />
+            </button>
+
+            <button
+              type="button"
+              className="btn-hero-secondary"
+              onClick={() => handleLaunchDemo('/transaction-discovery')}
+            >
+              <SearchCode size={16} color="#0066FF" />
+              <span>Analyze Transaction Code</span>
+            </button>
+
+            <a href="#sandbox" className="btn-hero-ghost">
+              <span>Explore Interactive Sandbox</span>
+              <ArrowRight size={13} />
+            </a>
+          </div>
+
+          {/* Compact Enterprise Trust Indicators */}
+          <div className="hero-trust-bar">
+            <div className="trust-item">
+              <CheckCircle2 size={15} className="trust-check-icon" />
+              <span>Standard-First Priority</span>
+            </div>
+            <div className="trust-item">
+              <CheckCircle2 size={15} className="trust-check-icon" />
+              <span>Clean Core Governance</span>
+            </div>
+            <div className="trust-item">
+              <CheckCircle2 size={15} className="trust-check-icon" />
+              <span>RAP Managed with Draft &amp; EML</span>
+            </div>
+            <div className="trust-item">
+              <CheckCircle2 size={15} className="trust-check-icon" />
+              <span>Zero Mutation Safety</span>
+            </div>
+          </div>
         </div>
-        <div className="hero-pill-badge">
-          <span className="pulse-dot" />
-          <Sparkles size={13} className="nav-sparkle-icon" />
-          <span>The Enterprise Modernization Accelerator for SAP S/4HANA</span>
-        </div>
 
-        <h1 className="hero-headline">
-          Eliminate SAP GUI Legacy Debt. Accelerate <span className="landing-brand-accent">Clean Core Fiori</span> Adoption.
-        </h1>
-
-        <p className="hero-subheadline">
-          Automate transaction discovery, match against the official 14,000+ SAP Fiori catalog, enforce standard-first governance, and synthesize production-grade ABAP RAP &amp; Fiori Elements applications in minutes.
-        </p>
-
-        <div className="hero-cta-group">
-          <button
-            type="button"
-            className="btn-hero-primary"
-            onClick={() => handleLaunchDemo('/overview')}
-          >
-            <Zap size={18} />
-            <span>Enter Enterprise Workspace</span>
-            <ArrowRight size={16} />
-          </button>
-
-          <button
-            type="button"
-            className="btn-hero-secondary"
-            onClick={() => handleLaunchDemo('/transaction-discovery')}
-          >
-            <SearchCode size={17} color="#0070F2" />
-            <span>Analyze Transaction Code</span>
-          </button>
-
-          <a href="#sandbox" className="btn-hero-ghost">
-            <span>Explore Interactive Sandbox</span>
-            <ArrowRight size={14} />
-          </a>
-        </div>
-
-        <div className="hero-trust-bar">
-          <div className="trust-item">
-            <CheckCircle2 size={16} color="#107E3E" />
-            <span>Standard-First Priority Mandate</span>
-          </div>
-          <div className="trust-item">
-            <ShieldCheck size={16} color="#0070F2" />
-            <span>SAP Clean Core Tier 2 Certified</span>
-          </div>
-          <div className="trust-item">
-            <Cpu size={16} color="#8A3FFC" />
-            <span>RAP Managed with Draft &amp; EML</span>
-          </div>
-          <div className="trust-item">
-            <Lock size={16} color="#0F62FE" />
-            <span>Zero Mutation Safety Guardrails</span>
-          </div>
+        {/* Right Column: Realistic FioriFy Product Preview Component */}
+        <div className="hero-preview-right">
+          <LandingProductPreview />
         </div>
       </section>
 
-      {/* 3. Executive ROI Metrics Strip */}
+      {/* ====================================================================
+          3. PLATFORM METRICS
+          ==================================================================== */}
       <section className="clean-core-strip" id="compliance">
         <div className="clean-core-inner">
           <div className="kpi-metric-card">
@@ -274,12 +333,14 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. Interactive Discovery & Fit-Gap Sandbox */}
+      {/* ====================================================================
+          4. INTERACTIVE PRODUCT SANDBOX
+          ==================================================================== */}
       <section className="sandbox-section" id="sandbox">
         <div className="sandbox-container">
           <div className="sandbox-header">
             <span className="sandbox-kicker">Interactive Product Sandbox</span>
-            <h2 className="sandbox-title">See How Fiorify Resolves Real Enterprise Transactions</h2>
+            <h2 className="sandbox-title">See How FioriFy Resolves Real Enterprise Transactions</h2>
             <p className="sandbox-subtitle">
               Select any SAP transaction code below to simulate live DDIC analysis, Fiori catalog matching, and governed modernization routing.
             </p>
@@ -301,7 +362,7 @@ export const LandingPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Interactive Console Card */}
+          {/* Interactive Dual Console Card */}
           <div className="console-card">
             <div className="console-system-bar">
               <div className="system-status-indicator">
@@ -368,14 +429,16 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. Generation Studio Deep Showcase */}
+      {/* ====================================================================
+          5. GENERATION STUDIO SHOWCASE
+          ==================================================================== */}
       <section className="studio-showcase-section" id="studio">
         <div className="studio-showcase-container">
           <div className="section-intro">
             <span className="section-kicker">Generation Studio &amp; Architecture Engine</span>
             <h2 className="section-headline">Deep ABAP RAP &amp; Fiori Elements Code Synthesis</h2>
             <p className="section-subheadline">
-              When genuine functional gaps necessitate custom development, Fiorify generates a complete 17-artifact Clean Core ABAP repository and enterprise Fiori Elements application.
+              When genuine functional gaps necessitate custom development, FioriFy generates a complete 17-artifact Clean Core ABAP repository and enterprise Fiori Elements application.
             </p>
           </div>
 
@@ -432,29 +495,21 @@ export const LandingPage: React.FC = () => {
                       <span className="file-name">zc_purchaseorder.ddls.asddls</span>
                       <span className="file-tag">CDS PROJECTION VIEW</span>
                     </div>
-                    <span className="code-action-tag">Clean Core Tier 2 &bull; Value Help Bound</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="code-action-tag">Clean Core Tier 2 &bull; Value Help Bound</span>
+                      <button
+                        type="button"
+                        className="btn-copy-snippet"
+                        onClick={() => handleCopyCode(CDS_CODE)}
+                      >
+                        {copiedCode ? <Check size={13} color="#107E3E" /> : <Copy size={13} />}
+                        <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </div>
                   </div>
                   <div className="studio-code-preview">
                     <pre className="code-block">
-{`@EndUserText.label: 'Purchase Order Projection View'
-@AccessControl.authorizationCheck: #CHECK
-@Metadata.allowExtensions: true
-define root view entity ZC_PurchaseOrder
-  provider contract transactional_query
-  as projection on ZI_PurchaseOrder
-{
-  key PurchaseOrderUUID,
-      PurchaseOrderNumber,
-      @Consumption.valueHelpDefinition: [{ entity: { name: 'I_CompanyCode', element: 'CompanyCode' } }]
-      CompanyCode,
-      @Consumption.valueHelpDefinition: [{ entity: { name: 'I_Supplier', element: 'Supplier' } }]
-      Supplier,
-      TotalNetAmount,
-      DocumentCurrency,
-      OrderStatus,
-      /* Compositions */
-      _Item : redirected to composition child ZC_PurchaseOrderItem
-}`}
+                      <code>{CDS_CODE}</code>
                     </pre>
                   </div>
                 </div>
@@ -467,27 +522,21 @@ define root view entity ZC_PurchaseOrder
                       <span className="file-name">bp_i_purchaseorder.clas.abap</span>
                       <span className="file-tag">LOCAL BEHAVIOR HANDLER</span>
                     </div>
-                    <span className="code-action-tag">Defensive EML &bull; %tky &bull; if_abap_behv_message</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span className="code-action-tag">Defensive EML &bull; %tky &bull; if_abap_behv_message</span>
+                      <button
+                        type="button"
+                        className="btn-copy-snippet"
+                        onClick={() => handleCopyCode(BEHAVIOR_CODE)}
+                      >
+                        {copiedCode ? <Check size={13} color="#107E3E" /> : <Copy size={13} />}
+                        <span>{copiedCode ? 'Copied' : 'Copy'}</span>
+                      </button>
+                    </div>
                   </div>
                   <div className="studio-code-preview">
                     <pre className="code-block">
-{`METHOD validateSupplier.
-  READ ENTITIES OF zi_purchaseorder IN LOCAL MODE
-    ENTITY PurchaseOrder
-      FIELDS ( Supplier ) WITH CORRESPONDING #( keys )
-    RESULT DATA(lt_orders).
-
-  LOOP AT lt_orders INTO DATA(ls_order).
-    IF ls_order-Supplier IS INITIAL.
-      APPEND VALUE #( %tky = ls_order-%tky ) TO failed-purchaseorder.
-      APPEND VALUE #( %tky = ls_order-%tky
-                      %msg = new_message_with_text(
-                               severity = if_abap_behv_message=>severity-error
-                               text     = 'Supplier is mandatory under Clean Core purchasing policy.' )
-                      %element-Supplier = if_abap_behv=>mk-on ) TO reported-purchaseorder.
-    ENDIF.
-  ENDLOOP.
-ENDMETHOD.`}
+                      <code>{BEHAVIOR_CODE}</code>
                     </pre>
                   </div>
                 </div>
@@ -553,7 +602,7 @@ ENDMETHOD.`}
                 <div className="studio-handover-grid">
                   <div className="handover-tree-col">
                     <div className="handover-tree-title">
-                      <Package size={16} color="#0070F2" />
+                      <Package size={16} color="#0066FF" />
                       <span>abapGit Repository Package Structure</span>
                     </div>
                     <pre className="handover-tree-content">
@@ -612,7 +661,9 @@ ENDMETHOD.`}
         </div>
       </section>
 
-      {/* 6. Four-Step Modernization Journey */}
+      {/* ====================================================================
+          6. STANDARD-FIRST MODERNIZATION PIPELINE
+          ==================================================================== */}
       <section className="workflow-section" id="fit-gap">
         <div className="sandbox-container">
           <div className="section-intro">
@@ -623,59 +674,72 @@ ENDMETHOD.`}
             </p>
           </div>
 
-          <div className="workflow-steps-grid">
-            <div className="workflow-step-card">
-              <span className="step-number-badge">PHASE 01</span>
+          <div className="workflow-pipeline-flow">
+            <div className="workflow-pipeline-step">
+              <div className="pipeline-step-header">
+                <span className="step-phase-pill">PHASE 01</span>
+                <span className="step-phase-conn" />
+              </div>
               <div className="step-icon-wrap">
                 <SearchCode size={20} />
               </div>
               <h3 className="step-title">Transaction Discovery</h3>
               <p className="step-desc">
-                Connects to SAP kernel dictionary tables (TSTC, TADIR, CVERS). Instantly validates transaction existence, executable programs, screens, and authorization requirements.
+                Validates transaction existence, executable programs, screens and authorization requirements.
               </p>
             </div>
 
-            <div className="workflow-step-card">
-              <span className="step-number-badge">PHASE 02</span>
+            <div className="workflow-pipeline-step">
+              <div className="pipeline-step-header">
+                <span className="step-phase-pill">PHASE 02</span>
+                <span className="step-phase-conn" />
+              </div>
               <div className="step-icon-wrap">
                 <Database size={20} />
               </div>
               <h3 className="step-title">Fiori Matching</h3>
               <p className="step-desc">
-                Correlates against 14,000+ official SAP Fiori apps. Verifies active Gateway OData services on the target system to confirm genuine deployment readiness.
+                Correlates transactions against the official SAP Fiori Apps Reference Library and checks relevant service readiness.
               </p>
             </div>
 
-            <div className="workflow-step-card">
-              <span className="step-number-badge">PHASE 03</span>
+            <div className="workflow-pipeline-step">
+              <div className="pipeline-step-header">
+                <span className="step-phase-pill">PHASE 03</span>
+                <span className="step-phase-conn" />
+              </div>
               <div className="step-icon-wrap">
                 <ShieldCheck size={20} />
               </div>
               <h3 className="step-title">10-Dimension Fit-Gap</h3>
               <p className="step-desc">
-                Systematically checks business rules, field parity, mobile needs, user exits, and authorizations. Prevents premature custom build if standard apps suffice.
+                Evaluates functional requirements, field parity, mobile requirements, user exits and authorization considerations.
               </p>
             </div>
 
-            <div className="workflow-step-card step-card-highlight">
-              <span className="step-number-badge step-badge-highlight">PHASE 04</span>
+            <div className="workflow-pipeline-step step-highlight">
+              <div className="pipeline-step-header">
+                <span className="step-phase-pill pill-highlight">PHASE 04</span>
+              </div>
               <div className="step-icon-wrap step-icon-highlight">
                 <Code2 size={20} />
               </div>
               <h3 className="step-title">Clean Core RAP Build</h3>
               <p className="step-desc">
-                Cryptographically authorizes Lead Architect approval, then generates CDS view entities, behavior definitions, defensive EML, and Fiori Elements apps.
+                Generates governed CDS entities, behavior definitions, EML implementation and Fiori Elements applications when custom development is justified.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. Enterprise Capabilities */}
+      {/* ====================================================================
+          7. ENTERPRISE CAPABILITIES
+          ==================================================================== */}
       <section className="capabilities-section" id="discovery">
         <div className="section-intro">
           <span className="section-kicker">Engineered For Enterprise Scale</span>
-          <h2 className="section-headline">Why Enterprise SAP Architects Choose Fiorify</h2>
+          <h2 className="section-headline">Why Enterprise SAP Architects Choose FioriFy</h2>
         </div>
 
         <div className="capabilities-grid">
@@ -741,14 +805,16 @@ ENDMETHOD.`}
         </div>
       </section>
 
-      {/* 8. Call to Action Banner */}
+      {/* ====================================================================
+          8. FINAL CALL TO ACTION
+          ==================================================================== */}
       <section className="cta-banner-section">
         <div className="cta-banner-card">
           <div>
             <span className="cta-kicker">Transform Your SAP Landscape Today</span>
             <h2 className="cta-title">Ready to Modernize Your SAP GUI Transactions?</h2>
             <p className="cta-desc">
-              Accelerate your S/4HANA migration, enforce Clean Core compliance, and deliver modern SAP Fiori applications in record time.
+              Accelerate your S/4HANA modernization, enforce Clean Core governance and deliver modern SAP Fiori applications.
             </p>
           </div>
           <div className="cta-actions">
@@ -771,15 +837,17 @@ ENDMETHOD.`}
         </div>
       </section>
 
-      {/* 9. Enterprise Footer */}
+      {/* ====================================================================
+          9. ENTERPRISE FOOTER
+          ==================================================================== */}
       <footer className="landing-footer">
         <div className="footer-left">
-          <span className="footer-brand">Fiorify Enterprise</span>
+          <span className="footer-brand">FioriFy</span>
           <span>&bull;</span>
-          <span>SAP S/4HANA Clean Core Modernization Platform</span>
-          <span className="footer-system-tag">S/4HANA 2023 FPS01</span>
+          <span>SAP Fiori Modernization Platform</span>
+          <span className="footer-system-tag">SAP S/4HANA 2023 FPS01</span>
         </div>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <div className="footer-right">
           <span>Standard-First Governance</span>
           <span>RAP Managed with Draft</span>
           <span>abapGit Ready</span>
