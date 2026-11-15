@@ -29,6 +29,7 @@ import { authService } from '../../services/authService';
 import { notificationService, AppNotification } from '../../services/notificationService';
 import { SystemStatusIndicator } from '../common/SystemStatusIndicator';
 import { uiConfig } from '../../config/uiConfig';
+import { FiorifyLogo } from '../common/FiorifyLogo';
 import { SystemConnectionState } from '../../services/contracts/types';
 
 export interface TopNavigationProps {
@@ -155,36 +156,11 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
           <Menu size={18} />
         </button>
 
-        <div
+        <FiorifyLogo
+          variant="compact"
+          size="sm"
           onClick={() => navigate('/overview')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            userSelect: 'none'
-          }}
-        >
-          <div
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '7px',
-              backgroundColor: 'var(--fiori-primary, #0066FF)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
-            }}
-          >
-            <Layers size={16} color="#FFFFFF" />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontWeight: 700, fontSize: '17px', letterSpacing: '-0.3px', color: '#0F172A' }}>
-              Fiori<span style={{ color: 'var(--fiori-primary, #0066FF)' }}>fy</span>
-            </span>
-          </div>
-        </div>
+        />
       </div>
 
       {/* Center: Clean & Uncluttered Workspace Context */}

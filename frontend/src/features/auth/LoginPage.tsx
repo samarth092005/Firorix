@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { FiorifyLogo } from '../../components/common/FiorifyLogo';
 import {
   Layers,
   ArrowRight,
@@ -81,16 +82,8 @@ export const LoginPage: React.FC = () => {
       <div className="login-hero-col">
         {/* Top Brand */}
         <div className="login-hero-content">
-          <div
-            onClick={() => navigate('/')}
-            className="login-brand-logo"
-          >
-            <div className="login-brand-icon">
-              <Layers size={22} />
-            </div>
-            <span style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px' }}>
-              Fiori<span style={{ color: '#58B8D4' }}>fy</span>
-            </span>
+          <div onClick={() => navigate('/')} style={{ cursor: 'pointer', marginBottom: '24px' }}>
+            <FiorifyLogo variant="full" size="lg" inverted={true} />
           </div>
 
           <div className="login-pill-badge">
