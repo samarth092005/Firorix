@@ -201,6 +201,7 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
         <SpecificationLifecycleView
           project={project}
           onProjectUpdated={(p) => onProjectUpdated && onProjectUpdated(p)}
+          onNavigateView={onNavigateView}
         />
       </div>
     );

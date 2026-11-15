@@ -201,7 +201,7 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onNavigateView('abap-generator')}
+            onClick={() => onNavigateView('spec-lifecycle')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -216,7 +216,7 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
               cursor: 'pointer'
             }}
           >
-            Proceed to ABAP Generator <ArrowRight size={14} />
+            Proceed to Specification Review <ArrowRight size={14} />
           </button>
         </div>
       </div>

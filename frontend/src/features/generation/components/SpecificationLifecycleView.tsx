@@ -17,11 +17,13 @@ import { authFetch } from '../services/generationProjectService';
 interface SpecificationLifecycleViewProps {
   project: GenerationProject;
   onProjectUpdated: (updated: GenerationProject) => void;
+  onNavigateView?: (view: any) => void;
 }
 
 export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProps> = ({
   project,
-  onProjectUpdated
+  onProjectUpdated,
+  onNavigateView
 }) => {
   const [readiness, setReadiness] = useState<any>(null);
   const [versions, setVersions] = useState<any[]>([]);
@@ -235,12 +237,12 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
             rows={2}
             style={{ width: '100%', padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '4px', marginBottom: '12px' }}
           />
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <button
               onClick={() => handleApproval('APPROVED')}
               style={{ padding: '8px 16px', backgroundColor: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
             >
-              Approve for S8/S9
+              Approve for Code Generation
             </button>
             <button
               onClick={() => handleApproval('CHANGES_REQUESTED')}
@@ -254,6 +256,27 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
             >
               Submit for Review
             </button>
+            {onNavigateView && (Boolean(project.approvedBy) || project.lifecycleStatus === 'READY_FOR_GENERATION' || project.lifecycleStatus === 'GENERATED') && (
+              <button
+                type="button"
+                onClick={() => onNavigateView('preview-validation')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 16px',
+                  backgroundColor: '#0066FF',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 600
+                }}
+              >
+                <span>Proceed to Artifact Sandbox</span>
+                <ArrowRight size={14} />
+              </button>
+            )}
           </div>
         </div>
       </div>

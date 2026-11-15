@@ -224,11 +224,12 @@ export const GenerationStudioPage: React.FC = () => {
         isLoading={isLoading}
       />
 
-      {/* 4.2 Internal 9-View Navigation Bar */}
+      {/* 4.2 Internal 2-Tier Stepper Navigation Bar */}
       <StudioNavigation
         activeView={activeView}
         onSelectView={handleSelectView}
         hasActiveProject={Boolean(activeProject)}
+        project={activeProject}
       />
 
       {/* Main View Area */}
