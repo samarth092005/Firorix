@@ -7,6 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
+    "syntax:check": "node scripts/check-syntax.js",
+    "check": "npm run syntax:check",
     "test": "node --test --test-concurrency=1 test/"
   },
   "keywords": [

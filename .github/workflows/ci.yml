@@ -1,0 +1,163 @@
+name: FioriX CI Quality Baseline
+
+on:
+  push:
+    branches:
+      - main
+      - test-01
+  pull_request:
+    branches:
+      - main
+      - test-01
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-and-static-analysis:
+    name: Security Hygiene & Static Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Verify Secret & Environment Hygiene
+        run: |
+          echo "Checking for accidental .env or secret leakage..."
+          if git ls-files | grep -E '^(\.env|\.env\.local|\.env\.production)$'; then
+            echo "ERROR: Tracked .env files detected!"
+            exit 1
+          fi
+          echo "Checking for private key leakage..."
+          if grep -rn "BEGIN PRIVATE KEY" --exclude-dir={.git,node_modules} .; then
+            echo "ERROR: Private key detected in repository!"
+            exit 1
+          fi
+          echo "Secret hygiene check passed."
+
+      - name: Verify Lockfile Presence
+        run: |
+          test -f backend/package-lock.json || (echo "Missing backend/package-lock.json" && exit 1)
+          test -f frontend/package-lock.json || (echo "Missing frontend/package-lock.json" && exit 1)
+          echo "Package lockfiles verified."
+
+      - name: Install Frontend Dependencies
+        run: npm --prefix frontend ci
+
+      - name: Frontend Static Typecheck
+        run: npm --prefix frontend run typecheck
+
+      - name: Backend Syntax Verification
+        run: node backend/scripts/check-syntax.js
+
+  backend-verification:
+    name: Backend Test Suite & Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        run: npm --prefix backend ci
+
+      - name: Execute Backend Tests
+        run: npm run test:backend
+        env:
+          NODE_ENV: test
+          FIORIFY_SYSTEM_MODE: DEMO
+          DEMO_MODE: 'true'
+
+      - name: Backend Dependency Audit
+        run: |
+          echo "Running dependency vulnerability audit for backend..."
+          npm audit --prefix backend --audit-level=critical || true
+
+  frontend-verification:
+    name: Frontend Test Suite & Production Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend Dependencies
+        run: npm --prefix frontend ci
+
+      - name: Execute Frontend Unit & Component Tests
+        run: npm --prefix frontend test -- --run
+
+      - name: Execute Frontend Production Build
+        run: npm --prefix frontend run build
+
+      - name: Verify Build Artifacts
+        run: |
+          test -f frontend/dist/index.html || (echo "Missing frontend/dist/index.html" && exit 1)
+          test -d frontend/dist/assets || (echo "Missing frontend/dist/assets directory" && exit 1)
+          echo "Frontend production build artifacts verified successfully."
+
+      - name: Frontend Dependency Audit
+        run: |
+          echo "Running dependency vulnerability audit for frontend..."
+          npm audit --prefix frontend --audit-level=critical || true
+
+  release-validation:
+    name: Release Gate & Baseline Validation
+    needs: [security-and-static-analysis, backend-verification, frontend-verification]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Verify Server Startup Dry-Run
+        run: |
+          node -e "
+            import('./backend/src/server.js').then((mod) => {
+              if (typeof mod.createServer !== 'function') {
+                console.error('createServer export missing from server.js');
+                process.exit(1);
+              }
+              console.log('Server initialization module verified.');
+              process.exit(0);
+            }).catch((err) => {
+              console.error('Server import failed:', err);
+              process.exit(1);
+            });
+          "
+
+      - name: Complete CI Quality Gate
+        run: |
+          echo "========================================================"
+          echo "FioriX Milestone 1: CI Quality & Baseline Checks PASSED"
+          echo "Repository is validated and clean for Milestone 2."
+          echo "========================================================"
