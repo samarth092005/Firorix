@@ -33,6 +33,8 @@ async function cleanTestRecords() {
       await pool.query('DELETE FROM generation_artifacts WHERE project_id = $1;', [row.project_id]);
       await pool.query('DELETE FROM generation_specifications WHERE project_id = $1;', [row.project_id]);
       await pool.query('DELETE FROM generation_activity_events WHERE project_id = $1;', [row.project_id]);
+      await pool.query('DELETE FROM project_specification_approvals WHERE project_id = $1;', [row.project_id]);
+      await pool.query('DELETE FROM project_specification_versions WHERE project_id = $1;', [row.project_id]);
       await pool.query('DELETE FROM generation_projects WHERE project_id = $1;', [row.project_id]);
     }
   }

@@ -239,9 +239,8 @@ export const AssessmentResultsPage: React.FC = () => {
   const tabs = useMemo(() => [
     { key: 'VERDICT' as const, label: '1. Verdict & Recommendation', icon: LayoutDashboard },
     { key: 'FIT_GAP' as const, label: '2. Fit-Gap & Scope Matrix', icon: GitCompare },
-    { key: 'TECHNICAL_EVIDENCE' as const, label: `3. Technical & Audit Proof `, icon: Code2 },
-    { key: 'MODERNIZATION_DECISION' as const, label: '4. Modernization Decision', icon: Sparkles }
-  ], [evidence.length]);
+    { key: 'MODERNIZATION_DECISION' as const, label: '3. Modernization Decision', icon: Sparkles }
+  ], []);
 
   const fitGapRows = useMemo(() => {
     if (!assessment) return [];
@@ -715,7 +714,7 @@ export const AssessmentResultsPage: React.FC = () => {
                   borderColor: isStandardMatch ? undefined : '#8C19C5'
                 }}
               >
-                <Sparkles size={14} /> Modernization Decision (Stage 4)
+                <Sparkles size={14} /> Modernization Decision (Stage 3)
               </button>
             </div>
           </div>
@@ -1143,7 +1142,7 @@ export const AssessmentResultsPage: React.FC = () => {
                   onClick={() => handleTabChange('MODERNIZATION_DECISION')}
                   style={{ backgroundColor: '#8C19C5', borderColor: '#8C19C5', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
                 >
-                  <Sparkles size={14} /> Open Studio Commissioning (Stage 4)
+                  <Sparkles size={14} /> Open Studio Commissioning (Stage 3)
                 </button>
               </div>
 
@@ -1176,14 +1175,6 @@ export const AssessmentResultsPage: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
             <button
               type="button"
-              className="fiori-btn fiori-btn-secondary"
-              onClick={() => handleTabChange('TECHNICAL_EVIDENCE')}
-              style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-            >
-              Review Technical Proof (Stage 3) <ArrowRight size={14} />
-            </button>
-            <button
-              type="button"
               className="fiori-btn fiori-btn-primary"
               onClick={() => handleTabChange('MODERNIZATION_DECISION')}
               style={{
@@ -1194,7 +1185,7 @@ export const AssessmentResultsPage: React.FC = () => {
                 borderColor: isStandardMatch ? undefined : '#8C19C5'
               }}
             >
-              <Sparkles size={14} /> Modernization Decision (Stage 4)
+              <Sparkles size={14} /> Modernization Decision (Stage 3) <ArrowRight size={14} />
             </button>
           </div>
         </div>
@@ -1202,200 +1193,6 @@ export const AssessmentResultsPage: React.FC = () => {
 
       {/* ========================================================================= */}
       {/* TAB 3: TECHNICAL & AUDIT PROOF (Clean Accordion Architecture)             */}
-      {/* ========================================================================= */}
-      {activeTab === 'TECHNICAL_EVIDENCE' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div>
-            <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)' }}>
-              Technical Proof &amp; Basis Audit Evidence
-            </h3>
-            <p style={{ margin: 0, fontSize: '12px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-              Verified repository artifacts, Internet Communication Framework (ICF) handlers, PFCG business roles, and S/4HANA release gates.
-            </p>
-          </div>
-
-          {/* Sleek Provenance & Verification Health Ribbon */}
-          <div
-            style={{
-              padding: '12px 18px',
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--fiori-border, #E2E8F0)',
-              borderRadius: 'var(--radius-md, 8px)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: '10px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-              <Server size={14} color="#0A6ED1" />
-              <span style={{ fontWeight: 700, color: '#0F172A' }}>Technical Audit Provenance:</span>
-              <span style={{ fontSize: '11px', color: '#64748B' }}>
-                {isStandardMatch
-                  ? 'Corroborated across S/4HANA 2023 DDIC & official catalogue'
-                  : 'S21 DDIC verified runtime baseline; 100% Custom RAP build'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <span style={{ padding: '3px 9px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, backgroundColor: '#DCFCE7', color: '#166534', border: '1px solid #BBF7D0' }}>
-                ● Live S21 Verified (Client 200)
-              </span>
-              <span style={{ padding: '3px 9px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, backgroundColor: isStandardMatch ? '#EFF6FF' : '#FEF4E8', color: isStandardMatch ? '#1D4ED8' : '#C25E00', border: `1px solid ${isStandardMatch ? '#BFDBFE' : '#FFDCB0'}` }}>
-                {isStandardMatch ? '● Official Fiori Library (FAL OData)' : '● 0 FAL Matches (Custom RAP Justified)'}
-              </span>
-              <span style={{ padding: '3px 9px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, backgroundColor: '#FAF5FF', color: '#6B21A8', border: '1px solid #E9D5FF' }}>
-                {isStandardMatch ? '● Clean Core Compliant' : '● Clean Core Tier 2 (Developer Cloud)'}
-              </span>
-            </div>
-          </div>
-
-          {/* Accordion 1: Architecture & S/4HANA Compatibility */}
-          <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--fiori-border, #E2E8F0)',
-              borderRadius: 'var(--radius-md, 8px)',
-              overflow: 'hidden'
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => toggleAccordion('architecture')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '14px 18px',
-                backgroundColor: '#F8FAFC',
-                border: 'none',
-                borderBottom: openAccordions.architecture ? '1px solid var(--fiori-border, #E2E8F0)' : 'none',
-                cursor: 'pointer',
-                textAlign: 'left'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Cpu size={16} color="var(--fiori-primary, #0A6ED1)" />
-                <div>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)' }}>
-                    1. Architecture &amp; Deployment Specifications
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#64748B', marginLeft: '10px' }}>
-                    S/4HANA 2023, SAP_BASIS 758, ICF paths, and Clean Core tiering
-                  </span>
-                </div>
-              </div>
-              {openAccordions.architecture ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </button>
-
-            {openAccordions.architecture && (
-              <div style={{ padding: '16px' }}>
-                <TechnicalImplementationPanel
-                  assessment={assessment}
-                  candidate={candidates[0] || null}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Accordion 2: Business Roles & Authorizations (PFCG) */}
-          <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--fiori-border, #E2E8F0)',
-              borderRadius: 'var(--radius-md, 8px)',
-              overflow: 'hidden'
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => toggleAccordion('roles')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '14px 18px',
-                backgroundColor: '#F8FAFC',
-                border: 'none',
-                borderBottom: openAccordions.roles ? '1px solid var(--fiori-border, #E2E8F0)' : 'none',
-                cursor: 'pointer',
-                textAlign: 'left'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <ShieldCheck size={16} color="var(--fiori-primary, #0A6ED1)" />
-                <div>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)' }}>
-                    2. Security &amp; Standard Business Roles ({roleValidation.length} Roles)
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#64748B', marginLeft: '10px' }}>
-                    Standard FLP catalogs and PFCG role templates
-                  </span>
-                </div>
-              </div>
-              {openAccordions.roles ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </button>
-
-            {openAccordions.roles && (
-              <div style={{ padding: '16px' }}>
-                <RoleValidationPanel roles={roleValidation} />
-              </div>
-            )}
-          </div>
-
-          {/* Accordion 3: OData Services & Endpoints */}
-          <div
-            style={{
-              backgroundColor: '#FFFFFF',
-              border: '1px solid var(--fiori-border, #E2E8F0)',
-              borderRadius: 'var(--radius-md, 8px)',
-              overflow: 'hidden'
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => toggleAccordion('odata')}
-              style={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '14px 18px',
-                backgroundColor: '#F8FAFC',
-                border: 'none',
-                borderBottom: openAccordions.odata ? '1px solid var(--fiori-border, #E2E8F0)' : 'none',
-                cursor: 'pointer',
-                textAlign: 'left'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Layers size={16} color="var(--fiori-primary, #0A6ED1)" />
-                <div>
-                  <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)' }}>
-                    3. Gateway OData Services ({odataValidation.length} Services)
-                  </span>
-                  <span style={{ fontSize: '11px', color: '#64748B', marginLeft: '10px' }}>
-                    Registered OData V2/V4 service bindings and catalog entities
-                  </span>
-                </div>
-              </div>
-              {openAccordions.odata ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-            </button>
-
-            {openAccordions.odata && (
-              <div style={{ padding: '16px' }}>
-                <ODataValidationPanel services={odataValidation} />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 4: MODERNIZATION DECISION                                             */}
       {/* ========================================================================= */}
       {activeTab === 'MODERNIZATION_DECISION' && (
         <ModernizationDecisionPanel

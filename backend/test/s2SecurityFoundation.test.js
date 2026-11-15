@@ -1,5 +1,5 @@
 /**
- * Fiorify — Stage S2: Security Foundation Test Suite
+ * Fiorify â€” Stage S2: Security Foundation Test Suite
  *
  * Verifies the 14 mandatory security test cases:
  *  1. Unauthenticated request (401)
@@ -33,11 +33,11 @@ import { GenerationProjectStore } from '../src/generation/projects/generationPro
 import { GenerationProjectService } from '../src/generation/projects/generationProjectService.js';
 import DatabasePool from '../src/infrastructure/db/pool.js';
 
-describe('Fiorify S2 Security Foundation — 14 Mandatory Security Controls', () => {
+describe('Fiorify S2 Security Foundation â€” 14 Mandatory Security Controls', () => {
   let server;
   let baseUrl;
   let testStoragePath;
-  let testProjectStoragePath;
+  let testProjectStorageDir;
   let assessmentStore;
   let projectStore;
   let projectService;
@@ -52,13 +52,13 @@ describe('Fiorify S2 Security Foundation — 14 Mandatory Security Controls', ()
       os.tmpdir(),
       `Fiorify-test-s2-assessments-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
     );
-    testProjectStoragePath = path.join(
+    testProjectStorageDir = path.join(
       os.tmpdir(),
-      `Fiorify-test-s2-projects-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+      `Fiorify-test-s2-projects-${Date.now()}-${Math.random().toString(36).slice(2)}`
     );
 
     assessmentStore = new AssessmentStore({ storagePath: testStoragePath });
-    projectStore = new GenerationProjectStore({ storagePath: testProjectStoragePath });
+    projectStore = new GenerationProjectStore(testProjectStorageDir);
     projectService = new GenerationProjectService({ projectStore, assessmentStore });
     systemRegistry = new SystemRegistry();
 
@@ -95,7 +95,7 @@ describe('Fiorify S2 Security Foundation — 14 Mandatory Security Controls', ()
     }
     try {
       if (fs.existsSync(testStoragePath)) fs.unlinkSync(testStoragePath);
-      if (fs.existsSync(testProjectStoragePath)) fs.unlinkSync(testProjectStoragePath);
+      if (fs.existsSync(testProjectStorageDir)) fs.rmSync(testProjectStorageDir, { recursive: true, force: true });
     } catch {}
   });
 

@@ -8,6 +8,8 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 import { handleGenerationRoutes } from '../src/generation/routes/generationRoutes.js';
 import { defaultGenerationProjectStore } from '../src/generation/projects/generationProjectStore.js';
 import { defaultGenerationProjectService } from '../src/generation/projects/generationProjectService.js';
@@ -188,5 +190,18 @@ describe('GEN-05 & GEN-06 REST API Integration', () => {
     assert.equal(data.success, true);
     assert.ok(data.traceabilityMatrix.length >= 1);
     assert.equal(data.traceabilityMatrix[0].requirementId, 'REQ-API-01');
+  });
+
+  after(async () => {
+    if (server) {
+      await new Promise((resolve) => server.close(resolve));
+    }
+    try {
+      await defaultGenerationProjectStore.deleteProject(testProjectId, { force: true });
+    } catch {}
+    const pDir = path.resolve('backend/data/generation-projects', testProjectId);
+    if (fs.existsSync(pDir)) {
+      try { fs.rmSync(pDir, { recursive: true, force: true }); } catch {}
+    }
   });
 });

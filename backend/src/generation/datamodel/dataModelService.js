@@ -17,6 +17,7 @@ import {
 import { defaultDataModelValidator } from './dataModelValidator.js';
 import { defaultGenerationProjectStore } from '../projects/generationProjectStore.js';
 import { LIFECYCLE_STATUSES } from '../contracts/generationProjectContract.js';
+import { semanticArchetypeEngine } from './semanticArchetypeEngine.js';
 
 export class DataModelService {
   constructor(options = {}) {
@@ -129,161 +130,30 @@ export class DataModelService {
       missingEvidence.push('Source package was not resolved; clean core Tier 2 Z-package suggested.');
     }
 
-    // Determine domain pattern
-    if (/^(ME|MM|PO|PUR)/i.test(cleanTcode) || /purchas|procure/i.test(businessDomain)) {
-      // Purchasing / Procurement pattern
-      const headerName = `Z_I_${cleanTcode}Header`;
-      const itemName = `Z_I_${cleanTcode}Item`;
-      const headerId = `ENT-${cleanTcode}-HDR`;
-      const itemId = `ENT-${cleanTcode}-ITM`;
-      const relId = `REL-${cleanTcode}-COMP`;
+    // Synthesize domain archetype for the transaction code across all 10 enterprise domains
+    const archetype = semanticArchetypeEngine.synthesizeArchetype({
+      tcode,
+      description: project.projectName || project.description || '',
+      businessArea: businessDomain,
+      targetRelease: project.targetRelease || 'SAP S/4HANA 2023 Private Edition'
+    });
 
-      entities = [
-        createEntityRecord({
-          entityId: headerId,
-          name: headerName,
-          label: `${tcode} Purchase Document Header`,
-          description: `Root Header Entity for ${tcode} Purchasing Process`,
-          entityType: ENTITY_TYPES.ROOT,
-          persistenceStrategy: PERSISTENCE_STRATEGIES.MANAGED_TABLE,
-          tableName: `Z${cleanTcode.slice(0, 8)}H`,
-          fields: [
-            createFieldRecord({ name: 'PurchaseOrderUUID', label: 'Technical Key', type: 'sysuuid_x16', isKey: true, isMandatory: true, semanticRole: 'KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: 'PurchaseOrder', label: 'Purchase Order Number', type: 'abap.char', length: 10, isMandatory: true, semanticRole: 'DESCRIPTION', provenance: hasDdicProgram ? 'LIVE_SAP_S21' : 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'PurchaseOrderType', label: 'Order Type', type: 'abap.char', length: 4, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Supplier', label: 'Supplier Account', type: 'abap.char', length: 10, isMandatory: true, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'DocumentDate', label: 'Document Date', type: 'abap.dats', semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'TotalNetAmount', label: 'Total Net Amount', type: 'abap.curr', length: 15, precision: 15, scale: 2, cukyField: 'DocumentCurrency', semanticRole: 'AMOUNT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'DocumentCurrency', label: 'Currency', type: 'abap.cuky', length: 5, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'OverallStatus', label: 'Status', type: 'abap.char', length: 2, semanticRole: 'STATUS', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CreatedAt', label: 'Created At', type: 'abap.utclong', isReadOnly: true, semanticRole: 'ADMIN_CREATED_AT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CreatedBy', label: 'Created By', type: 'abap.char', length: 12, isReadOnly: true, semanticRole: 'ADMIN_CREATED_BY', provenance: 'CURATED_REFERENCE' })
-          ]
-        }),
-        createEntityRecord({
-          entityId: itemId,
-          name: itemName,
-          label: `${tcode} Purchase Document Item`,
-          description: `Child Item Entity composed under ${headerName}`,
-          entityType: ENTITY_TYPES.CHILD,
-          persistenceStrategy: PERSISTENCE_STRATEGIES.MANAGED_TABLE,
-          tableName: `Z${cleanTcode.slice(0, 8)}I`,
-          fields: [
-            createFieldRecord({ name: 'ItemUUID', label: 'Item Key', type: 'sysuuid_x16', isKey: true, isMandatory: true, semanticRole: 'KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: 'PurchaseOrderUUID', label: 'Parent Key', type: 'sysuuid_x16', isMandatory: true, semanticRole: 'PARENT_KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: 'PurchaseOrderItem', label: 'Item Number', type: 'abap.numc', length: 5, isMandatory: true, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Material', label: 'Material Number', type: 'abap.char', length: 40, isMandatory: true, semanticRole: 'DESCRIPTION', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Plant', label: 'Plant', type: 'abap.char', length: 4, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'OrderQuantity', label: 'Order Quantity', type: 'abap.quan', length: 13, precision: 13, scale: 3, unitField: 'OrderQuantityUnit', semanticRole: 'QUANTITY', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'OrderQuantityUnit', label: 'Quantity Unit', type: 'abap.unit', length: 3, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'NetPrice', label: 'Net Price', type: 'abap.curr', length: 11, precision: 11, scale: 2, cukyField: 'DocumentCurrency', semanticRole: 'AMOUNT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'DocumentCurrency', label: 'Currency', type: 'abap.cuky', length: 5, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' })
-          ]
-        })
-      ];
+    const starterModel = archetype.starterDataModel || {};
+    entities = (starterModel.entities || []).map((ent) =>
+      createEntityRecord({
+        ...ent,
+        fields: (ent.fields || []).map((fld) =>
+          createFieldRecord({
+            ...fld,
+            provenance: fld.isKey ? 'VERIFIED_LOCAL_METADATA' : (hasDdicProgram ? 'LIVE_SAP_S21' : 'CURATED_REFERENCE')
+          })
+        )
+      })
+    );
 
-      relationships = [
-        createRelationshipRecord({
-          relationshipId: relId,
-          sourceEntityId: headerId,
-          targetEntityId: itemId,
-          name: '_Item',
-          relationshipType: RELATIONSHIP_TYPES.COMPOSITION,
-          cardinality: CARDINALITIES.ZERO_TO_MANY,
-          description: `Composition from ${headerName} to ${itemName}`,
-          onDelete: 'CASCADE'
-        })
-      ];
-    } else if (/^(F|FB|FI|FAR|FAP)/i.test(cleanTcode) || /financ|payment|ledger|account/i.test(businessDomain)) {
-      // Finance / Payment Document pattern
-      const headerName = `Z_I_${cleanTcode}Doc`;
-      const itemName = `Z_I_${cleanTcode}LineItem`;
-      const headerId = `ENT-${cleanTcode}-DOC`;
-      const itemId = `ENT-${cleanTcode}-LINE`;
-      const relId = `REL-${cleanTcode}-COMP`;
-
-      entities = [
-        createEntityRecord({
-          entityId: headerId,
-          name: headerName,
-          label: `${tcode} Financial Document Header`,
-          description: `Root Header Entity for ${tcode} Financial Posting`,
-          entityType: ENTITY_TYPES.ROOT,
-          persistenceStrategy: PERSISTENCE_STRATEGIES.MANAGED_TABLE,
-          tableName: `Z${cleanTcode.slice(0, 8)}H`,
-          fields: [
-            createFieldRecord({ name: 'DocumentUUID', label: 'Document Key', type: 'sysuuid_x16', isKey: true, isMandatory: true, semanticRole: 'KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: 'CompanyCode', label: 'Company Code', type: 'abap.char', length: 4, isMandatory: true, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'FiscalYear', label: 'Fiscal Year', type: 'abap.numc', length: 4, isMandatory: true, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'AccountingDocument', label: 'Document Number', type: 'abap.char', length: 10, isMandatory: true, semanticRole: 'DESCRIPTION', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'PostingDate', label: 'Posting Date', type: 'abap.dats', semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'TotalAmount', label: 'Total Amount', type: 'abap.curr', length: 15, precision: 15, scale: 2, cukyField: 'Currency', semanticRole: 'AMOUNT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Currency', label: 'Currency', type: 'abap.cuky', length: 5, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'PostingStatus', label: 'Status', type: 'abap.char', length: 2, semanticRole: 'STATUS', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CreatedAt', label: 'Created At', type: 'abap.utclong', isReadOnly: true, semanticRole: 'ADMIN_CREATED_AT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CreatedBy', label: 'Created By', type: 'abap.char', length: 12, isReadOnly: true, semanticRole: 'ADMIN_CREATED_BY', provenance: 'CURATED_REFERENCE' })
-          ]
-        }),
-        createEntityRecord({
-          entityId: itemId,
-          name: itemName,
-          label: `${tcode} Financial Line Item`,
-          description: `Child Item Entity composed under ${headerName}`,
-          entityType: ENTITY_TYPES.CHILD,
-          persistenceStrategy: PERSISTENCE_STRATEGIES.MANAGED_TABLE,
-          tableName: `Z${cleanTcode.slice(0, 8)}I`,
-          fields: [
-            createFieldRecord({ name: 'LineItemUUID', label: 'Line Item Key', type: 'sysuuid_x16', isKey: true, isMandatory: true, semanticRole: 'KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: 'DocumentUUID', label: 'Parent Key', type: 'sysuuid_x16', isMandatory: true, semanticRole: 'PARENT_KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: 'ItemNumber', label: 'Item Number', type: 'abap.numc', length: 3, isMandatory: true, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'GLAccount', label: 'G/L Account', type: 'abap.char', length: 10, isMandatory: true, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'DebitCreditCode', label: 'Debit/Credit', type: 'abap.char', length: 1, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Amount', label: 'Item Amount', type: 'abap.curr', length: 15, precision: 15, scale: 2, cukyField: 'Currency', semanticRole: 'AMOUNT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Currency', label: 'Currency', type: 'abap.cuky', length: 5, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CostCenter', label: 'Cost Center', type: 'abap.char', length: 10, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' })
-          ]
-        })
-      ];
-
-      relationships = [
-        createRelationshipRecord({
-          relationshipId: relId,
-          sourceEntityId: headerId,
-          targetEntityId: itemId,
-          name: '_Item',
-          relationshipType: RELATIONSHIP_TYPES.COMPOSITION,
-          cardinality: CARDINALITIES.ZERO_TO_MANY,
-          description: `Composition from ${headerName} to ${itemName}`,
-          onDelete: 'CASCADE'
-        })
-      ];
-    } else {
-      // Standard Core Entity pattern
-      const headerName = `Z_I_${cleanTcode}`;
-      const headerId = `ENT-${cleanTcode}-ROOT`;
-
-      entities = [
-        createEntityRecord({
-          entityId: headerId,
-          name: headerName,
-          label: `${tcode} Business Entity`,
-          description: `Root Transactional Entity for ${tcode}`,
-          entityType: ENTITY_TYPES.ROOT,
-          persistenceStrategy: PERSISTENCE_STRATEGIES.MANAGED_TABLE,
-          tableName: `Z${cleanTcode.slice(0, 8)}T`,
-          fields: [
-            createFieldRecord({ name: 'NodeUUID', label: 'Technical Key', type: 'sysuuid_x16', isKey: true, isMandatory: true, semanticRole: 'KEY', provenance: 'VERIFIED_LOCAL_METADATA' }),
-            createFieldRecord({ name: `${cleanTcode}ID`, label: 'Identifier', type: 'abap.char', length: 10, isMandatory: true, semanticRole: 'DESCRIPTION', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Description', label: 'Description', type: 'abap.char', length: 80, semanticRole: 'TEXT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'StatusCode', label: 'Status', type: 'abap.char', length: 4, semanticRole: 'STATUS', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'TotalAmount', label: 'Total Amount', type: 'abap.curr', length: 15, precision: 15, scale: 2, cukyField: 'Currency', semanticRole: 'AMOUNT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'Currency', label: 'Currency Code', type: 'abap.cuky', length: 5, semanticRole: 'GENERAL', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CreatedAt', label: 'Created At', type: 'abap.utclong', isReadOnly: true, semanticRole: 'ADMIN_CREATED_AT', provenance: 'CURATED_REFERENCE' }),
-            createFieldRecord({ name: 'CreatedBy', label: 'Created By', type: 'abap.char', length: 12, isReadOnly: true, semanticRole: 'ADMIN_CREATED_BY', provenance: 'CURATED_REFERENCE' })
-          ]
-        })
-      ];
-    }
+    relationships = (starterModel.relationships || []).map((rel) =>
+      createRelationshipRecord(rel)
+    );
 
     const suggestedDataModel = {
       specVersion: 1,

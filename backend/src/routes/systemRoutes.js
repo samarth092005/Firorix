@@ -188,7 +188,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
       return true;
     }
 
-    const authResult = authService.login(payload.email || payload.username, payload.password);
+    const authResult = await authService.login(payload.email || payload.username, payload.password);
     if (!authResult.success) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, statusCode: 'UNAUTHORIZED', error: authResult.error, errorMessage: authResult.errorMessage }));

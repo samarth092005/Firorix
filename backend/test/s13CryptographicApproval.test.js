@@ -239,7 +239,7 @@ test('Cryptographic Signature Service (Sprint 13.2 / REM-SEC-03)', async (t) => 
     );
   });
 
-  await t.test('10. Deployment Orchestration: handles legacy SHA-256 approval with warning log', async () => {
+  await t.test('10. Deployment Orchestration: rejects legacy SHA-256 approval with LEGACY_APPROVAL_UNAUTHORIZED (Sprint 14.1 SEC-02)', async () => {
     const signatureService = new CryptographicSignatureService({
       activeKeyVersion: 'v1',
       keys: { v1: 'orchestration-test-secret' }
@@ -287,10 +287,20 @@ test('Cryptographic Signature Service (Sprint 13.2 / REM-SEC-03)', async (t) => 
       verifier: { verifyDeployment: async () => ({ overallStatus: 'VERIFIED', checks: [] }) }
     });
 
-    const execRes = await orchestrator.executeDeploymentPlan('DEP-PLAN-LEGACY-01', {}, { id: 'chief-architect' });
-    assert.strictEqual(execRes.lifecycleStatus, 'STOPPED_AT_WRITE_BOUNDARY');
+    // P0 Behavior: Legacy SHA-256 approval digests MUST be rejected from authorizing active execution
+    await assert.rejects(
+      async () => orchestrator.executeDeploymentPlan('DEP-PLAN-LEGACY-01', {}, { id: 'chief-architect' }),
+      (err) => {
+        assert.strictEqual(err.code, 'LEGACY_APPROVAL_UNAUTHORIZED');
+        assert.match(err.message, /Legacy unauthenticated SHA-256 approval digests are restricted to historical audit/);
+        return true;
+      }
+    );
 
-    const warnLog = execRes.logs.find(l => l.level === 'WARN' && l.message.includes('legacy unauthenticated digest'));
-    assert.ok(warnLog, 'Must log WARN for legacy approval digest');
+    // Verify historical audit preservation: records remain readable
+    const readablePlan = await mockRepo.getDeploymentPlan('DEP-PLAN-LEGACY-01');
+    const readableApproval = await mockRepo.getLatestApproval('DEP-PLAN-LEGACY-01');
+    assert.strictEqual(readablePlan.id, 'DEP-PLAN-LEGACY-01');
+    assert.strictEqual(readableApproval.signatureHash, legacySha256);
   });
 });

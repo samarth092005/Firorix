@@ -1,3 +1,4 @@
+import { uiConfig } from '../../config/uiConfig';
 import React from 'react';
 import { SystemConnectionState } from '../../services/contracts/types';
 import { Wifi, WifiOff, AlertCircle, Database } from 'lucide-react';
@@ -11,8 +12,8 @@ export interface SystemStatusIndicatorProps {
 
 export const SystemStatusIndicator: React.FC<SystemStatusIndicatorProps> = ({
   state,
-  systemId = 'S21',
-  client = '200',
+  systemId = uiConfig.defaultSystem.id,
+  client = uiConfig.defaultSystem.client,
   showDetails = true
 }) => {
   const configs: Record<

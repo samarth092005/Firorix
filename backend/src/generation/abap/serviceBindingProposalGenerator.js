@@ -11,6 +11,7 @@
  */
 
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
+import { formatCdsViewName } from './cdsViewEntityGenerator.js';
 
 export function generateServiceBindingProposal(project, architecture) {
   const entities = project.dataModelSpec?.entities || [];
@@ -18,8 +19,8 @@ export function generateServiceBindingProposal(project, architecture) {
   if (!rootEntity) return [];
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '');
-  const serviceDefinitionName = `ZUI_${prefix}`.toUpperCase();
-  const bindingName = `ZUI_${prefix}_O4`.toUpperCase();
+  const serviceDefinitionName = formatCdsViewName('ZUI_', prefix).toUpperCase();
+  const bindingName = `${serviceDefinitionName}_O4`.toUpperCase();
   const sapNamespace = project.targetPackage || 'ZCUSTOM_CORE';
   const targetRelease = project.targetRelease || 'SAP S/4HANA 2023 On-Premise';
 

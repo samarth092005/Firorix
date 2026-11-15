@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { uiConfig, formatSystemTargetStamp } from '../../../config/uiConfig';
 import {
   Server,
   ShieldCheck,
@@ -149,7 +150,7 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
               </h2>
               <span className="preview-banner-badge" style={{ backgroundColor: '#DEF7EC', color: '#03543F' }}>
                 <span className="preview-banner-badge-dot" style={{ backgroundColor: '#10B981' }} />
-                TARGET: S21 / CLIENT 200 (S4CORE 108)
+                {formatSystemTargetStamp(project?.sourceSystemId || undefined, project?.sourceClient || undefined, preflight?.targetSystem?.softwareComponent)}
               </span>
             </div>
             <p className="preview-banner-desc">
@@ -231,7 +232,7 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', fontSize: '12px', color: '#92400E' }}>
         <Lock size={16} />
         <span>
-          <strong>SAP Clean Core Safety Directives Enforced:</strong> Fiorify executes 100% read-only diagnostic and verification calls. The execution engine stops at the SAP Write Boundary without creating unapproved repository objects in S21.
+          <strong>SAP Clean Core Safety Directives Enforced:</strong> Fiorify executes 100% read-only diagnostic and verification calls. The execution engine stops at the SAP Write Boundary without creating unapproved repository objects in {project?.sourceSystemId || uiConfig.defaultSystem.id}.
         </span>
       </div>
 

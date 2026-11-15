@@ -28,6 +28,7 @@ import { ConfirmDialog } from '../dialogs/ConfirmDialog';
 import { authService } from '../../services/authService';
 import { notificationService, AppNotification } from '../../services/notificationService';
 import { SystemStatusIndicator } from '../common/SystemStatusIndicator';
+import { uiConfig } from '../../config/uiConfig';
 import { SystemConnectionState } from '../../services/contracts/types';
 
 export interface TopNavigationProps {
@@ -198,7 +199,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
         }}
         className="fiori-topbar-context"
       >
-        <span>Modernization Workspace</span>
+        <span>{uiConfig.brand.workspaceName}</span>
       </div>
 
       {/* Right: Actions, Notifications & User Persona */}

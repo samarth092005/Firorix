@@ -27,51 +27,118 @@ export class PreviewManager {
     const syntheticStore = {};
     const entities = project.dataModelSpec?.entities || [];
     const rootEntity = entities.find((e) => e.entityType === 'ROOT' || e.isRoot) || entities[0];
+    if (!rootEntity) return syntheticStore;
 
-    for (const ent of entities) {
-      const isRoot = ent.entityId === rootEntity?.entityId;
-      const count = isRoot ? 5 : 12; // 5 headers, 12 items
-      const records = [];
+    // Generate root entities first
+    const rootRecords = [];
+    const rootKeyField = (rootEntity.fields || []).find((f) => f.isKey) || { name: 'ID' };
+    const rootBizKeyField = (rootEntity.fields || []).find((f) => f.semanticRole === 'BUSINESS_KEY');
 
-      for (let i = 1; i <= count; i++) {
-        const record = {};
-        for (const f of ent.fields || []) {
-          record[f.name] = this._generateSyntheticFieldValue(f, i, ent, rootEntity);
-        }
-
-        // Administrative audit fields
-        const now = new Date().toISOString();
-        record.CreatedBy = 'MOCK_ADMIN';
-        record.CreatedAt = now;
-        record.LastChangedBy = 'MOCK_ADMIN';
-        record.LastChangedAt = now;
-        record.LocalLastChangedAt = now;
-
-        records.push(record);
+    for (let i = 1; i <= 5; i++) {
+      const record = {};
+      for (const f of rootEntity.fields || []) {
+        record[f.name] = this._generateSyntheticFieldValue(f, i, rootEntity, null, null);
       }
+      const now = new Date().toISOString();
+      record.CreatedBy = 'MOCK_ADMIN';
+      record.CreatedAt = now;
+      record.LastChangedBy = 'MOCK_ADMIN';
+      record.LastChangedAt = now;
+      record.LocalLastChangedAt = now;
+      rootRecords.push(record);
+    }
+    syntheticStore[rootEntity.name] = rootRecords;
 
-      syntheticStore[ent.name] = records;
+    // Generate child entities linked to parent records
+    const childEntities = entities.filter((e) => e.entityId !== rootEntity.entityId);
+    for (const child of childEntities) {
+      const childRecords = [];
+      const parentKeyField = (child.fields || []).find((f) => f.semanticRole === 'PARENT_KEY');
+      let itemSeq = 1;
+
+      for (let pIdx = 0; pIdx < rootRecords.length; pIdx++) {
+        const parentRec = rootRecords[pIdx];
+        const parentKeyValue = parentRec[rootKeyField.name];
+
+        // 2 items per parent
+        for (let itemIdx = 1; itemIdx <= 2; itemIdx++) {
+          const childRec = {};
+          for (const f of child.fields || []) {
+            if (f.semanticRole === 'PARENT_KEY' || (parentKeyField && f.name === parentKeyField.name)) {
+              childRec[f.name] = parentKeyValue;
+            } else {
+              childRec[f.name] = this._generateSyntheticFieldValue(f, itemSeq, child, rootEntity, parentRec);
+            }
+          }
+          const numField = child.fields.find((f) => f.semanticRole === 'ITEM_NUMBER');
+          if (numField && childRec[numField.name] !== undefined) {
+            childRec[numField.name] = String(itemIdx * 10).padStart(numField.length || 3, '0');
+          }
+
+          // Balance debit / credit for Finance line items:
+          // Item 10: Debit 'S' 1000 EUR
+          // Item 20: Credit 'H' 1000 EUR
+          if (childRec.DebitCreditCode) {
+            childRec.DebitCreditCode = itemIdx === 1 ? 'S' : 'H';
+            childRec.Amount = 1000.00;
+          }
+
+          const now = new Date().toISOString();
+          childRec.CreatedBy = 'MOCK_ADMIN';
+          childRec.CreatedAt = now;
+          childRec.LastChangedBy = 'MOCK_ADMIN';
+          childRec.LastChangedAt = now;
+          childRec.LocalLastChangedAt = now;
+          childRecords.push(childRec);
+          itemSeq++;
+        }
+      }
+      syntheticStore[child.name] = childRecords;
     }
 
     return syntheticStore;
   }
 
-  _generateSyntheticFieldValue(field, index, entity, rootEntity) {
+  _generateSyntheticFieldValue(field, index, entity, rootEntity, parentRecord = null) {
     const nameLower = field.name.toLowerCase();
 
     // Primary or semantic key
     if (field.isKey) {
-      if (field.semanticRole === 'PARENT_KEY' && rootEntity) {
-        // Child matching parent key
+      if (field.semanticRole === 'PARENT_KEY' && parentRecord && rootEntity) {
         const parentKeyField = (rootEntity.fields || []).find((f) => f.isKey);
-        const parentIndex = Math.ceil(index / 3); // 3 items per parent
-        return `MOCK-${1000 + parentIndex}`;
+        return parentRecord[parentKeyField?.name] || `KEY-${1000 + index}`;
       }
       return `MOCK-${1000 + index}`;
     }
 
+    // SAP Business Keys
+    if (nameLower === 'purchaseorder' || nameLower === 'ebeln') {
+      return `450001${String(index).padStart(4, '0')}`;
+    }
+    if (nameLower === 'salesorder' || nameLower === 'vbeln') {
+      return `000001${String(index).padStart(4, '0')}`;
+    }
+    if (nameLower === 'productionorder' || (nameLower === 'ordernumber' && entity?.name?.toLowerCase().includes('order') && !nameLower.includes('maint'))) {
+      return `00010000${String(index).padStart(4, '0')}`;
+    }
+    if (nameLower === 'accountingdocument' || nameLower === 'belnr') {
+      return `100000${String(index).padStart(4, '0')}`;
+    }
+    if (nameLower === 'inspectionlot' || nameLower === 'prueflos') {
+      return `010000000${String(index).padStart(3, '0')}`;
+    }
+    if (nameLower === 'ordernumber' || nameLower === 'aufnr') {
+      return `400000000${String(index).padStart(3, '0')}`;
+    }
+    if (nameLower === 'transferorder' || nameLower === 'tanum') {
+      return `00000189${String(index).padStart(2, '0')}`;
+    }
+    if (nameLower === 'personnelnumber' || nameLower === 'pernr') {
+      return `001004${String(index).padStart(2, '0')}`;
+    }
+
     // Amounts & Currencies
-    if (field.semanticRole === 'AMOUNT' || field.type === 'abap.curr' || nameLower.includes('amount') || nameLower.includes('price')) {
+    if (field.semanticRole === 'AMOUNT' || field.type === 'abap.curr' || nameLower.includes('amount') || nameLower.includes('price') || nameLower.includes('cost')) {
       return parseFloat((index * 1250.50).toFixed(2));
     }
     if (field.semanticRole === 'CURRENCY_CODE' || field.type === 'abap.cuky' || nameLower.includes('currency')) {
@@ -80,33 +147,87 @@ export class PreviewManager {
     }
 
     // Quantities & Units
-    if (field.semanticRole === 'QUANTITY' || field.type === 'abap.quan' || nameLower.includes('quantity')) {
+    if (field.semanticRole === 'QUANTITY' || field.type === 'abap.quan' || nameLower.includes('quantity') || nameLower.includes('hours') || nameLower.includes('work')) {
+      if (nameLower.includes('hour') || nameLower.includes('work')) return 8.0;
       return index * 10;
     }
     if (field.type === 'abap.unit' || nameLower.includes('unit')) {
+      if (nameLower.includes('hour') || nameLower.includes('arbeh')) return 'H';
       return 'EA';
     }
 
-    // Company Code / Plant
+    // Organization Units
     if (nameLower.includes('companycode') || nameLower.includes('bukrs')) {
       return '1000';
     }
     if (nameLower.includes('plant') || nameLower.includes('werks')) {
       return '1010';
     }
+    if (nameLower.includes('workcenter') || nameLower.includes('arbpl')) {
+      const centers = ['MECH_01', 'ELEC_02', 'ASSM_03', 'LINE_04'];
+      return centers[index % centers.length];
+    }
+    if (nameLower.includes('warehousenumber') || nameLower.includes('lgnum')) {
+      return 'W01';
+    }
+    if (nameLower.includes('storagebin') || nameLower.includes('vlpla') || nameLower.includes('nlpla')) {
+      return `BIN-0${(index % 4) + 1}-A-${String(index * 2).padStart(2, '0')}`;
+    }
+    if (nameLower.includes('storagetype') || nameLower.includes('vltyp') || nameLower.includes('nltyp')) {
+      return index % 2 === 0 ? '001' : '002';
+    }
+    if (nameLower.includes('salesorganization') || nameLower.includes('vkorg')) {
+      return '1000';
+    }
+    if (nameLower.includes('distributionchannel') || nameLower.includes('vtweg')) {
+      return '10';
+    }
+    if (nameLower.includes('purchasingorg') || nameLower.includes('ekorg')) {
+      return '1000';
+    }
+    if (nameLower.includes('purchasinggroup') || nameLower.includes('ekgrp')) {
+      return '001';
+    }
 
-    // Supplier / Customer / Vendor
+    // Master Data: Equipment & Functional Locations
+    if (nameLower.includes('equipment') || nameLower.includes('equnr')) {
+      const equips = ['10002145', '10003890', '10004921', '10005510'];
+      return equips[index % equips.length];
+    }
+    if (nameLower.includes('functionallocation') || nameLower.includes('tplnr')) {
+      const floc = ['US01-PL01-BLD02', 'DE01-PL10-ENG01', 'FR02-PL05-LINE3'];
+      return floc[index % floc.length];
+    }
+
+    // Supplier / Customer / Vendor / Employee
     if (nameLower.includes('supplier') || nameLower.includes('vendor') || nameLower.includes('lifnr')) {
-      return `MOCK-SUPP-0${(index % 4) + 1}`;
+      const supps = ['100001', '100002', '100003', '100004'];
+      return supps[index % supps.length];
+    }
+    if (nameLower.includes('suppliername')) {
+      const names = ['Acme Industrial Parts GmbH', 'Apex Logistics Corp', 'Titan Components SE', 'Precision Tools Ltd'];
+      return names[index % names.length];
     }
     if (nameLower.includes('customer') || nameLower.includes('kunnr')) {
-      return `MOCK-CUST-0${(index % 4) + 1}`;
+      const custs = ['0000010001', '0000010002', '0000010003'];
+      return custs[index % custs.length];
+    }
+    if (nameLower.includes('customername')) {
+      const names = ['Global Systems Inc.', 'Nordic Manufacturing AS', 'Bavaria Motors AG'];
+      return names[index % names.length];
+    }
+    if (nameLower.includes('employeename') || nameLower.includes('ename') || nameLower.includes('requester')) {
+      const names = ['Marcus Vance', 'Sarah Jenkins', 'David Mueller', 'Elena Rostova', 'Kenji Sato'];
+      return names[index % names.length];
     }
 
     // Status / Code
     if (field.semanticRole === 'STATUS' || nameLower.includes('status')) {
       const statuses = ['APPROVED', 'PENDING_REVIEW', 'IN_PROCESS', 'DRAFT'];
       return statuses[index % statuses.length];
+    }
+    if (nameLower.includes('usagedecision')) {
+      return index % 3 === 0 ? 'R' : 'A'; // A = Accepted, R = Rejected
     }
 
     // Dates & Times
@@ -174,6 +295,19 @@ export class PreviewManager {
     if (nameLower.includes('fiscalyear') || nameLower.includes('gjahr')) {
       return '2026';
     }
+    if (nameLower.includes('documenttype') || nameLower.includes('blart')) {
+      return 'SA';
+    }
+
+    // Quality Management Characteristics
+    if (nameLower.includes('characteristictxt') || nameLower.includes('specification')) {
+      const specs = ['Diameter Outer Tolerance', 'Tensile Strength ISO', 'Surface Roughness Ra', 'Chemical Purity Index'];
+      return specs[index % specs.length];
+    }
+    if (nameLower.includes('targetvalue')) return 25.000;
+    if (nameLower.includes('lowerlimit')) return 24.850;
+    if (nameLower.includes('upperlimit')) return 25.150;
+    if (nameLower.includes('recordedresult')) return (25.020 + (index * 0.01));
 
     // Default string
     return `Mock ${field.label || field.name} ${index}`;

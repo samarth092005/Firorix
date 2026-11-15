@@ -1,3 +1,4 @@
+import { uiConfig, formatSystemBadge } from '../../config/uiConfig';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -428,7 +429,7 @@ export const OverviewPage: React.FC = () => {
             </div>
           </div>
           <span style={{ fontSize: '11px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: '3px 10px', borderRadius: '12px' }}>
-            ● Target S21-200 Active
+            ● Target {formatSystemBadge()} Active
           </span>
         </div>
 
@@ -440,8 +441,8 @@ export const OverviewPage: React.FC = () => {
               <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target System</span>
               <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#DCFCE7', color: '#15803D', padding: '1px 6px', borderRadius: '4px' }}>S/4HANA 2023</span>
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>S21 Private Cloud (Client 200)</div>
-            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>SAP_BASIS 758 • S4CORE 108 • Gateway Catalog</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>{uiConfig.defaultSystem.name} (Client {uiConfig.defaultSystem.client})</div>
+            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>{uiConfig.defaultSystem.basisRelease} • {uiConfig.defaultSystem.softwareComponent} • Gateway Catalog</div>
           </div>
 
           {/* Pillar 2: Official Fiori Catalogue */}

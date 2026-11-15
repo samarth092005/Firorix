@@ -299,11 +299,25 @@ export class DeploymentOrchestrationService {
       throw err;
     }
 
+    // Enforce tenant boundary
+    if (plan.tenantId && plan.tenantId !== tenantId) {
+      const err = new Error(`Deployment plan "${planId}" cannot be accessed: Tenant isolation violation.`);
+      err.code = 'TENANT_ACCESS_DENIED';
+      throw err;
+    }
+
     // 1. Verify Approval
     const latestApproval = await this.repository.getLatestApproval(planId, tenantId);
     if (!latestApproval || latestApproval.decision !== 'APPROVED') {
       const err = new Error(`Deployment plan "${planId}" cannot be executed: Missing or rejected Chief Architect approval.`);
       err.code = 'DEPLOYMENT_NOT_APPROVED';
+      throw err;
+    }
+
+    // Enforce tenant boundary on approval record
+    if (latestApproval.tenantId && latestApproval.tenantId !== tenantId) {
+      const err = new Error(`Deployment plan "${planId}" cannot be accessed: Approval record belongs to a different tenant.`);
+      err.code = 'TENANT_ACCESS_DENIED';
       throw err;
     }
 
@@ -341,6 +355,17 @@ export class DeploymentOrchestrationService {
       throw err;
     }
 
+    // P0 FAIL-CLOSED REJECTION (Sprint 14.1 SEC-02):
+    // Reject legacy unauthenticated SHA-256 approval digests. Historical signatures remain readable for audit,
+    // but must never authorize active deployments or sensitive mutations.
+    if (sigVerification.isLegacy) {
+      const err = new Error(
+        `Deployment plan "${planId}" cannot be executed: Legacy unauthenticated SHA-256 approval digests are restricted to historical audit and cannot authorize active deployments. Re-approval with HMAC-SHA256 is mandatory.`
+      );
+      err.code = 'LEGACY_APPROVAL_UNAUTHORIZED';
+      throw err;
+    }
+
     const executionId = `DEP-EXEC-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const startTime = new Date().toISOString();
 
@@ -349,10 +374,8 @@ export class DeploymentOrchestrationService {
       { timestamp: new Date().toISOString(), level: 'INFO', message: `Target System: ${plan.targetSystem} (Client ${plan.targetClient}), Package: ${plan.targetPackage}.` },
       {
         timestamp: new Date().toISOString(),
-        level: sigVerification.isLegacy ? 'WARN' : 'INFO',
-        message: sigVerification.isLegacy
-          ? `Cryptographic approval verified with legacy unauthenticated digest (${sigVerification.signatureType}). Re-approval with HMAC-SHA256 recommended.`
-          : `Cryptographic approval verified (Key: ${sigVerification.keyVersion}, Type: ${sigVerification.signatureType}, Signature: ${latestApproval.signatureHash.substring(0, 20)}...).`
+        level: 'INFO',
+        message: `Cryptographic approval verified (Key: ${sigVerification.keyVersion}, Type: ${sigVerification.signatureType}, Signature: ${latestApproval.signatureHash.substring(0, 20)}...).`
       },
       { timestamp: new Date().toISOString(), level: 'GUARDRAIL', message: 'CRITICAL GUARDRAIL: Halting execution at the SAP S/4HANA Write Boundary.' },
       { timestamp: new Date().toISOString(), level: 'GUARDRAIL', message: 'Fiorify Read-Only Directives prohibit unapproved mutating HTTP requests (POST, PUT, DELETE) to SAP endpoints.' },

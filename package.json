@@ -1,0 +1,22 @@
+{
+  "name": "fiorify-enterprise-platform",
+  "version": "1.0.0",
+  "description": "Fiorify Enterprise SAP Modernization & Fiori Application Platform",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "postinstall": "npm --prefix backend ci --omit=dev || npm --prefix backend install --omit=dev && npm --prefix frontend ci || npm --prefix frontend install && npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm --prefix frontend run build",
+    "test:backend": "node --test --test-concurrency=1 backend/test/",
+    "test:frontend": "npm --prefix frontend test",
+    "test": "npm run test:backend && npm run test:frontend"
+  },
+  "author": "Fiorify Engineering Team",
+  "license": "UNLICENSED"
+}

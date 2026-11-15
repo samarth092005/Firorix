@@ -18,6 +18,26 @@ import {
 const PROJECT_ID_REGEX = /^[A-Za-z0-9_-]{3,64}$/;
 
 /**
+ * Sanitizes any raw or namespaced identifier into a safe, valid Project ID.
+ * Replaces directory traversal characters, slashes, and spaces with hyphens,
+ * and strips characters outside [A-Za-z0-9_-].
+ *
+ * @param {string} projectId
+ * @returns {string} Safe normalized project ID
+ */
+export function sanitizeProjectId(projectId) {
+  if (!projectId || typeof projectId !== 'string') return '';
+  return projectId
+    .trim()
+    .replace(/[\/\\]+/g, '-')
+    .replace(/\.\.+/g, '')
+    .replace(/[^A-Za-z0-9_-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 64);
+}
+
+/**
  * Validates a Project ID string.
  * Must match [A-Za-z0-9_-]{3,64} and contain no path separators or traversal elements.
  */
@@ -102,6 +122,9 @@ export function validateCreateProjectPayload(payload) {
   }
 
   if (payload.projectId) {
+    if (typeof payload.projectId === 'string' && (payload.projectId.includes('/') || payload.projectId.includes('\\'))) {
+      payload.projectId = sanitizeProjectId(payload.projectId);
+    }
     const idCheck = validateProjectId(payload.projectId);
     if (!idCheck.isValid) {
       return idCheck;

@@ -1,3 +1,4 @@
+import { uiConfig } from '../../../config/uiConfig';
 import React from 'react';
 import {
   AssessmentRecord,
@@ -346,7 +347,7 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
                   10. Evidence Provenance &amp; Operational Limitations
                 </h4>
                 <div style={{ fontSize: '11px', color: '#64748B' }}>
-                  Provenances: {assessment.isDemo ? 'CURATED_DEMO_FIXTURE (Pending Live Verification)' : 'LIVE_SAP_S21'} with official SAP Fiori Apps Reference Library baseline. System availability remains subject to client-level Basis OData activation and PFCG authorizations.
+                  Provenances: {assessment.isDemo ? 'CURATED_DEMO_FIXTURE (Pending Live Verification)' : `LIVE_SAP_${assessment.systemId || uiConfig.defaultSystem.id}`} with official SAP Fiori Apps Reference Library baseline. System availability remains subject to client-level Basis OData activation and PFCG authorizations.
                 </div>
               </div>
             </div>

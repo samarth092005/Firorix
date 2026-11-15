@@ -1,6 +1,8 @@
 import React from 'react';
 import { Menu, Search, Bell, User, Layers, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../../services/authService';
+import { uiConfig, formatSystemBadge } from '../../config/uiConfig';
 
 export interface TopBarProps {
   onToggleSidebar: () => void;
@@ -9,6 +11,9 @@ export interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
+  const user = authService.getUser();
+  const activeSystem = uiConfig.defaultSystem;
+  const userDisplayName = (user as any)?.name || (user as any)?.email?.split('@')[0] || 'Admin User';
 
   return (
     <header
@@ -80,7 +85,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             fontWeight: 600,
             color: '#58B8D4'
           }}
-          title="Target SAP S/4HANA System: S21 Client 200"
+          title={`Target SAP S/4HANA System: ${activeSystem.id} Client ${activeSystem.client}`}
         >
           <span
             style={{
@@ -90,7 +95,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
               backgroundColor: '#107E3E'
             }}
           />
-          <span>SAP S21:200</span>
+          <span>SAP {formatSystemBadge(activeSystem.id, activeSystem.client, ':')}</span>
         </div>
       </div>
 
@@ -124,11 +129,11 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar }) => {
             borderRadius: 'var(--radius-sm)',
             border: '1px solid rgba(255, 255, 255, 0.12)'
           }}
-          title="Demo User Persona"
+          title={user?.email || 'Logged-in User'}
         >
           <User size={14} color="#FFFFFF" />
           <span style={{ fontSize: '12px', fontWeight: 500, color: '#FFFFFF' }}>
-            Demo User
+            {userDisplayName}
           </span>
         </div>
       </div>

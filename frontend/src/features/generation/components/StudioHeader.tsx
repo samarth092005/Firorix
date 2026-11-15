@@ -1,4 +1,5 @@
 import React from 'react';
+import { uiConfig } from '../../../config/uiConfig';
 import {
   Layers,
   FolderGit2,
@@ -44,7 +45,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           {project && <span style={{ color: 'var(--studio-text-subtle)' }}>/</span>}
           <div className="studio-brand-title">
             <Layers size={16} color="var(--studio-primary)" />
-            <span>Fiorify Generation Studio</span>
+            <span>{uiConfig.brand.productName}</span>
           </div>
         </div>
 
@@ -86,7 +87,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 
           <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--studio-text-muted)' }}>
             {project
-              ? (project.description || 'Custom RAP Managed application development project under Clean Core architecture.')
+              ? (project.description || '{project?.description || uiConfig.brand.tagline}')
               : 'Architect, generate, validate and export Clean Core custom SAP Fiori applications for genuine functional gaps.'}
           </p>
         </div>

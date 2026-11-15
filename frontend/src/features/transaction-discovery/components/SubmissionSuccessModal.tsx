@@ -1,4 +1,5 @@
 import React from 'react';
+import { uiConfig } from '../../../config/uiConfig';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, ArrowRight, History, SearchCode, ExternalLink } from 'lucide-react';
 import { StatusBadge } from '../../../components/common';
@@ -85,7 +86,7 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
               Transaction Assessment Successfully Registered
             </h3>
             <span style={{ fontSize: '12px', color: 'var(--fiori-success, #188918)', fontWeight: 600 }}>
-              Audit &amp; Discovery Request Logged in S21 Ledger
+              Audit &amp; Discovery Request Logged in {uiConfig.defaultSystem.id} Ledger
             </span>
           </div>
         </div>
@@ -94,7 +95,7 @@ export const SubmissionSuccessModal: React.FC<SubmissionSuccessModalProps> = ({
         <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '13px' }}>
           <p style={{ margin: 0, color: 'var(--fiori-text-primary, #1B2838)', lineHeight: 1.5 }}>
             Discovery parameters and business context for <strong>{tcode}</strong> have been evaluated
-            against the target S21 S/4HANA 2023 release profile and indexed in the persistent ledger.
+            against the target {uiConfig.defaultSystem.id} S/4HANA 2023 release profile and indexed in the persistent ledger.
           </p>
 
           <div

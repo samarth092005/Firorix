@@ -66,6 +66,28 @@ export function createPreMigrationBackup(dataDir, backupDir) {
   const manifestPath = path.join(snapshotFolder, 'manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
 
+  // Rotate snapshots to prevent unbounded disk usage (retain latest 3)
+  try {
+    const maxRetainedSnapshots = 3;
+    const allSnapshots = fs.readdirSync(resolvedBackupDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory() && d.name.startsWith('pre-s1-snapshot-'))
+      .map((d) => ({
+        name: d.name,
+        fullPath: path.join(resolvedBackupDir, d.name),
+        mtime: fs.statSync(path.join(resolvedBackupDir, d.name)).mtimeMs
+      }))
+      .sort((a, b) => b.mtime - a.mtime);
+
+    if (allSnapshots.length > maxRetainedSnapshots) {
+      const toDelete = allSnapshots.slice(maxRetainedSnapshots);
+      for (const snap of toDelete) {
+        fs.rmSync(snap.fullPath, { recursive: true, force: true });
+      }
+    }
+  } catch (rotateErr) {
+    // Non-fatal if rotation cleanup fails
+  }
+
   return {
     snapshotFolder,
     manifestPath,

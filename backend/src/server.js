@@ -256,7 +256,9 @@ export function createServer(options = {}) {
     const currentUser = resolveUser();
     req.user = currentUser;
 
+    const isStaticOrSpaRoute = (req.method === 'GET' || req.method === 'HEAD') && !url.pathname.startsWith('/api/');
     const isPublicEndpoint = (
+      isStaticOrSpaRoute ||
       url.pathname === '/' ||
       url.pathname === '/health' ||
       url.pathname === '/api/v1/health' ||
@@ -357,8 +359,12 @@ export function createServer(options = {}) {
       return false;
     };
 
-    // 1. Root Service Index
-    if (req.method === 'GET' && url.pathname === '/') {
+    // 1. Root Service Index (or Frontend SPA Entrypoint if HTML requested)
+    const frontendDistDir = path.resolve(process.cwd(), 'frontend', 'dist');
+    const hasFrontendDist = fs.existsSync(path.join(frontendDistDir, 'index.html'));
+    const prefersHtml = Boolean(req.headers.accept && req.headers.accept.includes('text/html'));
+
+    if (req.method === 'GET' && url.pathname === '/' && (!hasFrontendDist || !prefersHtml)) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify(
@@ -474,7 +480,6 @@ export function createServer(options = {}) {
     if (await handleMcpRoute(req, res, url, { mcpService, checkAdminAuth })) return;
 
     // Static frontend serving (for production and unified BTP deployments)
-    const frontendDistDir = path.resolve(process.cwd(), 'frontend', 'dist');
     if (req.method === 'GET' && !url.pathname.startsWith('/api/')) {
       const safePath = path.normalize(url.pathname).replace(/^(\.\.[\/\\])+/, '');
       let filePath = path.join(frontendDistDir, safePath);
@@ -553,7 +558,11 @@ export function createServer(options = {}) {
 
 const server = createServer();
 
-const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+const isDirectRun = Boolean(
+  process.argv[1] &&
+  (fileURLToPath(import.meta.url) === process.argv[1] ||
+   path.resolve(process.argv[1]).toLowerCase() === path.resolve(fileURLToPath(import.meta.url)).toLowerCase())
+);
 if (isDirectRun) {
   defaultMcpService.initialize().catch((err) => {
     console.warn(`[Fiorify MCP] Non-blocking initialization note: ${err.message}`);

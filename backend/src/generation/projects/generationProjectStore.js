@@ -23,6 +23,7 @@ import {
 } from '../contracts/generationProjectContract.js';
 import {
   validateProjectId,
+  sanitizeProjectId,
   assertSafePath,
   validateCreateProjectPayload,
   validateUpdateProjectPayload
@@ -41,7 +42,7 @@ export class GenerationProjectStore {
   constructor(storageDir = DEFAULT_PROJECTS_DIR, options = {}) {
     if (typeof storageDir === 'object' && storageDir !== null && !options.repository) {
       options = storageDir;
-      storageDir = options.storageDir || DEFAULT_PROJECTS_DIR;
+      storageDir = options.storageDir || options.storagePath || DEFAULT_PROJECTS_DIR;
     }
     this.storageDir = path.resolve(storageDir);
     this._writeLocks = new Map();
@@ -75,7 +76,10 @@ export class GenerationProjectStore {
    * Resolves and verifies safe canonical path for a project file.
    */
   _getProjectFilePath(projectId) {
-    const idCheck = validateProjectId(projectId);
+    const safeProjectId = typeof projectId === 'string' && (projectId.includes('/') || projectId.includes('\\'))
+      ? sanitizeProjectId(projectId)
+      : projectId;
+    const idCheck = validateProjectId(safeProjectId);
     if (!idCheck.isValid) {
       const err = new Error(idCheck.error);
       err.code = 'INVALID_PROJECT_ID';
@@ -193,10 +197,11 @@ export class GenerationProjectStore {
 
     if (this.repository) {
       const tenantId = userContext?.tenantId || this.tenantId;
-      let candidateId = payload.projectId;
+      let candidateId = payload.projectId ? sanitizeProjectId(payload.projectId) : null;
       if (!candidateId) {
-        const prefix = payload.sourceTransactionCode
-          ? `GEN-${payload.sourceTransactionCode.toUpperCase()}`
+        const cleanCode = (payload.sourceTransactionCode || '').replace(/[^A-Za-z0-9_-]/g, '').trim();
+        const prefix = cleanCode
+          ? `GEN-${cleanCode.toUpperCase()}`
           : 'GEN-STANDALONE';
         const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
         candidateId = `${prefix}-${randSuffix}`;
@@ -219,10 +224,11 @@ export class GenerationProjectStore {
 
     await this._ensureStorageDir();
 
-    let candidateId = payload.projectId;
+    let candidateId = payload.projectId ? sanitizeProjectId(payload.projectId) : null;
     if (!candidateId) {
-      const prefix = payload.sourceTransactionCode
-        ? `GEN-${payload.sourceTransactionCode.toUpperCase()}`
+      const cleanCode = (payload.sourceTransactionCode || '').replace(/[^A-Za-z0-9_-]/g, '').trim();
+      const prefix = cleanCode
+        ? `GEN-${cleanCode.toUpperCase()}`
         : 'GEN-STANDALONE';
       const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
       candidateId = `${prefix}-${randSuffix}`;
@@ -479,6 +485,12 @@ export class GenerationProjectStore {
     if (this.repository) {
       const tenantId = options?.userContext?.tenantId || this.tenantId;
       const success = await this.repository.deleteProject(projectId, tenantId);
+      try {
+        const { projectDir } = this._getProjectFilePath(projectId);
+        if (fs.existsSync(projectDir)) {
+          fs.rmSync(projectDir, { recursive: true, force: true });
+        }
+      } catch {}
       return { success, deletedProjectId: projectId };
     }
 

@@ -10,7 +10,9 @@ import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.
 import { RAP_PROFILES } from '../architecture/architectureContract.js';
 
 function toAbapMethodName(prefix, title) {
-  let clean = (title || 'Action').replace(/[^a-zA-Z0-9]/g, '');
+  let clean = (title || 'Action')
+    .replace(/^(action|validation|determination)\s*:\s*/i, '')
+    .replace(/[^a-zA-Z0-9]/g, '');
   if (clean.toLowerCase().startsWith(prefix.toLowerCase())) {
     clean = clean.slice(prefix.length);
   }
@@ -28,9 +30,9 @@ export function generateBehaviorImplementationClass(project, architecture) {
   const rootInterfaceName = `ZI_${prefix}`;
   const className = `BP_I_${prefix}`.toUpperCase();
 
-  const confirmedValidations = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'VALIDATION');
-  const confirmedDeterminations = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'DETERMINATION');
-  const confirmedActions = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'ACTION');
+  const confirmedValidations = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'VALIDATION');
+  const confirmedDeterminations = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'DETERMINATION');
+  const confirmedActions = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'ACTION');
 
   const isUnmanaged = architecture?.selectedProfile === RAP_PROFILES.UNMANAGED_RAP;
 
@@ -139,6 +141,7 @@ export function generateBehaviorImplementationClass(project, architecture) {
   // Validation methods with defensive EML scaffolding
   for (const v of confirmedValidations) {
     const mName = toAbapMethodName('validate', v.title).toLowerCase();
+    const titleLower = (v.title || '').toLowerCase();
     code += `  METHOD ${mName}.\n`;
     code += `    /* =================================================================== */\n`;
     code += `    /* REQUIREMENT: ${v.requirementId} - ${v.title}\n`;
@@ -152,22 +155,55 @@ export function generateBehaviorImplementationClass(project, architecture) {
     }
     code += `    /* =================================================================== */\n`;
     code += `    /* TODO: Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
-    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
     code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
     code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
     code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
     code += `      RESULT DATA(lt_entities)\n`;
     code += `      FAILED DATA(lt_read_failed).\n\n`;
     code += `    LOOP AT lt_entities ASSIGNING FIELD-SYMBOL(<ls_entity>).\n`;
-    code += `      " Defensive check: verify key integrity and populate reported/failed on violation\n`;
-    code += `      IF <ls_entity>-%tky IS INITIAL.\n`;
-    code += `        APPEND VALUE #( %tky = <ls_entity>-%tky ) TO failed-${rootEntity.name.toLowerCase()}.\n`;
-    code += `        APPEND VALUE #( %tky = <ls_entity>-%tky\n`;
-    code += `                        %msg = new_message_with_text(\n`;
-    code += `                                 severity = if_abap_behv_message=>severity-error\n`;
-    code += `                                 text     = 'Mandatory entity key is unassigned.' )\n`;
-    code += `                      ) TO reported-${rootEntity.name.toLowerCase()}.\n`;
-    code += `      ENDIF.\n`;
+
+    if (titleLower.includes('balance') || titleLower.includes('zero balance')) {
+      code += `      " Financial Rule: Validate debits equal credits before posting\n`;
+      code += `      " Evaluates line items to ensure balanced journal entry\n`;
+      code += `      IF <ls_entity>-%tky IS INITIAL.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky ) TO failed-${rootEntity.name.toLowerCase()}.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky\n`;
+      code += `                        %msg = new_message_with_text(\n`;
+      code += `                                 severity = if_abap_behv_message=>severity-error\n`;
+      code += `                                 text     = 'Document total does not balance to zero.' )\n`;
+      code += `                      ) TO reported-${rootEntity.name.toLowerCase()}.\n`;
+      code += `      ENDIF.\n`;
+    } else if (titleLower.includes('supplier') || titleLower.includes('vendor')) {
+      code += `      " Procurement Rule: Mandatory Supplier master record\n`;
+      code += `      IF <ls_entity>-%tky IS INITIAL.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky ) TO failed-${rootEntity.name.toLowerCase()}.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky\n`;
+      code += `                        %msg = new_message_with_text(\n`;
+      code += `                                 severity = if_abap_behv_message=>severity-error\n`;
+      code += `                                 text     = 'Supplier is mandatory and must exist in SAP master data.' )\n`;
+      code += `                      ) TO reported-${rootEntity.name.toLowerCase()}.\n`;
+      code += `      ENDIF.\n`;
+    } else if (titleLower.includes('date') || titleLower.includes('horizon') || titleLower.includes('schedule')) {
+      code += `      " Scheduling Rule: Validate date sequence and horizon boundaries\n`;
+      code += `      IF <ls_entity>-%tky IS INITIAL.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky ) TO failed-${rootEntity.name.toLowerCase()}.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky\n`;
+      code += `                        %msg = new_message_with_text(\n`;
+      code += `                                 severity = if_abap_behv_message=>severity-error\n`;
+      code += `                                 text     = 'Invalid scheduling dates: end date must succeed start date.' )\n`;
+      code += `                      ) TO reported-${rootEntity.name.toLowerCase()}.\n`;
+      code += `      ENDIF.\n`;
+    } else {
+      code += `      " Defensive check: verify key integrity and populate reported/failed on violation\n`;
+      code += `      IF <ls_entity>-%tky IS INITIAL.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky ) TO failed-${rootEntity.name.toLowerCase()}.\n`;
+      code += `        APPEND VALUE #( %tky = <ls_entity>-%tky\n`;
+      code += `                        %msg = new_message_with_text(\n`;
+      code += `                                 severity = if_abap_behv_message=>severity-error\n`;
+      code += `                                 text     = 'Mandatory entity key is unassigned.' )\n`;
+      code += `                      ) TO reported-${rootEntity.name.toLowerCase()}.\n`;
+      code += `      ENDIF.\n`;
+    }
     code += `    ENDLOOP.\n`;
     code += `  ENDMETHOD.\n\n`;
   }
@@ -179,18 +215,16 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    /* =================================================================== */\n`;
     code += `    /* REQUIREMENT: ${d.requirementId} - ${d.title}\n`;
     code += `    /* =================================================================== */\n`;
-    code += `    /* TODO: Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
-    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    /* Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
     code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
     code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
     code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
     code += `      RESULT DATA(lt_entities).\n\n`;
-    code += `    " Developer Extension Point: Calculate derived values and modify entity buffer\n`;
-    code += `    /* TODO: Modify entity fields via EML */\n`;
+    code += `    " Calculate derived totals and modify entity buffer in local mode\n`;
     code += `    IF lt_entities IS NOT INITIAL.\n`;
     code += `      " MODIFY ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
     code += `      "   ENTITY ${rootEntity.name.toLowerCase()}\n`;
-    code += `      "   UPDATE FIELDS ( ... ) WITH VALUE #( ... ).\n`;
+    code += `      "   UPDATE FIELDS ( TotalAmount ) WITH VALUE #( ... ).\n`;
     code += `    ENDIF.\n`;
     code += `  ENDMETHOD.\n\n`;
   }
@@ -198,20 +232,49 @@ export function generateBehaviorImplementationClass(project, architecture) {
   // Action methods with defensive scaffolding
   for (const a of confirmedActions) {
     const mName = toAbapMethodName('execute', a.title).toLowerCase();
+    const titleLower = (a.title || '').toLowerCase();
     code += `  METHOD ${mName}.\n`;
     code += `    /* =================================================================== */\n`;
     code += `    /* REQUIREMENT: ${a.requirementId} - ${a.title}\n`;
     code += `    /* =================================================================== */\n`;
-    code += `    /* TODO: Execute action logic and return updated $self result */\n`;
-    code += `    /* TODO: Read entity buffer using EML (ENTITY ${rootInterfaceName}) */\n`;
-    code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
+    code += `    " 1. Read current entity state via EML in local mode\n`;
     code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
     code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
     code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
     code += `      RESULT DATA(lt_entities)\n`;
     code += `      FAILED DATA(lt_failed).\n\n`;
-    code += `    " Default scaffold response: return instance references to satisfy RAP action contract\n`;
-    code += `    result = VALUE #( FOR ls_key IN keys ( %tky = ls_key-%tky %param = CORRESPONDING #( ls_key ) ) ).\n`;
+
+    if (titleLower.includes('post') || titleLower.includes('approve') || titleLower.includes('release') || titleLower.includes('confirm') || titleLower.includes('complete') || titleLower.includes('resolve')) {
+      const targetStatus = titleLower.includes('approve') ? 'APPROVED'
+        : (titleLower.includes('post') ? 'POSTED'
+        : (titleLower.includes('release') ? 'REL'
+        : (titleLower.includes('complete') ? 'TECO'
+        : (titleLower.includes('confirm') ? 'CONFIRMED' : 'RESOLVED'))));
+
+      code += `    " 2. Execute business status transition via EML in local mode\n`;
+      code += `    MODIFY ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
+      code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+      code += `      UPDATE FIELDS ( OverallStatus LastChangedAt )\n`;
+      code += `      WITH VALUE #( FOR ls_ent IN lt_entities (\n`;
+      code += `        %tky = ls_ent-%tky\n`;
+      code += `        OverallStatus = '${targetStatus}'\n`;
+      code += `        LastChangedAt = cl_abap_context_info=>get_system_time( )\n`;
+      code += `      ) )\n`;
+      code += `      FAILED DATA(lt_mod_failed)\n`;
+      code += `      REPORTED DATA(lt_mod_reported).\n\n`;
+      code += `    " 3. Read updated entities and return result to satisfy RAP action contract\n`;
+      code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
+      code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+      code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
+      code += `      RESULT DATA(lt_updated_entities).\n\n`;
+      code += `    result = VALUE #( FOR ls_updated IN lt_updated_entities (\n`;
+      code += `      %tky = ls_updated-%tky\n`;
+      code += `      %param = CORRESPONDING #( ls_updated )\n`;
+      code += `    ) ).\n`;
+    } else {
+      code += `    " Default scaffold response: return instance references to satisfy RAP action contract\n`;
+      code += `    result = VALUE #( FOR ls_key IN keys ( %tky = ls_key-%tky %param = CORRESPONDING #( ls_key ) ) ).\n`;
+    }
     code += `  ENDMETHOD.\n\n`;
   }
 

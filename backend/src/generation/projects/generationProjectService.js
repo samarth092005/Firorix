@@ -15,6 +15,7 @@ import {
   LIFECYCLE_STATUSES,
   TARGET_DEPLOYMENT_MODELS
 } from '../contracts/generationProjectContract.js';
+import { sanitizeProjectId } from './generationProjectValidator.js';
 import { defaultGenerationProjectStore } from './generationProjectStore.js';
 import { defaultAssessmentStore, LIFECYCLE_STATES } from '../../services/assessmentStore.js';
 import { defaultGenerationHandoffStore } from '../../services/generationHandoffStore.js';
@@ -204,10 +205,11 @@ export class GenerationProjectService {
       ? payload.projectName
       : `${sourceTCode} — ${cleanDesc}`;
     const projectDescription = cleanDesc || `Clean Core custom RAP Modernization for ${sourceTCode}.`;
+    const cleanTcode = sourceTCode.replace(/[^A-Za-z0-9_-]/gi, '').replace(/^_+|_+$/g, '') || 'APP';
     const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
-    const projectId = payload.projectId || `GEN-${sourceTCode}-${randSuffix}`;
-
-    const cleanTcode = sourceTCode.replace(/[^A-Z0-9]/gi, '') || 'APP';
+    const projectId = payload.projectId
+      ? sanitizeProjectId(payload.projectId)
+      : `GEN-${cleanTcode}-${randSuffix}`;
 
     // Intelligently synthesize authentic enterprise domain archetype
     const archetype = semanticArchetypeEngine.synthesizeArchetype({
@@ -340,7 +342,9 @@ export class GenerationProjectService {
     }
 
     const randSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
-    const projectId = payload.projectId || `GEN-STANDALONE-${randSuffix}`;
+    const projectId = payload.projectId
+      ? sanitizeProjectId(payload.projectId)
+      : `GEN-STANDALONE-${randSuffix}`;
     const tcode = payload.sourceTransactionCode ? payload.sourceTransactionCode.toUpperCase() : 'ZCUSTOM';
 
     const archetype = semanticArchetypeEngine.synthesizeArchetype({

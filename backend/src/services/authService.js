@@ -13,7 +13,10 @@
  */
 
 import crypto from 'node:crypto';
+import util from 'node:util';
 import { JwtVerifier } from '../infrastructure/security/jwtVerifier.js';
+
+const scryptAsync = util.promisify(crypto.scrypt);
 
 export const USER_ROLES = Object.freeze({
   ADMIN: 'ADMIN',
@@ -144,6 +147,184 @@ export const ROLE_PERMISSIONS = Object.freeze({
   ]
 });
 
+export const SCRYPT_CONFIG = Object.freeze({
+  algorithm: 'scrypt',
+  version: 'v1',
+  cost: 16384, // N: CPU/memory cost parameter (2^14). OWASP compliant for containerized environments.
+  blockSize: 8, // r: Block size
+  parallelization: 1, // p: Parallelization parameter
+  keyLength: 32, // 256-bit derived key
+  saltLength: 16, // 128-bit cryptographically secure random salt
+  maxmem: 64 * 1024 * 1024 // 64 MB ceiling, safely within Cloud Foundry memory quotas
+});
+
+/**
+ * Detects the stored hash format based strictly on the stored hash string syntax,
+ * completely independent of the candidate password's pattern.
+ */
+export function detectHashFormat(storedHash) {
+  if (!storedHash || typeof storedHash !== 'string') {
+    return { type: 'INVALID', isLegacy: false, isModern: false };
+  }
+  if (storedHash.startsWith('scrypt:v1:')) {
+    return { type: 'SCRYPT_V1', isLegacy: false, isModern: true };
+  }
+  if (/^[a-f0-9]{64}$/i.test(storedHash)) {
+    return { type: 'SHA256_LEGACY', isLegacy: true, isModern: false };
+  }
+  return { type: 'UNKNOWN', isLegacy: false, isModern: false };
+}
+
+/**
+ * Generates an adaptive cryptographically secure password hash using asynchronous scrypt.
+ * Offloads key derivation to libuv worker threads to keep the Node.js event loop completely responsive.
+ * Output format: scrypt:v1:N=16384,r=8,p=1:<saltHex>:<derivedKeyHex>
+ */
+export async function hashPassword(password, options = {}) {
+  if (password === null || password === undefined || typeof password !== 'string' || password.length === 0) {
+    throw new Error('Password must be a non-empty string.');
+  }
+
+  const cost = options.cost || SCRYPT_CONFIG.cost;
+  const blockSize = options.blockSize || SCRYPT_CONFIG.blockSize;
+  const parallelization = options.parallelization || SCRYPT_CONFIG.parallelization;
+  const keyLength = options.keyLength || SCRYPT_CONFIG.keyLength;
+  const saltLength = options.saltLength || SCRYPT_CONFIG.saltLength;
+
+  const salt = options.salt ? Buffer.from(options.salt, 'hex') : crypto.randomBytes(saltLength);
+  const derivedKey = await scryptAsync(password, salt, keyLength, {
+    N: cost,
+    r: blockSize,
+    p: parallelization,
+    maxmem: SCRYPT_CONFIG.maxmem
+  });
+
+  return `scrypt:${SCRYPT_CONFIG.version}:N=${cost},r=${blockSize},p=${parallelization}:${salt.toString('hex')}:${derivedKey.toString('hex')}`;
+}
+
+/**
+ * Synchronous variant used strictly for deterministic static user seed generation.
+ */
+export function hashPasswordSync(password, options = {}) {
+  if (password === null || password === undefined || typeof password !== 'string' || password.length === 0) {
+    throw new Error('Password must be a non-empty string.');
+  }
+
+  const cost = options.cost || SCRYPT_CONFIG.cost;
+  const blockSize = options.blockSize || SCRYPT_CONFIG.blockSize;
+  const parallelization = options.parallelization || SCRYPT_CONFIG.parallelization;
+  const keyLength = options.keyLength || SCRYPT_CONFIG.keyLength;
+  const saltLength = options.saltLength || SCRYPT_CONFIG.saltLength;
+
+  const salt = options.salt ? Buffer.from(options.salt, 'hex') : crypto.randomBytes(saltLength);
+  const derivedKey = crypto.scryptSync(password, salt, keyLength, {
+    N: cost,
+    r: blockSize,
+    p: parallelization,
+    maxmem: SCRYPT_CONFIG.maxmem
+  });
+
+  return `scrypt:${SCRYPT_CONFIG.version}:N=${cost},r=${blockSize},p=${parallelization}:${salt.toString('hex')}:${derivedKey.toString('hex')}`;
+}
+
+/**
+ * Asynchronously verifies a candidate password against either modern scrypt format or legacy SHA-256 digest.
+ * Offloads key derivation to libuv worker threads to keep the Node.js event loop unblocked.
+ * Employs timingSafeEqual across all comparison branches to prevent timing side channels.
+ */
+export async function verifyPassword(password, storedHash) {
+  if (password === null || password === undefined || typeof password !== 'string' || password.length === 0) {
+    return { valid: false, needsRehash: false, algorithm: 'none', reason: 'EMPTY_PASSWORD' };
+  }
+  if (!storedHash || typeof storedHash !== 'string') {
+    return { valid: false, needsRehash: false, algorithm: 'none', reason: 'INVALID_HASH' };
+  }
+
+  const format = detectHashFormat(storedHash);
+
+  // 1. Modern Scrypt Verification
+  if (format.isModern) {
+    const parts = storedHash.split(':');
+    if (parts.length !== 5) {
+      return { valid: false, needsRehash: false, algorithm: 'scrypt:v1', reason: 'MALFORMED_SCRYPT_HASH' };
+    }
+
+    const [, , paramStr, saltHex, expectedKeyHex] = parts;
+    const params = {};
+    for (const pair of paramStr.split(',')) {
+      const [k, v] = pair.split('=');
+      const num = parseInt(v, 10);
+      if (!Number.isFinite(num) || num <= 0) {
+        return { valid: false, needsRehash: false, algorithm: 'scrypt:v1', reason: 'INVALID_SCRYPT_PARAMETERS' };
+      }
+      params[k] = num;
+    }
+
+    const cost = params.N;
+    const blockSize = params.r;
+    const parallelization = params.p;
+
+    if (!cost || !blockSize || !parallelization) {
+      return { valid: false, needsRehash: false, algorithm: 'scrypt:v1', reason: 'INVALID_SCRYPT_PARAMETERS' };
+    }
+
+    let salt, expectedBuf;
+    try {
+      salt = Buffer.from(saltHex, 'hex');
+      expectedBuf = Buffer.from(expectedKeyHex, 'hex');
+      if (salt.length === 0 || expectedBuf.length === 0) {
+        return { valid: false, needsRehash: false, algorithm: 'scrypt:v1', reason: 'CORRUPTED_HEX_BUFFER' };
+      }
+    } catch {
+      return { valid: false, needsRehash: false, algorithm: 'scrypt:v1', reason: 'INVALID_HEX_DATA' };
+    }
+
+    let derivedBuf;
+    try {
+      derivedBuf = await scryptAsync(password, salt, expectedBuf.length, {
+        N: cost,
+        r: blockSize,
+        p: parallelization,
+        maxmem: SCRYPT_CONFIG.maxmem
+      });
+    } catch (scryptErr) {
+      return { valid: false, needsRehash: false, algorithm: 'scrypt:v1', reason: `SCRYPT_EXECUTION_ERROR: ${scryptErr.message}` };
+    }
+
+    const match = expectedBuf.length === derivedBuf.length && crypto.timingSafeEqual(expectedBuf, derivedBuf);
+    return {
+      valid: match,
+      needsRehash: false,
+      algorithm: 'scrypt:v1',
+      reason: match ? null : 'PASSWORD_MISMATCH'
+    };
+  }
+
+  // 2. Legacy SHA-256 verification (64 hex characters) with transparent migration flag
+  if (format.isLegacy) {
+    const expectedBuf = Buffer.from(storedHash, 'hex');
+
+    // Check exact untrimmed password (preserving Unicode and character boundaries)
+    const exactDigest = crypto.createHash('sha256').update(Buffer.from(password, 'utf8')).digest();
+    let isLegacyMatch = expectedBuf.length === exactDigest.length && crypto.timingSafeEqual(expectedBuf, exactDigest);
+
+    // Legacy fallback check: legacy implementation previously performed String(password).trim()
+    if (!isLegacyMatch) {
+      const trimmedDigest = crypto.createHash('sha256').update(Buffer.from(String(password).trim(), 'utf8')).digest();
+      isLegacyMatch = expectedBuf.length === trimmedDigest.length && crypto.timingSafeEqual(expectedBuf, trimmedDigest);
+    }
+
+    return {
+      valid: isLegacyMatch,
+      needsRehash: isLegacyMatch, // Requires transparent upgrade to modern scrypt hash
+      algorithm: 'sha256-legacy',
+      reason: isLegacyMatch ? 'LEGACY_SHA256_MATCH' : 'PASSWORD_MISMATCH'
+    };
+  }
+
+  return { valid: false, needsRehash: false, algorithm: 'unknown', reason: 'UNSUPPORTED_HASH_FORMAT' };
+}
+
 // Default users with deterministic mock credentials for dev/testing
 export const DEFAULT_USERS = Object.freeze([
   {
@@ -153,7 +334,7 @@ export const DEFAULT_USERS = Object.freeze([
     role: USER_ROLES.ADMIN,
     department: 'SAP Architecture & Platform Governance',
     tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPassword('AdminPass@2026')
+    passwordHash: hashPasswordSync('AdminPass@2026')
   },
   {
     id: 'USR-CONS-01',
@@ -162,7 +343,7 @@ export const DEFAULT_USERS = Object.freeze([
     role: USER_ROLES.SAP_CONSULTANT,
     department: 'SAP Digital Transformation',
     tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPassword('ConsultantPass@2026')
+    passwordHash: hashPasswordSync('ConsultantPass@2026')
   },
   {
     id: 'USR-APPR-01',
@@ -171,7 +352,7 @@ export const DEFAULT_USERS = Object.freeze([
     role: USER_ROLES.APPROVER,
     department: 'Enterprise Governance Committee',
     tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPassword('ApproverPass@2026')
+    passwordHash: hashPasswordSync('ApproverPass@2026')
   },
   {
     id: 'USR-ARCH-01',
@@ -180,7 +361,7 @@ export const DEFAULT_USERS = Object.freeze([
     role: USER_ROLES.LEAD_ARCHITECT,
     department: 'Enterprise Architecture Board',
     tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPassword('ArchitectPass@2026')
+    passwordHash: hashPasswordSync('ArchitectPass@2026')
   },
   {
     id: 'USR-REQ-01',
@@ -189,7 +370,7 @@ export const DEFAULT_USERS = Object.freeze([
     role: USER_ROLES.REQUESTER,
     department: 'Procure to Pay Practice',
     tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPassword('RequesterPass@2026')
+    passwordHash: hashPasswordSync('RequesterPass@2026')
   },
   {
     id: 'USR-VIEW-01',
@@ -198,13 +379,9 @@ export const DEFAULT_USERS = Object.freeze([
     role: USER_ROLES.VIEWER,
     department: 'Internal Audit & Reporting',
     tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPassword('ViewerPass@2026')
+    passwordHash: hashPasswordSync('ViewerPass@2026')
   }
 ]);
-
-export function hashPassword(password) {
-  return crypto.createHash('sha256').update(String(password).trim()).digest('hex');
-}
 
 export class AuthService {
   constructor(options = {}) {
@@ -216,13 +393,15 @@ export class AuthService {
     this.tokenTtlMs = options.tokenTtlMs || 24 * 60 * 60 * 1000; // 24 hours
     this.revokedTokens = new Set();
     this.users = new Map(DEFAULT_USERS.map((u) => [u.email.toLowerCase(), { ...u }]));
+    this.activeMigrations = new Map(); // Concurrency lock: userId -> Promise<string>
   }
 
   /**
-   * Authenticate with email/username and password
+   * Authenticate with email/username and password asynchronously without blocking the event loop.
+   * Supports modern scrypt verification, Unicode passwords, and race-free concurrent legacy re-hashing.
    */
-  login(identifier, password) {
-    if (!identifier || !password) {
+  async login(identifier, password) {
+    if (!identifier || typeof password !== 'string' || password.length === 0) {
       return { success: false, error: 'INVALID_CREDENTIALS', errorMessage: 'Identifier and password are required' };
     }
     const cleanId = String(identifier).trim().toLowerCase();
@@ -243,16 +422,43 @@ export class AuthService {
     if (!user) {
       return { success: false, error: 'INVALID_CREDENTIALS', errorMessage: 'Invalid user credentials' };
     }
-    const inputHash = hashPassword(password);
-    // Allow either the hashed password or standard dev passwords (only outside production)
+
+    const verification = await verifyPassword(password, user.passwordHash);
+
+    // Allow standard dev passwords only strictly outside production
     const isDevPass = (process.env.NODE_ENV !== 'production') && (
       (password === 'admin-dev-password' && user.role === USER_ROLES.ADMIN) ||
       (password === 'consultant-dev-password' && user.role === USER_ROLES.SAP_CONSULTANT) ||
       (password === 'demo-session-2026' && user.role === USER_ROLES.ADMIN) ||
-      (password === 'AdminPass@2026')
+      (password === 'AdminPass@2026' && user.role === USER_ROLES.ADMIN)
     );
-    if (user.passwordHash !== inputHash && !isDevPass) {
+
+    if (!verification.valid && !isDevPass) {
       return { success: false, error: 'INVALID_CREDENTIALS', errorMessage: 'Invalid user credentials' };
+    }
+
+    // Transparent legacy migration (SEC-01) with concurrent race deduplication:
+    if (verification.needsRehash) {
+      let migrationPromise = this.activeMigrations.get(user.id);
+      if (!migrationPromise) {
+        migrationPromise = (async () => {
+          try {
+            const newHash = await hashPassword(password);
+            // Verify stored hash still requires upgrade before mutating (idempotent guard)
+            const currentFormat = detectHashFormat(user.passwordHash);
+            if (currentFormat.isLegacy) {
+              user.passwordHash = newHash;
+              user.passwordAlgorithm = 'scrypt:v1';
+              user.lastRehashedAt = new Date().toISOString();
+            }
+            return user.passwordHash;
+          } finally {
+            this.activeMigrations.delete(user.id);
+          }
+        })();
+        this.activeMigrations.set(user.id, migrationPromise);
+      }
+      await migrationPromise;
     }
 
     const token = this.generateToken(user);
@@ -265,6 +471,61 @@ export class AuthService {
       },
       expiresAt: new Date(Date.now() + this.tokenTtlMs).toISOString()
     };
+  }
+
+  /**
+   * Register a new user with cryptographically secure modern scrypt hash (asynchronous)
+   */
+  async registerUser(userData, plainPassword) {
+    if (!userData || !userData.email) {
+      throw new Error('Valid user data with email is required.');
+    }
+    const cleanEmail = String(userData.email).trim().toLowerCase();
+    if (this.users.has(cleanEmail)) {
+      const err = new Error(`User with email "${cleanEmail}" already exists.`);
+      err.code = 'USER_ALREADY_EXISTS';
+      throw err;
+    }
+    const passwordHash = await hashPassword(plainPassword);
+    const newUser = {
+      ...userData,
+      email: cleanEmail,
+      passwordHash,
+      passwordAlgorithm: 'scrypt:v1',
+      tenantId: userData.tenantId || 'DEFAULT-TENANT-S21'
+    };
+    this.users.set(cleanEmail, newUser);
+    return this.sanitizeUser(newUser);
+  }
+
+  /**
+   * Reset user password with cryptographically secure modern scrypt hash (asynchronous)
+   */
+  async resetPassword(identifier, newPassword) {
+    if (!identifier || typeof newPassword !== 'string' || newPassword.length === 0) {
+      const err = new Error('Identifier and non-empty new password are required.');
+      err.code = 'INVALID_PASSWORD';
+      throw err;
+    }
+    const cleanId = String(identifier).trim().toLowerCase();
+    let user = this.users.get(cleanId);
+    if (!user) {
+      for (const u of this.users.values()) {
+        if (u.email.toLowerCase() === cleanId || u.id.toLowerCase() === cleanId) {
+          user = u;
+          break;
+        }
+      }
+    }
+    if (!user) {
+      const err = new Error(`User "${identifier}" not found.`);
+      err.code = 'USER_NOT_FOUND';
+      throw err;
+    }
+    user.passwordHash = await hashPassword(newPassword);
+    user.passwordAlgorithm = 'scrypt:v1';
+    user.lastPasswordResetAt = new Date().toISOString();
+    return true;
   }
 
   /**
@@ -389,11 +650,11 @@ export class AuthService {
   }
 
   /**
-   * Sanitize user for public return (removes password hashes)
+   * Sanitize user for public return (removes password hashes and security metadata)
    */
   sanitizeUser(user) {
     if (!user) return null;
-    const { passwordHash, ...safe } = user;
+    const { passwordHash, passwordAlgorithm, lastRehashedAt, lastPasswordResetAt, ...safe } = user;
     return {
       username: safe.email ? safe.email.split('@')[0] : (safe.id || 'user'),
       ...safe

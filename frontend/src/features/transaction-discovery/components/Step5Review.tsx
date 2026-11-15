@@ -1,3 +1,4 @@
+import { uiConfig } from '../../../config/uiConfig';
 import React from 'react';
 import {
   TransactionDiscoveryResponse,
@@ -143,7 +144,7 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
             <div>
               <span style={{ color: 'var(--fiori-text-secondary, #64748B)' }}>Data Provenance:</span>{' '}
               <span style={{ fontWeight: 600, color: '#E9730C' }}>
-                {sapMetadata.provenance === 'LIVE_SAP_S21' ? 'Live SAP S21' : 'Curated Demo Fixture'}
+                {sapMetadata?.provenance === 'LIVE_SAP_S21' || sapMetadata?.provenance?.startsWith('LIVE_') ? `Live SAP ${sapMetadata?.systemId || uiConfig.defaultSystem.id}` : 'Curated Demo Fixture'}
               </span>
             </div>
           </div>
@@ -296,7 +297,7 @@ export const Step5Review: React.FC<Step5ReviewProps> = ({
 
       {/* Submission Confirmation Notice */}
       <InformationPanel variant="success" title="Ready for Formal Assessment">
-        Submitting this discovery request will register an active assessment in the <strong>S21 Ledger</strong>,
+        Submitting this discovery request will register an active assessment in the <strong>{sapMetadata?.systemId || uiConfig.defaultSystem.id} Ledger</strong>,
         synthesize technical evidence, and open the full <strong>Assessment Results Workspace</strong>.
       </InformationPanel>
 

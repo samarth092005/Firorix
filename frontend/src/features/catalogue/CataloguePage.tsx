@@ -1,3 +1,4 @@
+import { uiConfig, formatSystemBadge } from '../../config/uiConfig';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -161,12 +162,27 @@ export const CataloguePage: React.FC = () => {
   };
 
   // Helper to format raw SAP role strings into clean, human-readable titles
+  
+  const formatLob = (rawLob?: string) => {
+    if (!rawLob || rawLob === 'General') return 'General';
+    const parts = rawLob.split(',').map(s => s.trim().replace(/^\*\s*/, '')).filter(Boolean);
+    const unique = [...new Set(parts)];
+    if (unique.length <= 1) return unique[0] || 'General';
+    return `${unique[0]} (+${unique.length - 1} more)`;
+  };
+
   const parseRoles = useCallback((rawRole?: string): { display: string[]; extraCount: number } => {
     if (!rawRole) return { display: [], extraCount: 0 };
-    const tokens = rawRole
-      .split(/[\*\$,;]+/)
+    // Clean raw SAP descriptions like "Role Name : Role description. Next Role : Description"
+    const cleaned = rawRole
+      .replace(/Others\s*:\s*Dummy Role/gi, '')
+      .replace(/Dummy Role/gi, '');
+      
+    // Split by role delimiters or colon descriptions
+    const parts = cleaned.split(/\s*:\s*[^;\.\*\$]+(?:[;\.\*\$]|$)/g);
+    const tokens = (parts.length > 1 ? parts : cleaned.split(/[,;\*\$]+/))
       .map((r) => r.trim().replace(/^SAP_BR_/, '').replace(/^SAP_/, '').replace(/_/g, ' '))
-      .filter((r) => r.length > 2 && !r.toLowerCase().includes('dummy'));
+      .filter((r) => r.length > 2 && !['other', 'others', 'dummy'].includes(r.toLowerCase()));
 
     const unique = [...new Set(tokens)];
     const top = unique.slice(0, 2);
@@ -584,7 +600,7 @@ export const CataloguePage: React.FC = () => {
                 SAP Transaction Detected: {searchQuery.trim().toUpperCase()}
               </div>
               <div style={{ fontSize: '12.5px', color: '#334155' }}>
-                Check live SAP S/4HANA (S21-200) Data Dictionary status and view the full verification pop-up.
+                Check live SAP S/4HANA ({formatSystemBadge()}) Data Dictionary status and view the full verification pop-up.
               </div>
             </div>
           </div>
@@ -648,7 +664,7 @@ export const CataloguePage: React.FC = () => {
                 </div>
 
                 <h3 className="app-card-title">{app.appName}</h3>
-                <p className="app-card-desc">{app.description || app.appName}</p>
+                <p className="app-card-desc">{app.description && !app.description.includes("Dummy Role") ? app.description : `Standard SAP ${app.appType || "WebGUI"} application for ${app.appName}.`}</p>
 
                 {roles.display.length > 0 && (
                   <div className="role-pill-list">
@@ -666,7 +682,7 @@ export const CataloguePage: React.FC = () => {
                 <div className="app-card-meta">
                   <div className="meta-row-clean">
                     <span className="meta-label">Line of Business:</span>
-                    <span className="meta-val">{app.lineOfBusiness || app.businessProcess || 'General'}</span>
+                    <span className="meta-val" title={app.lineOfBusiness || app.businessProcess || 'General'}>{formatLob(app.lineOfBusiness || app.businessProcess)}</span>
                   </div>
                   {app.odataServices && app.odataServices.length > 0 && (
                     <div className="meta-row-clean">
@@ -694,8 +710,8 @@ export const CataloguePage: React.FC = () => {
                     className="btn-card-details"
                     onClick={() => navigate(`/catalogue/${encodeURIComponent(app.appId)}`)}
                   >
-                    <ExternalLink size={12} />
                     <span>Details</span>
+                    <ArrowRight size={12} />
                   </button>
                 </div>
               </div>

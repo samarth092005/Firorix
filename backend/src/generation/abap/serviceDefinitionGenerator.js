@@ -5,6 +5,7 @@
  */
 
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
+import { formatCdsViewName, formatChildCdsViewName } from './cdsViewEntityGenerator.js';
 
 export function generateServiceDefinition(project, architecture) {
   const artifacts = [];
@@ -13,16 +14,18 @@ export function generateServiceDefinition(project, architecture) {
   if (!rootEntity) return artifacts;
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '');
-  const rootProjectionName = `ZC_${prefix}`;
-  const serviceName = `ZUI_${prefix}`.toUpperCase();
+  const rootProjectionName = formatCdsViewName('ZC_', prefix);
+  const serviceName = formatCdsViewName('ZUI_', prefix).toUpperCase();
 
   let srvd = `@EndUserText.label: '${rootEntity.businessName || rootEntity.name} Service Definition'\n`;
   srvd += `define service ${serviceName} {\n`;
   srvd += `  expose ${rootProjectionName} as ${rootEntity.name};\n`;
 
   const childEntities = entities.filter((e) => e.entityId !== rootEntity.entityId);
+  const childProjNames = [];
   for (const child of childEntities) {
-    const childProjName = `ZC_${prefix}_${child.name}`;
+    const childProjName = formatChildCdsViewName('ZC_', prefix, child.name);
+    childProjNames.push(childProjName);
     srvd += `  expose ${childProjName} as ${child.name};\n`;
   }
 
@@ -35,7 +38,7 @@ export function generateServiceDefinition(project, architecture) {
     filePath: `src/srvd/${serviceName.toLowerCase()}.srvd.asrvds`,
     content: srvd,
     sourceEntityIds: entities.map((e) => e.entityId),
-    dependencies: [rootProjectionName, ...childEntities.map((c) => `ZC_${prefix}_${c.name}`)]
+    dependencies: [rootProjectionName, ...childProjNames]
   }));
 
   return artifacts;

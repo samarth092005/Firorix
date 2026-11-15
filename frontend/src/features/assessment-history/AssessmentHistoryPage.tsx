@@ -1,46 +1,37 @@
+import { uiConfig, formatSystemBadge } from '../../config/uiConfig';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { assessmentService } from '../../services/assessmentService';
 import { AssessmentRecord, AssessmentResultType, AssessmentLifecycleStatus } from '../../services/contracts/types';
 import {
   PageHeader,
-  Breadcrumbs,
   SectionHeader,
+  DataTable,
+  ColumnDef,
   StatusBadge,
   SearchInput,
   FilterControls,
-  EmptyState,
   LoadingState,
-  DataTable,
-  ColumnDef
+  Breadcrumbs
 } from '../../components/common';
-import {
-  History,
-  SearchCode,
-  ArrowRight,
-  Server,
-  FileCheck2,
-  ExternalLink,
-  Layers,
-  Filter
-} from 'lucide-react';
+import { SearchCode, ExternalLink, Server, ArrowRight, Sparkles } from 'lucide-react';
 
 export const AssessmentHistoryPage: React.FC = () => {
   const navigate = useNavigate();
+
   const [assessments, setAssessments] = useState<AssessmentRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // Filters
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [businessAreaFilter, setBusinessAreaFilter] = useState<string>('ALL');
   const [resultFilter, setResultFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [classificationFilter, setClassificationFilter] = useState<string>('ALL');
+  const [deduplicateLatest, setDeduplicateLatest] = useState<boolean>(true);
 
   useEffect(() => {
     async function loadHistory() {
-      setIsLoading(true);
       try {
+        setIsLoading(true);
         const records = await assessmentService.getAssessments();
         setAssessments(records);
       } catch (err) {
@@ -53,13 +44,46 @@ export const AssessmentHistoryPage: React.FC = () => {
     loadHistory();
   }, []);
 
+  // Normalize business areas
+  const normalizeBusinessArea = (area: string) => {
+    if (!area) return 'General Business Area';
+    return area.replace(/\s*&\s*/g, ' and ').trim();
+  };
+
   const uniqueBusinessAreas = useMemo(() => {
-    const areas = Array.from(new Set(assessments.map((r) => r.businessArea)));
+    const rawAreas = assessments.map((r) => normalizeBusinessArea(r.businessArea));
+    const areas = Array.from(new Set(rawAreas));
     return areas.sort();
   }, [assessments]);
 
+  const processedAssessments = useMemo(() => {
+    let list = [...assessments];
+
+    if (deduplicateLatest) {
+      const map = new Map<string, AssessmentRecord>();
+      list.forEach((item) => {
+        const existing = map.get(item.tcode);
+        if (!existing) {
+          map.set(item.tcode, item);
+        } else {
+          const isBetter =
+            (item.status === 'APPROVED' && existing.status !== 'APPROVED') ||
+            (item.status === 'COMPLETED' && existing.status === 'PENDING_VERIFICATION') ||
+            (item.matchingFioriApp && !existing.matchingFioriApp) ||
+            item.id > existing.id;
+          if (isBetter) {
+            map.set(item.tcode, item);
+          }
+        }
+      });
+      list = Array.from(map.values());
+    }
+
+    return list;
+  }, [assessments, deduplicateLatest]);
+
   const filteredAssessments = useMemo(() => {
-    let result = [...assessments];
+    let result = [...processedAssessments];
 
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase().trim();
@@ -67,7 +91,7 @@ export const AssessmentHistoryPage: React.FC = () => {
         (r) =>
           r.tcode.toLowerCase().includes(q) ||
           r.description.toLowerCase().includes(q) ||
-          r.businessArea.toLowerCase().includes(q) ||
+          normalizeBusinessArea(r.businessArea).toLowerCase().includes(q) ||
           (r.matchingFioriApp &&
             (r.matchingFioriApp.appId.toLowerCase().includes(q) ||
               r.matchingFioriApp.appName.toLowerCase().includes(q)))
@@ -75,7 +99,7 @@ export const AssessmentHistoryPage: React.FC = () => {
     }
 
     if (businessAreaFilter !== 'ALL') {
-      result = result.filter((r) => r.businessArea === businessAreaFilter);
+      result = result.filter((r) => normalizeBusinessArea(r.businessArea) === businessAreaFilter);
     }
 
     if (resultFilter !== 'ALL') {
@@ -91,20 +115,21 @@ export const AssessmentHistoryPage: React.FC = () => {
     }
 
     return result;
-  }, [assessments, searchTerm, businessAreaFilter, resultFilter, statusFilter, classificationFilter]);
+  }, [processedAssessments, searchTerm, businessAreaFilter, resultFilter, statusFilter, classificationFilter]);
 
+  // Consolidated 5-Column layout: Prevents right-side overflow and text clipping
   const columns: ColumnDef<AssessmentRecord>[] = [
     {
       key: 'tcode',
       header: 'T-Code',
-      width: '120px',
+      width: '110px',
       sortable: true,
       render: (r) => (
         <div>
-          <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--fiori-navy, #102A43)' }}>
+          <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', color: 'var(--fiori-navy, #102A43)', fontSize: '13px' }}>
             {r.tcode}
           </span>
-          <div style={{ fontSize: '10px', color: 'var(--fiori-text-secondary, #64748B)' }}>
+          <div style={{ fontSize: '10px', color: 'var(--fiori-text-secondary, #64748B)', marginTop: '2px', fontWeight: 600 }}>
             {r.classification}
           </div>
         </div>
@@ -112,63 +137,38 @@ export const AssessmentHistoryPage: React.FC = () => {
     },
     {
       key: 'description',
-      header: 'Description & Repository',
-      width: '260px',
+      header: 'Transaction Name',
       sortable: true,
       render: (r) => (
-        <div>
-          <div style={{ fontWeight: 600, color: 'var(--fiori-text-primary, #1B2838)' }}>{r.description}</div>
-          <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)', fontFamily: 'var(--font-mono)' }}>
-            {r.programName} ({r.packageName})
-          </div>
-        </div>
+        <span style={{ fontWeight: 600, color: 'var(--fiori-text-primary, #1B2838)', fontSize: '13px' }}>
+          {r.description}
+        </span>
       )
-    },
-    {
-      key: 'businessArea',
-      header: 'Business Area',
-      width: '180px',
-      sortable: true,
-      render: (r) => (
-        <div>
-          <div style={{ fontSize: '12px', fontWeight: 500 }}>{r.businessArea}</div>
-          {r.subArea && (
-            <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>{r.subArea}</div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'assessmentResult',
-      header: 'Assessment Result',
-      width: '180px',
-      sortable: true,
-      render: (r) => <StatusBadge status={r.assessmentResult} size="sm" />
     },
     {
       key: 'matchingFioriApp',
-      header: 'Matching Fiori App',
-      width: '240px',
+      header: 'Target / Modernized App',
       render: (r) => {
         if (!r.matchingFioriApp) {
           return (
             <span style={{ fontSize: '12px', color: 'var(--fiori-text-secondary, #64748B)', fontStyle: 'italic' }}>
-              None verified
+              None verified (Custom RAP)
             </span>
           );
         }
         return (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ maxWidth: '280px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
               <span
                 style={{
                   fontSize: '11px',
                   fontWeight: 700,
                   fontFamily: 'var(--font-mono)',
                   color: 'var(--fiori-primary, #0A6ED1)',
-                  backgroundColor: 'var(--fiori-info-bg)',
+                  backgroundColor: 'var(--fiori-info-bg, #EFF6FF)',
                   padding: '1px 5px',
-                  borderRadius: '2px'
+                  borderRadius: '3px',
+                  border: '1px solid rgba(10, 110, 209, 0.2)'
                 }}
               >
                 {r.matchingFioriApp.appId}
@@ -185,43 +185,99 @@ export const AssessmentHistoryPage: React.FC = () => {
       }
     },
     {
-      key: 'lastAssessed',
-      header: 'Last Assessed',
-      width: '130px',
+      key: 'assessmentResult',
+      header: 'Outcome & Status',
+      width: '190px',
       sortable: true,
-      render: (r) => (
-        <span style={{ fontSize: '12px', color: 'var(--fiori-text-secondary, #64748B)', whiteSpace: 'nowrap' }}>
-          {r.lastAssessed}
-        </span>
-      )
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      width: '130px',
-      sortable: true,
-      render: (r) => <StatusBadge status={r.status} size="sm" />
+      render: (r) => {
+        const getStatusColor = (s: string) => {
+          if (s === 'APPROVED' || s === 'COMPLETED') return '#059669';
+          if (s === 'PENDING_VERIFICATION') return '#D97706';
+          return '#64748B';
+        };
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+            <StatusBadge status={r.assessmentResult} size="sm" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', fontWeight: 500, color: getStatusColor(r.status) }}>
+              <span
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: getStatusColor(r.status)
+                }}
+              />
+              <span>{r.status.replace(/_/g, ' ')}</span>
+            </div>
+          </div>
+        );
+      }
     },
     {
       key: 'actions',
       header: 'Action',
-      width: '150px',
+      width: '100px',
       align: 'right',
-      render: (r) => (
-        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-          <button
-            type="button"
-            className="fiori-btn fiori-btn-subtle"
-            style={{ height: '28px', padding: '0 8px', fontSize: '11px' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/assessment-results?id=${r.id}`);
-            }}
-          >
-            View Details
-          </button>
-        </div>
-      )
+      render: (r) => {
+        const isCustomBuild =
+          ((r.assessmentResult as any) === 'CUSTOM_BUILD') ||
+          ((r.assessmentResult as any) === 'CUSTOM_RAP_REQUIRED') ||
+          Boolean(r.matchingFioriApp?.appId?.startsWith('GEN-'));
+
+        return (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '4px' }}>
+            {isCustomBuild ? (
+              <button
+                type="button"
+                className="fiori-btn fiori-btn-subtle"
+                style={{
+                  height: '28px',
+                  padding: '0 10px',
+                  fontSize: '11px',
+                  color: 'var(--fiori-primary, #0070F2)',
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(0, 112, 242, 0.08)',
+                  borderRadius: '4px',
+                  border: '1px solid rgba(0, 112, 242, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/generation-studio');
+                }}
+                title="Open in Generation Studio"
+              >
+                <Sparkles size={12} />
+                <span>Studio</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="fiori-btn fiori-btn-subtle"
+                style={{
+                  height: '28px',
+                  padding: '0 8px',
+                  fontSize: '11px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  color: 'var(--fiori-text-secondary, #64748B)'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/assessment-results?id=${r.id}`);
+                }}
+              >
+                <span>View</span>
+                <ArrowRight size={11} />
+              </button>
+            )}
+          </div>
+        );
+      }
     }
   ];
 
@@ -251,7 +307,7 @@ export const AssessmentHistoryPage: React.FC = () => {
             }}
           >
             <Server size={12} color="var(--fiori-primary, #0070F2)" />
-            S21 (200) • S/4HANA 2023
+            {formatSystemBadge(undefined, undefined, ' (')} • S/4HANA 2023
           </span>
         }
         actions={[
@@ -271,13 +327,26 @@ export const AssessmentHistoryPage: React.FC = () => {
           border: '1px solid var(--fiori-border, #E2E8F0)',
           borderRadius: 'var(--radius-md, 10px)',
           padding: '22px',
-          boxShadow: 'var(--fiori-shadow-card)'
+          boxShadow: 'var(--fiori-shadow-card)',
+          overflowX: 'auto'
         }}
       >
-        <SectionHeader
-          title="All Recorded Assessments"
-          description={`Showing ${filteredAssessments.length} of ${assessments.length} transactions assessed for S21 S/4HANA 2023.`}
-        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+          <SectionHeader
+            title="All Recorded Assessments"
+            description={`Showing ${filteredAssessments.length} of ${processedAssessments.length} unique transactions assessed for ${uiConfig.defaultSystem.id} S/4HANA 2023.`}
+          />
+          {/* Deduplication Toggle */}
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--fiori-text-secondary, #64748B)', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={deduplicateLatest}
+              onChange={(e) => setDeduplicateLatest(e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            <span>Group duplicates (show latest per T-Code)</span>
+          </label>
+        </div>
 
         {/* Search & Filter Toolbar */}
         <div
@@ -297,72 +366,66 @@ export const AssessmentHistoryPage: React.FC = () => {
             width="320px"
           />
 
-          <FilterControls
-            groups={[
-              {
-                id: 'businessArea',
-                label: 'Business Area',
-                selectedValue: businessAreaFilter,
-                options: [
-                  { label: 'All Business Areas', value: 'ALL' },
-                  ...uniqueBusinessAreas.map((b) => ({ label: b, value: b }))
-                ]
-              },
-              {
-                id: 'assessmentResult',
-                label: 'Assessment Result',
-                selectedValue: resultFilter,
-                options: [
-                  { label: 'All Results', value: 'ALL' },
-                  { label: 'Explicit Successor', value: 'EXPLICIT_SUCCESSOR' },
-                  { label: 'SAP GUI for HTML', value: 'SAP_GUI_HTML' },
-                  { label: 'Functional Alternative', value: 'FUNCTIONAL_ALTERNATIVE' },
-                  { label: 'Pending Verification', value: 'PENDING_VERIFICATION' },
-                  { label: 'No Verified Match', value: 'NO_VERIFIED_MATCH' }
-                ]
-              },
-              {
-                id: 'classification',
-                label: 'Type',
-                selectedValue: classificationFilter,
-                options: [
-                  { label: 'All Types', value: 'ALL' },
-                  { label: 'Standard SAP', value: 'STANDARD' },
-                  { label: 'Custom (Z/Y)', value: 'CUSTOM' }
-                ]
-              },
-              {
-                id: 'status',
-                label: 'Status',
-                selectedValue: statusFilter,
-                options: [
-                  { label: 'All Statuses', value: 'ALL' },
-                  { label: 'Completed', value: 'COMPLETED' },
-                  { label: 'Pending Verification', value: 'PENDING_VERIFICATION' }
-                ]
-              }
-            ]}
-            onFilterChange={(groupId, value) => {
-              if (groupId === 'businessArea') setBusinessAreaFilter(value);
-              if (groupId === 'assessmentResult') setResultFilter(value);
-              if (groupId === 'classification') setClassificationFilter(value);
-              if (groupId === 'status') setStatusFilter(value);
-            }}
-            hasActiveFilters={
-              searchTerm !== '' ||
-              businessAreaFilter !== 'ALL' ||
-              resultFilter !== 'ALL' ||
-              classificationFilter !== 'ALL' ||
-              statusFilter !== 'ALL'
-            }
-            onReset={() => {
-              setSearchTerm('');
-              setBusinessAreaFilter('ALL');
-              setResultFilter('ALL');
-              setClassificationFilter('ALL');
-              setStatusFilter('ALL');
-            }}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <FilterControls
+              groups={[
+                {
+                  id: 'result',
+                  label: 'Outcome',
+                  selectedValue: resultFilter,
+                  options: [
+                    { label: 'All Outcomes', value: 'ALL' },
+                    { label: 'Explicit Successor', value: 'EXPLICIT_SUCCESSOR' },
+                    { label: 'Custom Build (RAP)', value: 'CUSTOM_RAP_REQUIRED' },
+                    { label: 'SAP GUI for HTML', value: 'WEBGUI_COMPATIBLE' },
+                    { label: 'Pending Verification', value: 'PENDING_VERIFICATION' }
+                  ]
+                },
+                {
+                  id: 'classification',
+                  label: 'Type',
+                  selectedValue: classificationFilter,
+                  options: [
+                    { label: 'All Types', value: 'ALL' },
+                    { label: 'Standard SAP', value: 'STANDARD' },
+                    { label: 'Custom (Z/Y)', value: 'CUSTOM' }
+                  ]
+                },
+                {
+                  id: 'status',
+                  label: 'Status',
+                  selectedValue: statusFilter,
+                  options: [
+                    { label: 'All Statuses', value: 'ALL' },
+                    { label: 'Completed', value: 'COMPLETED' },
+                    { label: 'Approved', value: 'APPROVED' },
+                    { label: 'Pending Verification', value: 'PENDING_VERIFICATION' }
+                  ]
+                }
+              ]}
+              onFilterChange={(groupId, value) => {
+                if (groupId === 'result') setResultFilter(value);
+                if (groupId === 'status') setStatusFilter(value);
+                if (groupId === 'classification') setClassificationFilter(value);
+              }}
+            />
+
+            {(searchTerm || resultFilter !== 'ALL' || classificationFilter !== 'ALL' || statusFilter !== 'ALL') && (
+              <button
+                type="button"
+                className="fiori-btn fiori-btn-subtle"
+                style={{ height: '32px', fontSize: '12px', color: 'var(--fiori-primary, #0070F2)' }}
+                onClick={() => {
+                  setSearchTerm('');
+                  setResultFilter('ALL');
+                  setClassificationFilter('ALL');
+                  setStatusFilter('ALL');
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
 
         <DataTable
@@ -371,8 +434,8 @@ export const AssessmentHistoryPage: React.FC = () => {
           keyExtractor={(item) => item.id}
           onRowClick={(item) => navigate(`/assessment-results?id=${item.id}`)}
           pageSize={10}
-          defaultSortKey="lastAssessed"
-          defaultSortOrder="desc"
+          defaultSortKey="tcode"
+          defaultSortOrder="asc"
         />
       </div>
     </div>

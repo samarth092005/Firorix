@@ -9,7 +9,7 @@
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
 import { RAP_PROFILES } from '../architecture/architectureContract.js';
 
-function formatCdsViewName(prefixTag, rawName) {
+export function formatCdsViewName(prefixTag, rawName) {
   const clean = String(rawName || 'ENTITY')
     .replace(/^Z_[IRC]_/i, '')
     .replace(/^Z[IRC]_/i, '')
@@ -19,7 +19,7 @@ function formatCdsViewName(prefixTag, rawName) {
   return `${prefixTag}${body}`;
 }
 
-function formatChildCdsViewName(prefixTag, rootName, childName) {
+export function formatChildCdsViewName(prefixTag, rootName, childName) {
   const cleanRoot = String(rootName || 'ROOT')
     .replace(/^Z_[IRC]_/i, '')
     .replace(/^Z[IRC]_/i, '')

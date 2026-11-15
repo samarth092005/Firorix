@@ -1,0 +1,46 @@
+# Cloud Foundry Deployment Ignore File (.cfignore)
+# Minimizes droplet size and prevents leakage of local credentials and transient files.
+
+# Version control
+.git/
+.gitignore
+
+# Documentation and audit reports
+docs/
+*.md
+!README.md
+
+# Development scratch files and IDE configurations
+scratch/
+.vscode/
+.idea/
+*.log
+
+# Test suites and test files (not required for runtime production droplet)
+backend/test/
+frontend/src/**/__tests__/
+*.test.js
+*.test.ts
+*.test.tsx
+*.spec.js
+*.spec.ts
+
+# Transient runtime databases and cache
+backend/data/db/
+backend/data/embedded-postgres/
+backend/data/pg_data/
+backend/data/backups/
+backend/data/quarantine/
+backend/data/generation-projects/
+data/db/
+data/artifacts/
+
+# Local dependencies (re-installed cleanly during Cloud Foundry buildpack staging)
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Local environment secrets (STRICTLY PROHIBITED IN DROPLET)
+.env
+.env.*
+*.env

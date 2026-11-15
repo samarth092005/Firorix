@@ -143,9 +143,10 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
   }
 
   // 3. GET /api/v1/generation/projects/:id/activity - Project Activity History
-  if (req.method === 'GET' && url.pathname.endsWith('/activity')) {
+  const activityMatch = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/activity$/);
+  if (req.method === 'GET' && activityMatch) {
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
-    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/activity'.length));
+    const projectId = decodeURIComponent(activityMatch[1]);
     try {
       const activity = await generationProjectService.getProjectActivity(projectId, currentUser);
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -159,9 +160,10 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
   }
 
   // 4. GET /api/v1/generation/projects/:id/summary - Project Summary
-  if (req.method === 'GET' && url.pathname.endsWith('/summary')) {
+  const summaryMatch = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/summary$/);
+  if (req.method === 'GET' && summaryMatch) {
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
-    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/summary'.length));
+    const projectId = decodeURIComponent(summaryMatch[1]);
     try {
       const summary = await generationProjectService.getProjectSummary(projectId, currentUser);
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -297,9 +299,10 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
   const singleProjectMatch = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)$/);
 
   // S7 API: GET /api/v1/generation/projects/:id/readiness
-  if (req.method === 'GET' && url.pathname.endsWith('/readiness')) {
+  const readinessMatch = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/readiness$/);
+  if (req.method === 'GET' && readinessMatch) {
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
-    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/readiness'.length));
+    const projectId = decodeURIComponent(readinessMatch[1]);
     try {
       const project = await generationProjectService.getProject(projectId, currentUser);
       if (!project) {
@@ -318,9 +321,10 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
   }
 
   // S7 API: GET /api/v1/generation/projects/:id/versions - List specification versions
-  if (req.method === 'GET' && url.pathname.endsWith('/versions')) {
+  const versionsMatch = url.pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/versions$/);
+  if (req.method === 'GET' && versionsMatch) {
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
-    const projectId = decodeURIComponent(url.pathname.slice('/api/v1/generation/projects/'.length, -'/versions'.length));
+    const projectId = decodeURIComponent(versionsMatch[1]);
     try {
       const versions = await defaultSpecificationVersioningService.listVersions(projectId);
       res.writeHead(200, { 'Content-Type': 'application/json' });
