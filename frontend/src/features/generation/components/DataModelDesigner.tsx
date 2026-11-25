@@ -413,62 +413,8 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
 
   const getActiveModelForPattern = () => {
     if (!suggestedModel) return null;
-    if (selectedArchetypePattern === 'MASTER_DETAIL') {
-      return suggestedModel;
-    }
-    if (selectedArchetypePattern === 'FLAT_OBJECT') {
-      const root = suggestedModel.entities?.[0];
-      const items = suggestedModel.entities?.[1];
-      if (!root) return suggestedModel;
-      const combinedFields = [
-        ...(root.fields || []),
-        ...(items?.fields || []).map((f: any) => ({
-          ...f,
-          name: f.name === 'ID' || f.name === 'UUID' ? `Item${f.name}` : f.name,
-          isKey: false
-        }))
-      ];
-      return {
-        ...suggestedModel,
-        rootEntity: root.name,
-        entities: [{ ...root, fields: combinedFields }],
-        relationships: []
-      };
-    }
-    if (selectedArchetypePattern === 'ANALYTICAL') {
-      const root = suggestedModel.entities?.[0];
-      if (!root) return suggestedModel;
-      const analyticalFields = [
-        ...(root.fields || []),
-        {
-          id: 'FLD-MEASURE-01',
-          name: 'TotalQuantity',
-          dataType: 'QUANTITY',
-          length: 13,
-          scale: 3,
-          isKey: false,
-          isNullable: true,
-          semanticRole: 'MEASURE',
-          provenance: 'INFERRED_PATTERN'
-        },
-        {
-          id: 'FLD-MEASURE-02',
-          name: 'TotalAmount',
-          dataType: 'CURR',
-          length: 15,
-          scale: 2,
-          isKey: false,
-          isNullable: true,
-          semanticRole: 'MEASURE',
-          provenance: 'INFERRED_PATTERN'
-        }
-      ];
-      return {
-        ...suggestedModel,
-        rootEntity: `${root.name}_Cube`,
-        entities: [{ ...root, name: `${root.name}_Cube`, fields: analyticalFields }],
-        relationships: []
-      };
+    if (suggestedModel.variants && suggestedModel.variants[selectedArchetypePattern]) {
+      return suggestedModel.variants[selectedArchetypePattern];
     }
     return suggestedModel;
   };
@@ -566,25 +512,30 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
             <ShieldCheck size={16} /> {isValidating ? 'Validating...' : 'Validate Data Model'}
           </button>
 
-          {validationReport && validationReport.errorCount === 0 && (
-            <button
-              onClick={() => onNavigateView('architecture')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                background: '#16a34a',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Handoff to Architecture <ArrowRight size={16} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={async () => {
+              if (!validationReport) {
+                await handleValidate();
+              }
+              onNavigateView('architecture');
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              background: validationReport && validationReport.errorCount === 0 ? '#16a34a' : '#0284c7',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title="Proceed to RAP Architecture Designer"
+          >
+            Handoff to Architecture <ArrowRight size={16} />
+          </button>
         </div>
       </div>
 

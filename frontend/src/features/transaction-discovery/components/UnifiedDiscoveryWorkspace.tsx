@@ -128,9 +128,31 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [primaryScenario, setPrimaryScenario] = useState<string>('');
   const [criticality, setCriticality] = useState<'HIGH' | 'MEDIUM' | 'LOW'>('HIGH');
   const [activeCategory, setActiveCategory] = useState<'ALL' | 'FI' | 'MM' | 'SD' | 'CUSTOM'>('ALL');
+  const [isScopeCustomized, setIsScopeCustomized] = useState<boolean>(false);
 
   // Available systems from adapter
   const availableSystems = mockSapAdapter.getAvailableSystems();
+
+  const handleResetSearch = () => {
+    setTcode('');
+    setMetadata(null);
+    setCandidates([]);
+    setSelectedCandidate(null);
+    setProgressState('IDLE');
+    setSearchError(null);
+  };
+
+  const handleSystemChange = (newSysId: string) => {
+    const sys = availableSystems.find((s) => s.systemId === newSysId);
+    if (sys) {
+      setSystemId(sys.systemId);
+      setClient(sys.client || '200');
+      setTargetRelease(sys.release || 'SAP S/4HANA 2023 Private Edition');
+      if (tcode.trim()) {
+        executeDiscovery(tcode, sys.systemId);
+      }
+    }
+  };
 
   const PRESET_CATEGORIES: Record<string, Array<{ tcode: string; desc: string; mod: string }>> = {
     ALL: [
@@ -280,14 +302,16 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         setIsVerificationModalOpen(false);
       }
 
-      // Pre-populate business scope if a preset matches
-      const preset = PRESET_SCENARIOS[cleanTcode];
-      if (preset) {
-        setBusinessProcess(preset.businessProcess);
-        setPrimaryScenario(preset.defaultScenario);
-      } else {
-        setBusinessProcess(cleanTcode.startsWith('Z') ? 'Custom Extension' : 'General Core Processing');
-        setPrimaryScenario(`Operational execution of transaction ${cleanTcode}`);
+      // Pre-populate business scope if a preset matches and user hasn't customized it
+      if (!isScopeCustomized) {
+        const preset = PRESET_SCENARIOS[cleanTcode];
+        if (preset) {
+          setBusinessProcess(preset.businessProcess);
+          setPrimaryScenario(preset.defaultScenario);
+        } else {
+          setBusinessProcess(cleanTcode.startsWith('Z') ? 'Custom Extension' : 'General Core Processing');
+          setPrimaryScenario(`Operational execution of transaction ${cleanTcode}`);
+        }
       }
     } catch (err: any) {
       console.error('Error during transaction discovery:', err);
@@ -638,14 +662,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             <select
               className="fiori-select"
               value={systemId}
-              onChange={(e) => {
-                const sys = availableSystems.find((s) => s.systemId === e.target.value);
-                if (sys) {
-                  setSystemId(sys.systemId);
-                  setClient(sys.client || '200');
-                  setTargetRelease(sys.release || 'SAP S/4HANA 2023 Private Edition');
-                }
-              }}
+              onChange={(e) => handleSystemChange(e.target.value)}
               style={{ width: '100%', boxSizing: 'border-box', height: '42px', fontSize: '12.5px', borderRadius: '8px' }}
             >
               {availableSystems.map((sys) => (
@@ -656,29 +673,50 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             </select>
           </div>
 
-          {/* Inspect Button */}
-          <button
-            type="submit"
-            className="fiori-btn fiori-btn-primary"
-            disabled={isLoading || !tcode.trim()}
-            style={{
-              height: '42px',
-              padding: '0 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '13.5px',
-              fontWeight: 700,
-              backgroundColor: 'var(--fiori-primary, #0066FF)',
-              color: '#FFFFFF',
-              borderRadius: '8px',
-              boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            {isLoading ? <Clock size={16} /> : <Zap size={16} />}
-            {isLoading ? 'Inspecting...' : 'Inspect & Match'}
-          </button>
+          {/* Inspect Button & Quick Reset */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              type="submit"
+              className="fiori-btn fiori-btn-primary"
+              disabled={isLoading || !tcode.trim()}
+              style={{
+                height: '42px',
+                padding: '0 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '13.5px',
+                fontWeight: 700,
+                backgroundColor: 'var(--fiori-primary, #0066FF)',
+                color: '#FFFFFF',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {isLoading ? <Clock size={16} /> : <Zap size={16} />}
+              {isLoading ? 'Inspecting...' : 'Inspect & Match'}
+            </button>
+
+            {tcode.trim() && (
+              <button
+                type="button"
+                className="fiori-btn fiori-btn-secondary"
+                onClick={handleResetSearch}
+                style={{
+                  height: '42px',
+                  padding: '0 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontSize: '12px',
+                  borderRadius: '8px'
+                }}
+                title="Reset search and metadata"
+              >
+                Reset
+              </button>
+            )}
+          </div>
         </form>
 
         {/* Explicit Progress State Indicator */}
@@ -1652,7 +1690,10 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                       type="text"
                       className="fiori-input"
                       value={businessProcess}
-                      onChange={(e) => setBusinessProcess(e.target.value)}
+                      onChange={(e) => {
+                        setBusinessProcess(e.target.value);
+                        setIsScopeCustomized(true);
+                      }}
                       style={{ fontSize: '12px' }}
                     />
                   </div>
@@ -1682,7 +1723,10 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                     type="text"
                     className="fiori-input"
                     value={primaryScenario}
-                    onChange={(e) => setPrimaryScenario(e.target.value)}
+                    onChange={(e) => {
+                      setPrimaryScenario(e.target.value);
+                      setIsScopeCustomized(true);
+                    }}
                     placeholder="e.g. Vendor open item clearing and payment execution"
                     style={{ fontSize: '12px' }}
                   />

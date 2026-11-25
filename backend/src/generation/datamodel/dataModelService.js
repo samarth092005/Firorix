@@ -155,12 +155,147 @@ export class DataModelService {
       createRelationshipRecord(rel)
     );
 
-    const suggestedDataModel = {
+    // 1. MASTER_DETAIL (2-Tier Header + Item Composition)
+    const masterDetailModel = {
       specVersion: 1,
-      rootEntity: entities[0].name,
+      rootEntity: entities[0]?.name || 'RootEntity',
       entities,
       relationships,
-      missingEvidence,
+      missingEvidence
+    };
+
+    // 2. FLAT_OBJECT (1-Tier Flat Normalized Entity)
+    const rootEnt = entities[0] || { name: 'RootEntity', fields: [] };
+    const childEnt = entities[1];
+    const flatFields = [...(rootEnt.fields || [])];
+    const existingFieldNames = new Set(flatFields.map((f) => f.name.toUpperCase()));
+
+    if (childEnt && Array.isArray(childEnt.fields)) {
+      for (const f of childEnt.fields) {
+        let fName = f.name;
+        if (existingFieldNames.has(fName.toUpperCase())) {
+          fName = `Item${fName}`;
+        }
+        if (!existingFieldNames.has(fName.toUpperCase())) {
+          existingFieldNames.add(fName.toUpperCase());
+          flatFields.push(
+            createFieldRecord({
+              ...f,
+              fieldId: `FLD-${fName.toUpperCase()}`,
+              name: fName,
+              isKey: false,
+              provenance: f.provenance || 'INFERRED_PATTERN'
+            })
+          );
+        }
+      }
+    }
+
+    const flatEntity = createEntityRecord({
+      ...rootEnt,
+      entityId: `ENT-${rootEnt.name.toUpperCase()}-FLAT`,
+      name: rootEnt.name,
+      description: `${rootEnt.description || rootEnt.name} (Single Object Flat Model)`,
+      fields: flatFields
+    });
+
+    const flatObjectModel = {
+      specVersion: 1,
+      rootEntity: flatEntity.name,
+      entities: [flatEntity],
+      relationships: [],
+      missingEvidence
+    };
+
+    // 3. ANALYTICAL (Analytical Reporting Cube with Dimensions & Measures)
+    const cubeFields = [];
+    for (const f of rootEnt.fields || []) {
+      if (f.isKey || ['CompanyCode', 'FiscalYear', 'Status', 'CreatedAt', 'PostingDate', 'Plant', 'SalesOrganization'].includes(f.name)) {
+        cubeFields.push(createFieldRecord({ ...f }));
+      }
+    }
+    // Ensure CurrencyCode and UnitOfMeasure references exist
+    if (!cubeFields.some((f) => f.name.toUpperCase() === 'CURRENCYCODE')) {
+      cubeFields.push(
+        createFieldRecord({
+          fieldId: 'FLD-CUKY-REF',
+          name: 'CurrencyCode',
+          type: 'abap.cuky',
+          length: 5,
+          isKey: false,
+          isNullable: true,
+          semanticRole: 'CURRENCY_KEY',
+          provenance: 'INFERRED_PATTERN'
+        })
+      );
+    }
+    if (!cubeFields.some((f) => f.name.toUpperCase() === 'UNITOFMEASURE')) {
+      cubeFields.push(
+        createFieldRecord({
+          fieldId: 'FLD-UNIT-REF',
+          name: 'UnitOfMeasure',
+          type: 'abap.unit',
+          length: 3,
+          isKey: false,
+          isNullable: true,
+          semanticRole: 'UNIT_KEY',
+          provenance: 'INFERRED_PATTERN'
+        })
+      );
+    }
+    // Add Measure fields
+    cubeFields.push(
+      createFieldRecord({
+        fieldId: 'FLD-MEASURE-AMOUNT',
+        name: 'TotalAmount',
+        type: 'abap.curr',
+        length: 15,
+        scale: 2,
+        isKey: false,
+        isNullable: true,
+        cukyField: 'CurrencyCode',
+        semanticRole: 'MEASURE',
+        provenance: 'INFERRED_PATTERN'
+      }),
+      createFieldRecord({
+        fieldId: 'FLD-MEASURE-QTY',
+        name: 'TotalQuantity',
+        type: 'abap.quan',
+        length: 13,
+        scale: 3,
+        isKey: false,
+        isNullable: true,
+        unitField: 'UnitOfMeasure',
+        semanticRole: 'MEASURE',
+        provenance: 'INFERRED_PATTERN'
+      })
+    );
+
+    const cubeEntity = createEntityRecord({
+      ...rootEnt,
+      entityId: `ENT-${rootEnt.name.toUpperCase()}-CUBE`,
+      name: `${rootEnt.name}_Cube`,
+      description: `${rootEnt.description || rootEnt.name} (Analytical Reporting Cube)`,
+      fields: cubeFields
+    });
+
+    const analyticalModel = {
+      specVersion: 1,
+      rootEntity: cubeEntity.name,
+      entities: [cubeEntity],
+      relationships: [],
+      missingEvidence
+    };
+
+    const variants = {
+      MASTER_DETAIL: masterDetailModel,
+      FLAT_OBJECT: flatObjectModel,
+      ANALYTICAL: analyticalModel
+    };
+
+    const suggestedDataModel = {
+      ...masterDetailModel,
+      variants,
       provenanceSummary: {
         verifiedCount: entities.flatMap((e) => e.fields).filter((f) => f.provenance === 'LIVE_SAP_S21' || f.provenance === 'VERIFIED_LOCAL_METADATA').length,
         inferredCount: entities.flatMap((e) => e.fields).filter((f) => f.provenance !== 'LIVE_SAP_S21' && f.provenance !== 'VERIFIED_LOCAL_METADATA').length,
@@ -192,10 +327,12 @@ export class DataModelService {
 
     const newEntity = createEntityRecord(entityPayload);
 
-    // If defining a new ROOT entity, replace any placeholder starter root entity
+    // If defining a new ROOT entity, replace any placeholder starter archetype entities
     if (newEntity.entityType === ENTITY_TYPES.ROOT || newEntity.isRoot) {
-      if (entities.length === 1 && entities[0].id?.endsWith('-ROOT')) {
-        entities.splice(0, 1);
+      const isStarter = entities.some((e) => e.id?.includes('-HDR') || e.id?.endsWith('-ROOT') || e.name.startsWith('Z_I_'));
+      if (isStarter) {
+        entities.length = 0;
+        relationships.length = 0;
       }
     }
 
@@ -221,7 +358,14 @@ export class DataModelService {
       }
     }
 
-    entities.push(newEntity);
+    const existingIndex = entities.findIndex(
+      (e) => e.name.toUpperCase() === newEntity.name.toUpperCase() || ((newEntity.isRoot || newEntity.entityType === ENTITY_TYPES.ROOT) && (e.isRoot || e.entityType === ENTITY_TYPES.ROOT))
+    );
+    if (existingIndex !== -1) {
+      entities[existingIndex] = newEntity;
+    } else {
+      entities.push(newEntity);
+    }
 
     const nextSpec = {
       ...currentSpec,

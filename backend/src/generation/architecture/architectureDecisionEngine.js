@@ -148,12 +148,13 @@ export class ArchitectureDecisionEngine {
     const authStrategy = AUTHORIZATION_STRATEGIES.CHECK_DCL_AND_RAP_MASTER;
     const serviceProtocol = overrides.serviceProtocol || SERVICE_PROTOCOLS.ODATA_V4_UI;
 
-    // Propose table names following clean core conventions
+    // Propose table names following clean core conventions (clamped strictly to 16 chars for SAP DDIC TABNAME)
     const baseName = (rootEntity?.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toUpperCase();
     const cleanPrefix = baseName.startsWith('Z') ? baseName : `Z${baseName}`;
-    const rootPersistenceTable = overrides.rootPersistenceTable || rootEntity?.tableName || `${cleanPrefix.slice(0, 15)}_ROOT`;
+    const safeBase = cleanPrefix.slice(0, 14);
+    const rootPersistenceTable = (overrides.rootPersistenceTable || rootEntity?.tableName || `${safeBase}_ROOT`).slice(0, 16);
     const draftPersistenceTable = draftEnabled
-      ? (overrides.draftPersistenceTable || (rootEntity?.tableName ? `${rootEntity.tableName.slice(0, 14)}_D` : `${cleanPrefix.slice(0, 14)}_DRAFT`))
+      ? (overrides.draftPersistenceTable || (rootEntity?.tableName ? `${rootEntity.tableName.slice(0, 14)}_D` : `${safeBase}_D`)).slice(0, 16)
       : null;
 
     const cleanCoreImplications = {
@@ -182,8 +183,8 @@ export class ArchitectureDecisionEngine {
         entityId: c.entityId,
         name: c.name,
         businessName: c.businessName || c.name,
-        tableName: `${cleanPrefix.slice(0, 12)}_${c.name.toUpperCase().slice(0, 6)}`,
-        draftTableName: draftEnabled ? `${cleanPrefix.slice(0, 11)}D_${c.name.toUpperCase().slice(0, 5)}` : null,
+        tableName: `${cleanPrefix.slice(0, 10)}_${c.name.toUpperCase().slice(0, 5)}`.slice(0, 16),
+        draftTableName: draftEnabled ? `${cleanPrefix.slice(0, 9)}D_${c.name.toUpperCase().slice(0, 5)}`.slice(0, 16) : null,
         compositionParent: rootEntity?.name || null
       })),
       persistenceApproach,

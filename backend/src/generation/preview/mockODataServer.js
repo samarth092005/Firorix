@@ -15,7 +15,7 @@ import { buildInteractiveFioriPreviewHtml } from './fioriHorizonTemplate.js';
 
 export { buildInteractiveFioriPreviewHtml };
 
-export const PREVIEW_WATERMARK_HTML = '';
+export const PREVIEW_WATERMARK_HTML = '<div id="Fiorify-preview-banner" style="position:fixed;bottom:0;left:0;right:0;background:#0066ff;color:#fff;font-size:12px;font-family:sans-serif;padding:6px 12px;display:flex;justify-content:space-between;align-items:center;z-index:999999;box-shadow:0 -2px 10px rgba(0,0,0,0.15)"><span>⚡ Fiorify Local Sandbox — Clean Core S/4HANA Preview (Isolated Mock V4 Runtime)</span><span style="opacity:0.85">Port Verified • Safe 127.0.0.1 Binding</span></div>';
 
 /**
  * Creates and starts an in-process mock HTTP server.

@@ -84,12 +84,39 @@ export const GenerationStudioPage: React.FC = () => {
     loadProjects();
   }, [loadProjects]);
 
-  // Handle incoming assessment handoff query (only when NOT using handoffId)
+  // Handle incoming assessment query: auto-create/load project without intrusive popup
   useEffect(() => {
     if (incomingAssessmentId && !incomingHandoffId && !urlProjectId) {
-      setIsCreateModalOpen(true);
+      let isCancelled = false;
+      setIsInitializingHandoff(true);
+      setHandoffStatusMessage('Initializing Modernization Workspace for assessed transaction...');
+
+      frontendGenerationProjectService
+        .createProject({
+          sourceAssessmentId: incomingAssessmentId,
+          projectName: `Modernization Project (${incomingAssessmentId})`,
+          description: `Clean Core RAP Modernization synthesized from Assessment ${incomingAssessmentId}`
+        })
+        .then(async (res) => {
+          if (isCancelled) return;
+          await loadProjects();
+          setActiveProject(res.project);
+          setActiveView('requirements');
+          updateUrlParams(res.project.projectId, 'requirements');
+        })
+        .catch((err: any) => {
+          if (isCancelled) return;
+          console.error('Failed to auto-provision project from assessment:', err);
+          setError(err?.message || 'Failed to initialize project from assessment.');
+          setActiveView('projects');
+        })
+        .finally(() => {
+          if (!isCancelled) {
+            setIsInitializingHandoff(false);
+          }
+        });
     }
-  }, [incomingAssessmentId, incomingHandoffId, urlProjectId]);
+  }, [incomingAssessmentId, incomingHandoffId, urlProjectId, loadProjects]);
 
   // Handle incoming approved handoff: auto-provision / resolve without opening popup
   useEffect(() => {

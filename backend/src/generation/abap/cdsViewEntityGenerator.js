@@ -28,7 +28,8 @@ export function formatChildCdsViewName(prefixTag, rootName, childName) {
     .replace(/^Z_[IRC]_/i, '')
     .replace(/^Z[IRC]_/i, '')
     .replace(/[^a-zA-Z0-9_]/g, '');
-  return `${prefixTag}${cleanRoot}_${cleanChild}`;
+  const combined = `${prefixTag}${cleanRoot}_${cleanChild}`;
+  return combined.slice(0, 30);
 }
 
 export function generateCdsEntities(project, architecture) {

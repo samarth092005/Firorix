@@ -90,7 +90,7 @@ export function generateBehaviorDefinition(project, architecture) {
     bdef += `  {\n`;
 
     // Map confirmed validations to prepare phase
-    const confirmedValidations = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'VALIDATION');
+    const confirmedValidations = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'VALIDATION');
     for (const val of confirmedValidations) {
       const valMethod = toAbapMethodName('validate', val.title);
       bdef += `    validation ${valMethod};\n`;
@@ -100,7 +100,7 @@ export function generateBehaviorDefinition(project, architecture) {
   }
 
   // Validations derived from confirmed requirements
-  const confirmedValReqs = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'VALIDATION');
+  const confirmedValReqs = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'VALIDATION');
   for (const v of confirmedValReqs) {
     const valMethod = toAbapMethodName('validate', v.title);
     bdef += `  /* REQ: ${v.requirementId} - ${v.title} */\n`;
@@ -108,7 +108,7 @@ export function generateBehaviorDefinition(project, architecture) {
   }
 
   // Determinations derived from confirmed requirements
-  const confirmedDetReqs = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'DETERMINATION');
+  const confirmedDetReqs = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'DETERMINATION');
   for (const d of confirmedDetReqs) {
     const detMethod = toAbapMethodName('calculate', d.title);
     bdef += `  /* REQ: ${d.requirementId} - ${d.title} */\n`;
@@ -116,7 +116,7 @@ export function generateBehaviorDefinition(project, architecture) {
   }
 
   // Actions derived from confirmed requirements
-  const confirmedActions = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'ACTION');
+  const confirmedActions = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'ACTION');
   for (const a of confirmedActions) {
     const actMethod = toAbapMethodName('execute', a.title);
     bdef += `  /* REQ: ${a.requirementId} - ${a.title} */\n`;

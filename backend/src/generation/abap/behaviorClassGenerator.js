@@ -30,9 +30,9 @@ export function generateBehaviorImplementationClass(project, architecture) {
   const rootInterfaceName = `ZI_${prefix}`;
   const className = `BP_I_${prefix}`.toUpperCase();
 
-  const confirmedValidations = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'VALIDATION');
-  const confirmedDeterminations = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'DETERMINATION');
-  const confirmedActions = requirements.filter((r) => (r.status === 'CONFIRMED' || r.status === 'DRAFT') && r.category === 'ACTION');
+  const confirmedValidations = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'VALIDATION');
+  const confirmedDeterminations = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'DETERMINATION');
+  const confirmedActions = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'ACTION');
 
   const isUnmanaged = architecture?.selectedProfile === RAP_PROFILES.UNMANAGED_RAP;
 

@@ -138,7 +138,7 @@ export class GenerationProjectService {
       )
     );
 
-    if (!assessment.leadArchitectApproval?.signature && (isApproved || isActorAuthorized)) {
+    if (!assessment.leadArchitectApproval?.signature && isApproved) {
       try {
         const signed = await defaultCryptographicSignatureService.signApproval(
           assessment,
@@ -161,7 +161,7 @@ export class GenerationProjectService {
       }
     }
 
-    if (!isApproved && !isActorAuthorized) {
+    if (!isApproved) {
       return {
         isValid: false,
         unapproved: true,
@@ -555,7 +555,7 @@ export class GenerationProjectService {
   /**
    * Retrieves authoritative assessment context for handoff review.
    */
-  async getAssessmentHandoffContext(assessmentId, userContext = null) {
+  async getAssessmentHandoffContext(assessmentId, userContext = null, handoffRecord = null) {
     const validation = await this.validateAssessmentForBuildHandoff(assessmentId, userContext, handoffRecord);
     if (!validation.isValid) {
       if (validation.notFound) {

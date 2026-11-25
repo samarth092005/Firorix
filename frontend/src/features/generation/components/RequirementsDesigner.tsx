@@ -199,6 +199,10 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   // Save changes to current requirement
   const handleSaveEdit = async () => {
     if (!selectedReqId) return;
+    if (!editBuffer.acceptanceCriteria || editBuffer.acceptanceCriteria.length === 0) {
+      setError('At least one acceptance criterion is required to ensure deterministic behavior verification.');
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -355,25 +359,25 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {summary?.allConfirmedOrResolved && (
-            <button
-              onClick={() => onNavigateView('data-model')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 16px',
-                background: '#0284c7',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Open Data Model Designer <ArrowRight size={16} />
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => onNavigateView('data-model')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              background: summary?.allConfirmedOrResolved ? '#16a34a' : '#0284c7',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title="Proceed to CDS Data Model Designer"
+          >
+            Open Data Model Designer <ArrowRight size={16} />
+          </button>
 
           <button
             onClick={handleImportAssessment}
