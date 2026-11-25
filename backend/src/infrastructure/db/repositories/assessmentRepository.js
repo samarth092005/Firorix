@@ -11,17 +11,23 @@ export class AssessmentRepository {
     return crypto.createHash('sha256').update(payload).digest('hex');
   }
 
-  async create(assessment, tenantId = 'DEFAULT-TENANT-S21') {
+  async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
     const client = typeof this.pool.getClient === 'function' ? await this.pool.getClient() : await this.pool.connect();
-    try {
-      await client.query('BEGIN;');
+    await client.query('BEGIN;');
+    await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
+    return client;
+  }
 
+  async create(assessment, tenantId = 'DEFAULT-TENANT-S21') {
+    const effectiveTenant = tenantId || assessment.tenantId || 'DEFAULT-TENANT-S21';
+    const client = await this._getTenantClient(effectiveTenant);
+    try {
       // Ensure tenant exists
       await client.query(`
         INSERT INTO tenants (tenant_id, name)
         VALUES ($1, $2)
         ON CONFLICT (tenant_id) DO NOTHING;
-      `, [tenantId, `Tenant ${tenantId}`]);
+      `, [effectiveTenant, `Tenant ${effectiveTenant}`]);
 
       // Ensure system profile exists if specified
       const sysId = assessment.systemId || assessment.systemContext?.systemId || 'S21';
@@ -163,31 +169,37 @@ export class AssessmentRepository {
   }
 
   async getById(id, tenantId = 'DEFAULT-TENANT-S21') {
-    const res = await this.pool.query(
-      'SELECT * FROM assessments WHERE id = $1 AND tenant_id = $2;',
-      [id, tenantId]
-    );
-    if (res.rowCount === 0) return null;
+    const client = await this._getTenantClient(tenantId);
+    try {
+      const res = await client.query(
+        'SELECT * FROM assessments WHERE id = $1 AND tenant_id = $2;',
+        [id, tenantId]
+      );
+      if (res.rowCount === 0) {
+        await client.query('COMMIT;');
+        return null;
+      }
 
-    const row = res.rows[0];
-    const dimRes = await this.pool.query(
-      'SELECT dimension_name, score, status, findings, gaps FROM fit_gap_dimensions WHERE assessment_id = $1;',
-      [id]
-    );
-    const dimensions = {};
-    for (const d of dimRes.rows) {
-      dimensions[d.dimension_name] = {
-        score: parseFloat(d.score),
-        status: d.status,
-        findings: d.findings,
-        gaps: d.gaps
-      };
-    }
+      const row = res.rows[0];
+      const dimRes = await client.query(
+        'SELECT dimension_name, score, status, findings, gaps FROM fit_gap_dimensions WHERE assessment_id = $1;',
+        [id]
+      );
+      const dimensions = {};
+      for (const d of dimRes.rows) {
+        dimensions[d.dimension_name] = {
+          score: parseFloat(d.score),
+          status: d.status,
+          findings: d.findings,
+          gaps: d.gaps
+        };
+      }
 
-    const auditRes = await this.pool.query(
-      'SELECT event_id, timestamp, actor, action, details, previous_hash, integrity_hash FROM assessment_audit_events WHERE assessment_id = $1 ORDER BY timestamp ASC, id ASC;',
-      [id]
-    );
+      const auditRes = await client.query(
+        'SELECT event_id, timestamp, actor, action, details, previous_hash, integrity_hash FROM assessment_audit_events WHERE assessment_id = $1 ORDER BY timestamp ASC, id ASC;',
+        [id]
+      );
+      await client.query('COMMIT;');
 
     return {
       id: row.id,
@@ -315,44 +327,57 @@ export class AssessmentRepository {
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString()
     };
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async list(filter = {}, tenantId = 'DEFAULT-TENANT-S21') {
-    let query = 'SELECT id FROM assessments WHERE tenant_id = $1';
-    const params = [tenantId];
+    const client = await this._getTenantClient(tenantId);
+    try {
+      let query = 'SELECT id FROM assessments WHERE tenant_id = $1';
+      const params = [tenantId];
 
-    if (filter.status || filter.lifecycleStatus) {
-      params.push(filter.status || filter.lifecycleStatus);
-      query += ` AND lifecycle_status = $${params.length}`;
-    }
-    if (filter.businessArea) {
-      params.push(filter.businessArea);
-      query += ` AND business_area = $${params.length}`;
-    }
-    if (filter.search) {
-      params.push(`%${filter.search}%`);
-      query += ` AND (transaction_code ILIKE $${params.length} OR description ILIKE $${params.length} OR candidate_app_name ILIKE $${params.length})`;
-    }
+      if (filter.status || filter.lifecycleStatus) {
+        params.push(filter.status || filter.lifecycleStatus);
+        query += ` AND lifecycle_status = $${params.length}`;
+      }
+      if (filter.businessArea) {
+        params.push(filter.businessArea);
+        query += ` AND business_area = $${params.length}`;
+      }
+      if (filter.search) {
+        params.push(`%${filter.search}%`);
+        query += ` AND (transaction_code ILIKE $${params.length} OR description ILIKE $${params.length} OR candidate_app_name ILIKE $${params.length})`;
+      }
 
-    query += ' ORDER BY created_at DESC;';
-    const res = await this.pool.query(query, params);
+      query += ' ORDER BY created_at DESC;';
+      const res = await client.query(query, params);
+      await client.query('COMMIT;');
 
-    const items = [];
-    for (const row of res.rows) {
-      const item = await this.getById(row.id, tenantId);
-      if (item) items.push(item);
+      const items = [];
+      for (const row of res.rows) {
+        const item = await this.getById(row.id, tenantId);
+        if (item) items.push(item);
+      }
+      return items;
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
     }
-    return items;
   }
 
   async update(id, updates, tenantId = 'DEFAULT-TENANT-S21') {
     const existing = await this.getById(id, tenantId);
     if (!existing) return null;
 
-    const client = await this.pool.getClient();
+    const client = await this._getTenantClient(tenantId);
     try {
-      await client.query('BEGIN;');
-
       const newStatus = updates.lifecycleStatus || updates.status || existing.lifecycleStatus;
       const newAction = updates.recommendation?.action || existing.recommendation?.action;
       const newConfidence = updates.recommendation?.confidence || existing.recommendation?.confidence;

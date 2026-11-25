@@ -70,70 +70,70 @@ const VIEW_METADATA: Record<Exclude<StudioInternalView, 'projects'>, ViewMetadat
   architecture: {
     title: 'Architecture Designer',
     icon: Cpu,
-    phaseName: 'Phase 4: RAP Architecture & Capabilities Specification',
+    phaseName: 'RAP Architecture & Capabilities Specification',
     phaseNumber: 4,
     purpose: 'Formulate the technical RAP scenario profile (Managed with Draft), standard operations, custom actions, and Clean Core Tier 2 settings.',
-    prerequisites: ['Phase 3: Formulated CDS data model'],
-    emptyStateTitle: 'RAP Architecture Workspace Scheduled for Phase 4',
-    emptyStateDescription: 'RAP Managed behavior definition, draft table configuration, and action definitions will be configured in Phase 4.'
+    prerequisites: ['CDS data model defined'],
+    emptyStateTitle: 'RAP Architecture Workspace',
+    emptyStateDescription: 'Configure RAP Managed behavior definition, draft table configuration, and action definitions.'
   },
   'spec-lifecycle': {
     title: 'Specification Lifecycle & Governance',
     icon: CheckCircle2,
-    phaseName: 'Phase 5: Specification Readiness, Versioning & Review',
+    phaseName: 'Specification Readiness & Governance',
     phaseNumber: 5,
     purpose: 'Verify 13 deterministic readiness gates, snapshot immutable versions, and govern Lead/Chief Architect approval.',
-    prerequisites: ['Phase 2-4: Requirements, Data Model and Architecture definitions'],
+    prerequisites: ['Requirements, Data Model and Architecture definitions confirmed'],
     emptyStateTitle: 'Specification Lifecycle Active',
     emptyStateDescription: '13-Gate Readiness, Immutable Version History & Architect Approvals.'
   },
   'abap-generator': {
     title: 'ABAP Generator',
     icon: Code2,
-    phaseName: 'Phase 5: Automated ABAP Artifact Generation',
-    phaseNumber: 5,
+    phaseName: 'Automated ABAP Cloud Artifact Generation',
+    phaseNumber: 6,
     purpose: 'Synthesize clean ABAP Cloud artifacts: CDS View Entities, Behavior Definitions (BDEF), Service Definitions (SRVD), and Service Bindings (SRVB).',
-    prerequisites: ['Phase 4: Architecture specification confirmed'],
-    emptyStateTitle: 'ABAP Cloud Generator Engine Scheduled for Phase 5',
-    emptyStateDescription: 'Deterministic template-based generation of ABAP Cloud source code and syntax verification will execute in Phase 5.'
+    prerequisites: ['Architecture specification confirmed'],
+    emptyStateTitle: 'ABAP Cloud Generator Engine Active',
+    emptyStateDescription: 'Deterministic template-based generation of ABAP Cloud source code and syntax verification.'
   },
   'ui-generator': {
     title: 'Fiori UI Generator',
     icon: LayoutTemplate,
-    phaseName: 'Phase 6: SAP Fiori Elements Generation',
-    phaseNumber: 6,
+    phaseName: 'SAP Fiori Elements Generation',
+    phaseNumber: 7,
     purpose: 'Generate List Report / Object Page floorplan manifests, UI annotations, local mock data sets, and ui5.yaml configuration.',
-    prerequisites: ['Phase 4: Architecture profile', 'Phase 5: Service definition'],
-    emptyStateTitle: 'Fiori Elements Generator Scheduled for Phase 6',
-    emptyStateDescription: 'Automated synthesis of UI5 application manifests and realistic mock data sets will be introduced in Phase 6.'
+    prerequisites: ['Architecture profile and service definitions confirmed'],
+    emptyStateTitle: 'Fiori Elements Generator Active',
+    emptyStateDescription: 'Automated synthesis of UI5 application manifests and realistic mock data sets.'
   },
   'preview-validation': {
     title: 'Preview & Validation',
     icon: CheckCircle2,
-    phaseName: 'Phase 7: Local Mock Preview & Syntax Verification',
-    phaseNumber: 7,
-    purpose: 'Run the standalone local preview server, inspect rendered Fiori UI, test draft handling, and run validation lint suites.',
-    prerequisites: ['Phase 5: ABAP artifacts', 'Phase 6: UI5 application'],
-    emptyStateTitle: 'Preview & Validation Suite Scheduled for Phase 7',
-    emptyStateDescription: 'Interactive mock server hosting and AST-level syntax validation will be activated in Phase 7.'
+    phaseName: 'Interactive Preview & Syntax Validation',
+    phaseNumber: 8,
+    purpose: 'Run the standalone preview server, inspect rendered Fiori UI, test draft handling, and run validation lint suites.',
+    prerequisites: ['ABAP artifacts and UI5 application synthesized'],
+    emptyStateTitle: 'Preview & Validation Suite Active',
+    emptyStateDescription: 'Interactive mock server hosting and AST-level syntax validation.'
   },
   'review-export': {
     title: 'Review & Export',
     icon: PackageCheck,
-    phaseName: 'Phase 8: Audit Review & Transport Packaging',
-    phaseNumber: 8,
+    phaseName: 'Audit Review & Transport Packaging',
+    phaseNumber: 9,
     purpose: 'Inspect cryptographic provenance, download the complete ZIP project bundle, and review Clean Core compliance certificate.',
-    prerequisites: ['Phase 7: Validation passed with zero errors'],
-    emptyStateTitle: 'Review & Export Manager Scheduled for Phase 8',
-    emptyStateDescription: 'Final ZIP bundle packaging, checksum verification, and Clean Core sign-off certificate export will be available in Phase 8.'
+    prerequisites: ['Validation passed with zero errors'],
+    emptyStateTitle: 'Review & Export Manager Ready',
+    emptyStateDescription: 'Final ZIP bundle packaging, checksum verification, and Clean Core sign-off certificate export.'
   },
   deployment: {
     title: 'SAP DEV Deployment',
     icon: Send,
-    phaseName: 'Phase 10: SAP DEV Deployment & Verification',
+    phaseName: 'SAP S/4HANA Deployment & Verification',
     phaseNumber: 10,
     purpose: 'Execute preflight checks, generate dependency-ordered deployment plans, sign off approvals, and verify active SAP repository objects.',
-    prerequisites: ['Phase 9: Export package verified'],
+    prerequisites: ['Export package verified'],
     emptyStateTitle: 'Deployment Orchestration Ready',
     emptyStateDescription: 'Target landscape S21 / Client 200 ready for deployment plan staging.'
   },
@@ -298,32 +298,6 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
 
   return (
     <div className="workspace-canvas">
-      {/* Permanent Local Mock Watermark */}
-      <div
-        style={{
-          padding: '12px 18px',
-          backgroundColor: 'var(--studio-surface-subtle)',
-          border: '1px solid var(--studio-border)',
-          borderRadius: 'var(--studio-radius-sm)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          marginBottom: '20px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <HardDrive size={18} color="var(--studio-primary)" />
-          <div style={{ fontSize: '13px', color: 'var(--studio-text-main)', fontWeight: 600 }}>
-            Local-First Review Workspace — Local Mock Data Only (No Remote SAP Deployment)
-          </div>
-        </div>
-        <span className="studio-chip primary">
-          {meta.phaseName}
-        </span>
-      </div>
-
       {/* Structured Workspace Overview Card */}
       <div className="canvas-header-card">
         <div className="canvas-title-group">

@@ -369,15 +369,17 @@ export class PreviewManager {
         syntheticStore
       });
 
+      const relativePreviewUrl = `/api/v1/generation/projects/${cleanId}/preview/content/webapp/index.html`;
       const sessionInfo = {
         sessionId: `PREV-${cleanId}-${port}`,
         projectId: cleanId,
         port: session.port,
         host: '127.0.0.1',
         url: session.url,
-        previewUrl: `${session.url}/webapp/index.html`,
-        serviceBasePath: `${session.url}/odata/v4/service`,
-        metadataUrl: `${session.url}/odata/v4/service/$metadata`,
+        previewUrl: relativePreviewUrl,
+        directUrl: `${session.url}/webapp/index.html`,
+        serviceBasePath: `/api/v1/generation/projects/${cleanId}/preview/content/odata/v4/service`,
+        metadataUrl: `/api/v1/generation/projects/${cleanId}/preview/content/odata/v4/service/$metadata`,
         status: 'RUNNING',
         startedAt: session.startedAt,
         recordCounts: Object.fromEntries(
@@ -446,15 +448,17 @@ export class PreviewManager {
       };
     }
 
+    const relativePreviewUrl = `/api/v1/generation/projects/${cleanId}/preview/content/webapp/index.html`;
     return {
       sessionId: `PREV-${cleanId}-${session.port}`,
       projectId: cleanId,
       status: session.status,
       host: '127.0.0.1',
       url: session.url,
-      previewUrl: `${session.url}/webapp/index.html`,
-      serviceBasePath: `${session.url}/odata/v4/service`,
-      metadataUrl: `${session.url}/odata/v4/service/$metadata`,
+      previewUrl: relativePreviewUrl,
+      directUrl: `${session.url}/webapp/index.html`,
+      serviceBasePath: `/api/v1/generation/projects/${cleanId}/preview/content/odata/v4/service`,
+      metadataUrl: `/api/v1/generation/projects/${cleanId}/preview/content/odata/v4/service/$metadata`,
       port: session.port,
       startedAt: session.startedAt,
       lastActivityAt: session.lastActivityAt,

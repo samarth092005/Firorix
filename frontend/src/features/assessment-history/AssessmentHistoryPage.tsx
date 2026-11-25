@@ -307,7 +307,7 @@ export const AssessmentHistoryPage: React.FC = () => {
             }}
           >
             <Server size={12} color="var(--fiori-primary, #0070F2)" />
-            {formatSystemBadge(undefined, undefined, ' (')} • S/4HANA 2023
+            {uiConfig.defaultSystem.id} (Client {uiConfig.defaultSystem.client}) • S/4HANA 2023
           </span>
         }
         actions={[

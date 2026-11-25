@@ -1,89 +1,94 @@
-# Fiorify — Security Architecture Specification
-
-## 1. Security Architecture Principles
-
-Fiorify is architected with defense-in-depth security across all boundaries:
-1. **Authentication by Default**: Production environments strictly reject unauthenticated traffic.
-2. **Separation of Duties (SoD)**: Creators cannot approve their own assessments; administrative overrides are strictly restricted and audited.
-3. **Cryptographic Integrity**: Keyed HMAC-SHA256 signatures with key versioning replace unauthenticated plain digests.
-4. **Tenant Isolation**: Mandatory tenant filters on every database read/write.
-5. **Zero SAP Modifications**: Hardened outbound HTTP client preventing mutating operations to live SAP landscapes.
+# Fiorify Enterprise Security Architecture (SEC-012)
+**Document Version:** 1.0.0  
+**Target Platform:** SAP Business Technology Platform (BTP) Cloud Foundry  
+**Compliance Standard:** SAP Cloud Security Framework & OWASP Top 10 API Security
 
 ---
 
-## 2. Cryptographic Approval Integrity (Sprint 13.2 / REM-SEC-03)
+## 1. Executive Summary & Architecture Principles
 
-### 2.1 Threat Model & Remediation
-Prior to Sprint 13.2, approvals used unkeyed SHA-256 digests (`crypto.createHash('sha256')`). An attacker could manipulate the payload and recompute the digest.
-**Sprint 13.2 Remediation**:
-- Keyed HMAC-SHA256 implemented via `CryptographicSignatureService` (`backend/src/infrastructure/security/cryptographicSignatureService.js`).
-- Signatures formatted as: `sig:<keyVersion>:<hmac_hex>` (e.g. `sig:v1:a8f...`).
-- Active signing secret loaded from `FIORIFY_SIGNING_SECRET` or `FIORIFY_APPROVAL_SECRET`.
-- Verification enforces `crypto.timingSafeEqual` to defeat timing attacks.
+Fiorify is designed under a **Zero-Trust, Standard-First, and Defense-in-Depth** security philosophy. The platform governs the lifecycle of SAP transaction modernization, fit-gap assessment, and ABAP RESTful Application Programming (RAP) generation while enforcing strict operational boundaries against unauthorized access, tenant data bleeding, and live SAP system corruption.
 
-### 2.2 Key Rotation & Enterprise KMS Abstraction
-
-```mermaid
-flowchart TD
-    subgraph KMS_Layer ["Cryptographic Provider Abstraction"]
-        KMS_BASE["KmsSignatureProvider (Base Interface)"]
-        LOCAL_HMAC["LocalHmacSignatureProvider\n(Key Ring: v1, v2, ...)\n[Active Provider]"]
-        AWS_KMS["AwsKmsSignatureProvider\n[Extensible Plugin]"]
-        AZURE_KV["AzureKeyVaultProvider\n[Extensible Plugin]"]
-        GCP_KMS["GcpCloudKmsProvider\n[Extensible Plugin]"]
-    end
-
-    subgraph Service_Consumers ["Fiorify Domain Consumers"]
-        DEP_ORCH["Deployment Orchestration Service\n(approveDeploymentPlan / executeDeploymentPlan)"]
-        SPEC_VER["Specification Versioning Service\n(processApproval / verifyApprovalSignature)"]
-    end
-
-    KMS_BASE <|-- LOCAL_HMAC
-    KMS_BASE <|-- AWS_KMS
-    KMS_BASE <|-- AZURE_KV
-    KMS_BASE <|-- GCP_KMS
-
-    DEP_ORCH --> LOCAL_HMAC
-    SPEC_VER --> LOCAL_HMAC
+```
+                      [ User / External Client ]
+                                   │
+                                   ▼
+             ┌───────────────────────────────────────────┐
+             │         SAP BTP Application Router        │
+             │   (TLS Termination, Session Routing, WAF) │
+             └─────────────────────┬─────────────────────┘
+                                   │
+                         JWT Bearer (RS256)
+                                   ▼
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │                    Fiorify Node.js LTS Engine                          │
+ │                                                                        │
+ │   ┌───────────────────────┐         ┌──────────────────────────────┐   │
+ │   │  Auth & Token Gate    │────────▶│ Security Headers & CORS Gate │   │
+ │   │ (XSUAA / Local / Demo)│         │(CSP, HSTS, X-Frame-Options)  │   │
+ │   └──────────┬────────────┘         └──────────────┬───────────────┘   │
+ │              │                                     │                   │
+ │              ▼                                     ▼                   │
+ │   ┌───────────────────────┐         ┌──────────────────────────────┐   │
+ │   │ Field Sanitizer Gate  │────────▶│ RBAC & Permission Middleware │   │
+ │   │(Strip Protected Field)│         │ (Deny-by-default Enforcement)│   │
+ │   └──────────┬────────────┘         └──────────────┬───────────────┘   │
+ │              │                                     │                   │
+ │              ▼                                     ▼                   │
+ │   ┌────────────────────────────────────────────────────────────┐       │
+ │   │               Multi-Tenant Store Boundary                  │       │
+ │   │        (Tenant ID filtering on all queries & stores)       │       │
+ │   └──────────┬─────────────────────────────────────┬───────────┘       │
+ │              │                                     │                   │
+ └──────────────┼─────────────────────────────────────┼───────────────────┘
+                │                                     │
+                ▼                                     ▼
+ ┌──────────────────────────────┐   ┌──────────────────────────────────────┐
+ │  Local Dev / CI Persistence  │   │  Production SAP BTP Persistence      │
+ │  PostgreSQL Engine (pg.Pool) │   │  SAP HANA Cloud (Tenant HDI / Schema)│
+ └──────────────────────────────┘   └──────────────────────────────────────┘
 ```
 
-- **Fail-Closed in Production**: If `FIORIFY_SIGNING_SECRET` is missing in `production` mode, the application halts at initialization with `MISSING_SIGNING_SECRET`.
-- **Zero-Downtime Rotation**: Multiple historical keys can be loaded via `FIORIFY_SIGNING_KEYS_JSON`. The active key is set via `FIORIFY_SIGNING_KEY_VERSION`.
-- **Backward-Compatible Verification**: Historical approvals created with 64-character unkeyed SHA-256 digests are identified, validated against their canonical payload, and logged as `UNAUTHENTICATED_LEGACY_DIGEST` with a recommendation to re-sign.
+---
+
+## 2. Security Boundaries & Invariants
+
+| Layer | Security Control | Invariant Enforced |
+| :--- | :--- | :--- |
+| **Edge / Transport** | TLS 1.3, HSTS (`max-age=31536000`), CSP | HTTP traffic strictly encrypted; frame embedding prevented (`DENY`). |
+| **Identity Provider** | SAP BTP XSUAA (JWT RS256) / Local Scrypt | In production, local and demo auth providers are strictly forbidden (`fail-closed`). |
+| **Token Lifecycle** | SHA-256 Hashed Token Revocation & Family Tracking | Revoked tokens invalidated cluster-wide; replay attacks trigger family revocation. |
+| **API Boundary** | Request Body Size Capping (`100KB`) | Denial-of-Service (DoS) and memory exhaustion attacks rejected with HTTP 413. |
+| **Parameter Sanitization** | `sanitizeProtectedFields` | Client-controlled `createdBy`, `tenantId`, `roles`, `isAdmin` stripped before handlers. |
+| **Authorization** | Deny-by-default RBAC (`requireRole`, `requirePermission`) | All privileged endpoints require affirmative, authenticated permissions. |
+| **Multi-Tenancy** | Strict Tenant Discriminator (`tenantId`) Filtering | Cross-tenant queries return filtered results or HTTP 403 `TenantAccessDenied`. |
+| **Audit Trail** | Tamper-Evident SHA-256 Audit Chaining | Audit events cryptographically linked to previous event hashes (`GENESIS` to leaf). |
+| **SAP Landscape** | Zero-Modification Read-Only Policy (`int_samarth`) | Zero DDIC/ABAP changes on SAP S21; zero mutating HTTP requests (`POST`/`PUT`/`DELETE`). |
 
 ---
 
-## 3. Separation of Duties (Sprint 13.1 / REM-SEC-01)
+## 3. Threat Model & Countermeasures (STRIDE Analysis)
 
-1. **Creator-Approver Separation**:
-   - `assessmentStore.approveAssessment(id, userContext)` verifies `assessment.created_by !== userContext.id`.
-   - If creator attempts self-approval, throws `CREATOR_CANNOT_APPROVE` (HTTP 403).
-2. **Administrative Override Gate**:
-   - Setting `isOverride: true` requires authenticated `ADMIN`, `LEAD_ARCHITECT`, or `CHIEF_ARCHITECT` role.
-   - Non-admin attempts with `isOverride: true` throw `UNAUTHORIZED_OVERRIDE` (HTTP 403).
-   - All overrides log an immutable audit event: `ADMIN_OVERRIDE_APPROVED` in `security_audit_events`.
+1. **Spoofing Identity:**
+   - *Threat:* Malicious client injects falsified user IDs, roles, or tenant IDs via request headers or JSON bodies.
+   - *Countermeasure:* Server-authoritative token validation extracts `userId`, `role`, and `tenantId` exclusively from cryptographically verified JWT signatures. `sanitizeProtectedFields` strips client fields.
 
----
+2. **Tampering with Data:**
+   - *Threat:* Alteration of audit trails or bypassing architectural review status.
+   - *Countermeasure:* Assessments use SHA-256 linked-list cryptographic chaining. Any modification to a previous event breaks the cryptographic checksum verification.
 
-## 4. Authentication Defaults & Environment Boundaries (Sprint 13.1 / REM-SEC-02)
+3. **Repudiation:**
+   - *Threat:* Approver denies authorizing a custom RAP application development.
+   - *Countermeasure:* Authoritative user context is stamped with ISO 8601 timestamp, approver ID, approver name, and digital hash signature onto both assessment and handoff records.
 
-1. **Production Mode (`NODE_ENV=production`)**:
-   - Missing or invalid `Authorization: Bearer <jwt>` returns HTTP 401.
-   - Impersonation headers (`x-fiorify-role`, `x-fiorify-user`) are completely rejected.
-2. **Development Mode**:
-   - Unauthenticated requests default to `VIEWER` on `DEV-SANDBOX-TENANT`. Unauthenticated requests NEVER receive `ADMIN`.
-   - Development impersonation requires `x-fiorify-admin-dev-secret`.
+4. **Information Disclosure:**
+   - *Threat:* Tenant A accesses assessments, handoffs, or generation projects belonging to Tenant B.
+   - *Countermeasure:* Multi-tenant isolation at route and store levels. `withTenantClient` sets tenant configuration in database session; stores filter on `tenantId`.
 
----
+5. **Denial of Service (DoS):**
+   - *Threat:* Large payloads flood Node.js event loop or exhaust memory.
+   - *Countermeasure:* Streaming body length limiter terminates connections exceeding 100KB with HTTP 413. IP rate limiting protects authentication endpoints.
 
-## 5. SAP HTTP Traversal & Read-Only Defense (Sprint 13.1 / REM-SEC-05)
-
-- Canonicalization via `path.posix.normalize()`.
-- Multi-stage decoding detects single (`%2e%2e`), double (`%252e%252e`), ambiguous separators (`%2f`, `%5c`), and null bytes (`%00`).
-- Strict allowlist enforces standard SAP ICF/Gateway endpoints:
-  - `/sap/opu/odata/*`
-  - `/sap/opu/odata4/*`
-  - `/sap/bc/adt/*`
-  - `/sap/public/bc/icf/*`
-- Approved host checking blocks SSRF attacks targeting unauthorized network resources.
-- Read-only enforcement (`assertReadOnly`) blocks all mutating HTTP verbs (`POST`, `PUT`, `PATCH`, `DELETE`).
+6. **Elevation of Privilege:**
+   - *Threat:* Consultant attempts to self-approve a custom build without Lead Architect sign-off.
+   - *Countermeasure:* Separation of Duties policy (`SEPARATION_OF_DUTIES_VIOLATION`) strictly forbids assessment creator from approving their own assessment. Build approvals require explicit `BUILD_ARCHITECT_APPROVER` permission.

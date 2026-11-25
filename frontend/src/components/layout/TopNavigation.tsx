@@ -180,38 +180,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
 
       {/* Right: Actions, Notifications & User Persona */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {/* Reset Demo Quick Action Button */}
-        <button
-          type="button"
-          onClick={() => setIsResetConfirmOpen(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '5px 10px',
-            backgroundColor: '#FEF2F2',
-            border: '1px solid #FECACA',
-            borderRadius: 'var(--radius-sm, 6px)',
-            color: '#B91C1C',
-            fontSize: '12px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#FEE2E2';
-            e.currentTarget.style.borderColor = '#FCA5A5';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#FEF2F2';
-            e.currentTarget.style.borderColor = '#FECACA';
-          }}
-          title="Reset demo projects, assessments, and local cache to pristine baseline"
-        >
-          <RotateCcw size={13} color="#DC2626" />
-          <span>Reset Demo</span>
-        </button>
-
         {/* Notifications Popover */}
         <div ref={notifRef} style={{ position: 'relative' }}>
           <button
@@ -582,26 +550,50 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             }}
             aria-label="User profile and settings"
           >
-            <div
-              style={{
-                width: '26px',
-                height: '26px',
-                borderRadius: '50%',
-                backgroundColor: 'var(--fiori-primary-light, #EFF6FF)',
-                color: 'var(--fiori-primary, #0066FF)',
-                border: '1px solid #BFDBFE',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '11px',
-                fontWeight: 700
-              }}
-            >
-              A
-            </div>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: '#0F172A' }}>
-              Admin
-            </span>
+            {(() => {
+              const u = authService.getUser();
+              const initial = u?.name ? u.name.charAt(0).toUpperCase() : (u?.email ? u.email.charAt(0).toUpperCase() : 'U');
+              const displayName = u?.name || (u?.email ? u.email.split('@')[0] : 'User');
+              return (
+                <>
+                  <div
+                    style={{
+                      width: '26px',
+                      height: '26px',
+                      borderRadius: '50%',
+                      backgroundColor: u?.isDemo ? '#FEF3C7' : 'var(--fiori-primary-light, #EFF6FF)',
+                      color: u?.isDemo ? '#D97706' : 'var(--fiori-primary, #0066FF)',
+                      border: u?.isDemo ? '1px solid #FCD34D' : '1px solid #BFDBFE',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '11px',
+                      fontWeight: 700
+                    }}
+                  >
+                    {initial}
+                  </div>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: '#0F172A' }}>
+                    {displayName}
+                  </span>
+                  {u?.isDemo && (
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        padding: '1px 5px',
+                        borderRadius: '4px',
+                        backgroundColor: '#FEF3C7',
+                        color: '#92400E',
+                        fontWeight: 700,
+                        border: '1px solid #FDE68A'
+                      }}
+                    >
+                      DEMO
+                    </span>
+                  )}
+                </>
+              );
+            })()}
             <ChevronDown size={13} color="#64748B" />
           </button>
 
@@ -695,6 +687,35 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                 
 
 
+
+                <div style={{ height: '1px', backgroundColor: 'var(--fiori-border, #E2E8F0)', margin: '4px 0' }} />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setIsResetConfirmOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '8px 14px',
+                    textAlign: 'left',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '12px',
+                    color: '#B91C1C',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#FEF2F2')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  title="Reset demo projects, assessments, and local cache to pristine baseline"
+                >
+                  <RotateCcw size={14} color="#DC2626" />
+                  Reset Demo Data
+                </button>
 
                 <div style={{ height: '1px', backgroundColor: 'var(--fiori-border, #E2E8F0)', margin: '4px 0' }} />
 

@@ -1,5 +1,6 @@
-import { PERMISSIONS } from '../../services/authService.js';
+import { PERMISSIONS, USER_ROLES } from '../../services/authService.js';
 import { SECURITY_ACTIONS } from '../../infrastructure/security/securityAuditLogger.js';
+import { sanitizeProtectedFields } from '../../middleware/securityFieldSanitizer.js';
 import { defaultGenerationReadinessEngine } from '../projects/generationReadinessEngine.js';
 import { defaultSpecificationVersioningService } from '../projects/specificationVersioningService.js';
 
@@ -65,6 +66,33 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
   // 1. GET /api/v1/generation/projects - List Generation Projects
   if (req.method === 'GET' && url.pathname === '/api/v1/generation/projects') {
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const clientTenantId = url.searchParams.get('tenantId');
+    const hasAdminAccess = currentUser?.role === USER_ROLES.ADMIN ||
+      (Array.isArray(currentUser?.scopes) && currentUser?.scopes.includes('Fiorify.admin.access'));
+
+    if (clientTenantId && currentUser?.tenantId && clientTenantId !== currentUser.tenantId && !hasAdminAccess) {
+      if (securityAuditLogger?.logEvent) {
+        securityAuditLogger.logEvent({
+          actor: currentUser.id || 'anonymous',
+          tenantId: currentUser.tenantId,
+          action: SECURITY_ACTIONS.TENANT_ACCESS_VIOLATION,
+          resource: '/api/v1/generation/projects',
+          outcome: 'DENIED',
+          details: { targetTenant: clientTenantId, userTenant: currentUser.tenantId }
+        }).catch(() => {});
+      }
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          success: false,
+          statusCode: 'FORBIDDEN',
+          error: 'TenantAccessDenied',
+          errorMessage: `Client parameter cannot override authenticated tenant boundary "${currentUser.tenantId}".`
+        })
+      );
+      return true;
+    }
+
     try {
       const search = url.searchParams.get('search') || undefined;
       const lifecycleStatus = url.searchParams.get('lifecycleStatus') || undefined;
@@ -99,7 +127,8 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
     if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
     try {
       const payload = await readJson();
-      const result = await generationProjectService.createProject(payload, currentUser);
+      const cleanPayload = sanitizeProtectedFields(payload, { strict: false });
+      const result = await generationProjectService.createProject(cleanPayload, currentUser);
       const statusCode = result.alreadyExists ? 200 : 201;
       res.writeHead(statusCode, { 'Content-Type': 'application/json' });
       res.end(
@@ -473,7 +502,8 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
     if (req.method === 'PATCH') {
       try {
         const patch = await readJson();
-        const updated = await generationProjectService.updateProject(projectId, patch, currentUser);
+        const cleanPatch = sanitizeProtectedFields(patch, { strict: false, allowedFields: ['lifecycleStatus'] });
+        const updated = await generationProjectService.updateProject(projectId, cleanPatch, currentUser);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, project: updated }, null, 2));
       } catch (err) {

@@ -18,7 +18,8 @@ export const ALLOWED_SAP_ENDPOINT_PREFIXES = Object.freeze([
   '/sap/opu/odata4/',
   '/sap/bc/adt/',
   '/sap/bc/echo',
-  '/sap/public/bc/'
+  '/sap/public/bc/',
+  '/sap/public/ping'
 ]);
 
 export const DEFAULT_ALLOWED_HOST_PATTERNS = Object.freeze([
@@ -33,7 +34,8 @@ export const DEFAULT_ALLOWED_HOST_PATTERNS = Object.freeze([
   /^([a-z0-9_-]+\.)*local(:[0-9]+)?$/i,
   /^([a-z0-9_-]+\.)*ondemand\.com(:[0-9]+)?$/i,
   /^([a-z0-9_-]+\.)*sap(:[0-9]+)?$/i,
-  /^s21(:[0-9]+)?$/i,
+  /^s21[a-z0-9_-]*(:[0-9]+)?$/i,
+  /^ais-21(:[0-9]+)?$/i,
   /^kbl_fiori(:[0-9]+)?$/i,
   /^sap-s21\.internal(:[0-9]+)?$/i
 ]);
@@ -81,6 +83,23 @@ export class SapHttpClient {
       );
       err.code = 'WRITE_OPERATION_BLOCKED';
       err.statusCode = 'AUTHORIZATION_BLOCKED';
+      throw err;
+    }
+  }
+
+  /**
+   * Enforces strict TLS invariants (SAP-004)
+   */
+  assertTlsInvariants(targetUrl, options = {}) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction && process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+      const err = new Error('SECURITY INVARIANT VIOLATION: Insecure TLS bypass (NODE_TLS_REJECT_UNAUTHORIZED=0) is strictly forbidden in production.');
+      err.code = 'INSECURE_TLS_FORBIDDEN';
+      throw err;
+    }
+    if (options.rejectUnauthorized === false && isProduction) {
+      const err = new Error('SECURITY INVARIANT VIOLATION: rejectUnauthorized cannot be set to false in production.');
+      err.code = 'INSECURE_TLS_FORBIDDEN';
       throw err;
     }
   }
@@ -241,6 +260,7 @@ export class SapHttpClient {
     const method = String(options.method || 'GET').toUpperCase();
     this.assertReadOnly(method);
     this.assertAllowedEndpoint(targetUrl);
+    this.assertTlsInvariants(targetUrl, options);
 
     const correlationId = options.correlationId || `fio-corr-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
 

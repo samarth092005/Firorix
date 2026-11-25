@@ -774,7 +774,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1345')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "ME21N",
@@ -8527,7 +8527,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_armanclear",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F0773')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "F0984A",
@@ -8593,7 +8593,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/sbrt_appss1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F1619')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "F2970",
@@ -8632,7 +8632,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_csilposting",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2970')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "F5588",
@@ -8671,7 +8671,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/caincgpay_anls1",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F5588')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "F9325",
@@ -8710,7 +8710,7 @@
     "bspApplicationUrl": "/sap/bc/ui5_ui5/sap/fin_ar_postpaym",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F9325')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "FBZ1",
@@ -8745,7 +8745,7 @@
     "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ1')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.057Z"
   },
   {
     "appId": "FBZ3",
@@ -8779,7 +8779,7 @@
     "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FBZ3')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.058Z"
   },
   {
     "appId": "FPCPL",
@@ -8814,7 +8814,7 @@
     "deploymentType": "ON_PREMISE",
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('FPCPL')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
-    "retrievalTimestamp": "2026-11-15T05:26:23.162Z"
+    "retrievalTimestamp": "2026-11-17T17:39:08.058Z"
   },
   {
     "appId": "F7319",
@@ -8934,5 +8934,45 @@
     "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('F2665')/",
     "provenance": "OFFICIAL_CATALOGUE_LIVE",
     "retrievalTimestamp": "2026-11-13T09:32:35.117Z"
+  },
+  {
+    "appId": "VA05",
+    "appName": "List Credit Memo Requests, List Debit Memo Requests, List Sales Orders, List Sales Orders - VA05, List Sales Orders Without Charge",
+    "description": "Others : \r\nDummy Role\r\n\r\n",
+    "appType": "SAP GUI",
+    "uiTechnology": "SAP GUI for HTML",
+    "businessProcess": "",
+    "lineOfBusiness": "",
+    "productVersion": "SAP S/4HANA Cloud Private Edition 2025",
+    "softwareComponent": "S4CORE 109",
+    "businessRole": "SAP_BR * SAP_BR_EXTERNAL_AUDITOR * SAP_BR_INTERNAL_SALES_REP * SAP_BR_INTERNAL_SALES_REP_PRSV * SAP_BR_OPERATION_CLERK_ACM * SAP_BR_SALES_MANAGER * SAP_BR_SETTLEMENT_CLERK_ACM * SAP_BR_SOLN_BUSINESS_SPCLST * SAP_BR_SOLN_ORDER_SPCLST * SAP_BR_TRANSPORTATION_MANAGER",
+    "roleTooltips": "Sales Manager : \r\nMonitors and optimizes sales processes, sales panning, and coordinates sales forces.\r\n\r\nSolution Order Specialist : \r\nManages solution orders for customers. Creates, updates, orchestrates and monitos the solution order, order execution and coordination across delivery organizations, delivering reports on orders, executing order changes, etc.\r\n\r\nTransportation Manager : \r\nManages transportation activities.\r\n\r\nInternal Sales Representative : \r\nManages sales documents, e.g. captures changes or cancels sales orders, prepares quotations, and manages contracts. Monitors, troubleshoots, and collaborates on critical open issues from the sales order fulfillment process.\r\n\r\nSolution Business Specialist : \r\nManages the complete solution quotation process and the business solution portfolio of customers. Creates, updates, orchestrates and monitors solution quotations and all subsequent business documents like Sales &amp; Service Order, Service Contracts and Subscription order etc.\r\n\r\nSettlement Clerk (Agricultural Contract Management) : \r\nCompiles and computes payment due and recoveries to be made for ACM.\r\n\r\nOperations Clerk (Agricultural Contract Management) : \r\nPerform clerical or administrative duties in a variety of business for ACM.\r\n\r\nInternal Sales Representative - Professional Services : \r\nManages sales orders referring to professional services, e.g. captures changes or rejects sales order items. Monitors, troubleshoots, and collaborates on critical open issues from the sales order fulfillment process.\r\n\r\nExternal Auditor : \r\nReviews the accounts of organizations to ensure the accuracy and completeness of their financial records.",
+    "businessCatalog": "SAP_SD_BC_SLS_LIST_OP,SAP_SD_BC_SO_PROC_OP",
+    "technicalCatalog": "SAP_TC_CEC_SD_BE_APPS:S4SD",
+    "odataServices": [],
+    "leadingTransactionCodes": [
+      "VA05"
+    ],
+    "semanticObject": "SD_SLS_GF",
+    "semanticAction": "manage",
+    "compatibilityMatrix": {
+      "onPremise": true,
+      "privateCloud": true,
+      "publicCloud": false,
+      "supportedReleases": [
+        "SAP S/4HANA Cloud Private Edition 2025"
+      ]
+    },
+    "supportedCapabilities": [
+      "TRANSACTIONAL",
+      "DATA_ENTRY"
+    ],
+    "deploymentType": "ON_PREMISE",
+    "documentationUrl": "https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('VA05')/",
+    "provenance": "OFFICIAL_CATALOGUE_LIVE",
+    "retrievalTimestamp": "2026-11-16T15:21:10.173Z",
+    "relatedTCodes": [
+      "VA05"
+    ]
   }
 ]

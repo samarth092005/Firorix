@@ -319,44 +319,25 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
           </div>
         </div>
 
-        {/* Warning Acknowledgment Gate */}
-        {hasWarnings && !hasBlockingErrors && (
+        {/* Non-blocking warnings advisory note */}
+        {hasWarnings && !hasBlockingErrors && !acknowledgedWarnings && (
           <div
             style={{
-              padding: '12px 16px',
+              padding: '10px 14px',
               backgroundColor: '#FFFBEB',
               border: '1px solid #FDE68A',
               borderRadius: '6px',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between'
+              gap: '10px',
+              fontSize: '12px',
+              color: '#92400E'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#92400E' }}>
-              <AlertTriangle size={18} color="#D97706" />
-              <span>
-                Project contains non-blocking warnings. Review the findings and acknowledge them to proceed with export packaging.
-              </span>
-            </div>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: '#78350F',
-                cursor: 'pointer'
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={acknowledgedWarnings}
-                onChange={(e) => setAcknowledgedWarnings(e.target.checked)}
-                style={{ cursor: 'pointer' }}
-              />
-              Acknowledge warnings & allow export
-            </label>
+            <AlertTriangle size={15} color="#D97706" />
+            <span>
+              Review the findings below. Authorize export using the governance acknowledgment banner above.
+            </span>
           </div>
         )}
 

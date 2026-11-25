@@ -97,25 +97,43 @@ export const OverviewPage: React.FC = () => {
     return Array.from(modules).sort();
   }, [assessments]);
 
-  // Derived counts
+  // Derived counts based on actual assessment outcomes
   const totalAssessed = summary?.totalAssessed ?? assessments.length;
-  const directReplacements =
-    summary?.explicitSuccessorsCount ??
-    assessments.filter((a) => (a.assessmentResult || a.result) === 'EXPLICIT_SUCCESSOR').length;
-  const partialFits =
-    summary?.functionalAlternativeCount ??
-    assessments.filter((a) => (a.assessmentResult || a.result) === 'FUNCTIONAL_ALTERNATIVE').length;
-  const customOrIncompatible =
-    summary?.releaseIncompatibleCount ??
-    assessments.filter((a) => (a.assessmentResult || a.result) === 'RELEASE_INCOMPATIBLE').length;
+  const directReplacements = assessments.filter((a) => {
+    const res = a.assessmentResult || a.result;
+    return ['EXPLICIT_SUCCESSOR', 'STANDARD_FIT', 'VERIFIED_FIT', 'FIT'].includes(res) ||
+      (a.matchingFioriApp && !a.matchingFioriApp.appId?.startsWith('GEN-') && res !== 'CUSTOM_RAP_REQUIRED');
+  }).length;
+  const partialFits = assessments.filter((a) => {
+    const res = a.assessmentResult || a.result;
+    return ['FUNCTIONAL_ALTERNATIVE', 'PARTIAL_FIT', 'WEBGUI_COMPATIBLE', 'PENDING_VERIFICATION', 'INVESTIGATE_CATALOGUE_INFO'].includes(res) &&
+      !['EXPLICIT_SUCCESSOR', 'STANDARD_FIT'].includes(res) &&
+      res !== 'CUSTOM_RAP_REQUIRED';
+  }).length;
+  const customOrIncompatible = assessments.filter((a) => {
+    const res = a.assessmentResult || a.result;
+    return ['RELEASE_INCOMPATIBLE', 'CUSTOM_RAP_REQUIRED', 'CUSTOM_BUILD', 'BUILD', 'TECHNICAL_ANALYSIS_REQUIRED'].includes(res) ||
+      (!a.matchingFioriApp && res !== 'PENDING_VERIFICATION');
+  }).length;
 
   // Filtered assessments based on search, status tab, and module
   const filteredAssessments = useMemo(() => {
     return assessments.filter((a) => {
       // 1. Status Filter
       const resType = a.assessmentResult || a.result;
-      if (statusFilter !== 'ALL' && resType !== statusFilter) {
-        return false;
+      if (statusFilter === 'EXPLICIT_SUCCESSOR') {
+        const isDirect = ['EXPLICIT_SUCCESSOR', 'STANDARD_FIT', 'VERIFIED_FIT', 'FIT'].includes(resType) ||
+          (a.matchingFioriApp && !a.matchingFioriApp.appId?.startsWith('GEN-') && resType !== 'CUSTOM_RAP_REQUIRED');
+        if (!isDirect) return false;
+      } else if (statusFilter === 'FUNCTIONAL_ALTERNATIVE') {
+        const isAlternative = ['FUNCTIONAL_ALTERNATIVE', 'PARTIAL_FIT', 'WEBGUI_COMPATIBLE', 'PENDING_VERIFICATION', 'INVESTIGATE_CATALOGUE_INFO'].includes(resType) &&
+          !['EXPLICIT_SUCCESSOR', 'STANDARD_FIT'].includes(resType) &&
+          resType !== 'CUSTOM_RAP_REQUIRED';
+        if (!isAlternative) return false;
+      } else if (statusFilter === 'RELEASE_INCOMPATIBLE') {
+        const isCustom = ['RELEASE_INCOMPATIBLE', 'CUSTOM_RAP_REQUIRED', 'CUSTOM_BUILD', 'BUILD', 'TECHNICAL_ANALYSIS_REQUIRED'].includes(resType) ||
+          (!a.matchingFioriApp && resType !== 'PENDING_VERIFICATION');
+        if (!isCustom) return false;
       }
 
       // 2. Module Filter

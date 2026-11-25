@@ -33,6 +33,7 @@ import {
   recordLifecycleEvent
 } from './generationProjectLifecycle.js';
 import { GenerationProjectRepository } from '../../infrastructure/db/repositories/generationProjectRepository.js';
+import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from '../../services/standardTransactionKnowledge.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -179,6 +180,16 @@ export class GenerationProjectStore {
       const err = new Error(`Project file for "${projectId}" contains invalid or mismatched project ID.`);
       err.code = 'CORRUPTED_PROJECT_FILE';
       throw err;
+    }
+
+    if (parsed) {
+      const tc = (parsed.sourceTransactionCode || '').toUpperCase();
+      if (tc && (parsed.projectName === `${tc} — SAP Transaction` || parsed.projectName === 'SAP Transaction' || !parsed.projectName)) {
+        const canonical = STANDARD_TRANSACTION_CATALOG[tc]?.description || synthesizeTransactionTitle(tc);
+        if (canonical && canonical !== 'SAP Transaction') {
+          parsed.projectName = `${tc} — ${canonical}`;
+        }
+      }
     }
 
     return parsed;

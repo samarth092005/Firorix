@@ -143,12 +143,13 @@ export const catalogueService = {
     };
 
     const res = await apiClient.searchCatalogue(params);
+    const candidates = res?.candidates || (res as any)?.apps || [];
     return {
-      data: res.candidates || [],
-      totalCount: res.totalCount || (res.candidates ? res.candidates.length : 0),
-      returnedCount: res.returnedCount || (res.candidates ? res.candidates.length : 0),
-      success: res.success,
-      provenance: res.provenance || 'OFFICIAL_CATALOGUE',
+      data: candidates,
+      totalCount: res?.totalCount ?? candidates.length,
+      returnedCount: res?.returnedCount ?? candidates.length,
+      success: res?.success ?? true,
+      provenance: res?.provenance || 'OFFICIAL_CATALOGUE',
       isDemo: false
     };
   },
@@ -189,12 +190,12 @@ export const catalogueService = {
     try {
       const res = await apiClient.getCatalogueAppById(cleanId);
       return {
-        data: res.app,
-        success: res.success && !!res.app,
-        fromCache: res.fromCache,
-        provenance: res.app?.provenance || res.provenance || 'OFFICIAL_CATALOGUE_CACHED',
+        data: res?.app ?? null,
+        success: Boolean(res?.success && res?.app),
+        fromCache: Boolean(res?.fromCache),
+        provenance: res?.app?.provenance || res?.provenance || 'OFFICIAL_CATALOGUE_CACHED',
         isDemo: false,
-        errorMessage: res.errorMessage
+        errorMessage: res?.errorMessage
       };
     } catch (err: any) {
       if (err instanceof ApiError && err.statusCode === 404) {
@@ -213,8 +214,12 @@ export const catalogueService = {
   /**
    * Retrieves catalogue ingestion status and metrics from the backend.
    */
-  async getCatalogueStatus(): Promise<CatalogueStatusInfo> {
-    const res = await apiClient.getCatalogueStatus();
-    return res.status;
+  async getCatalogueStatus(): Promise<CatalogueStatusInfo | null> {
+    try {
+      const res = await apiClient.getCatalogueStatus();
+      return res?.status ?? null;
+    } catch {
+      return null;
+    }
   }
 };

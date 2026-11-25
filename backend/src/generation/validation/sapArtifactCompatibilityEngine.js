@@ -109,13 +109,14 @@ export class SapArtifactCompatibilityEngine {
       cdsFieldNames.set(view.objectName, fields);
 
       // Check Customer Namespace
-      if (!view.objectName.startsWith('Z') && !view.objectName.startsWith('Y')) {
+      const objName = view.objectName || view.name || '';
+      if (objName && !objName.startsWith('Z') && !objName.startsWith('Y')) {
         findings.push({
           level: 'WARNING',
           code: 'NON_CUSTOMER_NAMESPACE',
           artifactId: view.artifactId,
-          objectName: view.objectName,
-          message: `Object "${view.objectName}" is not prefixed with Z* or Y*.`,
+          objectName: objName,
+          message: `Object "${objName}" is not prefixed with Z* or Y*.`,
           remediation: 'Ensure custom ABAP objects reside in customer namespace.'
         });
       }
@@ -162,7 +163,7 @@ export class SapArtifactCompatibilityEngine {
     }
 
     // Check Behavior Implementation Classes (CLAS) - Critical TODO & Method Check
-    const abapClasses = artifacts.filter(a => a.artifactType === 'RAP_BEHAVIOR_POOL' || a.filePath.endsWith('.clas.abap'));
+    const abapClasses = artifacts.filter(a => a.artifactType === 'RAP_BEHAVIOR_POOL' || (a.filePath && a.filePath.endsWith('.clas.abap')));
     const detectedTodos = [];
     const emptyMethods = [];
 
@@ -254,7 +255,7 @@ export class SapArtifactCompatibilityEngine {
     // -------------------------------------------------------------
     // 2. FIORI ELEMENTS ARTIFACT & CONTRACT CHECKING
     // -------------------------------------------------------------
-    const manifestArtifact = artifacts.find(a => a.filePath.endsWith('manifest.json'));
+    const manifestArtifact = artifacts.find(a => a.filePath && a.filePath.endsWith('manifest.json'));
     if (manifestArtifact) {
       try {
         const manifest = JSON.parse(manifestArtifact.content);

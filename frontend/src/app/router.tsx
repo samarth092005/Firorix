@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBrowserRouter, Navigate, useSearchParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
+import { ProtectedRoute } from '../components/common/ProtectedRoute';
 import { localStore } from '../services/mock/localStore';
 
 // Top-level Suspense Fallback for standalone routes (Landing, Login)
@@ -97,9 +98,13 @@ export const router = createBrowserRouter([
     path: '/login',
     element: withTopLevelSuspense(LoginPage)
   },
-  // Enterprise Application Shell
+  // Enterprise Application Shell (Guarded by ProtectedRoute - AUTH-005, IDP-010)
   {
-    element: <AppShell />,
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
     children: [
       // 1. Overview Dashboard (Sprint 2 Centerpiece / Work Page)
       {

@@ -98,6 +98,8 @@ export interface GatewayCatalogApiResponse {
   totalCount: number;
   returnedCount: number;
   fromCache?: boolean;
+  isFallback?: boolean;
+  notice?: string;
   services: GatewayServiceItem[];
   provenance: string;
   timestamp: string;
@@ -619,6 +621,15 @@ export class ApiClient {
       }
       const contentLength = response.headers?.get('content-length');
       if (contentLength === '0') {
+        if (!response.ok) {
+          throw new ApiError({
+            message: `HTTP ${response.status} ${response.statusText}`,
+            statusCode: response.status,
+            statusText: response.statusText,
+            correlationId: responseCorrelationId,
+            isNetworkError: response.status === 502 || response.status === 504
+          });
+        }
         return null as T;
       }
 
@@ -626,6 +637,15 @@ export class ApiClient {
       const rawText = await response.text();
 
       if (!rawText || rawText.trim().length === 0) {
+        if (!response.ok) {
+          throw new ApiError({
+            message: `HTTP ${response.status} ${response.statusText}`,
+            statusCode: response.status,
+            statusText: response.statusText,
+            correlationId: responseCorrelationId,
+            isNetworkError: response.status === 502 || response.status === 504
+          });
+        }
         return null as T;
       }
 
@@ -639,7 +659,8 @@ export class ApiClient {
             statusCode: response.status,
             statusText: response.statusText,
             correlationId: responseCorrelationId,
-            responseBody: rawText
+            responseBody: rawText,
+            isNetworkError: response.status === 502 || response.status === 504
           });
         }
       } else {
@@ -666,7 +687,8 @@ export class ApiClient {
           statusCode: response.status,
           statusText: response.statusText,
           correlationId: responseCorrelationId,
-          responseBody: parsedData
+          responseBody: parsedData,
+          isNetworkError: response.status === 502 || response.status === 504
         });
       }
 
@@ -1301,6 +1323,43 @@ export class ApiClient {
     options?: ApiRequestOptions
   ): Promise<any> {
     return this.get<any>('/generation/handoff', { ...options, params: params as any });
+  }
+
+  /**
+   * Lists registered users for administration (UI-003).
+   * GET /api/v1/admin/users
+   */
+  public async listAdminUsers(
+    options?: ApiRequestOptions
+  ): Promise<{ success: boolean; count: number; users: any[] }> {
+    return this.get<{ success: boolean; count: number; users: any[] }>('/admin/users', options);
+  }
+
+  /**
+   * Registers a new enterprise user (UI-003).
+   * POST /api/v1/admin/users
+   */
+  public async createAdminUser(
+    userData: { email: string; name: string; role: string; department?: string; tenantId?: string },
+    options?: ApiRequestOptions
+  ): Promise<{ success: boolean; user: any; message?: string }> {
+    return this.post<{ success: boolean; user: any; message?: string }>('/admin/users', userData, options);
+  }
+
+  /**
+   * Updates an existing user's role (UI-003).
+   * PUT /api/v1/admin/users/:id/role
+   */
+  public async updateAdminUserRole(
+    userId: string,
+    role: string,
+    options?: ApiRequestOptions
+  ): Promise<{ success: boolean; user: any; message?: string }> {
+    return this.put<{ success: boolean; user: any; message?: string }>(
+      `/admin/users/${encodeURIComponent(userId)}/role`,
+      { role },
+      options
+    );
   }
 }
 

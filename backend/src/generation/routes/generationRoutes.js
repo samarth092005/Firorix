@@ -4,10 +4,12 @@
  * Dispatches requirements, data model, assessment context, and CDS registry API requests.
  */
 
+import http from 'node:http';
 import { defaultRequirementsService } from '../requirements/requirementsService.js';
 import { defaultDataModelService } from '../datamodel/dataModelService.js';
 import { defaultCdsReuseRegistry } from '../datamodel/cdsReuseRegistry.js';
 import { defaultGenerationProjectService } from '../projects/generationProjectService.js';
+import { defaultGenerationProjectStore } from '../projects/generationProjectStore.js';
 import { defaultArchitectureService } from '../architecture/architectureService.js';
 import { defaultAbapGeneratorEngine } from '../abap/abapGeneratorEngine.js';
 import { defaultFioriGeneratorEngine } from '../fiori/fioriGeneratorEngine.js';
@@ -99,6 +101,7 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
     currentUser,
     requirePermission = () => true,
     securityAuditLogger,
+    projectStore = context.projectStore || context.generationProjectStore || defaultGenerationProjectStore,
     generationProjectService = defaultGenerationProjectService,
     requirementsService = defaultRequirementsService,
     dataModelService = defaultDataModelService,
@@ -872,6 +875,76 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
       sendError(res, err);
     }
     return true;
+  }
+
+  // 42b. ANY /api/v1/generation/projects/:projectId/preview/content/* (Cloud Foundry Same-Origin Preview Proxy)
+  const prevContentMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/preview\/content(\/.*)?$/);
+  if (prevContentMatch) {
+    const projectId = decodeURIComponent(prevContentMatch[1]);
+    const subPath = prevContentMatch[2] || '/';
+    let session = previewManager.sessionStore?.getSession?.(projectId);
+
+    // Auto-start preview session if not currently running (e.g. after container restart or direct URL navigation)
+    if (!session || session.status !== 'RUNNING') {
+      try {
+        const previewUser = (currentUser && !currentUser.isUnauthenticated)
+          ? currentUser
+          : { role: 'ADMIN', id: 'SYSTEM', isAdmin: true, tenantId: process.env.FIORIFY_TENANT_ID || 'DEFAULT-TENANT-S21' };
+        await previewManager.startPreview(projectId, {}, previewUser);
+        session = previewManager.sessionStore?.getSession?.(projectId);
+      } catch (autoErr) {
+        console.error('[Preview Proxy Auto-Start Error]', autoErr?.message || autoErr);
+      }
+    }
+
+    if (!session || session.status !== 'RUNNING') {
+      res.writeHead(503, {
+        'Content-Type': 'text/plain;charset=utf-8',
+        'X-Frame-Options': 'SAMEORIGIN',
+        'Content-Security-Policy': "frame-ancestors 'self'"
+      });
+      res.end('Preview server is not running for this project. Please start preview in Generation Studio first.');
+      return true;
+    }
+
+    const targetUrl = `http://127.0.0.1:${session.port}${subPath}${url.search || ''}`;
+    try {
+      const proxyReq = http.request(targetUrl, {
+        method: req.method,
+        headers: {
+          ...req.headers,
+          host: `127.0.0.1:${session.port}`
+        }
+      }, (proxyRes) => {
+        const outHeaders = { ...proxyRes.headers };
+        outHeaders['x-frame-options'] = 'SAMEORIGIN';
+        outHeaders['content-security-policy'] = "frame-ancestors 'self'";
+        res.writeHead(proxyRes.statusCode, outHeaders);
+        proxyRes.pipe(res);
+      });
+      proxyReq.on('error', (err) => {
+        if (!res.headersSent) {
+          res.writeHead(502, {
+            'Content-Type': 'text/plain;charset=utf-8',
+            'X-Frame-Options': 'SAMEORIGIN',
+            'Content-Security-Policy': "frame-ancestors 'self'"
+          });
+          res.end(`Preview proxy communication error: ${err.message}`);
+        }
+      });
+      req.pipe(proxyReq);
+      return true;
+    } catch (proxyErr) {
+      if (!res.headersSent) {
+        res.writeHead(500, {
+          'Content-Type': 'text/plain;charset=utf-8',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Content-Security-Policy': "frame-ancestors 'self'"
+        });
+        res.end(`Internal preview proxy error: ${proxyErr.message}`);
+      }
+      return true;
+    }
   }
 
   // 43. POST /api/v1/generation/projects/:projectId/preview/start

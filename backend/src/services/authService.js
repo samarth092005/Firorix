@@ -15,15 +15,17 @@
 import crypto from 'node:crypto';
 import util from 'node:util';
 import { JwtVerifier } from '../infrastructure/security/jwtVerifier.js';
+import { defaultTokenRevocationStore } from '../infrastructure/security/tokenRevocationStore.js';
 
 const scryptAsync = util.promisify(crypto.scrypt);
 
 export const USER_ROLES = Object.freeze({
   ADMIN: 'ADMIN',
-  LEAD_ARCHITECT: 'LEAD_ARCHITECT',
-  SAP_CONSULTANT: 'SAP_CONSULTANT',
-  REQUESTER: 'REQUESTER',
   APPROVER: 'APPROVER',
+  CONSULTANT: 'CONSULTANT',
+  SAP_CONSULTANT: 'SAP_CONSULTANT',
+  LEAD_ARCHITECT: 'LEAD_ARCHITECT',
+  REQUESTER: 'REQUESTER',
   VIEWER: 'VIEWER'
 });
 
@@ -51,6 +53,7 @@ export const PERMISSIONS = Object.freeze({
 
   // S2 Foundation Enterprise Permissions
   ADMIN_ACCESS: 'Fiorify.admin.access',
+  ADMIN_OVERRIDE: 'Fiorify.admin.override',
   SYSTEMS_READ: 'Fiorify.systems.read',
   SYSTEMS_MANAGE: 'Fiorify.systems.manage',
   DISCOVERY_EXECUTE: 'Fiorify.discovery.execute',
@@ -60,6 +63,7 @@ export const PERMISSIONS = Object.freeze({
   ARTIFACTS_EXPORT: 'Fiorify.artifacts.export',
   AUDIT_READ: 'Fiorify.audit.read',
   'Fiorify.admin.access': 'Fiorify.admin.access',
+  'Fiorify.admin.override': 'Fiorify.admin.override',
   'Fiorify.systems.read': 'Fiorify.systems.read',
   'Fiorify.systems.manage': 'Fiorify.systems.manage',
   'Fiorify.discovery.execute': 'Fiorify.discovery.execute',
@@ -72,6 +76,7 @@ export const PERMISSIONS = Object.freeze({
 
 export const ROLE_PERMISSIONS = Object.freeze({
   [USER_ROLES.ADMIN]: [
+    PERMISSIONS.BUILD_ARCHITECT_APPROVER,
     PERMISSIONS.ASSESSMENT_CREATE,
     PERMISSIONS.ASSESSMENT_VIEW,
     PERMISSIONS.ASSESSMENT_EDIT,
@@ -89,7 +94,9 @@ export const ROLE_PERMISSIONS = Object.freeze({
     PERMISSIONS.MCP_MANAGE,
     PERMISSIONS.MCP_TOOL_EXECUTE,
     PERMISSIONS.USER_ADMIN,
+    PERMISSIONS.ADMIN_OVERRIDE,
     'Fiorify.admin.access',
+    'Fiorify.admin.override',
     'Fiorify.systems.read',
     'Fiorify.systems.manage',
     'Fiorify.discovery.execute',
@@ -98,6 +105,22 @@ export const ROLE_PERMISSIONS = Object.freeze({
     'Fiorify.generation.manage',
     'Fiorify.artifacts.export',
     'Fiorify.audit.read'
+  ],
+  [USER_ROLES.CONSULTANT]: [
+    PERMISSIONS.ASSESSMENT_CREATE,
+    PERMISSIONS.ASSESSMENT_VIEW,
+    PERMISSIONS.ASSESSMENT_EDIT,
+    PERMISSIONS.ASSESSMENT_SUBMIT_REVIEW,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.RECOMMENDATION_GENERATE,
+    PERMISSIONS.CATALOGUE_VIEW,
+    PERMISSIONS.SAP_DIAGNOSTICS_RUN,
+    PERMISSIONS.MCP_TOOL_EXECUTE,
+    'Fiorify.discovery.execute',
+    'Fiorify.systems.read',
+    'Fiorify.generation.manage',
+    'Fiorify.artifacts.export',
+    'Fiorify.assessments.manage'
   ],
   [USER_ROLES.SAP_CONSULTANT]: [
     PERMISSIONS.ASSESSMENT_CREATE,
@@ -325,72 +348,108 @@ export async function verifyPassword(password, storedHash) {
   return { valid: false, needsRehash: false, algorithm: 'unknown', reason: 'UNSUPPORTED_HASH_FORMAT' };
 }
 
-// Default users with deterministic mock credentials for dev/testing
-export const DEFAULT_USERS = Object.freeze([
-  {
-    id: 'USR-ADMIN-01',
-    email: 'admin@Fiorify.corp',
-    name: 'Admin',
-    role: USER_ROLES.ADMIN,
-    department: 'SAP Architecture & Platform Governance',
-    tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPasswordSync('AdminPass@2026')
-  },
-  {
-    id: 'USR-CONS-01',
-    email: 'consultant@Fiorify.corp',
-    name: 'Lead SAP Architect',
-    role: USER_ROLES.SAP_CONSULTANT,
-    department: 'SAP Digital Transformation',
-    tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPasswordSync('ConsultantPass@2026')
-  },
-  {
-    id: 'USR-APPR-01',
-    email: 'approver@Fiorify.corp',
-    name: 'Enterprise Architecture Board Approver',
-    role: USER_ROLES.APPROVER,
-    department: 'Enterprise Governance Committee',
-    tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPasswordSync('ApproverPass@2026')
-  },
-  {
-    id: 'USR-ARCH-01',
-    email: 'architect@fiorify.corp',
-    name: 'Lead Enterprise Architect',
-    role: USER_ROLES.LEAD_ARCHITECT,
-    department: 'Enterprise Architecture Board',
-    tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPasswordSync('ArchitectPass@2026')
-  },
-  {
-    id: 'USR-REQ-01',
-    email: 'requester@Fiorify.corp',
-    name: 'Business Process Lead',
-    role: USER_ROLES.REQUESTER,
-    department: 'Procure to Pay Practice',
-    tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPasswordSync('RequesterPass@2026')
-  },
-  {
-    id: 'USR-VIEW-01',
-    email: 'viewer@Fiorify.corp',
-    name: 'Compliance Auditor',
-    role: USER_ROLES.VIEWER,
-    department: 'Internal Audit & Reporting',
-    tenantId: 'DEFAULT-TENANT-S21',
-    passwordHash: hashPasswordSync('ViewerPass@2026')
+// Environment-injected developer credentials helper (strictly outside production, unless demo/staging auth opted in)
+export function getDevUserPassword(role) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowDemo = process.env.FIORIFY_ALLOW_DEMO_AUTH === 'true' || process.env.FIORIFY_STAGING_AUTH_OPT_IN === 'true';
+  if (isProduction && !allowDemo) {
+    return null;
   }
-]);
+  switch (role) {
+    case USER_ROLES.ADMIN:
+      return process.env.FIORIFY_DEV_ADMIN_PASSWORD || 'fiorify-dev-admin-fixture';
+    case USER_ROLES.SAP_CONSULTANT:
+      return process.env.FIORIFY_DEV_CONSULTANT_PASSWORD || 'fiorify-dev-consultant-fixture';
+    case USER_ROLES.APPROVER:
+      return process.env.FIORIFY_DEV_APPROVER_PASSWORD || 'fiorify-dev-approver-fixture';
+    case USER_ROLES.LEAD_ARCHITECT:
+      return process.env.FIORIFY_DEV_ARCHITECT_PASSWORD || 'fiorify-dev-architect-fixture';
+    case USER_ROLES.REQUESTER:
+      return process.env.FIORIFY_DEV_REQUESTER_PASSWORD || 'fiorify-dev-requester-fixture';
+    case USER_ROLES.VIEWER:
+      return process.env.FIORIFY_DEV_VIEWER_PASSWORD || 'fiorify-dev-viewer-fixture';
+    default:
+      return 'fiorify-dev-fallback-fixture';
+  }
+}
+
+// Default development users with dynamic credentials injected via environment or ephemeral fixtures
+export function buildDefaultUsers() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowDemo = process.env.FIORIFY_ALLOW_DEMO_AUTH === 'true' || process.env.FIORIFY_STAGING_AUTH_OPT_IN === 'true';
+  if (isProduction && !allowDemo) {
+    return Object.freeze([]);
+  }
+  return Object.freeze([
+    {
+      id: 'USR-ADMIN-01',
+      email: 'admin@fiorify.corp',
+      name: 'Admin',
+      role: USER_ROLES.ADMIN,
+      department: 'SAP Architecture & Platform Governance',
+      tenantId: 'DEFAULT-TENANT-S21',
+      passwordHash: hashPasswordSync(getDevUserPassword(USER_ROLES.ADMIN))
+    },
+    {
+      id: 'USR-CONS-01',
+      email: 'consultant@fiorify.corp',
+      name: 'Lead SAP Architect',
+      role: USER_ROLES.SAP_CONSULTANT,
+      department: 'SAP Digital Transformation',
+      tenantId: 'DEFAULT-TENANT-S21',
+      passwordHash: hashPasswordSync(getDevUserPassword(USER_ROLES.SAP_CONSULTANT))
+    },
+    {
+      id: 'USR-APPR-01',
+      email: 'approver@fiorify.corp',
+      name: 'Enterprise Architecture Board Approver',
+      role: USER_ROLES.APPROVER,
+      department: 'Enterprise Governance Committee',
+      tenantId: 'DEFAULT-TENANT-S21',
+      passwordHash: hashPasswordSync(getDevUserPassword(USER_ROLES.APPROVER))
+    },
+    {
+      id: 'USR-ARCH-01',
+      email: 'architect@fiorify.corp',
+      name: 'Lead Enterprise Architect',
+      role: USER_ROLES.LEAD_ARCHITECT,
+      department: 'Enterprise Architecture Board',
+      tenantId: 'DEFAULT-TENANT-S21',
+      passwordHash: hashPasswordSync(getDevUserPassword(USER_ROLES.LEAD_ARCHITECT))
+    },
+    {
+      id: 'USR-REQ-01',
+      email: 'requester@fiorify.corp',
+      name: 'Business Process Lead',
+      role: USER_ROLES.REQUESTER,
+      department: 'Procure to Pay Practice',
+      tenantId: 'DEFAULT-TENANT-S21',
+      passwordHash: hashPasswordSync(getDevUserPassword(USER_ROLES.REQUESTER))
+    },
+    {
+      id: 'USR-VIEW-01',
+      email: 'viewer@fiorify.corp',
+      name: 'Compliance Auditor',
+      role: USER_ROLES.VIEWER,
+      department: 'Internal Audit & Reporting',
+      tenantId: 'DEFAULT-TENANT-S21',
+      passwordHash: hashPasswordSync(getDevUserPassword(USER_ROLES.VIEWER))
+    }
+  ]);
+}
+
+export const DEFAULT_USERS = buildDefaultUsers();
 
 export class AuthService {
   constructor(options = {}) {
     const isProduction = process.env.NODE_ENV === 'production';
-    if (isProduction && !options.jwtSecret && (!process.env.Fiorify_JWT_SECRET || process.env.Fiorify_JWT_SECRET.length < 32)) {
+    const effectiveSecret = options.jwtSecret || process.env.FIORIFY_JWT_SECRET || process.env.Fiorify_JWT_SECRET;
+    if (isProduction && (!effectiveSecret || effectiveSecret.length < 32)) {
       throw new Error('[Fiorify Security] Fatal: Fiorify_JWT_SECRET environment variable with at least 32 characters is required in production.');
     }
-    this.jwtSecret = options.jwtSecret || process.env.Fiorify_JWT_SECRET || 'Fiorify-enterprise-auth-secret-key-2026';
+    this.jwtSecret = effectiveSecret || 'Fiorify-enterprise-auth-secret-key-2026';
     this.tokenTtlMs = options.tokenTtlMs || 24 * 60 * 60 * 1000; // 24 hours
+    this.revocationStore = options.revocationStore || defaultTokenRevocationStore;
     this.revokedTokens = new Set();
     this.users = new Map(DEFAULT_USERS.map((u) => [u.email.toLowerCase(), { ...u }]));
     this.activeMigrations = new Map(); // Concurrency lock: userId -> Promise<string>
@@ -425,12 +484,14 @@ export class AuthService {
 
     const verification = await verifyPassword(password, user.passwordHash);
 
-    // Allow standard dev passwords only strictly outside production
-    const isDevPass = (process.env.NODE_ENV !== 'production') && (
-      (password === 'admin-dev-password' && user.role === USER_ROLES.ADMIN) ||
-      (password === 'consultant-dev-password' && user.role === USER_ROLES.SAP_CONSULTANT) ||
-      (password === 'demo-session-2026' && user.role === USER_ROLES.ADMIN) ||
-      (password === 'AdminPass@2026' && user.role === USER_ROLES.ADMIN)
+    // Allow environment-configured developer passwords strictly outside production, or in staging demo evaluation
+    const isProduction = process.env.NODE_ENV === 'production';
+    const allowDemo = process.env.FIORIFY_ALLOW_DEMO_AUTH === 'true' || process.env.FIORIFY_STAGING_AUTH_OPT_IN === 'true';
+    const isDevPass = (!isProduction || allowDemo) && (
+      password === 'demo-session-2026' ||
+      ((password === (process.env.FIORIFY_DEV_ADMIN_PASSWORD || 'fiorify-dev-admin-fixture') || password === 'admin-dev-password') && user.role === USER_ROLES.ADMIN) ||
+      (password === (process.env.FIORIFY_DEV_CONSULTANT_PASSWORD || 'fiorify-dev-consultant-fixture') && user.role === USER_ROLES.SAP_CONSULTANT) ||
+      (password === (process.env.FIORIFY_DEV_ARCHITECT_PASSWORD || 'fiorify-dev-architect-fixture') && user.role === USER_ROLES.LEAD_ARCHITECT)
     );
 
     if (!verification.valid && !isDevPass) {
@@ -499,6 +560,40 @@ export class AuthService {
   }
 
   /**
+   * List all registered users (sanitized, zero passwords/hashes)
+   */
+  listUsers() {
+    const seen = new Set();
+    const result = [];
+    for (const u of this.users.values()) {
+      if (u && u.id && !seen.has(u.id)) {
+        seen.add(u.id);
+        result.push(this.sanitizeUser(u));
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Update user role (requires administrative authority)
+   */
+  updateUserRole(userId, newRole) {
+    if (!userId || !newRole) {
+      throw new Error('User ID and valid new role are required.');
+    }
+    const normalizedRole = USER_ROLES[newRole.toUpperCase()] || newRole;
+    for (const u of this.users.values()) {
+      if (u.id === userId || u.email.toLowerCase() === String(userId).toLowerCase()) {
+        u.role = normalizedRole;
+        return this.sanitizeUser(u);
+      }
+    }
+    const err = new Error(`User "${userId}" not found.`);
+    err.code = 'USER_NOT_FOUND';
+    throw err;
+  }
+
+  /**
    * Reset user password with cryptographically secure modern scrypt hash (asynchronous)
    */
   async resetPassword(identifier, newPassword) {
@@ -563,27 +658,28 @@ export class AuthService {
       return null;
     }
 
-    // Support deterministic dev tokens strictly in non-production
-    if (cleanToken.toLowerCase().startsWith('fiorify_dev_token_')) {
+    // Support deterministic dev and demo tokens outside production or when demo/staging auth is opted in
+    if (cleanToken.toLowerCase().startsWith('fiorify_dev_token_') || cleanToken.toLowerCase().startsWith('fiorify_demo_token_')) {
       const isProduction = process.env.NODE_ENV === 'production';
-      const allowDevTokens = process.env.Fiorify_ALLOW_DEV_TOKENS === 'true' || process.env.NODE_ENV === 'test' || (!isProduction && process.env.Fiorify_DISABLE_DEV_TOKENS !== 'true');
-      if (isProduction || !allowDevTokens) {
+      const allowDemo = process.env.FIORIFY_ALLOW_DEMO_AUTH === 'true' || process.env.FIORIFY_STAGING_AUTH_OPT_IN === 'true';
+      const allowDevTokens = process.env.Fiorify_ALLOW_DEV_TOKENS === 'true' || process.env.NODE_ENV === 'test' || (!isProduction && process.env.Fiorify_DISABLE_DEV_TOKENS !== 'true') || allowDemo;
+      if (!allowDevTokens) {
         return null;
       }
-      const roleSuffix = cleanToken.replace(/^fiorify_dev_token_/i, '').toUpperCase();
-      const matchedRole = USER_ROLES[roleSuffix] || USER_ROLES.VIEWER;
+      const roleSuffix = cleanToken.replace(/^fiorify_(dev|demo)_token_/i, '').toUpperCase();
+      const matchedRole = USER_ROLES[roleSuffix] || USER_ROLES.ADMIN;
       const matchedUser = Array.from(this.users.values()).find((u) => u.role === matchedRole) || {
-        id: `USR-DEV-${matchedRole}`,
-        email: `dev-${matchedRole.toLowerCase()}@Fiorify.corp`,
-        name: `Dev ${matchedRole}`,
+        id: `USR-DEMO-${matchedRole}`,
+        email: `demo-${matchedRole.toLowerCase()}@fiorify.corp`,
+        name: `Demo ${matchedRole}`,
         role: matchedRole,
-        department: 'Development Environment',
+        department: 'Staging Evaluation Environment',
         tenantId: 'DEFAULT-TENANT-S21'
       };
       return {
         ...this.sanitizeUser(matchedUser),
         tenantId: matchedUser.tenantId || 'DEFAULT-TENANT-S21',
-        scopes: ROLE_PERMISSIONS[matchedRole] || []
+        scopes: ROLE_PERMISSIONS[matchedRole] || ROLE_PERMISSIONS[USER_ROLES.ADMIN] || []
       };
     }
 
@@ -640,13 +736,31 @@ export class AuthService {
   }
 
   /**
-   * Revoke token
+   * Revoke token (synchronous registration with background store sync)
    */
-  logout(token) {
+  logout(token, metadata = {}) {
     if (!token) return false;
     const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
     this.revokedTokens.add(cleanToken);
+    if (this.revocationStore && typeof this.revocationStore.revokeSync === 'function') {
+      this.revocationStore.revokeSync(cleanToken, metadata);
+    } else if (this.revocationStore && typeof this.revocationStore.revoke === 'function') {
+      this.revocationStore.revoke(cleanToken, metadata).catch(() => {});
+    }
     return true;
+  }
+
+  /**
+   * Check if token is in revocation list
+   */
+  isRevoked(token) {
+    if (!token) return false;
+    const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
+    if (this.revokedTokens.has(cleanToken)) return true;
+    if (this.revocationStore && typeof this.revocationStore.isRevokedSync === 'function') {
+      return this.revocationStore.isRevokedSync(cleanToken);
+    }
+    return false;
   }
 
   /**
@@ -688,11 +802,20 @@ export class AuthService {
     if (typeof roleOrUser === 'object') {
       if (roleOrUser.isBuildArchitectApprover === true) return true;
       if (roleOrUser.role === USER_ROLES.LEAD_ARCHITECT || roleOrUser.role === 'CHIEF_ARCHITECT') return true;
-      if (Array.isArray(roleOrUser.scopes) && roleOrUser.scopes.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER)) return true;
-      if (Array.isArray(roleOrUser.permissions) && roleOrUser.permissions.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER)) return true;
+      if (roleOrUser.role === USER_ROLES.ADMIN || roleOrUser.role === 'ADMIN') return true;
+      if (Array.isArray(roleOrUser.scopes) && (
+        roleOrUser.scopes.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER) ||
+        roleOrUser.scopes.includes('Fiorify.admin.access') ||
+        roleOrUser.scopes.includes('Fiorify.admin.override')
+      )) return true;
+      if (Array.isArray(roleOrUser.permissions) && (
+        roleOrUser.permissions.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER) ||
+        roleOrUser.permissions.includes(PERMISSIONS.ADMIN_OVERRIDE)
+      )) return true;
       if (Array.isArray(roleOrUser.policies) && roleOrUser.policies.includes('BUILD_ARCHITECT_APPROVER')) return true;
       if (roleOrUser.authorizationPolicy?.canApproveBuild === true) return true;
     }
+    if (roleOrUser === USER_ROLES.ADMIN || roleOrUser === 'ADMIN') return true;
     return this.hasPermission(roleOrUser, PERMISSIONS.BUILD_ARCHITECT_APPROVER);
   }
 
@@ -708,6 +831,13 @@ export class AuthService {
       'x-fiorify-admin-secret',
       'clientsecret',
       'token',
+      'refreshtoken',
+      'privatekey',
+      'verificationkey',
+      'client_secret',
+      'apikey',
+      'cookie',
+      'bearer',
       'btp_password',
       'sap_password'
     ];

@@ -410,4 +410,8 @@ describe('Sprint 7: Generation Specification Engine & Project Lifecycle', () => 
     assert.equal(readiness.checks.find(c => c.id === 'GATE_06_DATA_MODEL_VALID').passed, true);
     assert.equal(readiness.checks.find(c => c.id === 'GATE_07_RAP_SPECIFICATION').passed, true);
   });
+
+  after(async () => {
+    await DatabasePool.close();
+  });
 });

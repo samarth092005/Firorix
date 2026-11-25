@@ -340,7 +340,7 @@ ENDMETHOD.`;
         <div className="sandbox-container">
           <div className="sandbox-header">
             <span className="sandbox-kicker">Interactive Product Sandbox</span>
-            <h2 className="sandbox-title">See How FioriFy Resolves Real Enterprise Transactions</h2>
+            <h2 className="sandbox-title">See How Fiorify Resolves Real Enterprise Transactions</h2>
             <p className="sandbox-subtitle">
               Select any SAP transaction code below to simulate live DDIC analysis, Fiori catalog matching, and governed modernization routing.
             </p>
@@ -438,7 +438,7 @@ ENDMETHOD.`;
             <span className="section-kicker">Generation Studio &amp; Architecture Engine</span>
             <h2 className="section-headline">Deep ABAP RAP &amp; Fiori Elements Code Synthesis</h2>
             <p className="section-subheadline">
-              When genuine functional gaps necessitate custom development, FioriFy generates a complete 17-artifact Clean Core ABAP repository and enterprise Fiori Elements application.
+              When genuine functional gaps necessitate custom development, Fiorify generates a complete 17-artifact Clean Core ABAP repository and enterprise Fiori Elements application.
             </p>
           </div>
 
@@ -739,7 +739,7 @@ ENDMETHOD.`;
       <section className="capabilities-section" id="discovery">
         <div className="section-intro">
           <span className="section-kicker">Engineered For Enterprise Scale</span>
-          <h2 className="section-headline">Why Enterprise SAP Architects Choose FioriFy</h2>
+          <h2 className="section-headline">Why Enterprise SAP Architects Choose Fiorify</h2>
         </div>
 
         <div className="capabilities-grid">
@@ -842,7 +842,7 @@ ENDMETHOD.`;
           ==================================================================== */}
       <footer className="landing-footer">
         <div className="footer-left">
-          <span className="footer-brand">FioriFy</span>
+          <span className="footer-brand">Fiorify</span>
           <span>&bull;</span>
           <span>SAP Fiori Modernization Platform</span>
           <span className="footer-system-tag">SAP S/4HANA 2023 FPS01</span>

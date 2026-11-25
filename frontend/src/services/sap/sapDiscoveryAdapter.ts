@@ -32,6 +32,22 @@ export interface ISapDiscoveryAdapter {
  * SAP Integration Service Contract:
  * Read-only Gateway OData Service: /sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV
  */
+function formatFallbackTitle(tcode: string): string {
+  const clean = tcode.trim().toUpperCase();
+  if (clean === 'ST22') return 'ABAP Dump Analysis (ABAP Runtime Errors)';
+  if (clean === 'SE16N') return 'General Table Display';
+  if (clean === 'SU53') return 'Evaluate Authorization Check';
+  if (clean === 'FS00') return 'Manage G/L Account Master Data';
+  if (clean === 'F1612') return 'Post Outgoing Payments';
+  if (clean === 'MM31') return 'Display Material Structure';
+  if (clean.startsWith('ME')) return `Purchasing & Sourcing (${clean})`;
+  if (clean.startsWith('MM')) return `Material Master Management (${clean})`;
+  if (clean.startsWith('VA')) return `Sales Order Processing (${clean})`;
+  if (clean.startsWith('FB') || clean.startsWith('F-') || clean.startsWith('FS')) return `Financial Accounting & Posting (${clean})`;
+  if (clean.startsWith('Z') || clean.startsWith('Y')) return `Custom Application (${clean})`;
+  return `SAP Transaction ${clean}`;
+}
+
 class SapDiscoveryAdapter implements ISapDiscoveryAdapter {
   getSystemMetadataSources() {
     return {
@@ -89,7 +105,9 @@ class SapDiscoveryAdapter implements ISapDiscoveryAdapter {
       targetRelease: request.targetRelease,
       exists,
       classification,
-      description: tx?.description || (exists ? 'SAP Transaction' : 'Transaction Not Found in Dictionary'),
+      description: (tx?.description && tx.description !== 'SAP Transaction' && !tx.description.startsWith('Assessment for '))
+        ? tx.description
+        : (exists ? formatFallbackTitle(cleanTcode) : 'Transaction Not Found in Dictionary'),
       programName: tx?.program || 'UNKNOWN',
       screenNumber: tx?.screenNumber || '0100',
       packageName: tx?.packageName || (classification === 'CUSTOM' ? 'ZCUSTOM' : 'SAP_STANDARD'),

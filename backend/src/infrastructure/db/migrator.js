@@ -1,14 +1,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import DatabasePool from './pool.js';
 
 export class MigrationRunner {
   constructor(options = {}) {
-    this.migrationsDir = options.migrationsDir || path.resolve(
+    const baseDir = path.resolve(
       path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1')),
       'migrations'
     );
+    const pgDir = path.join(baseDir, 'postgres');
+    this.migrationsDir = options.migrationsDir || (fs.existsSync(pgDir) ? pgDir : baseDir);
   }
 
   computeChecksum(content) {
@@ -66,8 +69,30 @@ export class MigrationRunner {
     });
   }
 
-  async migrateUp(options = {}) {
+  async getMigrationClient(options = {}) {
+    const migrationUrl = options.connectionString || process.env.MIGRATION_DATABASE_URL_UNPOOLED || process.env.MIGRATION_DATABASE_URL;
+    if (migrationUrl) {
+      const migrationPool = await DatabasePool.getPool({ connectionString: migrationUrl });
+      const client = await migrationPool.connect();
+      return {
+        client,
+        release: async () => {
+          client.release();
+          await migrationPool.end().catch(() => {});
+        }
+      };
+    }
     const client = await DatabasePool.getClient();
+    return {
+      client,
+      release: async () => {
+        client.release();
+      }
+    };
+  }
+
+  async migrateUp(options = {}) {
+    const { client, release } = await this.getMigrationClient(options);
     const results = {
       applied: [],
       skipped: [],
@@ -129,14 +154,28 @@ export class MigrationRunner {
         }
       }
 
+      // Grant app user permissions on newly created tables if present
+      try {
+        await client.query(`
+          DO $$
+          BEGIN
+            IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'fiorify_app') THEN
+              GRANT USAGE ON SCHEMA public TO fiorify_app;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO fiorify_app;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO fiorify_app;
+            END IF;
+          END $$;
+        `);
+      } catch {}
+
       return results;
     } finally {
-      client.release();
+      await release();
     }
   }
 
   async migrateDown(targetVersion, options = {}) {
-    const client = await DatabasePool.getClient();
+    const { client, release } = await this.getMigrationClient(options);
     const results = {
       rolledBack: [],
       errors: []
@@ -181,12 +220,12 @@ export class MigrationRunner {
 
       return results;
     } finally {
-      client.release();
+      await release();
     }
   }
 
-  async status() {
-    const client = await DatabasePool.getClient();
+  async status(options = {}) {
+    const { client, release } = await this.getMigrationClient(options);
     try {
       const applied = await this.getAppliedMigrations(client);
       const appliedMap = new Map(applied.map(m => [m.version, m]));
@@ -203,9 +242,37 @@ export class MigrationRunner {
           : null
       }));
     } finally {
-      client.release();
+      await release();
     }
   }
 }
 
 export default MigrationRunner;
+
+// CLI execution entrypoint
+if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+  const runner = new MigrationRunner();
+  const cmd = (process.argv[2] || 'status').toLowerCase();
+  try {
+    if (cmd === 'up') {
+      const res = await runner.migrateUp();
+      console.log('[MigrationRunner] Completed:', JSON.stringify(res, null, 2));
+      await DatabasePool.close();
+      process.exit(0);
+    } else if (cmd === 'down') {
+      const res = await runner.migrateDown(parseInt(process.argv[3] || '1', 10));
+      console.log('[MigrationRunner] Rollback completed:', JSON.stringify(res, null, 2));
+      await DatabasePool.close();
+      process.exit(0);
+    } else {
+      const res = await runner.status();
+      console.log('[MigrationRunner] Status:', JSON.stringify(res, null, 2));
+      await DatabasePool.close();
+      process.exit(0);
+    }
+  } catch (err) {
+    console.error('[MigrationRunner] Error:', err.message);
+    await DatabasePool.close().catch(() => {});
+    process.exit(1);
+  }
+}

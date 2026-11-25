@@ -39,6 +39,19 @@ export class McpConnectionManager extends EventEmitter {
         mcpLogger.warn('MCP child process terminated unexpectedly.');
         this.toolRegistry.clear();
         this._setState(CONNECTION_STATES.DISCONNECTED, new McpConnectionError('MCP process exited unexpectedly'));
+
+        // Automatic keep-alive reconnect
+        if (this.config.autoConnect && this.reconnectAttempts < this.config.reconnectMaxAttempts) {
+          this.reconnectAttempts++;
+          const delay = Math.min(2000 * this.reconnectAttempts, 15000);
+          mcpLogger.info(`Scheduling MCP auto-reconnect attempt ${this.reconnectAttempts}/${this.config.reconnectMaxAttempts} in ${delay}ms...`);
+          if (this._reconnectTimer) clearTimeout(this._reconnectTimer);
+          this._reconnectTimer = setTimeout(() => {
+            this.connect().catch((err) => {
+              mcpLogger.warn(`MCP auto-reconnect attempt ${this.reconnectAttempts} failed: ${err.message}`);
+            });
+          }, delay);
+        }
       }
     };
 

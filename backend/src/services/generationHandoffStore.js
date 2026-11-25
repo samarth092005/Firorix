@@ -14,6 +14,7 @@ import { defaultAssessmentStore, LIFECYCLE_STATES } from './assessmentStore.js';
 import { STANDARD_TRANSACTION_CATALOG } from './standardTransactionKnowledge.js';
 import { authService, USER_ROLES, PERMISSIONS } from './authService.js';
 import { GenerationHandoffRepository } from '../infrastructure/db/repositories/generationHandoffRepository.js';
+import { defaultCryptographicSignatureService } from '../infrastructure/security/cryptographicSignatureService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +37,12 @@ export class GenerationHandoffStore {
     const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || process.env.FIORIX_PERSISTENCE || '').toLowerCase();
     this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres');
     this.repository = options.repository || (this.useDatabase ? new GenerationHandoffRepository() : null);
+
+    if (process.env.NODE_ENV === 'production' && !this.useDatabase && !options.allowVolatileStoreInProduction) {
+      const err = new Error('FATAL CONFIGURATION: In production (NODE_ENV=production), durable database persistence is mandatory. File/memory fallback is prohibited.');
+      err.code = 'PRODUCTION_PERSISTENCE_REQUIRED';
+      throw err;
+    }
   }
 
   async _withWriteLock(operation) {
@@ -154,6 +161,18 @@ export class GenerationHandoffStore {
 
     const targetVersion = assessment.version !== undefined ? assessment.version : 1;
 
+    // Server-Authoritative Actor Authorization Check
+    // Never trust client-provided author, architectName, or approvalObj.approver strings!
+    const isActorAuthorizedArchitect = Boolean(
+      userContext && !userContext.isUnauthenticated && (
+        authService.canApproveBuild(userContext) ||
+        userContext.role === USER_ROLES.LEAD_ARCHITECT ||
+        userContext.role === 'CHIEF_ARCHITECT' ||
+        userContext.role === USER_ROLES.ADMIN ||
+        userContext.role === 'ADMIN'
+      )
+    );
+
     // 4. Validate approval object (scope, version binding, expiration)
     const approvalObj = assessment.leadArchitectApproval || payload.leadArchitectApproval;
     if (approvalObj && approvalObj.approved === true) {
@@ -192,17 +211,36 @@ export class GenerationHandoffStore {
           throw err;
         }
       }
-    }
 
-    // Server-Authoritative Actor Authorization Check
-    // Never trust client-provided author, architectName, or approvalObj.approver strings!
-    const isActorAuthorizedArchitect = Boolean(
-      userContext && !userContext.isUnauthenticated && (
-        authService.canApproveBuild(userContext) ||
-        userContext.role === USER_ROLES.LEAD_ARCHITECT ||
-        userContext.role === 'CHIEF_ARCHITECT'
-      )
-    );
+      // GOV-005: Cryptographic signature verification at handoff boundary
+      if (approvalObj.signature) {
+        const verifyResult = await defaultCryptographicSignatureService.verifyApproval(assessment, approvalObj);
+        if (!verifyResult.valid) {
+          const err = new Error(
+            `Cryptographic Approval Verification Failed at handoff boundary: ${verifyResult.reason}. Tampering, expiry, or manifest mismatch detected.`
+          );
+          err.code = verifyResult.reason || 'INVALID_APPROVAL_SIGNATURE';
+          throw err;
+        }
+      } else if (isActorAuthorizedArchitect) {
+        // Sign server-side with authoritative server secret
+        const signed = await defaultCryptographicSignatureService.signApproval(
+          assessment,
+          userContext,
+          { approvalScope: 'BUILD' }
+        );
+        approvalObj.signature = signed.signature;
+        approvalObj.signatureAlgorithm = signed.signatureAlgorithm;
+        approvalObj.manifestHash = signed.manifestHash;
+        approvalObj.signedAt = signed.signedAt;
+      } else if (process.env.NODE_ENV === 'production') {
+        const err = new Error(
+          'Cryptographic Approval Signature Required: In production environments, handoff requires a cryptographically bound HMAC-SHA256 signature.'
+        );
+        err.code = 'MISSING_APPROVAL_SIGNATURE';
+        throw err;
+      }
+    }
 
     const isAssessmentAuthoritativelyApproved = Boolean(
       assessment.lifecycleStatus === LIFECYCLE_STATES.APPROVED ||
@@ -342,8 +380,26 @@ export class GenerationHandoffStore {
         createdAt: now,
         updatedAt: now,
         createdBy: actorId,
-        creatorName: actorName
+        creatorName: actorName,
+        tenantId: userContext?.tenantId || assessment.tenantId || this.tenantId
       };
+
+      if (isArchitectApproved) {
+        try {
+          const signed = await defaultCryptographicSignatureService.signApproval(
+            assessment,
+            userContext || { id: actorId, name: actorName, role: userContext?.role || 'ADMIN' },
+            { approvalScope: 'BUILD' }
+          );
+          handoffRecord.leadArchitectApproval.signature = signed.signature;
+          handoffRecord.leadArchitectApproval.signatureAlgorithm = signed.signatureAlgorithm;
+          handoffRecord.leadArchitectApproval.canonicalPayload = signed.canonicalPayload;
+          handoffRecord.leadArchitectApproval.manifestHash = signed.manifestHash;
+          handoffRecord.leadArchitectApproval.signedAt = signed.signedAt;
+        } catch (signErr) {
+          console.warn('[GenerationHandoffStore] Signature warning:', signErr.message);
+        }
+      }
 
       // 1. Authoritative persistence in PostgreSQL if active
       if (this.repository) {
@@ -376,7 +432,9 @@ export class GenerationHandoffStore {
             leadArchitectApproval: handoffRecord.leadArchitectApproval,
             approvalStatus: 'APPROVED',
             lifecycleStatus: 'APPROVED',
-            handoffId
+            handoffId,
+            isOverride: true,
+            overrideReason: 'Architectural approval granted for custom Generation Studio build'
           },
           actorName,
           `Synchronized architect approval from generation handoff ${handoffId}`,
@@ -470,6 +528,11 @@ export class GenerationHandoffStore {
 
     await this._ensureLoaded();
     let all = Array.from(this._handoffs.values());
+
+    const requestedTenant = filters.tenantId || userContext?.tenantId;
+    if (requestedTenant) {
+      all = all.filter((h) => !h.tenantId || h.tenantId === requestedTenant);
+    }
 
     if (filters.assessmentId || filters.sourceAssessmentId) {
       const aid = filters.assessmentId || filters.sourceAssessmentId;

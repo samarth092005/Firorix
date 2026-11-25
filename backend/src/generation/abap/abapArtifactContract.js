@@ -51,6 +51,10 @@ export function createAbapArtifact({
 }) {
   const generatedAt = new Date().toISOString();
   const checksum = computeSha256(content);
+  const hasTodo = typeof content === 'string' && (content.includes('TODO:') || content.includes('/* TODO'));
+  const isDeployable = rest.isDeployable !== undefined 
+    ? rest.isDeployable 
+    : !(rest.requiresDeveloperCompletion || hasTodo);
 
   return {
     artifactId: artifactId || `ART-ABAP-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`,
@@ -72,6 +76,7 @@ export function createAbapArtifact({
     manualEditStatus,
     dependencies,
     limitations,
+    isDeployable,
     ...rest
   };
 }

@@ -3,6 +3,7 @@ import { useApp } from '../../app/providers';
 import { MessageStrip } from '../../components/status/MessageStrip';
 import { ConfirmDialog } from '../../components/dialogs/ConfirmDialog';
 import { Settings, RotateCcw, ShieldCheck, Database, Info, Layers } from 'lucide-react';
+import { UserManagementSection } from './UserManagementSection';
 
 export const SettingsPage: React.FC = () => {
   const { resetDemoData, currentUser } = useApp();
@@ -42,6 +43,9 @@ export const SettingsPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Enterprise User Management (UI-003) */}
+        <UserManagementSection currentUserRole={currentUser.role} />
 
         {/* Display Density */}
         <div className="fiori-card">

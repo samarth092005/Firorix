@@ -13,6 +13,11 @@ export function synthesizeTransactionTitle(tcode) {
   if (!tcode) return 'Custom Business Application';
   const clean = String(tcode).trim().toUpperCase();
 
+  // 1. Authoritative check in standard catalog
+  if (typeof STANDARD_TRANSACTION_CATALOG !== 'undefined' && STANDARD_TRANSACTION_CATALOG[clean]?.description) {
+    return STANDARD_TRANSACTION_CATALOG[clean].description;
+  }
+
   // Custom namespace (Z* / Y*) — tokenize into title-cased words
   if (clean.startsWith('Z') || clean.startsWith('Y')) {
     const raw = clean.replace(/^[ZY]_?/, '');
@@ -35,12 +40,29 @@ export function synthesizeTransactionTitle(tcode) {
   if (/^(FB|F-|FS)/i.test(clean)) return `Financial Accounting & Posting (${clean})`;
   if (/^(IW|PM)/i.test(clean)) return `Plant Maintenance Work Order (${clean})`;
   if (/^(CO|MD|CR|CS)/i.test(clean)) return `Production Planning & Orders (${clean})`;
+  if (/^(CJ|CN|PS)/i.test(clean)) return `Project Systems Processing (${clean})`;
+  if (/^(KS|KP|KO)/i.test(clean)) return `Controlling & Cost Accounting (${clean})`;
+  if (/^(PA|PB)/i.test(clean)) return `Human Capital Management (${clean})`;
+  if (/^(QA|QE|QP)/i.test(clean)) return `Quality Management Processing (${clean})`;
   if (/^(ST|SM|SE|SU|PF)/i.test(clean)) return `System Administration & Diagnostics (${clean})`;
 
   return `SAP Transaction ${clean}`;
 }
 
 export const STANDARD_TRANSACTION_CATALOG = {
+  // --- Project System (PS) ---
+  'CJ20N': {
+    tcode: 'CJ20N',
+    description: 'Project Builder (Work Breakdown Structure & Network)',
+    functionalArea: 'Project System — Work Breakdown Structure (PS-ST)',
+    program: 'SAPLCJWB',
+    packageName: 'CN',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: ['CJ20N'],
+    lineOfBusiness: 'R&D / Engineering'
+  },
   // --- Materials Management (MM) ---
   'MM01': {
     tcode: 'MM01',
@@ -561,6 +583,42 @@ export const STANDARD_TRANSACTION_CATALOG = {
     primaryFioriAppId: null,
     fioriSuccessors: [],
     lineOfBusiness: 'Technology & System Operations'
+  },
+  'SU53': {
+    tcode: 'SU53',
+    description: 'Evaluate Authorization Check',
+    functionalArea: 'Security & Authorizations (BC-SEC-AUT)',
+    program: 'SAPMSU53',
+    packageName: 'SUSR',
+    softwareComponent: 'SAP_BASIS',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Security & Identity Management'
+  },
+  'F1612': {
+    tcode: 'F1612',
+    description: 'Post Outgoing Payments',
+    functionalArea: 'Financial Accounting — Accounts Payable (FI-AP)',
+    program: 'SAPMF05A',
+    packageName: 'FBAS',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: 'F1612',
+    fioriSuccessors: ['F1612'],
+    lineOfBusiness: 'Finance'
+  },
+  'MM31': {
+    tcode: 'MM31',
+    description: 'Display Material Structure',
+    functionalArea: 'Materials Management — Material Master (MM-MD)',
+    program: 'SAPMMG01',
+    packageName: 'MG',
+    softwareComponent: 'S4CORE 108',
+    screenNumber: '0100',
+    primaryFioriAppId: null,
+    fioriSuccessors: [],
+    lineOfBusiness: 'Supply Chain'
   },
   'SE11': {
     tcode: 'SE11',

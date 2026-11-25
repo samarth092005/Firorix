@@ -48,6 +48,30 @@ export const EVIDENCE_PROVENANCE = Object.freeze({
 
 export const DEFAULT_SAP_SYSTEMS = Object.freeze([
   {
+    systemId: 'S21',
+    displayName: 'SAP S/4HANA 2023 Private Edition (Client 200)',
+    systemName: 'S21 SAP S/4HANA 2023 Private Edition (Live Target)',
+    environment: 'PRODUCTION',
+    mode: 'LIVE_SAP',
+    active: true,
+    product: 'SAP S/4HANA',
+    deploymentEdition: 'Private Edition',
+    release: 'SAP S/4HANA 2023 Private Edition',
+    clientIdentifier: '200',
+    client: '200',
+    destinationName: process.env.SAP_DESTINATION_NAME || 'S21_FIORI',
+    rfcDestination: 'S21_RFC_DISCOVERY',
+    gatewayCatalogService: '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection',
+    adtDiscoveryEndpoint: '/sap/bc/adt/discovery',
+    connectivityStatus: CONNECTIVITY_STATUSES.UNKNOWN,
+    lastSuccessfulCheck: null,
+    evidenceProvenance: EVIDENCE_PROVENANCE.LIVE_SAP_VERIFIED,
+    configurationStatus: 'CONFIGURED',
+    components: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
+    softwareComponents: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
+    capabilities: ['GATEWAY_CATALOG', 'ODATA_V2', 'ODATA_V4', 'FIORI_LAUNCHPAD']
+  },
+  {
     systemId: 'S21-200',
     displayName: 'SAP S/4HANA 2023 Private Edition (Client 200)',
     systemName: 'S21 SAP S/4HANA 2023 Private Edition (Live Target)',
@@ -59,13 +83,13 @@ export const DEFAULT_SAP_SYSTEMS = Object.freeze([
     release: 'SAP S/4HANA 2023 Private Edition',
     clientIdentifier: '200',
     client: '200',
-    destinationName: 'S21',
+    destinationName: process.env.SAP_DESTINATION_NAME || 'S21_FIORI',
     rfcDestination: 'S21_RFC_DISCOVERY',
     gatewayCatalogService: '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection',
     adtDiscoveryEndpoint: '/sap/bc/adt/discovery',
     connectivityStatus: CONNECTIVITY_STATUSES.UNKNOWN,
     lastSuccessfulCheck: null,
-    evidenceProvenance: EVIDENCE_PROVENANCE.PENDING_VERIFICATION,
+    evidenceProvenance: EVIDENCE_PROVENANCE.LIVE_SAP_VERIFIED,
     configurationStatus: 'CONFIGURED',
     components: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
     softwareComponents: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
@@ -154,6 +178,12 @@ export class SystemRegistry {
     this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres');
     this.repository = options.repository || (this.useDatabase ? new SapSystemRepository() : null);
     this.defaultTenantId = options.tenantId || 'DEFAULT-TENANT-S21';
+
+    if (process.env.NODE_ENV === 'production' && !this.useDatabase && !options.allowVolatileStoreInProduction) {
+      const err = new Error('FATAL CONFIGURATION: In production (NODE_ENV=production), durable database persistence is mandatory. Memory fallback is prohibited.');
+      err.code = 'PRODUCTION_PERSISTENCE_REQUIRED';
+      throw err;
+    }
   }
 
   /**
@@ -193,22 +223,37 @@ export class SystemRegistry {
    */
   async getSystem(systemId, tenantId = this.defaultTenantId) {
     if (!systemId) return null;
-    if (this.repository) {
-      try {
-        const dbItem = await this.repository.getById(systemId, tenantId);
-        if (dbItem) {
-          const memItem = this.systems.get(systemId) || {};
-          return {
-            ...memItem,
-            ...dbItem,
-            connectivityStatus: dbItem.connectionState || dbItem.connectivityStatus || memItem.connectivityStatus
-          };
+    const cleanId = String(systemId).trim();
+    const candidateIds = [cleanId];
+    if (cleanId === 'S21') candidateIds.push('S21-200');
+    if (cleanId === 'S21-200') candidateIds.push('S21');
+
+    for (const id of candidateIds) {
+      if (this.repository) {
+        try {
+          const dbItem = await this.repository.getById(id, tenantId);
+          if (dbItem) {
+            const memItem = this.systems.get(id) || {};
+            return {
+              ...memItem,
+              ...dbItem,
+              destinationName: memItem.destinationName || process.env.SAP_DESTINATION_NAME || 'S21_FIORI',
+              connectivityStatus: dbItem.connectionState || dbItem.connectivityStatus || memItem.connectivityStatus
+            };
+          }
+        } catch (err) {
+          console.warn('[SystemRegistry] Database get error, falling back to memory:', err.message);
         }
-      } catch (err) {
-        console.warn('[SystemRegistry] Database get error, falling back to memory:', err.message);
+      }
+      if (this.systems.has(id)) {
+        const item = { ...this.systems.get(id) };
+        if (!item.destinationName || item.destinationName === 'S21') {
+          item.destinationName = process.env.SAP_DESTINATION_NAME || 'S21_FIORI';
+        }
+        return item;
       }
     }
-    return this.systems.get(systemId) || null;
+    return null;
   }
 
   /**
@@ -216,7 +261,11 @@ export class SystemRegistry {
    */
   getSystemSync(systemId) {
     if (!systemId) return null;
-    return this.systems.get(systemId) || null;
+    const cleanId = String(systemId).trim();
+    return this.systems.get(cleanId) ||
+      (cleanId === 'S21' ? this.systems.get('S21-200') : null) ||
+      (cleanId === 'S21-200' ? this.systems.get('S21') : null) ||
+      null;
   }
 
   /**

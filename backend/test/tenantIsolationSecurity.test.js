@@ -287,4 +287,44 @@ describe('QA-02: Tenant Isolation & Admin Security Architecture', () => {
     assert.equal(updatedReq.confirmedBy, 'Verified Enterprise Architect', 'Must ignore client-supplied confirmedBy');
     assert.notEqual(updatedReq.confirmedBy, 'SpoofedUntrustedActor', 'Must NEVER trust client-supplied confirmedBy');
   });
+
+  it('8. Production fail-closed: token lacking tenant cannot spoof tenant via x-tenant-id in production', async () => {
+    const { createAuthMiddleware } = await import('../src/middleware/authMiddleware.js');
+    const prodAuthMiddleware = createAuthMiddleware({
+      authService,
+      isProduction: true,
+      enforceAuth: true
+    });
+
+    const tokenNoTenant = authService.generateToken({
+      id: 'USR-NO-TENANT',
+      email: 'user@external.corp',
+      role: USER_ROLES.SAP_CONSULTANT
+      // tenantId omitted intentionally
+    });
+
+    const mockReq = {
+      method: 'GET',
+      headers: {
+        authorization: `Bearer ${tokenNoTenant}`,
+        'x-tenant-id': 'SPOOFED-TENANT'
+      }
+    };
+    let writtenStatus = null;
+    let writtenBody = null;
+    const mockRes = {
+      writeHead(status, headers) { writtenStatus = status; },
+      end(body) { writtenBody = body; }
+    };
+    const mockUrl = new URL('http://localhost:4004/api/v1/generation/projects');
+
+    const allowed = await prodAuthMiddleware.authenticate(mockReq, mockRes, mockUrl);
+    assert.equal(allowed, false, 'Authentication gate must reject request');
+    assert.equal(writtenStatus, 401);
+    const parsed = JSON.parse(writtenBody);
+    assert.ok(
+      parsed.code === 'MISSING_TENANT_CONTEXT' || parsed.code === 'TENANT_SPOOFING_FORBIDDEN',
+      `Expected tenant boundary rejection but got: ${parsed.code}`
+    );
+  });
 });

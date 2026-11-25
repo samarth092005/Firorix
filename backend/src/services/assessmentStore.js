@@ -17,15 +17,18 @@ import { fitGapAssessmentEngine } from '../engine/fitGapAssessmentEngine.js';
 import { AssessmentRepository } from '../infrastructure/db/repositories/assessmentRepository.js';
 import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from './standardTransactionKnowledge.js';
 import { authService, USER_ROLES, PERMISSIONS } from './authService.js';
+import { defaultCryptographicSignatureService } from '../infrastructure/security/cryptographicSignatureService.js';
 
 function isAuthorizedAdmin(userContext) {
   if (!userContext || userContext.isUnauthenticated) return false;
   return (
     userContext.role === USER_ROLES.ADMIN ||
+    userContext.role === 'ADMIN' ||
     userContext.role === USER_ROLES.LEAD_ARCHITECT ||
     userContext.role === 'CHIEF_ARCHITECT' ||
     authService.hasPermission(userContext, PERMISSIONS.ADMIN_ACCESS) ||
-    authService.hasPermission(userContext, PERMISSIONS.USER_ADMIN)
+    authService.hasPermission(userContext, PERMISSIONS.USER_ADMIN) ||
+    authService.hasPermission(userContext, PERMISSIONS.ADMIN_OVERRIDE)
   );
 }
 
@@ -51,7 +54,7 @@ export const ALLOWED_TRANSITIONS = Object.freeze({
   PENDING_REVIEW: ['APPROVED', 'REJECTED', 'ARCHIVED'],
   APPROVED: ['ARCHIVED'],
   REJECTED: ['PENDING_REVIEW', 'DRAFT', 'ARCHIVED'],
-  ARCHIVED: ['DRAFT', 'PENDING_REVIEW']
+  ARCHIVED: ['DRAFT']
 });
 
 export const MODERNIZATION_ACTION_TYPES = Object.freeze({
@@ -79,7 +82,9 @@ export const SERVER_AUTHORITATIVE_FIELDS = Object.freeze([
   'fitGapScore',
   'scoreCoverage',
   'dimensionResults',
-  'scoringBreakdown'
+  'scoringBreakdown',
+  'approvalSignature',
+  'leadArchitectApproval'
 ]);
 
 /**
@@ -88,6 +93,19 @@ export const SERVER_AUTHORITATIVE_FIELDS = Object.freeze([
 export function computeEventHash(event, previousHash = 'GENESIS') {
   const content = `${previousHash}|${event.eventId}|${event.timestamp}|${event.action}|${event.actorId || event.author}|${event.previousState || ''}|${event.newState || ''}|${event.comment || ''}`;
   return crypto.createHash('sha256').update(content).digest('hex');
+}
+
+/**
+ * Detects whether the current process is running under a test runner.
+ */
+export function isTestRunnerActive() {
+  return Boolean(
+    process.env.NODE_ENV === 'test' ||
+    process.env.npm_lifecycle_event === 'test' ||
+    (Array.isArray(process.execArgv) && process.execArgv.some((arg) => typeof arg === 'string' && arg.includes('--test'))) ||
+    (Array.isArray(process.argv) && process.argv.some((arg) => typeof arg === 'string' && (arg.includes('--test') || arg.includes('test/')))) ||
+    process.env.NODE_TEST_CONTEXT
+  );
 }
 
 /**
@@ -593,7 +611,7 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
 
   return {
     id,
-    tenantId: input.tenantId || userContext?.tenantId || 'DEFAULT-TENANT-S21',
+    tenantId: userContext?.tenantId || input.tenantId || 'DEFAULT-TENANT-S21',
     requestId: effectiveRequestId,
     tcode,
     systemId,
@@ -634,30 +652,30 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
       lastUpdated: now
     },
 
-    // Additional metadata — determine canonical transaction description (never default to generic "Assessment for <TCode>")
+    // Additional metadata — determine canonical transaction description (never default to generic "Assessment for <TCode>" or "SAP Transaction")
     description: (
-      (input.description && typeof input.description === 'string' && !input.description.trim().startsWith('Assessment for ') && input.description.trim() !== tcode)
+      (input.description && typeof input.description === 'string' && !input.description.trim().startsWith('Assessment for ') && input.description.trim() !== tcode && input.description.trim().toLowerCase() !== 'sap transaction')
         ? input.description.trim()
-        : (input.discoveryMetadata?.description && typeof input.discoveryMetadata.description === 'string' && !input.discoveryMetadata.description.trim().startsWith('Assessment for ') && input.discoveryMetadata.description.trim() !== tcode)
+        : (input.discoveryMetadata?.description && typeof input.discoveryMetadata.description === 'string' && !input.discoveryMetadata.description.trim().startsWith('Assessment for ') && input.discoveryMetadata.description.trim() !== tcode && input.discoveryMetadata.description.trim().toLowerCase() !== 'sap transaction')
         ? input.discoveryMetadata.description.trim()
-        : (input.transactionDescription && typeof input.transactionDescription === 'string' && !input.transactionDescription.trim().startsWith('Assessment for ') && input.transactionDescription.trim() !== tcode)
+        : (input.transactionDescription && typeof input.transactionDescription === 'string' && !input.transactionDescription.trim().startsWith('Assessment for ') && input.transactionDescription.trim() !== tcode && input.transactionDescription.trim().toLowerCase() !== 'sap transaction')
         ? input.transactionDescription.trim()
-        : (input.transactionText && typeof input.transactionText === 'string')
+        : (input.transactionText && typeof input.transactionText === 'string' && input.transactionText.trim().toLowerCase() !== 'sap transaction')
         ? input.transactionText.trim()
-        : (input.tcodeDescription && typeof input.tcodeDescription === 'string')
+        : (input.tcodeDescription && typeof input.tcodeDescription === 'string' && input.tcodeDescription.trim().toLowerCase() !== 'sap transaction')
         ? input.tcodeDescription.trim()
         : (STANDARD_TRANSACTION_CATALOG[tcode]?.description)
         ? STANDARD_TRANSACTION_CATALOG[tcode].description
-        : (reqObj.title && !reqObj.title.startsWith('Assessment for '))
+        : (reqObj.title && !reqObj.title.startsWith('Assessment for ') && reqObj.title.trim().toLowerCase() !== 'sap transaction')
         ? reqObj.title
         : STANDARD_TRANSACTION_CATALOG[tcode]?.description || synthesizeTransactionTitle(tcode)
     ),
     subArea: input.subArea || '',
-    programName: input.programName || input.discoveryMetadata?.programName || '',
-    screenNumber: input.screenNumber || input.discoveryMetadata?.screenNumber || '',
-    packageName: input.packageName || input.discoveryMetadata?.packageName || (tcode === 'F-53' || tcode === 'F-28' || tcode === 'FB03' ? 'FBAS' : (tcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS')),
+    programName: input.programName || input.discoveryMetadata?.programName || STANDARD_TRANSACTION_CATALOG[tcode]?.program || '',
+    screenNumber: input.screenNumber || input.discoveryMetadata?.screenNumber || STANDARD_TRANSACTION_CATALOG[tcode]?.screenNumber || '0100',
+    packageName: input.packageName || input.discoveryMetadata?.packageName || STANDARD_TRANSACTION_CATALOG[tcode]?.packageName || (tcode === 'F-53' || tcode === 'F-28' || tcode === 'FB03' ? 'FBAS' : (tcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS')),
     originalSystem: input.originalSystem || input.discoveryMetadata?.originalSystem || 'SAP',
-    softwareComponent: input.softwareComponent || input.discoveryMetadata?.softwareComponent || 'S4CORE 108',
+    softwareComponent: input.softwareComponent || input.discoveryMetadata?.softwareComponent || STANDARD_TRANSACTION_CATALOG[tcode]?.softwareComponent || 'S4CORE 108',
     rationale: input.rationale || recommendation?.rationale || '',
 
     // Complete Fit-Gap Evaluation preservation (FITGAP-02)
@@ -708,7 +726,13 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
 }
 
 export class AssessmentStore {
-  constructor(options = {}) {
+  constructor(storagePathOrOptions = {}, maybeOptions = {}) {
+    let options = {};
+    if (typeof storagePathOrOptions === 'string') {
+      options = { storagePath: storagePathOrOptions, ...maybeOptions };
+    } else if (typeof storagePathOrOptions === 'object' && storagePathOrOptions !== null) {
+      options = { ...storagePathOrOptions, ...maybeOptions };
+    }
     this.storagePath = options.storagePath || resolveDefaultStoragePath();
     this._writeLock = Promise.resolve();
     this._initialized = false;
@@ -717,6 +741,12 @@ export class AssessmentStore {
     const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || process.env.FIORIX_PERSISTENCE || '').toLowerCase();
     this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres' && !options.storagePath);
     this.repository = options.repository || (this.useDatabase ? new AssessmentRepository() : null);
+
+    if (process.env.NODE_ENV === 'production' && !this.useDatabase && !options.allowVolatileStoreInProduction) {
+      const err = new Error('FATAL CONFIGURATION: In production (NODE_ENV=production), durable database persistence is mandatory. File/memory fallback is prohibited.');
+      err.code = 'PRODUCTION_PERSISTENCE_REQUIRED';
+      throw err;
+    }
   }
 
   /**
@@ -789,6 +819,14 @@ export class AssessmentStore {
    * Persists all records atomically to disk via tmp file replacement.
    */
   async _persist() {
+    const defaultStorage = path.resolve(resolveDefaultStoragePath());
+    const currentStorage = path.resolve(this.storagePath);
+    if (isTestRunnerActive() && currentStorage === defaultStorage && !this.allowDefaultStoreWriteInTest) {
+      const err = new Error(`TEST_ISOLATION_VIOLATION: Attempted to write to canonical assessment storage (${this.storagePath}) during test execution. Tests must use an ephemeral or isolated store.`);
+      err.code = 'TEST_ISOLATION_VIOLATION';
+      throw err;
+    }
+
     const recordsArray = Array.from(this._records.values());
     const json = JSON.stringify(recordsArray, null, 2);
     const dir = path.dirname(this.storagePath);
@@ -956,9 +994,15 @@ export class AssessmentStore {
             err.code = 'UNAUTHORIZED_OVERRIDE';
             throw err;
           }
+          const overrideReason = updates.overrideReason || comment || updates.comment;
+          if (!overrideReason || String(overrideReason).trim().length < 10) {
+            const err = new Error('Governance override requires a documented business justification (minimum 10 characters).');
+            err.code = 'VALIDATION_ERROR';
+            throw err;
+          }
         }
 
-        if (isCreator && !isOverride) {
+        if (isCreator && !isOverride && !isAuthorizedAdmin(userContext)) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
@@ -971,11 +1015,32 @@ export class AssessmentStore {
           existing.assessmentResult === 'CUSTOM_RAP_REQUIRED' ||
           Boolean(existing.buildProject)
         );
-        if (isBuild && !authService.canApproveBuild(userContext)) {
+        if (isBuild && !authService.canApproveBuild(userContext) && !isOverride) {
           const err = new Error('Unauthorized BUILD Approval: Formal approval of custom BUILD modernization requires explicit BUILD_ARCHITECT_APPROVER authorization.');
           err.code = 'UNAUTHORIZED_BUILD_APPROVER';
           throw err;
         }
+
+        // Cryptographically bind approval signature (GOV-004)
+        const approvalScope = updates.scope || updates.approvalScope || (isBuild ? 'BUILD' : 'ADD_AND_CONFIGURE');
+        const signedApproval = await defaultCryptographicSignatureService.signApproval(
+          existing,
+          userContext || { id: actorId, name: actorName },
+          { approvalScope }
+        );
+        updates.approvalSignature = signedApproval.signature;
+        updates.leadArchitectApproval = {
+          approved: true,
+          approverId: actorId,
+          approverName: actorName,
+          approvedAt: new Date().toISOString(),
+          decision: 'APPROVED',
+          scope: approvalScope,
+          isOverride,
+          signature: signedApproval.signature,
+          signatureAlgorithm: signedApproval.signatureAlgorithm,
+          canonicalPayload: signedApproval.canonicalPayload
+        };
       }
 
       if (newLifecycle === LIFECYCLE_STATES.REJECTED) {
@@ -990,6 +1055,12 @@ export class AssessmentStore {
       const sanitizedUpdates = { ...updates };
       for (const field of SERVER_AUTHORITATIVE_FIELDS) {
         delete sanitizedUpdates[field];
+      }
+
+      if (newLifecycle === LIFECYCLE_STATES.APPROVED) {
+        sanitizedUpdates.approvalSignature = updates.approvalSignature;
+        sanitizedUpdates.leadArchitectApproval = updates.leadArchitectApproval;
+        sanitizedUpdates.governanceReview = updates.governanceReview;
       }
 
       sanitizedUpdates.lifecycleStatus = newLifecycle;
@@ -1058,9 +1129,15 @@ export class AssessmentStore {
             err.code = 'UNAUTHORIZED_OVERRIDE';
             throw err;
           }
+          const overrideReason = updates.overrideReason || comment || updates.comment;
+          if (!overrideReason || String(overrideReason).trim().length < 10) {
+            const err = new Error('Governance override requires a documented business justification (minimum 10 characters).');
+            err.code = 'VALIDATION_ERROR';
+            throw err;
+          }
         }
 
-        if (isCreator && !isOverride) {
+        if (isCreator && !isOverride && !isAuthorizedAdmin(userContext)) {
           const err = new Error('Separation of duties policy violation: Assessment creator cannot approve their own assessment.');
           err.code = 'SEPARATION_OF_DUTIES_VIOLATION';
           throw err;
@@ -1073,11 +1150,32 @@ export class AssessmentStore {
           existing.assessmentResult === 'CUSTOM_RAP_REQUIRED' ||
           Boolean(existing.buildProject)
         );
-        if (isBuild && !authService.canApproveBuild(userContext)) {
+        if (isBuild && !authService.canApproveBuild(userContext) && !isOverride) {
           const err = new Error('Unauthorized BUILD Approval: Formal approval of custom BUILD modernization requires explicit BUILD_ARCHITECT_APPROVER authorization.');
           err.code = 'UNAUTHORIZED_BUILD_APPROVER';
           throw err;
         }
+
+        // Cryptographically bind approval signature (GOV-004)
+        const approvalScope = updates.scope || updates.approvalScope || (isBuild ? 'BUILD' : 'ADD_AND_CONFIGURE');
+        const signedApproval = await defaultCryptographicSignatureService.signApproval(
+          existing,
+          userContext || { id: actorId, name: actorName },
+          { approvalScope }
+        );
+        updates.approvalSignature = signedApproval.signature;
+        updates.leadArchitectApproval = {
+          approved: true,
+          approverId: actorId,
+          approverName: actorName,
+          approvedAt: new Date().toISOString(),
+          decision: 'APPROVED',
+          scope: approvalScope,
+          isOverride,
+          signature: signedApproval.signature,
+          signatureAlgorithm: signedApproval.signatureAlgorithm,
+          canonicalPayload: signedApproval.canonicalPayload
+        };
       }
 
       // Rejection requires comment/reason (GOV-01)
@@ -1133,6 +1231,12 @@ export class AssessmentStore {
       const sanitizedUpdates = { ...updates };
       for (const field of SERVER_AUTHORITATIVE_FIELDS) {
         delete sanitizedUpdates[field];
+      }
+
+      if (newLifecycle === LIFECYCLE_STATES.APPROVED) {
+        sanitizedUpdates.approvalSignature = updates.approvalSignature;
+        sanitizedUpdates.leadArchitectApproval = updates.leadArchitectApproval;
+        sanitizedUpdates.governanceReview = updates.governanceReview;
       }
 
       const versionHistory = Array.isArray(existing.versionHistory) ? [...existing.versionHistory] : [];
@@ -1367,10 +1471,15 @@ export class AssessmentStore {
       systemId,
       assessmentLevel,
       search,
+      tenantId: requestedTenantId,
       includeArchived = false,
       limit,
       offset = 0
     } = filters;
+
+    if (requestedTenantId && typeof requestedTenantId === 'string') {
+      records = records.filter((r) => r.tenantId === requestedTenantId);
+    }
 
     if (!includeArchived) {
       records = records.filter((r) => r.lifecycleStatus !== LIFECYCLE_STATES.ARCHIVED && r.status !== 'ARCHIVED');
@@ -1683,7 +1792,9 @@ export class AssessmentStore {
           userContext && !userContext.isUnauthenticated && (
             authService.canApproveBuild(userContext) ||
             userContext.role === USER_ROLES.LEAD_ARCHITECT ||
-            userContext.role === 'CHIEF_ARCHITECT'
+            userContext.role === 'CHIEF_ARCHITECT' ||
+            userContext.role === USER_ROLES.ADMIN ||
+            userContext.role === 'ADMIN'
           )
         );
 

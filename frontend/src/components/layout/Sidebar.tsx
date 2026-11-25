@@ -33,8 +33,7 @@ export const FIORIFY_NAV_ITEMS: NavItemConfig[] = [
   {
     to: '/transaction-discovery',
     label: 'Transaction Discovery',
-    icon: SearchCode,
-    badge: 'Core'
+    icon: SearchCode
   },
   {
     to: '/catalogue',
@@ -49,8 +48,7 @@ export const FIORIFY_NAV_ITEMS: NavItemConfig[] = [
   {
     to: '/generation-studio',
     label: 'Generation Studio',
-    icon: Sparkles,
-    badge: 'Studio'
+    icon: Sparkles
   }
 ];
 

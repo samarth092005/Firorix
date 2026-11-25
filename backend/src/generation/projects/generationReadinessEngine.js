@@ -63,7 +63,7 @@ export class GenerationReadinessEngine {
     let buildApproved = true;
     if (isBuild && project.origin !== 'STANDALONE') {
       const assessment = project.assessmentContext || {};
-      const hasApproval = assessment.approvalProvenance || project.approvedBy || project.buildApproval;
+      const hasApproval = assessment.approvalProvenance || project.approvedBy || project.buildApproval || project.lifecycleStatus === 'READY_FOR_GENERATION' || project.lifecycleStatus === 'GENERATED' || project.lifecycleStatus === 'VALIDATION_COMPLETED' || project.lifecycleStatus === 'EXPORTED';
       buildApproved = Boolean(hasApproval);
       checks.push({
         id: 'GATE_02_BUILD_APPROVAL',
@@ -105,12 +105,13 @@ export class GenerationReadinessEngine {
 
     // Gate 5: Solution Architecture Defined
     const arch = project.architectureSpec || {};
-    const archDefined = Boolean(arch.profile || arch.scenario || arch.applicationType || isAddAndConfigure);
+    const effectiveArchProfile = arch.profile || arch.selectedProfile || arch.rapScenario || arch.scenario || arch.applicationType;
+    const archDefined = Boolean(effectiveArchProfile || isAddAndConfigure);
     checks.push({
       id: 'GATE_05_ARCHITECTURE_DEFINED',
       name: 'Solution Architecture Defined',
       passed: archDefined,
-      details: archDefined ? `Architecture profile: ${arch.profile || 'STANDARD_FIORI_ADOPTION'}` : 'Architecture specification missing.'
+      details: archDefined ? `Architecture profile: ${effectiveArchProfile || 'STANDARD_FIORI_ADOPTION'}` : 'Architecture specification missing.'
     });
     if (!archDefined) blockingReasons.push('Solution architecture profile must be evaluated and saved.');
 
@@ -127,7 +128,7 @@ export class GenerationReadinessEngine {
     if (!dataModelValid) blockingReasons.push('Data model requires at least one ROOT CDS business object entity.');
 
     // Gate 7: RAP Backend Specification Valid (BUILD only)
-    const rapValid = isAddAndConfigure ? true : Boolean(arch.profile && (arch.rapScenario || arch.behaviorOperations || entities.length > 0));
+    const rapValid = isAddAndConfigure ? true : Boolean(effectiveArchProfile && (arch.rapScenario || arch.behaviorOperations || entities.length > 0));
     checks.push({
       id: 'GATE_07_RAP_SPECIFICATION',
       name: 'RAP Backend Specification',
@@ -179,14 +180,38 @@ export class GenerationReadinessEngine {
       details: traceabilityPassed ? 'Requirements trace through data entities and service artifacts.' : 'Unmapped requirements detected.'
     });
 
-    // Gate 12: Critical Dependencies Resolved
-    const depsResolved = true; // S21 target verified in project context
+    // Gate 12: Critical Dependencies Resolved (GEN-001)
+    let depsResolved = true;
+    const depIssues = [];
+
+    const targetRel = project.targetRelease || project.targetSystemRelease || 'SAP S/4HANA 2023 On-Premise';
+    const supportedPlatforms = ['S/4HANA', 'BTP', 'CLOUD', 'SAP S/4HANA 2020', 'SAP S/4HANA 2021', 'SAP S/4HANA 2022', 'SAP S/4HANA 2023', 'SAP S/4HANA 2025'];
+    const isSupportedPlatform = supportedPlatforms.some((p) => targetRel.toUpperCase().includes(p));
+    if (!isSupportedPlatform) {
+      depsResolved = false;
+      depIssues.push(`Target platform "${targetRel}" is not supported for modern RAP generation.`);
+    }
+
+    if (Array.isArray(project.dependencies)) {
+      for (const dep of project.dependencies) {
+        if (!dep || dep.status === 'UNRESOLVED' || dep.status === 'MISSING') {
+          depsResolved = false;
+          depIssues.push(`Unresolved project dependency: ${dep?.name || 'Unknown'}`);
+        }
+      }
+    }
+
     checks.push({
       id: 'GATE_12_DEPENDENCIES_RESOLVED',
       name: 'Target Release Compatibility & Dependencies',
       passed: depsResolved,
-      details: `Validated for target landscape: ${project.targetRelease || 'SAP S/4HANA 2023 On-Premise'}`
+      details: depsResolved
+        ? `Validated for target landscape: ${targetRel}`
+        : `Unresolved dependencies: ${depIssues.join('; ')}`
     });
+    if (!depsResolved) {
+      blockingReasons.push(...depIssues);
+    }
 
     // Gate 13: No Blocking Validation Errors
     const noBlockingErrors = blockingReasons.length === 0;

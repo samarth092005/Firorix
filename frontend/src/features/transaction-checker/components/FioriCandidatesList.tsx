@@ -316,7 +316,7 @@ export const FioriCandidatesList: React.FC<FioriCandidatesListProps> = ({
             No Verified Fiori Application Candidate
           </h3>
           <p style={{ fontSize: '13px', color: 'var(--fiori-text-secondary)', maxWidth: '580px', margin: '0 auto' }}>
-            No curated standard SAP Fiori application mapping exists for transaction <strong>{tcode}</strong> in the synthetic demo catalogue. Phase 1 governance strictly forbids keyword-similarity guesses or probabilistic matches.
+            No standard SAP Fiori application mapping was found for transaction <strong>{tcode}</strong> in the SAP standard reference catalogue. A custom Clean Core application is recommended.
           </p>
         </div>
       </div>

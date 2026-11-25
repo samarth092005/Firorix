@@ -28,10 +28,12 @@ import path from 'node:path';
 export const GATEWAY_CATALOG_PATH = '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection';
 
 /**
- * Loads local environment variables from .env if running locally outside Cloud Foundry.
+ * Loads local environment variables from .env and .env.local if running locally outside Cloud Foundry.
  */
 export function loadLocalEnv() {
   const candidatePaths = [
+    path.resolve(process.cwd(), '.env.local'),
+    path.resolve(process.cwd(), 'backend', '.env.local'),
     path.resolve(process.cwd(), '.env'),
     path.resolve(process.cwd(), 'backend', '.env')
   ];
@@ -46,17 +48,37 @@ export function loadLocalEnv() {
           const idx = trimmed.indexOf('=');
           if (idx !== -1) {
             const key = trimmed.slice(0, idx).trim();
-            const val = trimmed.slice(idx + 1).trim();
+            let val = trimmed.slice(idx + 1).trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.slice(1, -1);
+            }
             if (process.env[key] === undefined) {
               process.env[key] = val;
             }
           }
         }
-        break;
       } catch {
         // Fallback silently if file read fails
       }
     }
+  }
+
+  // Extract DATABASE_URL from VCAP_SERVICES user-provided services if not already set
+  if (!process.env.DATABASE_URL && process.env.VCAP_SERVICES) {
+    try {
+      const vcap = typeof process.env.VCAP_SERVICES === 'string'
+        ? JSON.parse(process.env.VCAP_SERVICES)
+        : process.env.VCAP_SERVICES;
+      const userProvided = vcap['user-provided'] || [];
+      const pgService = userProvided.find(s =>
+        s.name?.toLowerCase().includes('postgres') ||
+        s.name?.toLowerCase().includes('fiorify') ||
+        s.credentials?.DATABASE_URL
+      );
+      if (pgService?.credentials?.DATABASE_URL) {
+        process.env.DATABASE_URL = pgService.credentials.DATABASE_URL;
+      }
+    } catch {}
   }
 }
 
@@ -465,6 +487,28 @@ export class BtpDestinationAdapter {
       headers = {},
       destination = null
     } = requestConfig;
+
+    // SAP-005: Central read-only SAP method policy enforcement
+    const upperMethod = String(method || 'GET').toUpperCase();
+    const ALLOWED_READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+    if (!ALLOWED_READ_ONLY_METHODS.has(upperMethod)) {
+      return {
+        success: false,
+        statusCode: 'READ_ONLY_VIOLATION',
+        httpStatus: 405,
+        errorMessage: `CENTRAL SAP SAFETY VIOLATION: Mutating HTTP method "${upperMethod}" is strictly prohibited. Fiorify operates exclusively in read-only discovery mode against SAP landscapes.`,
+        details: { method: upperMethod, path }
+      };
+    }
+
+    // SAP-004: TLS validation invariants in production
+    if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_TLS_REJECT_UNAUTHORIZED === '0') {
+        const err = new Error('SECURITY INVARIANT VIOLATION: Insecure TLS bypass (NODE_TLS_REJECT_UNAUTHORIZED=0) is strictly forbidden in production.');
+        err.code = 'INSECURE_TLS_FORBIDDEN';
+        throw err;
+      }
+    }
 
     let targetDestination = destination;
     if (!targetDestination) {

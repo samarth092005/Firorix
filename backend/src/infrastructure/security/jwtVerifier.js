@@ -19,6 +19,22 @@ export class JwtVerifier {
   }
 
   /**
+   * Normalizes public verification keys from various formats (PEM, raw base64, escaped newlines).
+   * Commonly handles SAP BTP XSUAA verification key formats.
+   */
+  static formatPublicKey(key) {
+    if (!key || typeof key !== 'string') return key;
+    let normalized = key.replace(/\\n/g, '\n').trim();
+    if (normalized.includes('-----BEGIN')) {
+      return normalized;
+    }
+    // Clean whitespace and wrap raw base64 in standard PEM delimiters
+    const cleaned = normalized.replace(/\s+/g, '');
+    const chunks = cleaned.match(/.{1,64}/g) || [cleaned];
+    return `-----BEGIN PUBLIC KEY-----\n${chunks.join('\n')}\n-----END PUBLIC KEY-----\n`;
+  }
+
+  /**
    * Generates a signed JWT token
    */
   static sign(payload, secretOrPrivateKey, options = {}) {
@@ -31,6 +47,7 @@ export class JwtVerifier {
 
     const now = Math.floor(Date.now() / 1000);
     const finalPayload = {
+      jti: payload?.jti || crypto.randomUUID(),
       iat: now,
       exp: now + (options.expiresInSeconds || 86400),
       iss: options.issuer || 'https://Fiorify.corp/auth',
@@ -86,8 +103,12 @@ export class JwtVerifier {
 
     // 1. Algorithm check
     const algorithm = header.alg;
-    if (options.algorithms && !options.algorithms.includes(algorithm)) {
-      return { isValid: false, error: `Algorithm ${algorithm} not permitted by policy` };
+    if (!algorithm || algorithm === 'none' || algorithm.toLowerCase() === 'none') {
+      return { isValid: false, error: 'Unsecured JWTs (alg=none) are strictly forbidden' };
+    }
+    const allowedAlgorithms = options.algorithms || ['HS256', 'RS256'];
+    if (!allowedAlgorithms.includes(algorithm)) {
+      return { isValid: false, error: `Algorithm ${algorithm} not permitted by policy. Allowed: ${allowedAlgorithms.join(', ')}` };
     }
 
     // 2. Signature verification
@@ -106,9 +127,10 @@ export class JwtVerifier {
           .digest();
         signatureValid = crypto.timingSafeEqual(signatureBuffer, expectedSig);
       } else if (algorithm === 'RS256') {
+        const formattedKey = JwtVerifier.formatPublicKey(secretOrPublicKey);
         const verifier = crypto.createVerify('RSA-SHA256');
         verifier.update(dataToVerify);
-        signatureValid = verifier.verify(secretOrPublicKey, signatureBuffer);
+        signatureValid = verifier.verify(formattedKey, signatureBuffer);
       } else {
         return { isValid: false, error: `Unsupported JWT algorithm: ${algorithm}` };
       }
@@ -123,6 +145,9 @@ export class JwtVerifier {
     const now = Math.floor(Date.now() / 1000);
 
     // 3. Expiration check
+    if (options.requireExp && (!payload.exp || typeof payload.exp !== 'number')) {
+      return { isValid: false, error: 'Token missing mandatory exp claim' };
+    }
     if (payload.exp && typeof payload.exp === 'number') {
       if (now > payload.exp) {
         return { isValid: false, error: `Token expired at ${new Date(payload.exp * 1000).toISOString()}` };

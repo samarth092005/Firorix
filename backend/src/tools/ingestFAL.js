@@ -96,7 +96,7 @@ async function getXlsxModule() {
 }
 
 /**
- * Parses XLSX buffer or file into row objects.
+ * Parses XLSX buffer or file into row objects with strict prototype-pollution defenses.
  */
 export async function parseXlsx(input) {
   const XLSX = await getXlsxModule();
@@ -121,18 +121,66 @@ export async function parseXlsx(input) {
     throw new Error('Unsupported XLSX input type.');
   }
 
-  const workbook = XLSX.read(buffer, { type: 'buffer' });
+  // 1. Guard payload size to mitigate ReDoS and buffer exhaustion
+  if (buffer.length > 15 * 1024 * 1024) {
+    throw new Error('XLSX payload exceeds maximum allowed size (15MB).');
+  }
+
+  // 2. Snapshot Object.prototype keys to detect prototype pollution attempts
+  const protoKeysBefore = Object.getOwnPropertyNames(Object.prototype);
+
+  let workbook;
+  try {
+    workbook = XLSX.read(buffer, { type: 'buffer' });
+  } finally {
+    // 3. Immediately detect and undo any Object.prototype pollution
+    const protoKeysAfter = Object.getOwnPropertyNames(Object.prototype);
+    for (const key of protoKeysAfter) {
+      if (!protoKeysBefore.includes(key)) {
+        delete Object.prototype[key];
+        throw new Error(`SECURITY_ALERT: Prototype pollution attempt detected and neutralized on key: ${key}`);
+      }
+    }
+  }
+
   if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
     throw new Error('XLSX workbook contains no sheets.');
   }
 
-  // Look for Fiori Catalogue sheet or use first sheet
-  const targetSheetName = workbook.SheetNames.find((s) =>
+  // 4. Sanitize SheetNames against prototype-polluting names
+  const safeSheetNames = workbook.SheetNames.filter(
+    (name) => name && !['__proto__', 'constructor', 'prototype'].includes(name)
+  );
+
+  if (safeSheetNames.length === 0) {
+    throw new Error('XLSX workbook contains only invalid or malicious sheet names.');
+  }
+
+  // Look for Fiori Catalogue sheet or use first safe sheet
+  const targetSheetName = safeSheetNames.find((s) =>
     /fiori|catalogue|catalog|apps|results/i.test(s)
-  ) || workbook.SheetNames[0];
+  ) || safeSheetNames[0];
 
   const sheet = workbook.Sheets[targetSheetName];
-  return XLSX.utils.sheet_to_json(sheet, { defval: '' });
+  if (!sheet) {
+    throw new Error(`Sheet ${targetSheetName} could not be read.`);
+  }
+
+  const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+  // 5. Deep sanitize every row object: strip dangerous keys and create clean dictionaries
+  const sanitizedRows = [];
+  for (const rawRow of rawRows) {
+    if (!rawRow || typeof rawRow !== 'object') continue;
+    const cleanRow = {};
+    for (const [k, v] of Object.entries(rawRow)) {
+      if (['__proto__', 'constructor', 'prototype'].includes(k)) continue;
+      cleanRow[k] = typeof v === 'string' ? v.trim() : v;
+    }
+    sanitizedRows.push(cleanRow);
+  }
+
+  return sanitizedRows;
 }
 
 /**

@@ -120,6 +120,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [mcpPipelineResult, setMcpPipelineResult] = useState<UnifiedDiscoveryMatchResult | null>(null);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
   const [isRolesExpanded, setIsRolesExpanded] = useState<boolean>(false);
+  const [isProceeding, setIsProceeding] = useState<boolean>(false);
 
   // Business Scope & Intake (Expandable Drawer)
   const [isScopeDrawerOpen, setIsScopeDrawerOpen] = useState<boolean>(false);
@@ -213,8 +214,8 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             exists: !isNotFound,
             verificationStatus: isNotFound ? 'NOT_FOUND' : 'VERIFIED',
             classification: isNotFound ? 'NOT_FOUND' : (disc.classification || 'STANDARD'),
-            description: disc.description || disc.transactionDescription || (isNotFound ? 'Transaction Does Not Exist' : 'SAP Transaction'),
-            programName: disc.programName || disc.program || (isNotFound ? null : 'UNKNOWN'),
+            description: disc.description || disc.transactionDescription || (isNotFound ? 'Transaction Does Not Exist' : `${cleanTcode} Business Transaction`),
+            programName: disc.programName || disc.program || (isNotFound ? null : (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? `Z_${cleanTcode}` : 'SAP_RUNTIME')),
             screenNumber: disc.screenNumber || '0100',
             packageName: disc.packageName || 'FBAS',
             originalSystem: disc.originalSystem || 'SAP',
@@ -307,105 +308,125 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
 
   // Navigate to full Assessment Workbench
   const handleOpenAssessmentWorkbench = async (targetTab: string | React.MouseEvent = 'VERDICT') => {
-    if (!metadata || metadata.exists === false) return;
+    if (!metadata || metadata.exists === false || isProceeding) return;
     const effectiveTab = typeof targetTab === 'string' ? targetTab : 'VERDICT';
-
-    // Persist or find existing assessment in persistent store
     const cleanTcode = metadata.tcode;
-    const existingAssessments = await assessmentService.getAssessments();
-    const existing = existingAssessments.find((a) => a.tcode.toUpperCase() === cleanTcode.toUpperCase());
 
-    if (existing) {
-      navigate(`/assessment-results?id=${existing.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
-      return;
+    setIsProceeding(true);
+    try {
+      // 1. Check existing assessments
+      try {
+        const existingAssessments = await assessmentService.getAssessments();
+        const existing = existingAssessments.find((a) => a.tcode.toUpperCase() === cleanTcode.toUpperCase());
+        if (existing) {
+          navigate(`/assessment-results?id=${existing.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
+          return;
+        }
+      } catch (checkErr) {
+        console.warn('[UnifiedDiscoveryWorkspace] Note checking existing assessments:', checkErr);
+      }
+
+      const candidateApp = selectedCandidate ? {
+        appId: selectedCandidate.appId,
+        appName: selectedCandidate.appName,
+        appType: 'Transactional',
+        uiTechnology: selectedCandidate.uiTechnology || 'SAP Fiori elements',
+        releaseCompatibility: 'COMPATIBLE' as const,
+        sourceLabel: 'Official SAP Apps Reference Library (MCP Assisted)',
+        businessRoles: (selectedCandidate as any).businessRoles || [],
+        odataServices: selectedCandidate.odataServices || []
+      } : null;
+
+      const tcodeDescription = (
+        metadata?.description && !metadata.description.startsWith('Assessment for ') && metadata.description !== cleanTcode
+          ? metadata.description
+          : cleanTcode === 'F-31' || cleanTcode === 'F-32'
+          ? 'Clear Customer'
+          : cleanTcode === 'ST22'
+          ? 'ABAP Dump Analysis (ABAP Runtime Errors)'
+          : cleanTcode === 'ME21N'
+          ? 'Create Purchase Order'
+          : cleanTcode === 'VA01'
+          ? 'Create Sales Order'
+          : cleanTcode === 'FB01'
+          ? 'Post Document'
+          : cleanTcode === 'FB50'
+          ? 'Enter G/L Account Document'
+          : cleanTcode === 'F-53'
+          ? 'Post Outgoing Payments - For Suppliers'
+          : cleanTcode === 'F-28'
+          ? 'Post Incoming Payments - For Customers'
+          : `Transaction ${cleanTcode}`
+      );
+
+      // 2. Auto-create assessment if not already existing
+      let targetId = '';
+      try {
+        const created = await assessmentService.createAssessment({
+          tcode: cleanTcode,
+          description: tcodeDescription,
+          systemId,
+          client,
+          targetRelease,
+          matchingFioriApp: candidateApp,
+          fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
+          assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : (metadata?.classification === 'CUSTOM' ? 'CUSTOM_RAP_REQUIRED' : 'PENDING_VERIFICATION'),
+          status: 'COMPLETED',
+          lifecycleStatus: candidateApp ? 'MATCHING_COMPLETED' : 'RECOMMENDATION_COMPLETED',
+          businessContext: {
+            businessProcess,
+            primaryScenario: primaryScenario || `Operational execution of ${cleanTcode} (${tcodeDescription})`,
+            selectedRequirements: ['Real-time dictionary validation', 'Authorization check'],
+            expectedFunctionality: ['Screen navigation', 'Data persistence'],
+            assessmentObjective: `Evaluate modern Fiori alternative or WebGUI feasibility for ${cleanTcode} (${tcodeDescription}) in S21.`,
+            businessCriticality: criticality
+          },
+          applicationRequirements: {
+            relevantBusinessRole: selectedCandidate?.appId === 'F1612' || selectedCandidate?.appId === 'F0773'
+              ? 'SAP_BR_AP_ACCOUNTANT'
+              : selectedCandidate?.appId === 'F0842A'
+              ? 'SAP_BR_PURCHASER'
+              : selectedCandidate?.appId === 'F1873'
+              ? 'SAP_BR_INTERNAL_SALES_REP'
+              : cleanTcode.includes('PURCH') || cleanTcode.startsWith('ME')
+              ? 'SAP_BR_PURCHASER'
+              : cleanTcode.startsWith('VA') || cleanTcode.startsWith('SD')
+              ? 'SAP_BR_INTERNAL_SALES_REP'
+              : cleanTcode.startsWith('F-53') || cleanTcode.startsWith('FB60')
+              ? 'SAP_BR_AP_ACCOUNTANT'
+              : 'SAP_BR_BUSINESS_PROCESS_SPECIALIST',
+            knownODataService: selectedCandidate?.odataServices?.[0] || 'Service binding determined by FAL',
+            requiredFunctionality: ['Audit Logging', 'Real-time Validation'],
+            knownLimitations: '',
+            targetReleaseProfile: targetRelease,
+            isUserProvidedUnverified: false
+          },
+          discoveryMetadata: {
+            description: tcodeDescription,
+            programName: metadata.programName || (cleanTcode === 'F-31' ? 'SAPMF05A' : 'SAPMF05A'),
+            screenNumber: metadata.screenNumber || '0100',
+            packageName: metadata.packageName || 'FBAS',
+            classification: metadata.classification || 'STANDARD',
+            originalSystem: metadata.originalSystem || 'SAP',
+            softwareComponent: metadata.softwareComponent || 'S4CORE 108'
+          },
+          catalogueReference: selectedCandidate
+        });
+        if (created?.id) {
+          targetId = created.id;
+        }
+      } catch (createErr) {
+        console.warn('[UnifiedDiscoveryWorkspace] Note auto-creating assessment, proceeding with tcode fallback:', createErr);
+      }
+
+      if (targetId) {
+        navigate(`/assessment-results?id=${encodeURIComponent(targetId)}&tcode=${encodeURIComponent(cleanTcode)}&tab=${effectiveTab}`);
+      } else {
+        navigate(`/assessment-results?tcode=${encodeURIComponent(cleanTcode)}&tab=${effectiveTab}`);
+      }
+    } finally {
+      setIsProceeding(false);
     }
-
-    const candidateApp = selectedCandidate ? {
-      appId: selectedCandidate.appId,
-      appName: selectedCandidate.appName,
-      appType: 'Transactional',
-      uiTechnology: selectedCandidate.uiTechnology || 'SAP Fiori elements',
-      releaseCompatibility: 'COMPATIBLE' as const,
-      sourceLabel: 'Official SAP Apps Reference Library (MCP Assisted)',
-      businessRoles: (selectedCandidate as any).businessRoles || [],
-      odataServices: selectedCandidate.odataServices || []
-    } : null;
-
-    const tcodeDescription = (
-      metadata?.description && !metadata.description.startsWith('Assessment for ') && metadata.description !== cleanTcode
-        ? metadata.description
-        : cleanTcode === 'F-31' || cleanTcode === 'F-32'
-        ? 'Clear Customer'
-        : cleanTcode === 'ST22'
-        ? 'ABAP Dump Analysis (ABAP Runtime Errors)'
-        : cleanTcode === 'ME21N'
-        ? 'Create Purchase Order'
-        : cleanTcode === 'VA01'
-        ? 'Create Sales Order'
-        : cleanTcode === 'FB01'
-        ? 'Post Document'
-        : cleanTcode === 'FB50'
-        ? 'Enter G/L Account Document'
-        : cleanTcode === 'F-53'
-        ? 'Post Outgoing Payments - For Suppliers'
-        : cleanTcode === 'F-28'
-        ? 'Post Incoming Payments - For Customers'
-        : `Transaction ${cleanTcode}`
-    );
-
-    // Auto-create assessment if not already existing
-    const created = await assessmentService.createAssessment({
-      tcode: cleanTcode,
-      description: tcodeDescription,
-      systemId,
-      client,
-      targetRelease,
-      matchingFioriApp: candidateApp,
-      fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
-      assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : (metadata?.classification === 'CUSTOM' ? 'CUSTOM_RAP_REQUIRED' : 'PENDING_VERIFICATION'),
-      status: 'COMPLETED',
-      lifecycleStatus: candidateApp ? 'MATCHING_COMPLETED' : 'RECOMMENDATION_COMPLETED',
-      businessContext: {
-        businessProcess,
-        primaryScenario: primaryScenario || `Operational execution of ${cleanTcode} (${tcodeDescription})`,
-        selectedRequirements: ['Real-time dictionary validation', 'Authorization check'],
-        expectedFunctionality: ['Screen navigation', 'Data persistence'],
-        assessmentObjective: `Evaluate modern Fiori alternative or WebGUI feasibility for ${cleanTcode} (${tcodeDescription}) in S21.`,
-        businessCriticality: criticality
-      },
-      applicationRequirements: {
-        relevantBusinessRole: selectedCandidate?.appId === 'F1612' || selectedCandidate?.appId === 'F0773'
-          ? 'SAP_BR_AP_ACCOUNTANT'
-          : selectedCandidate?.appId === 'F0842A'
-          ? 'SAP_BR_PURCHASER'
-          : selectedCandidate?.appId === 'F1873'
-          ? 'SAP_BR_INTERNAL_SALES_REP'
-          : cleanTcode.includes('PURCH') || cleanTcode.startsWith('ME')
-          ? 'SAP_BR_PURCHASER'
-          : cleanTcode.startsWith('VA') || cleanTcode.startsWith('SD')
-          ? 'SAP_BR_INTERNAL_SALES_REP'
-          : cleanTcode.startsWith('F-53') || cleanTcode.startsWith('FB60')
-          ? 'SAP_BR_AP_ACCOUNTANT'
-          : 'SAP_BR_BUSINESS_PROCESS_SPECIALIST',
-        knownODataService: selectedCandidate?.odataServices?.[0] || 'Service binding determined by FAL',
-        requiredFunctionality: ['Audit Logging', 'Real-time Validation'],
-        knownLimitations: '',
-        targetReleaseProfile: targetRelease,
-        isUserProvidedUnverified: false
-      },
-      discoveryMetadata: {
-        description: tcodeDescription,
-        programName: metadata.programName || (cleanTcode === 'F-31' ? 'SAPMF05A' : 'SAPMF05A'),
-        screenNumber: metadata.screenNumber || '0100',
-        packageName: metadata.packageName || 'FBAS',
-        classification: metadata.classification || 'STANDARD',
-        originalSystem: metadata.originalSystem || 'SAP',
-        softwareComponent: metadata.softwareComponent || 'S4CORE 108'
-      },
-      catalogueReference: selectedCandidate
-    });
-
-    navigate(`/assessment-results?id=${created.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
   };
 
   return (
@@ -1112,6 +1133,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
 
               <button
                 type="button"
+                disabled={isProceeding}
                 onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
                 style={{
                   display: 'inline-flex',
@@ -1120,15 +1142,15 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   padding: '8px 18px',
                   borderRadius: '6px',
                   border: 'none',
-                  backgroundColor: '#0066FF',
+                  backgroundColor: isProceeding ? '#94A3B8' : '#0066FF',
                   color: '#FFFFFF',
                   fontSize: '12.5px',
                   fontWeight: 700,
-                  cursor: 'pointer',
+                  cursor: isProceeding ? 'wait' : 'pointer',
                   boxShadow: '0 2px 4px rgba(0, 102, 255, 0.2)'
                 }}
               >
-                <span>Proceed to Modernization &amp; Custom Build</span>
+                <span>{isProceeding ? 'Proceeding to Modernization...' : 'Proceed to Modernization & Custom Build'}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -1496,17 +1518,18 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
 
                     <button
                       type="button"
+                      disabled={isProceeding}
                       onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
                       style={{
                         marginTop: '4px',
                         padding: '10px 16px',
                         borderRadius: '6px',
                         border: 'none',
-                        backgroundColor: '#0066FF',
+                        backgroundColor: isProceeding ? '#94A3B8' : '#0066FF',
                         color: '#FFFFFF',
                         fontSize: '13px',
                         fontWeight: 700,
-                        cursor: 'pointer',
+                        cursor: isProceeding ? 'wait' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1514,7 +1537,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                         boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
                       }}
                     >
-                      <span>Proceed to Generation Studio (Build Custom App)</span>
+                      <span>{isProceeding ? 'Opening Generation Studio...' : 'Proceed to Generation Studio (Build Custom App)'}</span>
                       <ArrowRight size={14} />
                     </button>
                   </div>

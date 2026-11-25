@@ -47,6 +47,60 @@ export const CONFIDENCE_LEVELS = {
 
 export class TechnicalEvidenceEngine {
   /**
+   * Sanitizes sensitive fields from evidence payloads (DISC-005).
+   */
+  sanitizeEvidencePayload(payload = {}) {
+    if (!payload || typeof payload !== 'object') return payload;
+    const sanitized = Array.isArray(payload) ? [] : {};
+    const SENSITIVE_KEYS = /password|secret|token|bearer|apikey|api_key|authorization|auth_token/i;
+
+    for (const [k, v] of Object.entries(payload)) {
+      if (SENSITIVE_KEYS.test(k) && typeof v === 'string') {
+        sanitized[k] = '[REDACTED]';
+      } else if (v && typeof v === 'object' && !Array.isArray(v)) {
+        sanitized[k] = this.sanitizeEvidencePayload(v);
+      } else {
+        sanitized[k] = v;
+      }
+    }
+    return sanitized;
+  }
+
+  /**
+   * Builds an enriched technical evidence item (DISC-005).
+   */
+  buildEvidenceItem(options = {}) {
+    const {
+      type = 'METADATA',
+      evidenceType = type,
+      sourceEndpoint = '/sap/opu/odata',
+      systemId = 'S21',
+      client = '200',
+      sapClient = client,
+      tenantId = 'DEFAULT-TENANT-S21',
+      data = {},
+      confidence = 'HIGH'
+    } = options;
+
+    return {
+      evidenceId: `EVD-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      type: evidenceType,
+      evidenceType,
+      sourceEndpoint,
+      systemId,
+      sapClient,
+      tenantId,
+      retrievalTimestamp: new Date().toISOString(),
+      freshness: {
+        verifiedAt: new Date().toISOString(),
+        ttlMs: 3600000
+      },
+      confidence,
+      data: this.sanitizeEvidencePayload(data)
+    };
+  }
+
+  /**
    * Collects and normalizes technical evidence for a transaction.
    *
    * @param {Object} params
@@ -167,6 +221,48 @@ export class TechnicalEvidenceEngine {
       } else {
         missingEvidence.push('TADIR: Package (DEVCLASS) and original system (SRCSYSTEM) pending verification.');
         verificationWarnings.push('Package allocation unverified in TADIR; standard vs custom classification may have reduced confidence.');
+      }
+
+      // 1d. DDIC Screen & Tables Evidence (DD02L / DD03L)
+      if (transactionData.screenNumber || (transactionData.sourceTables && transactionData.sourceTables.length > 0)) {
+        evidence.push({
+          evidenceId: nextId(),
+          evidenceType: 'DDIC_METADATA',
+          sourceSystem: defaultSystemId,
+          sourceName: 'DD02L_DD03L',
+          sourceRecordId: normTcode,
+          evidenceValue: {
+            screenNumber: transactionData.screenNumber || '0100',
+            sourceTables: transactionData.sourceTables || []
+          },
+          provenance: isLiveMode ? PROVENANCE_CATEGORIES.LIVE_SAP : PROVENANCE_CATEGORIES.CURATED_FIXTURE,
+          confidence: CONFIDENCE_LEVELS.HIGH,
+          retrievedAt: new Date().toISOString(),
+          verificationStatus: 'VERIFIED',
+          relatedTransaction: normTcode,
+          limitations: []
+        });
+      }
+
+      // 1e. SU24 / USOBX_C Authorization Evidence
+      if (transactionData.authorizationObjects && transactionData.authorizationObjects.length > 0) {
+        evidence.push({
+          evidenceId: nextId(),
+          evidenceType: 'AUTHORIZATION_OBJECTS',
+          sourceSystem: defaultSystemId,
+          sourceName: 'USOBX_C',
+          sourceRecordId: normTcode,
+          evidenceValue: {
+            primaryAuthObject: transactionData.primaryAuthObject || transactionData.authorizationObjects[0],
+            authorizationObjects: transactionData.authorizationObjects
+          },
+          provenance: isLiveMode ? PROVENANCE_CATEGORIES.LIVE_SAP : PROVENANCE_CATEGORIES.CURATED_FIXTURE,
+          confidence: CONFIDENCE_LEVELS.HIGH,
+          retrievedAt: new Date().toISOString(),
+          verificationStatus: 'VERIFIED',
+          relatedTransaction: normTcode,
+          limitations: []
+        });
       }
     } else {
       missingEvidence.push(`TSTC: Transaction "${normTcode}" not found in system table.`);
@@ -353,11 +449,24 @@ export class TechnicalEvidenceEngine {
       overallConfidence = CONFIDENCE_LEVELS.LOW;
     }
 
+    const client = system.client || '200';
+    const enrichedEvidence = evidence.map((item) => ({
+      ...item,
+      sapClient: item.sapClient || client,
+      sourceEndpoint: item.sourceEndpoint || item.sourceRecordId || item.sourceName,
+      retrievalTimestamp: item.retrievalTimestamp || item.retrievedAt || new Date().toISOString(),
+      freshness: item.freshness || {
+        verifiedAt: item.retrievedAt || new Date().toISOString(),
+        ttlMs: 300000
+      },
+      authorizationStatus: item.authorizationStatus || (item.verificationStatus === 'BLOCKED_BY_AUTHORIZATION' ? 'UNAUTHORIZED_403' : 'AUTHORIZED')
+    }));
+
     return {
       transactionCode: normTcode,
-      totalEvidenceItems: evidence.length,
+      totalEvidenceItems: enrichedEvidence.length,
       overallConfidence,
-      evidence,
+      evidence: enrichedEvidence,
       missingEvidence,
       verificationWarnings,
       collectionTimestamp: new Date().toISOString()

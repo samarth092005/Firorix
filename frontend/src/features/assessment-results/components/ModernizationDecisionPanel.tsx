@@ -67,17 +67,24 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
 }) => {
   const navigate = useNavigate();
 
+  const isNoStandardCandidate = !assessment.matchingFioriApp && (!candidates || candidates.length === 0);
+  const isCustomBuildReq =
+    (assessment.assessmentResult as string) === 'CUSTOM_RAP_REQUIRED' ||
+    (assessment.assessmentResult as string) === 'CUSTOM_BUILD';
+
   // Normalize outcome to canonical values: Exactly 2 outcomes (ADD_AND_CONFIGURE vs BUILD) plus internal governance states
-  const canonicalOutcome: 'ADD_AND_CONFIGURE' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION' =
-    recommendationOutcome === 'BUILD' || recommendationOutcome === 'TECHNICAL_ANALYSIS_REQUIRED'
+  const canonicalOutcome: 'ADD_AND_CONFIGURE' | 'BUILD' | 'INSUFFICIENT_EVIDENCE' | 'PENDING_VERIFICATION' | 'REVIEW' =
+    recommendationOutcome === 'BUILD' || recommendationOutcome === 'TECHNICAL_ANALYSIS_REQUIRED' || isNoStandardCandidate || isCustomBuildReq
       ? 'BUILD'
       : recommendationOutcome === 'PENDING_VERIFICATION' || recommendationOutcome === 'INVESTIGATE_CATALOGUE_INFO'
       ? 'PENDING_VERIFICATION'
       : recommendationOutcome === 'INSUFFICIENT_EVIDENCE'
       ? 'INSUFFICIENT_EVIDENCE'
+      : recommendationOutcome === 'REVIEW'
+      ? 'REVIEW'
       : 'ADD_AND_CONFIGURE';
 
-  const isBuildRecommended = canonicalOutcome === 'BUILD' || (!assessment.matchingFioriApp && candidates.length === 0);
+  const isBuildRecommended = canonicalOutcome === 'BUILD';
 
   // Sub-tabs in Modernization Workspace: Strictly 2 Decisive Strategic Paths
   const [activeTab, setActiveTab] = useState<'ADOPT_CONFIGURE' | 'BUILD_STUDIO'>(
@@ -409,17 +416,22 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
                 boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                 backgroundColor:
                   canonicalOutcome === 'ADD_AND_CONFIGURE' ? '#EDF9F0' :
-                  canonicalOutcome === 'BUILD' ? '#F7EDFD' : '#F1F5F9',
+                  canonicalOutcome === 'BUILD' ? '#F7EDFD' :
+                  canonicalOutcome === 'REVIEW' ? '#FFFBEB' : '#F1F5F9',
                 color:
                   canonicalOutcome === 'ADD_AND_CONFIGURE' ? '#107E3E' :
-                  canonicalOutcome === 'BUILD' ? '#8C19C5' : '#475569',
+                  canonicalOutcome === 'BUILD' ? '#8C19C5' :
+                  canonicalOutcome === 'REVIEW' ? '#B45309' : '#475569',
                 border: `1px solid ${
                   canonicalOutcome === 'ADD_AND_CONFIGURE' ? '#BCE6C6' :
-                  canonicalOutcome === 'BUILD' ? '#E3BFFF' : '#CBD5E1'
+                  canonicalOutcome === 'BUILD' ? '#E3BFFF' :
+                  canonicalOutcome === 'REVIEW' ? '#FDE68A' : '#CBD5E1'
                 }`
               }}
             >
-              {canonicalOutcome === 'ADD_AND_CONFIGURE' ? 'ADD & CONFIGURE' : canonicalOutcome}
+              {canonicalOutcome === 'ADD_AND_CONFIGURE' ? 'ADD & CONFIGURE' :
+               canonicalOutcome === 'BUILD' ? 'CUSTOM RAP BUILD' :
+               canonicalOutcome.replace(/_/g, ' ')}
             </span>
           </div>
         </div>

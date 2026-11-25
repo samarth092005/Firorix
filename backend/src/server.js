@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { btpDestinationAdapter, loadLocalEnv } from './adapters/btpDestinationAdapter.js';
 
@@ -11,7 +12,7 @@ import { sapTransactionDiscoveryAdapter } from './adapters/sapTransactionDiscove
 import { officialFioriCatalogueAdapter } from './adapters/officialFioriCatalogueAdapter.js';
 import { fitGapAssessmentEngine } from './engine/fitGapAssessmentEngine.js';
 import { recommendationEngine } from './engine/recommendationEngine.js';
-import { defaultAssessmentStore, AssessmentStore } from './services/assessmentStore.js';
+import { defaultAssessmentStore, AssessmentStore, isTestRunnerActive, resolveDefaultStoragePath } from './services/assessmentStore.js';
 import { defaultFalIngestionService } from './tools/ingestFAL.js';
 import { transactionDiscoveryEngine } from './engine/transactionDiscoveryEngine.js';
 import { technicalEvidenceEngine } from './engine/technicalEvidenceEngine.js';
@@ -20,6 +21,8 @@ import { defaultMcpService } from './mcp/services/mcpService.js';
 import { defaultMcpDiscoveryOrchestrator } from './mcp/discovery/index.js';
 import { defaultAuthService, USER_ROLES } from './services/authService.js';
 import { defaultSecurityAuditLogger, SECURITY_ACTIONS } from './infrastructure/security/securityAuditLogger.js';
+import { defaultAuthProviderFactory } from './infrastructure/security/authProviderFactory.js';
+import { createAuthMiddleware } from './middleware/authMiddleware.js';
 import { defaultSystemRegistry } from './adapters/systemRegistry.js';
 import { EnterpriseService } from './services/enterpriseService.js';
 import { GenerationHandoffStore, defaultGenerationHandoffStore } from './services/generationHandoffStore.js';
@@ -88,6 +91,30 @@ export function setCorsHeaders(req, res) {
 }
 
 /**
+ * Sets enterprise-grade HTTP security headers (SEC-011)
+ * Helmet-equivalent headers for OWASP / SAP BTP compliance.
+ */
+export function setSecurityHeaders(req, res) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  const isPreviewRequest = req.url && (req.url.includes('/preview/content') || req.url.includes('/webapp/'));
+  res.setHeader('X-Frame-Options', isPreviewRequest ? 'SAMEORIGIN' : 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (isProduction || req.headers['x-forwarded-proto'] === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+
+  // Content-Security-Policy
+  const csp = isPreviewRequest
+    ? "default-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https:; frame-ancestors 'self';"
+    : "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: https:; connect-src 'self' http://localhost:* https://*.hana.ondemand.com https://*.authentication.*.hana.ondemand.com; frame-ancestors 'self';";
+  res.setHeader('Content-Security-Policy', csp);
+}
+
+/**
  * Creates and configures the native HTTP server.
  * Accepts optional adapter injections for testing and environment isolation.
  */
@@ -99,11 +126,33 @@ export function createServer(options = {}) {
   const fitGapEngine = options.fitGapEngine || fitGapAssessmentEngine;
   const recommendationEngineInstance = options.recommendationEngine || recommendationEngine;
   const defaultTenantId = options.tenantId || process.env.Fiorify_TENANT_ID || 'DEFAULT-TENANT-S21';
-  const assessmentStore = options.assessmentStore || (
-    options.useDatabase
-      ? new AssessmentStore({ useDatabase: true, tenantId: defaultTenantId })
-      : defaultAssessmentStore
-  );
+  const isTestMode = isTestRunnerActive();
+  let ephemeralAssessmentFile = null;
+  let ephemeralDir = null;
+  let assessmentStore = options.assessmentStore;
+  if (!assessmentStore) {
+    if (options.useDatabase) {
+      assessmentStore = new AssessmentStore({ useDatabase: true, tenantId: defaultTenantId });
+    } else if (isTestMode) {
+      ephemeralDir = fs.mkdtempSync(path.join(os.tmpdir(), 'fiorify-test-asm-'));
+      ephemeralAssessmentFile = path.join(ephemeralDir, 'assessments.json');
+      const canonicalPath = resolveDefaultStoragePath();
+      if (fs.existsSync(canonicalPath)) {
+        fs.copyFileSync(canonicalPath, ephemeralAssessmentFile);
+      } else {
+        fs.writeFileSync(ephemeralAssessmentFile, '[]', 'utf8');
+      }
+      assessmentStore = new AssessmentStore({
+        storagePath: ephemeralAssessmentFile,
+        tenantId: defaultTenantId,
+        isEphemeral: true,
+        allowVolatileStoreInProduction: true
+      });
+    } else {
+      assessmentStore = defaultAssessmentStore;
+    }
+  }
+
   const falIngestionService = options.falIngestionService || defaultFalIngestionService;
   const discoveryEngine = options.discoveryEngine || transactionDiscoveryEngine;
   const evidenceEngine = options.evidenceEngine || technicalEvidenceEngine;
@@ -119,9 +168,15 @@ export function createServer(options = {}) {
   const generationHandoffStore = options.generationHandoffStore || (
     (options.useDatabase || assessmentStore?.useDatabase)
       ? new GenerationHandoffStore({ useDatabase: true, tenantId: defaultTenantId, assessmentStore })
-      : defaultGenerationHandoffStore
+      : (isTestMode
+          ? new GenerationHandoffStore({
+              storagePath: path.join(ephemeralDir || os.tmpdir(), 'generationHandoffs.json'),
+              assessmentStore,
+              allowVolatileStoreInProduction: true
+            })
+          : defaultGenerationHandoffStore)
   );
-  if (options.assessmentStore && generationHandoffStore) {
+  if ((options.assessmentStore || isTestMode) && generationHandoffStore) {
     generationHandoffStore.assessmentStore = assessmentStore;
   }
   const generationProjectStore = options.generationProjectStore || defaultGenerationProjectStore;
@@ -143,9 +198,21 @@ export function createServer(options = {}) {
     falIngestionService.adapter = officialCatalogueAdapter;
   }
 
+  const authProviderFactory = options.authProviderFactory || defaultAuthProviderFactory;
+  const authMiddleware = options.authMiddleware || createAuthMiddleware({
+    adapter,
+    authService,
+    authProviderFactory,
+    securityAuditLogger,
+    isProduction,
+    enforceAuth,
+    defaultTenantId
+  });
+
   const server = http.createServer(async (req, res) => {
     try {
       setCorsHeaders(req, res);
+      setSecurityHeaders(req, res);
 
       if (req.method === 'OPTIONS') {
         res.writeHead(204);
@@ -155,209 +222,48 @@ export function createServer(options = {}) {
 
       const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
-    // Helper to resolve authenticated user context (SEC-01 + S2 + S13.1 REM-SEC-02)
-    const resolveUser = () => {
-      const authHeader = req.headers.authorization;
-      const customSecret = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
-      const devImpersonationUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'];
-      const devRole = req.headers['x-fiorify-dev-role'] || req.headers['x-fiorify-role'];
+      // Centralized Authentication Gate (AUTH-001, AUTH-005)
+      const allowed = await authMiddleware.authenticate(req, res, url);
+      if (!allowed) {
+        return;
+      }
 
-      // Development impersonation is strictly forbidden in production
-      if (isProduction) {
-        if (customSecret || devImpersonationUser || devRole) {
-          return { isUnauthenticated: true, authError: 'DEV_IMPERSONATION_FORBIDDEN_IN_PRODUCTION' };
+      const currentUser = req.user;
+      const requirePermission = (permission) => authMiddleware.requirePermission(req, res, permission, url);
+      const requireRole = (allowedRoles) => authMiddleware.requireRole(req, res, allowedRoles, url);
+
+      const checkAdminAuth = () => {
+        if (currentUser && !currentUser.isUnauthenticated) {
+          if (
+            currentUser.role === USER_ROLES.ADMIN ||
+            currentUser.role === 'ADMIN' ||
+            currentUser.role === USER_ROLES.LEAD_ARCHITECT ||
+            currentUser.role === 'CHIEF_ARCHITECT' ||
+            authService.hasPermission(currentUser, PERMISSIONS.MCP_MANAGE) ||
+            authService.hasPermission(currentUser, PERMISSIONS.ADMIN_ACCESS) ||
+            authService.hasPermission(currentUser, PERMISSIONS.ADMIN_OVERRIDE)
+          ) {
+            return true;
+          }
         }
-      }
 
-      // If development impersonation headers are provided in dev/test, they REQUIRE a valid secret
-      if (!isProduction && (devImpersonationUser || devRole) && !customSecret) {
-        return { isUnauthenticated: true, authError: 'DEV_IMPERSONATION_REQUIRES_SECRET' };
-      }
+        const authHeader = req.headers.authorization;
+        const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+        const rawCustomHeader = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
+        const customHeaderSecret = rawCustomHeader
+          ? String(rawCustomHeader).trim()
+          : null;
+        const providedSecret = customHeaderSecret || bearerSecret;
 
-      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || (!isProduction ? 'dev-admin-secret-change-in-production' : undefined);
-      const requestTenantId = req.headers['x-tenant-id'] || defaultTenantId;
+        if (!providedSecret) {
+          return false;
+        }
 
-      const isAdminSecretValid = (sec) => {
-        if (!sec || isProduction) return false;
-        const clean = String(sec).trim();
-        if (configuredSecret && clean === configuredSecret) return true;
-        if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(clean)) return true;
+        const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
+        if (providedSecret === configuredSecret) return true;
+        if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(providedSecret)) return true;
         return false;
       };
-
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.slice(7).trim();
-        if (!isProduction && isAdminSecretValid(token)) {
-          const adminUser = devImpersonationUser || 'USR-ADMIN-01';
-          const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
-          const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
-          return {
-            id: adminUser,
-            name: adminName,
-            email: adminEmail,
-            role: USER_ROLES.ADMIN,
-            tenantId: requestTenantId || defaultTenantId || 'DEFAULT-TENANT-S21',
-            department: 'SAP Architecture & Platform Governance'
-          };
-        }
-        const verified = authService.verifyToken(token);
-        if (verified) {
-          const tokenTenantId = verified.tenantId || verified.ext_attr?.zdn;
-          if (isProduction && !tokenTenantId && !req.headers['x-tenant-id']) {
-            return { isUnauthenticated: true, authError: 'MISSING_TENANT_CONTEXT' };
-          }
-          const hasCrossTenantAdmin = Array.isArray(verified.scopes) && (
-            verified.scopes.includes('Fiorify.admin.access') ||
-            verified.scopes.includes('Fiorify.tenants.manage') ||
-            verified.role === USER_ROLES.ADMIN
-          );
-          if (req.headers['x-tenant-id'] && tokenTenantId && req.headers['x-tenant-id'] !== tokenTenantId && !hasCrossTenantAdmin) {
-            return { isUnauthenticated: true, authError: 'TENANT_SPOOFING_FORBIDDEN' };
-          }
-          verified.tenantId = (hasCrossTenantAdmin && req.headers['x-tenant-id']) ? req.headers['x-tenant-id'] : (tokenTenantId || defaultTenantId);
-          return verified;
-        }
-        return { isUnauthenticated: true, authError: 'INVALID_TOKEN' };
-      }
-
-      if (customSecret) {
-        if (!isProduction && isAdminSecretValid(customSecret)) {
-          const adminUser = devImpersonationUser || 'USR-ADMIN-01';
-          const adminName = req.headers['x-fiorify-admin-name'] || req.headers['x-Fiorify-admin-name'] || 'Admin';
-          const adminEmail = req.headers['x-fiorify-admin-email'] || req.headers['x-Fiorify-admin-email'] || 'admin@Fiorify.corp';
-          return {
-            id: adminUser,
-            name: adminName,
-            email: adminEmail,
-            role: USER_ROLES.ADMIN,
-            tenantId: requestTenantId || defaultTenantId || 'DEFAULT-TENANT-S21',
-            department: 'SAP Architecture & Platform Governance'
-          };
-        }
-        return { isUnauthenticated: true, authError: 'INVALID_ADMIN_SECRET' };
-      }
-
-      if (enforceAuth) {
-        return { isUnauthenticated: true, authError: 'MISSING_TOKEN' };
-      }
-
-      // In non-production development with auth unenforced:
-      // Minimum-permission unauthenticated identity (VIEWER, never ADMIN)
-      return {
-        id: 'USR-DEV-VIEWER',
-        name: 'Development Viewer',
-        email: 'dev-viewer@fiorify.corp',
-        role: USER_ROLES.VIEWER,
-        tenantId: req.headers['x-tenant-id'] || defaultTenantId,
-        department: 'Development Sandbox'
-      };
-    };
-
-    const currentUser = resolveUser();
-    req.user = currentUser;
-
-    const isStaticOrSpaRoute = (req.method === 'GET' || req.method === 'HEAD') && !url.pathname.startsWith('/api/');
-    const isPublicEndpoint = (
-      isStaticOrSpaRoute ||
-      url.pathname === '/' ||
-      url.pathname === '/health' ||
-      url.pathname === '/api/v1/health' ||
-      url.pathname === '/api/v1/auth/login' ||
-      url.pathname === '/api/v1/auth/logout' ||
-      (req.method === 'GET' && url.pathname === '/api/v1/status')
-    );
-
-    if (!isPublicEndpoint && currentUser && currentUser.isUnauthenticated) {
-      securityAuditLogger.logEvent({
-        actor: 'anonymous',
-        tenantId: 'UNKNOWN_TENANT',
-        action: SECURITY_ACTIONS.AUTH_FAILURE,
-        resource: url.pathname,
-        outcome: 'FAILED',
-        details: { reason: currentUser.authError }
-      }).catch(() => {});
-
-      res.writeHead(401, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          success: false,
-          statusCode: 'UNAUTHORIZED',
-          code: currentUser.authError || 'UNAUTHORIZED',
-          error: 'Unauthorized',
-          errorMessage: currentUser.authError ? `Authentication failed: ${currentUser.authError}` : 'Authentication required. Invalid or missing Bearer token.'
-        })
-      );
-      return;
-    }
-
-    const requirePermission = (permission) => {
-      if (currentUser && (authService.hasPermission(currentUser, permission) || currentUser.role === USER_ROLES.ADMIN)) {
-        return true;
-      }
-      securityAuditLogger.logEvent({
-        actor: currentUser?.id || 'anonymous',
-        tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
-        action: SECURITY_ACTIONS.PERMISSION_DENIED,
-        resource: url.pathname,
-        outcome: 'DENIED',
-        details: { requiredPermission: permission, userRole: currentUser?.role }
-      }).catch(() => {});
-
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          success: false,
-          statusCode: 'FORBIDDEN',
-          error: 'Forbidden',
-          errorMessage: `User is lacking required permission "${permission}". Access denied.`
-        })
-      );
-      return false;
-    };
-
-    const requireRole = (allowedRoles) => {
-      if (currentUser && allowedRoles.includes(currentUser.role)) {
-        return true;
-      }
-      securityAuditLogger.logEvent({
-        actor: currentUser?.id || 'anonymous',
-        tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
-        action: SECURITY_ACTIONS.PERMISSION_DENIED,
-        resource: url.pathname,
-        outcome: 'DENIED',
-        details: { allowedRoles, userRole: currentUser?.role }
-      }).catch(() => {});
-
-      res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          success: false,
-          statusCode: 'FORBIDDEN',
-          error: 'Forbidden',
-          errorMessage: `Role "${currentUser?.role}" is not authorized for this operation. Required: ${allowedRoles.join(', ')}.`
-        })
-      );
-      return false;
-    };
-
-    const checkAdminAuth = () => {
-      const authHeader = req.headers.authorization;
-      const bearerSecret = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-      const rawCustomHeader = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
-      const customHeaderSecret = rawCustomHeader
-        ? String(rawCustomHeader).trim()
-        : null;
-      const providedSecret = customHeaderSecret || bearerSecret;
-
-      if (!providedSecret) {
-        return false;
-      }
-
-      const configuredSecret = process.env.Fiorify_ADMIN_SECRET || process.env.FIORIFY_ADMIN_SECRET || 'dev-admin-secret-change-in-production';
-      if (providedSecret === configuredSecret) return true;
-      if (adapter && typeof adapter.verifyAdminSecret === 'function' && adapter.verifyAdminSecret(providedSecret)) return true;
-      return false;
-    };
 
     // 1. Root Service Index (or Frontend SPA Entrypoint if HTML requested)
     const frontendDistDir = path.resolve(process.cwd(), 'frontend', 'dist');
@@ -421,6 +327,8 @@ export function createServer(options = {}) {
       requireRole,
       checkAdminAuth,
       authService,
+      authProviderFactory,
+      authMiddleware,
       securityAuditLogger,
       systemRegistry,
       adapter,
@@ -518,7 +426,7 @@ export function createServer(options = {}) {
 
     // Route not found
     res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Endpoint Not Found', path: url.pathname }));
+    res.end(JSON.stringify({ success: false, statusCode: 'NOT_FOUND', error: 'Endpoint Not Found', path: url.pathname }));
   } catch (unexpectedErr) {
     if (!res.headersSent) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -550,6 +458,13 @@ export function createServer(options = {}) {
         // ignore
       }
     }
+    if (ephemeralDir) {
+      try {
+        fs.rmSync(ephemeralDir, { recursive: true, force: true });
+      } catch {
+        // ignore ephemeral cleanup errors
+      }
+    }
     return originalClose(cb);
   };
 
@@ -564,6 +479,17 @@ const isDirectRun = Boolean(
    path.resolve(process.argv[1]).toLowerCase() === path.resolve(fileURLToPath(import.meta.url)).toLowerCase())
 );
 if (isDirectRun) {
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      defaultAuthProviderFactory.assertProductionReadiness();
+      const { DatabaseAdapterFactory } = await import('./infrastructure/db/adapters/databaseAdapterFactory.js');
+      DatabaseAdapterFactory.assertProductionReadiness();
+    } catch (secErr) {
+      console.error(`[Fiorify Security Guardrail] Startup Refused: ${secErr.message}`);
+      process.exit(1);
+    }
+  }
+
   defaultMcpService.initialize().catch((err) => {
     console.warn(`[Fiorify MCP] Non-blocking initialization note: ${err.message}`);
   });
@@ -574,6 +500,12 @@ if (isDirectRun) {
       await defaultMcpService.shutdown();
     } catch (err) {
       console.warn(`[Fiorify MCP] Shutdown warning: ${err.message}`);
+    }
+    try {
+      const { defaultDatabaseAdapter } = await import('./infrastructure/db/adapters/databaseAdapterFactory.js');
+      await defaultDatabaseAdapter.close();
+    } catch (err) {
+      console.warn(`[Fiorify DB] Shutdown warning: ${err.message}`);
     }
     server.close(() => {
       process.exit(0);

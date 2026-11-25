@@ -20,6 +20,17 @@ import {
   WifiOff
 } from 'lucide-react';
 
+const formatBusinessRoles = (roles?: string): string[] => {
+  if (!roles || roles.includes('Dummy Role')) return [];
+  return roles
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .split(/[*|,]/)
+    .map((r) => r.trim())
+    .filter(Boolean);
+};
+
 export const AppDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -246,7 +257,9 @@ export const AppDetailPage: React.FC = () => {
 
           <p className="fiori-page-subtitle" style={{ marginTop: '6px' }}>
             Line of Business: <strong>{app.lineOfBusiness || app.businessProcess || 'General'}</strong>
-            {app.businessRole && !app.businessRole.includes('Dummy Role') && <span> &bull; Target Role: {app.businessRole}</span>}
+            {formatBusinessRoles(app.businessRole).length > 0 && (
+              <span> &bull; Target Role: {formatBusinessRoles(app.businessRole)[0]}</span>
+            )}
           </p>
         </div>
 
@@ -368,10 +381,33 @@ export const AppDetailPage: React.FC = () => {
 
             {app.businessRole && (
               <div>
-                <div style={{ color: 'var(--fiori-text-secondary)', fontSize: '11px', fontWeight: 600 }}>
+                <div style={{ color: 'var(--fiori-text-secondary)', fontSize: '11px', fontWeight: 600, marginBottom: '6px' }}>
                   TARGET BUSINESS ROLE(S)
                 </div>
-                <div>{app.businessRole && !app.businessRole.includes('Dummy Role') ? app.businessRole : 'Standard End-User / Cross-Functional'}</div>
+                {formatBusinessRoles(app.businessRole).length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {formatBusinessRoles(app.businessRole).map((role, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          padding: '2px 8px',
+                          backgroundColor: '#F1F5F9',
+                          border: '1px solid #CBD5E1',
+                          borderRadius: '12px',
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          color: '#334155'
+                        }}
+                      >
+                        {role}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div>Standard End-User / Cross-Functional</div>
+                )}
               </div>
             )}
 

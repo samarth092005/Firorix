@@ -51,6 +51,8 @@ export const PREFLIGHT_READINESS = Object.freeze({
 
 export class SapPreflightService {
   constructor(options = {}) {
+    this.options = options;
+    this.isMock = Boolean(options.provider || options.mock || options.isMock);
     this.provider = options.provider || defaultSapConnectivityProvider;
     this.defaultDestination = options.defaultDestination || process.env.SAP_DESTINATION_NAME || 'S21';
     this.defaultClient = options.defaultClient || process.env.SAP_CLIENT || '200';
@@ -64,7 +66,14 @@ export class SapPreflightService {
     const sanitized = Array.isArray(details) ? [] : {};
     for (const [k, v] of Object.entries(details)) {
       const lower = k.toLowerCase();
-      if (lower.includes('auth') || lower.includes('pass') || lower.includes('token') || lower.includes('secret') || lower.includes('cookie')) {
+      if (
+        k !== 'authorizations' &&
+        (lower.includes('auth') ||
+         lower.includes('pass') ||
+         lower.includes('token') ||
+         lower.includes('secret') ||
+         lower.includes('cookie'))
+      ) {
         sanitized[k] = '[REDACTED]';
       } else if (v && typeof v === 'object') {
         sanitized[k] = this.sanitizeDetails(v);
@@ -87,14 +96,28 @@ export class SapPreflightService {
 
     const startTime = Date.now();
     const checks = [];
+    let reachabilityEndpoint = '/sap/public/bc/ur';
 
-    // Helper to push check result
-    const recordCheck = (id, name, category, status, details, remediation = null, latencyMs = 0) => {
+    // Helper to push check result with complete SAP-008 evidence provenance
+    const isSimulated = Boolean(this.isMock || options.provider || connectionMode === 'MOCK' || process.env.FIORIFY_DEMO_MODE === 'true');
+    const defaultProvenance = isSimulated ? 'SIMULATED_FIXTURE' : (connectionMode === 'BTP_DESTINATION' ? 'BTP_DESTINATION' : (process.env.SAP_URL_OVERRIDE ? 'LIVE_DIRECT_HTTP' : 'DIRECT_HTTP'));
+
+    const recordCheck = (id, name, category, status, details, remediation = null, latencyMs = 0, endpoint = null) => {
       checks.push({
         id,
         name,
         category, // NETWORK, SECURITY, COMPATIBILITY, REPOSITORY, GOVERNANCE
-        status,   // PASSED, WARNING, FAILED, SKIPPED
+        status,   // PASSED, WARNING, FAILED, SKIPPED, BLOCKED, PENDING_VERIFICATION
+        verificationState: status === 'PASSED' ? 'VERIFIED' : (status === 'WARNING' ? 'PENDING_VERIFICATION' : status),
+        sourceSystem: destinationName,
+        sapClient: String(sapClient).trim(),
+        endpoint: endpoint || reachabilityEndpoint || null,
+        provenance: defaultProvenance,
+        verificationTimestamp: new Date().toISOString(),
+        freshness: {
+          verifiedAt: new Date().toISOString(),
+          ttlMs: 300000 // 5 minutes validity
+        },
         latencyMs,
         details: this.sanitizeDetails(details),
         remediation
@@ -159,7 +182,7 @@ export class SapPreflightService {
     // 2. HOST REACHABILITY (Multi-endpoint fallback: Gateway Catalog or Public UR)
     const t1 = Date.now();
     let isReachable = false;
-    let reachabilityEndpoint = '/sap/public/bc/ur';
+    reachabilityEndpoint = '/sap/public/bc/ur';
     let reachabilityRes = await this.provider.executeQuery('/sap/public/bc/ur', {
       ...options,
       destinationName,
@@ -420,21 +443,42 @@ export class SapPreflightService {
       );
     }
 
-    // 12. USER AUTHORIZATION DIAGNOSTICS
+    // 12. USER AUTHORIZATION DIAGNOSTICS (SAP-007: derived strictly from live evidence, zero synthetic SAP_ALL)
     const t11 = Date.now();
+    const isGatewayVerified = gatewayRes.success || gatewayRes.status === 200;
+    const isAdtVerified = adtRes.success || adtRes.status === 200;
     const auths = [
-      { object: 'S_SERVICE', status: 'VERIFIED', description: 'SAP Gateway Service Execution' },
-      { object: 'S_ADT_RES', status: 'VERIFIED', description: 'ABAP Development Tools Resource Access' },
-      { object: 'S_RFC', status: 'VERIFIED', description: 'Remote Function Call Execution' },
-      { object: 'S_TABU_DIS', status: 'READ_ONLY', description: 'Table & View Display Authorization' },
-      { object: 'SAP_ALL', status: 'CONFIRMED', description: 'System Administrator Profile (int_samarth)' }
+      {
+        object: 'S_SERVICE',
+        status: isGatewayVerified ? 'VERIFIED' : (gatewayRes.status === 403 ? 'BLOCKED' : (isReachable ? 'FAILED' : 'PENDING_VERIFICATION')),
+        description: 'SAP Gateway Service Execution (/IWFND/CATALOGSERVICE)'
+      },
+      {
+        object: 'S_ADT_RES',
+        status: isAdtVerified ? 'VERIFIED' : (adtRes.status === 403 ? 'BLOCKED' : (isReachable ? 'FAILED' : 'PENDING_VERIFICATION')),
+        description: 'ABAP Development Tools Resource Access (/sap/bc/adt)'
+      },
+      {
+        object: 'S_RFC',
+        status: isReachable && authPassed ? 'VERIFIED' : 'PENDING_VERIFICATION',
+        description: 'Remote Function Call Execution'
+      },
+      {
+        object: 'S_TABU_DIS',
+        status: isReachable && authPassed ? 'READ_ONLY_VERIFIED' : 'PENDING_VERIFICATION',
+        description: 'Table & View Display Authorization'
+      }
     ];
     recordCheck(
       PREFLIGHT_CHECK_IDS.AUTHORIZATION_DIAGNOSTICS,
       'User Authorization Diagnostics',
       'SECURITY',
-      'PASSED',
-      { user: process.env.SAP_USER || 'int_samarth', authorizations: auths },
+      (isGatewayVerified && isAdtVerified) || (isReachable && authPassed) ? 'PASSED' : (reachabilityRes.status === 403 ? 'FAILED' : 'WARNING'),
+      {
+        user: process.env.SAP_USER || 'int_samarth',
+        authorizations: auths,
+        provenance: isSimulated ? 'SIMULATED_FIXTURE' : (isReachable ? 'LIVE_EVIDENCE_DERIVED' : 'PENDING_VERIFICATION')
+      },
       null,
       Date.now() - t11
     );
@@ -512,12 +556,14 @@ export class SapPreflightService {
       success: overallReadiness === PREFLIGHT_READINESS.READY || overallReadiness === PREFLIGHT_READINESS.READY_WITH_LIMITATIONS,
       overallReadiness,
       targetSystem: {
-        systemId: 'S21',
+        systemId: destinationName,
         client: sapClient,
         release: 'SAP S/4HANA 2023 Private Edition',
         softwareComponent: 'S4CORE 108',
         destinationName,
-        connectionMode
+        connectionMode,
+        provenance: defaultProvenance,
+        evidenceTimestamp: new Date().toISOString()
       },
       timestamp: new Date().toISOString(),
       durationMs: Date.now() - startTime,

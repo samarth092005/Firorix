@@ -90,7 +90,9 @@ export const CataloguePage: React.FC = () => {
     setStatusLoading(true);
     try {
       const status = await catalogueService.getCatalogueStatus();
-      setStatusInfo(status);
+      if (status) {
+        setStatusInfo(status);
+      }
     } catch (err: any) {
       console.warn('Could not load catalogue status:', err);
     } finally {
@@ -110,9 +112,9 @@ export const CataloguePage: React.FC = () => {
         lineOfBusiness: selectedLob || undefined,
         isDemoMode
       });
-      setApps(res.data);
+      setApps(res?.data || []);
     } catch (err: any) {
-      if (err instanceof ApiError && (err.isNetworkError || err.statusCode === 0)) {
+      if (err instanceof ApiError && (err.isNetworkError || err.statusCode === 0 || err.statusCode === 502 || err.statusCode === 504)) {
         setIsOffline(true);
         setError('Cannot reach Fiorify backend service on port 4004. Please verify the backend is running.');
       } else {

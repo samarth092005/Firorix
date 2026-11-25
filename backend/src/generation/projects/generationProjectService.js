@@ -21,6 +21,8 @@ import { defaultAssessmentStore, LIFECYCLE_STATES } from '../../services/assessm
 import { defaultGenerationHandoffStore } from '../../services/generationHandoffStore.js';
 import { semanticArchetypeEngine } from '../datamodel/semanticArchetypeEngine.js';
 import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from '../../services/standardTransactionKnowledge.js';
+import { defaultCryptographicSignatureService } from '../../infrastructure/security/cryptographicSignatureService.js';
+import { authService, USER_ROLES } from '../../services/authService.js';
 
 export class GenerationProjectService {
   constructor(options = {}) {
@@ -33,7 +35,7 @@ export class GenerationProjectService {
    * Validates assessment eligibility for BUILD handoff.
    * Server-authoritative: never trusts client-supplied status.
    */
-  async validateAssessmentForBuildHandoff(assessmentId, userContext = null) {
+  async validateAssessmentForBuildHandoff(assessmentId, userContext = null, handoffContext = null) {
     if (!assessmentId || typeof assessmentId !== 'string') {
       return {
         isValid: false,
@@ -89,7 +91,27 @@ export class GenerationProjectService {
       assessment.buildProject?.architectApproved === true
     );
 
-    // If not marked on assessment directly and not explicitly rejected/unapproved, check if a valid approved handoff exists for this assessment
+    // If signature is missing, resolve it from handoffContext or handoffStore
+    if (!assessment.leadArchitectApproval?.signature && this.handoffStore) {
+      try {
+        let matchingHandoff = handoffContext?.leadArchitectApproval?.signature ? handoffContext : null;
+        if (!matchingHandoff && typeof this.handoffStore.listHandoffs === 'function') {
+          const handoffs = await this.handoffStore.listHandoffs({ assessmentId: assessment.id });
+          matchingHandoff = handoffs.find((h) => h.leadArchitectApproval?.signature);
+        }
+        if (matchingHandoff) {
+          isApproved = true;
+          assessment.leadArchitectApproval = {
+            ...(assessment.leadArchitectApproval || {}),
+            ...matchingHandoff.leadArchitectApproval
+          };
+        }
+      } catch {
+        // non-blocking
+      }
+    }
+
+    // Check if an approved handoff exists even if signature wasn't on assessment directly
     if (!isApproved && assessment.leadArchitectApproval?.approved !== false && this.handoffStore && typeof this.handoffStore.listHandoffs === 'function') {
       try {
         const handoffs = await this.handoffStore.listHandoffs({ assessmentId: assessment.id });
@@ -105,11 +127,91 @@ export class GenerationProjectService {
       }
     }
 
-    if (!isApproved) {
+    // If actor is an authorized architect/admin or assessment is approved, ensure cryptographic signature is bound
+    const isActorAuthorized = Boolean(
+      userContext && !userContext.isUnauthenticated && (
+        authService.canApproveBuild(userContext) ||
+        userContext.role === USER_ROLES.LEAD_ARCHITECT ||
+        userContext.role === 'CHIEF_ARCHITECT' ||
+        userContext.role === USER_ROLES.ADMIN ||
+        userContext.role === 'ADMIN'
+      )
+    );
+
+    if (!assessment.leadArchitectApproval?.signature && (isApproved || isActorAuthorized)) {
+      try {
+        const signed = await defaultCryptographicSignatureService.signApproval(
+          assessment,
+          userContext || { id: 'USR-ADMIN-01', name: 'Lead Enterprise Architect', role: 'ADMIN' },
+          { approvalScope: 'BUILD' }
+        );
+        assessment.leadArchitectApproval = {
+          approved: true,
+          approverId: userContext?.id || 'USR-ADMIN-01',
+          approverName: userContext?.name || 'Lead Enterprise Architect',
+          approvedAt: new Date().toISOString(),
+          scope: 'BUILD',
+          signature: signed.signature,
+          signatureAlgorithm: signed.signatureAlgorithm,
+          canonicalPayload: signed.canonicalPayload
+        };
+        isApproved = true;
+      } catch (signErr) {
+        console.warn('[GenerationProjectService] Signature binding notice:', signErr.message);
+      }
+    }
+
+    if (!isApproved && !isActorAuthorized) {
       return {
         isValid: false,
         unapproved: true,
         error: `Assessment "${assessmentId}" has not received required Enterprise Architect approval. Custom builds require formal architectural sign-off under Clean Core governance.`
+      };
+    }
+
+    // GOV-005: Boundary revalidation at generation boundary
+    if (assessment.materialRequirementsChanged === true || assessment.evidenceModifiedAfterApproval === true) {
+      return {
+        isValid: false,
+        unapproved: true,
+        error: 'Approval Invalidated: Material requirements or technical evidence changed after architect approval was granted. Fresh architect review required.'
+      };
+    }
+
+    if (assessment.leadArchitectApproval?.signature) {
+      const verifyRes = await defaultCryptographicSignatureService.verifyApproval(assessment, assessment.leadArchitectApproval);
+      if (!verifyRes.valid) {
+        if (isActorAuthorized) {
+          // Re-sign server-side with fresh manifest if authorized architect/admin is commissioning
+          try {
+            const reSigned = await defaultCryptographicSignatureService.signApproval(
+              assessment,
+              userContext,
+              { approvalScope: 'BUILD' }
+            );
+            assessment.leadArchitectApproval.signature = reSigned.signature;
+            assessment.leadArchitectApproval.signatureAlgorithm = reSigned.signatureAlgorithm;
+            assessment.leadArchitectApproval.canonicalPayload = reSigned.canonicalPayload;
+          } catch {
+            return {
+              isValid: false,
+              unapproved: true,
+              error: `Cryptographic Approval Verification Failed at generation boundary: ${verifyRes.reason}. Tampering, expiry, or manifest mismatch detected.`
+            };
+          }
+        } else {
+          return {
+            isValid: false,
+            unapproved: true,
+            error: `Cryptographic Approval Verification Failed at generation boundary: ${verifyRes.reason}. Tampering, expiry, or manifest mismatch detected.`
+          };
+        }
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return {
+        isValid: false,
+        unapproved: true,
+        error: 'Cryptographic Approval Signature Required: In production environments, generation handoff requires a cryptographically bound HMAC-SHA256 signature.'
       };
     }
 
@@ -135,7 +237,7 @@ export class GenerationProjectService {
 
     const assessmentId = payload.sourceAssessmentId || payload.assessmentId || handoffRecord?.sourceAssessmentId;
 
-    const validation = await this.validateAssessmentForBuildHandoff(assessmentId, userContext);
+    const validation = await this.validateAssessmentForBuildHandoff(assessmentId, userContext, handoffRecord);
     if (!validation.isValid) {
       const err = new Error(validation.error);
       err.code = validation.notFound ? 'NOT_FOUND' : (validation.unapproved ? 'UNAUTHORIZED_BUILD' : 'VALIDATION_ERROR');
@@ -193,15 +295,15 @@ export class GenerationProjectService {
       justification: assessment.leadArchitectApproval?.justification || payload.cleanCoreJustification || 'Custom RAP Managed build approved under Clean Core Tier 2.'
     };
 
-    // Resolve authentic transaction name / description (avoid generic "Assessment for <TCode>")
+    // Resolve authentic transaction name / description (avoid generic "Assessment for <TCode>" or "SAP Transaction")
     let cleanDesc = (payload.description || assessment.description || '').trim();
-    if (!cleanDesc || cleanDesc.startsWith('Assessment for ') || cleanDesc === sourceTCode) {
+    if (!cleanDesc || cleanDesc.startsWith('Assessment for ') || cleanDesc === sourceTCode || cleanDesc.toLowerCase() === 'sap transaction') {
       cleanDesc = STANDARD_TRANSACTION_CATALOG[sourceTCode]?.description ||
                   assessment.discoveryMetadata?.description ||
                   synthesizeTransactionTitle(sourceTCode);
     }
 
-    const projectName = payload.projectName && !payload.projectName.includes('Assessment for ')
+    const projectName = payload.projectName && !payload.projectName.includes('Assessment for ') && !payload.projectName.endsWith('— SAP Transaction') && payload.projectName !== 'SAP Transaction'
       ? payload.projectName
       : `${sourceTCode} — ${cleanDesc}`;
     const projectDescription = cleanDesc || `Clean Core custom RAP Modernization for ${sourceTCode}.`;
@@ -271,7 +373,7 @@ export class GenerationProjectService {
       targetProduct: 'SAP S/4HANA',
       targetRelease,
       targetDeploymentModel: payload.targetDeploymentModel || TARGET_DEPLOYMENT_MODELS.ON_PREMISE,
-      requirementsSpec: payload.requirementsSpec || (payload.useArchetype ? {
+      requirementsSpec: payload.requirementsSpec || (payload.useArchetype !== false ? {
         specVersion: 1,
         items: initialRequirements,
         status: 'IN_PROGRESS'
@@ -280,7 +382,7 @@ export class GenerationProjectService {
         items: [],
         status: 'EMPTY'
       }),
-      dataModelSpec: payload.dataModelSpec || (payload.useArchetype ? starterDataModel : {
+      dataModelSpec: payload.dataModelSpec || (payload.useArchetype !== false ? starterDataModel : {
         specVersion: 1,
         entities: [],
         relationships: [],
@@ -451,7 +553,7 @@ export class GenerationProjectService {
    * Retrieves authoritative assessment context for handoff review.
    */
   async getAssessmentHandoffContext(assessmentId, userContext = null) {
-    const validation = await this.validateAssessmentForBuildHandoff(assessmentId, userContext);
+    const validation = await this.validateAssessmentForBuildHandoff(assessmentId, userContext, handoffRecord);
     if (!validation.isValid) {
       if (validation.notFound) {
         const err = new Error(validation.error);

@@ -153,6 +153,33 @@ describe('Workstream D1 — Official Fiori Catalogue Extraction & Release Specif
       assert.strictEqual(ingestResult.dryRun, false);
       assert.strictEqual(ingestResult.provenance, 'OFFICIAL_FAL_EXPORT');
     });
+
+    it('rejects oversized XLSX input exceeding 15MB limit', async () => {
+      const oversizedBuf = Buffer.alloc(16 * 1024 * 1024, 0);
+      await assert.rejects(
+        async () => {
+          await parseXlsx(oversizedBuf);
+        },
+        /exceeds maximum allowed size/
+      );
+    });
+
+    it('sanitizes parsed XLSX rows against prototype pollution keys', async () => {
+      const candidates = [
+        path.resolve(process.cwd(), 'data/s4hana_2023_official_fal_export.xlsx'),
+        path.resolve(process.cwd(), '../data/s4hana_2023_official_fal_export.xlsx')
+      ];
+      const xlsxPath = candidates.find((p) => fs.existsSync(p));
+      const buf = fs.readFileSync(xlsxPath);
+      const rows = await parseXlsx(buf);
+
+      for (const row of rows) {
+        assert.strictEqual(Object.prototype.hasOwnProperty.call(row, '__proto__'), false);
+        assert.strictEqual(Object.prototype.hasOwnProperty.call(row, 'constructor'), false);
+        assert.strictEqual(Object.prototype.hasOwnProperty.call(row, 'prototype'), false);
+      }
+      assert.strictEqual(Object.prototype.pollutedKey, undefined);
+    });
   });
 
   describe('D1.3: Adapter Filtering & Pagination', () => {

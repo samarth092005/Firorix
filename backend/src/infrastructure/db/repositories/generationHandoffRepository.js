@@ -12,11 +12,16 @@ export class GenerationHandoffRepository {
     return await this.pool.connect();
   }
 
-  async createHandoff(handoff, tenantId = 'DEFAULT-TENANT-S21') {
+  async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
     const client = await this._getClient();
-    try {
-      await client.query('BEGIN;');
+    await client.query('BEGIN;');
+    await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
+    return client;
+  }
 
+  async createHandoff(handoff, tenantId = 'DEFAULT-TENANT-S21') {
+    const client = await this._getTenantClient(tenantId);
+    try {
       // Ensure tenant exists
       await client.query(`
         INSERT INTO tenants (tenant_id, name)
@@ -137,40 +142,57 @@ export class GenerationHandoffRepository {
   }
 
   async getHandoff(handoffId, tenantId = 'DEFAULT-TENANT-S21') {
-    const res = await this.pool.query(
-      `SELECT * FROM generation_handoffs WHERE handoff_id = $1 AND tenant_id = $2;`,
-      [handoffId, tenantId]
-    );
-    if (res.rows.length === 0) return null;
-    return this._mapRowToHandoff(res.rows[0]);
+    const client = await this._getTenantClient(tenantId);
+    try {
+      const res = await client.query(
+        `SELECT * FROM generation_handoffs WHERE handoff_id = $1 AND tenant_id = $2;`,
+        [handoffId, tenantId]
+      );
+      await client.query('COMMIT;');
+      if (res.rows.length === 0) return null;
+      return this._mapRowToHandoff(res.rows[0]);
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async listHandoffs(filters = {}, tenantId = 'DEFAULT-TENANT-S21') {
-    let query = `SELECT * FROM generation_handoffs WHERE tenant_id = $1`;
-    const params = [tenantId];
+    const client = await this._getTenantClient(tenantId);
+    try {
+      let query = `SELECT * FROM generation_handoffs WHERE tenant_id = $1`;
+      const params = [tenantId];
 
-    if (filters.assessmentId || filters.sourceAssessmentId) {
-      params.push(filters.assessmentId || filters.sourceAssessmentId);
-      query += ` AND source_assessment_id = $${params.length}`;
-    }
-    if (filters.tcode) {
-      params.push(filters.tcode.toUpperCase());
-      query += ` AND tcode = $${params.length}`;
-    }
-    if (filters.approvalStatus) {
-      params.push(filters.approvalStatus.toUpperCase());
-      query += ` AND approval_status = $${params.length}`;
-    }
+      if (filters.assessmentId || filters.sourceAssessmentId) {
+        params.push(filters.assessmentId || filters.sourceAssessmentId);
+        query += ` AND source_assessment_id = $${params.length}`;
+      }
+      if (filters.tcode) {
+        params.push(filters.tcode.toUpperCase());
+        query += ` AND tcode = $${params.length}`;
+      }
+      if (filters.approvalStatus) {
+        params.push(filters.approvalStatus.toUpperCase());
+        query += ` AND approval_status = $${params.length}`;
+      }
 
-    query += ` ORDER BY created_at DESC;`;
-    const res = await this.pool.query(query, params);
-    return res.rows.map(r => this._mapRowToHandoff(r));
+      query += ` ORDER BY created_at DESC;`;
+      const res = await client.query(query, params);
+      await client.query('COMMIT;');
+      return res.rows.map(r => this._mapRowToHandoff(r));
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async recordApproval(approvalData, tenantId = 'DEFAULT-TENANT-S21') {
-    const client = await this._getClient();
+    const client = await this._getTenantClient(tenantId);
     try {
-      await client.query('BEGIN;');
       const approvalId = approvalData.approvalId || `APP-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const assessmentId = approvalData.assessmentId;
       const targetVersion = approvalData.assessmentVersion !== undefined ? approvalData.assessmentVersion : 1;
@@ -219,13 +241,22 @@ export class GenerationHandoffRepository {
   }
 
   async getApproval(assessmentId, version = 1, scope = 'BUILD', tenantId = 'DEFAULT-TENANT-S21') {
-    const res = await this.pool.query(
-      `SELECT * FROM build_architect_approvals
-       WHERE assessment_id = $1 AND assessment_version = $2 AND scope = $3 AND tenant_id = $4;`,
-      [assessmentId, version, String(scope).toUpperCase(), tenantId]
-    );
-    if (res.rows.length === 0) return null;
-    return res.rows[0];
+    const client = await this._getTenantClient(tenantId);
+    try {
+      const res = await client.query(
+        `SELECT * FROM build_architect_approvals
+         WHERE assessment_id = $1 AND assessment_version = $2 AND scope = $3 AND tenant_id = $4;`,
+        [assessmentId, version, String(scope).toUpperCase(), tenantId]
+      );
+      await client.query('COMMIT;');
+      if (res.rows.length === 0) return null;
+      return res.rows[0];
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   _mapRowToHandoff(row) {

@@ -146,7 +146,7 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
           <div className="preview-banner-content">
             <div className="preview-banner-title-row">
               <h2 className="preview-banner-title">
-                SAP DEV Deployment &amp; System Verification (S11)
+                SAP DEV Deployment &amp; System Verification ({project?.sourceSystemId || 'S21'})
               </h2>
               <span className="preview-banner-badge" style={{ backgroundColor: '#DEF7EC', color: '#03543F' }}>
                 <span className="preview-banner-badge-dot" style={{ backgroundColor: '#10B981' }} />
@@ -329,8 +329,12 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
                         {c.status}
                       </span>
                     </td>
-                    <td style={{ padding: '10px 14px', color: '#475569', fontFamily: 'monospace', fontSize: '11px' }}>
-                      {JSON.stringify(c.details)}
+                    <td style={{ padding: '10px 14px', color: '#475569', fontSize: '12px' }}>
+                      {typeof c.details === 'object' && c.details !== null
+                        ? Object.entries(c.details)
+                            .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
+                            .join(' • ')
+                        : String(c.details || 'Verified')}
                     </td>
                     <td style={{ padding: '10px 14px', color: '#64748B' }}>{c.latencyMs} ms</td>
                   </tr>

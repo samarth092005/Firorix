@@ -1,6 +1,10 @@
 import pg from 'pg';
 import path from 'node:path';
 import fs from 'node:fs';
+import { loadLocalEnv } from '../../adapters/btpDestinationAdapter.js';
+
+// Auto-load environment configuration
+loadLocalEnv();
 
 const { Pool } = pg;
 
@@ -10,20 +14,55 @@ let activeConfig = null;
 
 export class DatabasePool {
   static async getPool(customConfig = {}) {
+    if (customConfig.connectionString) {
+      const config = {
+        max: 10,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 15000,
+        ...customConfig
+      };
+      if (customConfig.connectionString.includes('sslmode=') || process.env.PGSSL === 'true') {
+        config.ssl = config.ssl || { rejectUnauthorized: false };
+      }
+      return new Pool(config);
+    }
+
     if (globalPool) {
       return globalPool;
     }
 
-    const connectionString = customConfig.connectionString || process.env.DATABASE_URL;
+    let connectionString = customConfig.connectionString || process.env.DATABASE_URL;
+
+    // Support Cloud Foundry user-provided services
+    if (!connectionString && process.env.VCAP_SERVICES) {
+      try {
+        const vcap = typeof process.env.VCAP_SERVICES === 'string'
+          ? JSON.parse(process.env.VCAP_SERVICES)
+          : process.env.VCAP_SERVICES;
+        const userProvided = vcap['user-provided'] || [];
+        const pgService = userProvided.find(s =>
+          s.name?.toLowerCase().includes('postgres') ||
+          s.name?.toLowerCase().includes('fiorify') ||
+          s.credentials?.DATABASE_URL
+        );
+        if (pgService?.credentials?.DATABASE_URL) {
+          connectionString = pgService.credentials.DATABASE_URL;
+        }
+      } catch {}
+    }
     let config = {
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 15000,
       ...customConfig
     };
 
     if (connectionString) {
       config.connectionString = connectionString;
+      if (connectionString.includes('sslmode=') || process.env.PGSSL === 'true') {
+        // Enforce strict TLS certificate verification against trusted root CAs
+        config.ssl = config.ssl || { rejectUnauthorized: true };
+      }
     } else {
       config.host = customConfig.host || process.env.PGHOST || '127.0.0.1';
       config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : ((process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true') ? 54334 : 5432));

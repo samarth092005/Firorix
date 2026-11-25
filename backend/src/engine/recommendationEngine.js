@@ -429,7 +429,9 @@ export class RecommendationEngine {
 
     // 10. Complete Verified Fit -> ADD_AND_CONFIGURE
     else if (
-      assessment.overallStatus === ASSESSMENT_STATUSES.VERIFIED_FIT &&
+      (assessment.overallStatus === ASSESSMENT_STATUSES.VERIFIED_FIT ||
+       assessment.overallStatus === 'FIT' ||
+       assessment.overallStatus === 'VERIFIED_FIT') &&
       criticalGaps.length === 0
     ) {
       outcome = RECOMMENDATION_OUTCOMES.ADD_AND_CONFIGURE;

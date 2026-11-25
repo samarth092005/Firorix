@@ -36,19 +36,22 @@ export const LoginPage: React.FC = () => {
     }
   }, [autoDemo]);
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!email) {
       setError('Please provide a valid SAP User ID or Email');
+      return;
+    }
+    if (!password) {
+      setError('Please enter your password.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
 
-    authService.login(email, password).finally(() => {
-      setIsLoading(false);
-      // Navigate to redirect target, transaction discovery if tcode was passed, or overview
+    try {
+      await authService.login(email, password);
       if (redirectTarget) {
         navigate(redirectTarget);
       } else if (tcodeTarget) {
@@ -56,16 +59,21 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate('/overview');
       }
-    });
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed. Please verify your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleInstantDemoLogin = () => {
+  const handleInstantDemoLogin = async () => {
     setIsLoading(true);
+    setError(null);
     setEmail(DEMO_USER.email);
     setPassword('demo-session-2026');
 
-    authService.loginWithDemo().finally(() => {
-      setIsLoading(false);
+    try {
+      await authService.loginWithDemo();
       if (redirectTarget) {
         navigate(redirectTarget);
       } else if (tcodeTarget) {
@@ -73,7 +81,11 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate('/overview');
       }
-    });
+    } catch (err: any) {
+      setError(err.message || 'Demo session initialization failed.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

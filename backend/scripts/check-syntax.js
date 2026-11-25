@@ -30,7 +30,7 @@ const targetDirs = [
 ];
 
 const allFiles = targetDirs.flatMap(walk);
-console.log(`[FioriX Backend Quality] Validating syntax for ${allFiles.length} JavaScript files...`);
+console.log(`[Fiorify Backend Quality] Validating syntax for ${allFiles.length} JavaScript files...`);
 
 let errorCount = 0;
 for (const file of allFiles) {

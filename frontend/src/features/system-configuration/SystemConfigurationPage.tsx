@@ -27,7 +27,8 @@ import {
   RefreshCw,
   ExternalLink,
   Wifi,
-  WifiOff
+  WifiOff,
+  Info
 } from 'lucide-react';
 
 export const SystemConfigurationPage: React.FC = () => {
@@ -383,12 +384,78 @@ export const SystemConfigurationPage: React.FC = () => {
 
             {catalogState.status === 'LOADED' && (
               <div>
+                {catalogState.notice && (
+                  <div
+                    style={{
+                      padding: '10px 14px',
+                      backgroundColor: '#EFF6FF',
+                      border: '1px solid #BFDBFE',
+                      borderRadius: '6px',
+                      color: '#1E40AF',
+                      fontSize: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '12px'
+                    }}
+                  >
+                    <Info size={15} color="#2563EB" />
+                    <span>{catalogState.notice}</span>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', fontSize: '11px', color: '#64748B' }}>
-                  <span>Showing {catalogState.services.length} of {catalogState.totalCount.toLocaleString()} services</span>
-                  <span>Provenance: {catalogState.provenance}</span>
+                  <span>Showing {catalogState.services.length} of {catalogState.totalCount.toLocaleString()} registered services</span>
+                  <span style={{ fontWeight: 600 }}>Provenance: {catalogState.provenance}</span>
                 </div>
 
-
+                <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0', textAlign: 'left' }}>
+                        <th style={{ padding: '8px 12px', fontWeight: 600, color: '#475569' }}>Technical Service Name</th>
+                        <th style={{ padding: '8px 12px', fontWeight: 600, color: '#475569' }}>Description</th>
+                        <th style={{ padding: '8px 12px', fontWeight: 600, color: '#475569', width: '80px' }}>Protocol</th>
+                        <th style={{ padding: '8px 12px', fontWeight: 600, color: '#475569', width: '60px' }}>Ver</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {catalogState.services.map((svc) => (
+                        <tr key={svc.id || svc.technicalServiceName} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                          <td style={{ padding: '8px 12px', fontWeight: 600, color: '#0F172A' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span>{svc.technicalServiceName}</span>
+                              {svc.isSapService && (
+                                <span style={{ fontSize: '10px', padding: '1px 5px', borderRadius: '3px', backgroundColor: '#F1F5F9', color: '#475569' }}>
+                                  Standard
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 400 }}>{svc.title}</div>
+                          </td>
+                          <td style={{ padding: '8px 12px', color: '#475569' }}>
+                            {svc.description || svc.title || 'Standard S/4HANA OData service'}
+                          </td>
+                          <td style={{ padding: '8px 12px' }}>
+                            <span style={{
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              backgroundColor: svc.serviceType === 'OData V4' ? '#F3E8FF' : '#E0F2FE',
+                              color: svc.serviceType === 'OData V4' ? '#7E22CE' : '#0369A1'
+                            }}>
+                              {svc.serviceType || 'OData V2'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '8px 12px', color: '#64748B', fontWeight: 600 }}>
+                            v{svc.version || 1}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

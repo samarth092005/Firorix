@@ -366,10 +366,10 @@ describe('Fiorify CAT-02 — Frontend Canonical Catalogue Integration Tests', ()
     );
 
     const status = await catalogueService.getCatalogueStatus();
-    expect(status.totalRecords).toBe(3);
-    expect(status.sourceVersion).toBe('SAP S/4HANA Reference Library');
-    expect(status.importStatus).toBe('IDLE');
-    expect(status.sourceDistribution['OFFICIAL_CATALOGUE_LIVE']).toBe(3);
+    expect(status!.totalRecords).toBe(3);
+    expect(status!.sourceVersion).toBe('SAP S/4HANA Reference Library');
+    expect(status!.importStatus).toBe('IDLE');
+    expect(status!.sourceDistribution['OFFICIAL_CATALOGUE_LIVE']).toBe(3);
 
     const [calledUrl] = (globalThis.fetch as any).mock.calls[0];
     expect(calledUrl).toBe('http://localhost:4004/api/v1/fiori-catalogue/status');
@@ -446,12 +446,12 @@ describe('Fiorify CAT-02 — Frontend Canonical Catalogue Integration Tests', ()
     );
 
     const status = await catalogueService.getCatalogueStatus();
-    expect(status.totalRecords).toBe(31);
-    expect(status.sourceCoverage?.isSubset).toBe(true);
-    expect(status.sourceCoverage?.coveragePercent).toBe(0.18);
-    expect(status.recordsByAppType?.['Transactional']).toBe(15);
-    expect(status.recordsByAppType?.['SAP GUI']).toBe(15);
-    expect(status.duplicateRecordsCount).toBe(0);
+    expect(status!.totalRecords).toBe(31);
+    expect(status!.sourceCoverage?.isSubset).toBe(true);
+    expect(status!.sourceCoverage?.coveragePercent).toBe(0.18);
+    expect(status!.recordsByAppType?.['Transactional']).toBe(15);
+    expect(status!.recordsByAppType?.['SAP GUI']).toBe(15);
+    expect(status!.duplicateRecordsCount).toBe(0);
   });
 
   // 14. Search with appType filter parameter

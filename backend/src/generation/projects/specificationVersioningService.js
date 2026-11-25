@@ -232,7 +232,10 @@ export class SpecificationVersioningService {
    * Approves or requests changes on a specification version (Server-side RBAC enforced).
    */
   async processApproval(project, { decision, comments = '' }, user) {
-    if (!user || (!user.roles?.includes('CHIEF_ARCHITECT') && !user.roles?.includes('ADMIN') && !user.roles?.includes('LEAD_ARCHITECT'))) {
+    const userRoles = Array.isArray(user?.roles) ? user.roles : (user?.role ? [user.role] : []);
+    const hasArchitectRole = userRoles.some(r => ['CHIEF_ARCHITECT', 'ADMIN', 'LEAD_ARCHITECT'].includes(String(r).toUpperCase())) ||
+      user?.isBuildArchitectApprover === true;
+    if (!user || !hasArchitectRole) {
       const err = new Error('Access denied: Chief Architect or Administrator authorization required to approve specifications.');
       err.code = 'UNAUTHORIZED_APPROVAL';
       throw err;
@@ -264,8 +267,8 @@ export class SpecificationVersioningService {
           verNum,
           decision,
           comments,
-          user.name || user.username,
-          user.roles[0] || 'CHIEF_ARCHITECT',
+          user.name || user.username || 'Chief Architect',
+          (Array.isArray(user.roles) && user.roles.length > 0 ? user.roles[0] : (user.role || 'CHIEF_ARCHITECT')),
           approvedAt,
           signatureHash
         ]

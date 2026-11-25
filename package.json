@@ -5,12 +5,11 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=10.0.0"
+    "node": "22.x",
+    "npm": "10.x"
   },
   "scripts": {
     "start": "node backend/src/server.js",
-    "postinstall": "npm --prefix backend ci --omit=dev || npm --prefix backend install --omit=dev && npm --prefix frontend ci || npm --prefix frontend install && npm --prefix frontend run build",
     "build:frontend": "npm --prefix frontend run build",
     "build": "npm --prefix frontend run build",
     "check:backend": "npm --prefix backend run check",
@@ -22,5 +21,15 @@
     "test": "npm run test:backend && npm run test:frontend"
   },
   "author": "Fiorify Engineering Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@neon/config": "^1.14.2",
+    "@neon/env": "^2.1.5",
+    "@sap-cloud-sdk/connectivity": "^3.26.4",
+    "@sap-cloud-sdk/http-client": "^3.26.4",
+    "@sap-ux/fiori-mcp-server": "1.15.24",
+    "pg": "^8.23.1",
+    "xlsx": "^0.18.5"
+  }
 }

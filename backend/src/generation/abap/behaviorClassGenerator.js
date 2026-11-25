@@ -99,11 +99,31 @@ export function generateBehaviorImplementationClass(project, architecture) {
   // get_instance_authorizations
   code += `  METHOD get_instance_authorizations.\n`;
   code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
-  code += `    " Evaluates requested instance authorizations against PFCG authorization profiles\n`;
+  code += `    " SEC-RAP-01: Explicit Deny-by-Default Instance Authorization Guardrail\n`;
+  code += `    " Evaluates requested instance authorizations against PFCG authorization objects\n`;
   code += `    LOOP AT keys ASSIGNING FIELD-SYMBOL(<ls_key>).\n`;
+  code += `      " Deny-by-default initialization:\n`;
+  code += `      DATA(lv_update_allowed) = if_abap_behv=>auth-unauthorized.\n`;
+  code += `      DATA(lv_delete_allowed) = if_abap_behv=>auth-unauthorized.\n\n`;
+  code += `      " Defensive Authorization Check (S_TABU_DIS / Activity 02 = Change)\n`;
+  code += `      AUTHORITY-CHECK OBJECT 'S_TABU_DIS'\n`;
+  code += `        ID 'DICBERCLS' DUMMY\n`;
+  code += `        ID 'ACTVT' FIELD '02'.\n`;
+  code += `      IF sy-subrc = 0.\n`;
+  code += `        lv_update_allowed = if_abap_behv=>auth-allowed.\n`;
+  code += `      ENDIF.\n\n`;
+  code += `      " Defensive Authorization Check (S_TABU_DIS / Activity 06 = Delete)\n`;
+  code += `      AUTHORITY-CHECK OBJECT 'S_TABU_DIS'\n`;
+  code += `        ID 'DICBERCLS' DUMMY\n`;
+  code += `        ID 'ACTVT' FIELD '06'.\n`;
+  code += `      IF sy-subrc = 0.\n`;
+  code += `        lv_delete_allowed = if_abap_behv=>auth-allowed.\n`;
+  code += `      ENDIF.\n\n`;
+  code += `      " Scaffolding fallback assigns validated authority or auth-allowed conditionally\n`;
   code += `      APPEND VALUE #( %tky = <ls_key>-%tky\n`;
-  code += `                      %update = if_abap_behv=>auth-allowed\n`;
-  code += `                      %delete = if_abap_behv=>auth-allowed ) TO result.\n`;
+  code += `                      %update = lv_update_allowed " %update = if_abap_behv=>auth-allowed\n`;
+  code += `                      %delete = lv_delete_allowed " %delete = if_abap_behv=>auth-allowed\n`;
+  code += `                    ) TO result.\n`;
   code += `    ENDLOOP.\n`;
   code += `  ENDMETHOD.\n\n`;
 
@@ -221,6 +241,7 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `      ALL FIELDS WITH CORRESPONDING #( keys )\n`;
     code += `      RESULT DATA(lt_entities).\n\n`;
     code += `    " Calculate derived totals and modify entity buffer in local mode\n`;
+    code += `    /* TODO: Modify entity fields via EML */\n`;
     code += `    IF lt_entities IS NOT INITIAL.\n`;
     code += `      " MODIFY ENTITIES OF ${rootInterfaceName.toLowerCase()} IN LOCAL MODE\n`;
     code += `      "   ENTITY ${rootEntity.name.toLowerCase()}\n`;
@@ -336,7 +357,8 @@ export function generateBehaviorImplementationClass(project, architecture) {
     dependencies: [rootInterfaceName],
     limitations,
     requiresDeveloperCompletion: true,
-    developerCompletionMethods
+    developerCompletionMethods,
+    isDeployable: false
   }));
 
   return artifacts;

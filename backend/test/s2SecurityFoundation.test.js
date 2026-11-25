@@ -93,6 +93,7 @@ describe('Fiorify S2 Security Foundation â€” 14 Mandatory Security Controls
     if (server) {
       await new Promise((resolve) => server.close(resolve));
     }
+    await DatabasePool.close();
     try {
       if (fs.existsSync(testStoragePath)) fs.unlinkSync(testStoragePath);
       if (fs.existsSync(testProjectStorageDir)) fs.rmSync(testProjectStorageDir, { recursive: true, force: true });

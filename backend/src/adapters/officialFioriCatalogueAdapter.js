@@ -55,6 +55,14 @@ export const CATALOGUE_AVAILABILITY_STATES = Object.freeze({
   INVALID_SOURCE_RESPONSE: 'INVALID_SOURCE_RESPONSE'
 });
 
+export const CATALOGUE_COMPLETENESS_STATES = Object.freeze({
+  COMPLETE: 'COMPLETE',
+  INCOMPLETE: 'INCOMPLETE',
+  STALE: 'STALE',
+  FAILED_SYNC: 'FAILED_SYNC',
+  UNKNOWN: 'UNKNOWN'
+});
+
 export const OFFICIAL_FIORI_LIBRARY_BASE_URL =
   'https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/services/SingleApp.xsodata/InputFilterParam(InpFilterValue=\'1NA\')/Results';
 
@@ -688,12 +696,14 @@ export class OfficialFioriCatalogueAdapter {
       pageSize: effectiveLimit,
       totalPages,
       candidates: limited,
+      apps: limited,
       availabilityState,
+      catalogueCompleteness: this.getCompletenessMetadata(),
       catalogueCoverage: {
         cacheSize: this.memoryCache.size,
         coverageScope: 'Curated SAP S/4HANA 2023 On-Premise Baseline & Ingested Exports',
         snapshotVersion: 'FAL_2023_FPS02_BASELINE_V1',
-        isCompleteGlobalLibrary: false,
+        isCompleteGlobalLibrary: this.getCompletenessMetadata().isComplete,
         notice: 'Displaying verified and cached SAP Fiori applications. Import complete FAL exports via /api/v1/fiori-catalogue/import.'
       },
       provenance: 'OFFICIAL_CATALOGUE',
@@ -702,20 +712,83 @@ export class OfficialFioriCatalogueAdapter {
   }
 
   /**
+   * Returns all loaded apps from memory cache (DISC-007).
+   */
+  getAllApps() {
+    return Array.from(this.memoryCache.values());
+  }
+
+  /**
+   * Retrieves end-to-end catalogue completeness metadata (DISC-002, DISC-007).
+   */
+  getCompletenessMetadata() {
+    let statusData = null;
+    try {
+      const statusPath = resolveCanonicalCatalogueStatusPath();
+      if (fs.existsSync(statusPath)) {
+        statusData = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
+      }
+    } catch {
+      statusData = null;
+    }
+
+    const totalRecords = this.memoryCache.size;
+    const isExportImported =
+      statusData?.liveSourceStatus === CATALOGUE_AVAILABILITY_STATES.OFFICIAL_EXPORT_IMPORTED ||
+      statusData?.importStatus === 'SUCCESS';
+
+    const lastSyncTime = statusData?.lastSuccessfulImport
+      ? new Date(statusData.lastSuccessfulImport).getTime()
+      : null;
+    const now = Date.now();
+    // Consider catalogue stale if older than 30 days
+    const isStale = lastSyncTime ? (now - lastSyncTime > 30 * 24 * 60 * 60 * 1000) : false;
+
+    const failedPages = statusData?.failedPages || statusData?.failedBatches || [];
+    const hasSyncFailure = statusData?.importStatus === 'FAILED' || failedPages.length > 0;
+
+    let completenessState = CATALOGUE_COMPLETENESS_STATES.UNKNOWN;
+    if (hasSyncFailure) {
+      completenessState = CATALOGUE_COMPLETENESS_STATES.FAILED_SYNC;
+    } else if (isStale && totalRecords > 0) {
+      completenessState = CATALOGUE_COMPLETENESS_STATES.STALE;
+    } else if (statusData?.isCompleteGlobalLibrary === true || (isExportImported && totalRecords >= 250)) {
+      completenessState = CATALOGUE_COMPLETENESS_STATES.COMPLETE;
+    } else if (totalRecords > 0) {
+      completenessState = CATALOGUE_COMPLETENESS_STATES.INCOMPLETE;
+    } else {
+      completenessState = CATALOGUE_COMPLETENESS_STATES.UNKNOWN;
+    }
+
+    return {
+      state: completenessState,
+      completenessState,
+      isComplete: completenessState === CATALOGUE_COMPLETENESS_STATES.COMPLETE,
+      isStale,
+      freshnessStatus: isStale ? 'STALE' : 'FRESH',
+      source: statusData?.provenance || (isExportImported ? 'OFFICIAL_FAL_EXPORT' : 'OFFICIAL_CATALOGUE_CACHED'),
+      catalogueVersion: statusData?.sourceVersion || 'S4HANA_2023_FPS02_OFFICIAL',
+      totalRecords,
+      totalExpectedRecords: statusData?.totalRecords || 16000,
+      expectedTotalAppsCount: statusData?.totalRecords || 16000,
+      recordsRetrieved: statusData?.lastImportSummary?.totalRecords || totalRecords,
+      retrievedAppsCount: totalRecords,
+      recordsImported: statusData?.lastImportSummary?.importedCount || totalRecords,
+      paginationCompleted: !hasSyncFailure,
+      synchronizationTimestamp: statusData?.lastImportSummary?.timestamp || statusData?.lastSuccessfulImport || null,
+      lastSuccessfulSynchronization: statusData?.lastSuccessfulImport || null,
+      failedPages
+    };
+  }
+
+  /**
    * Evaluates current catalogue availability state.
    */
   getAvailabilityState() {
     if (this.memoryCache.size > 0) {
-      try {
-        const statusPath = resolveCanonicalCatalogueStatusPath();
-        if (fs.existsSync(statusPath)) {
-          const status = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
-          if (status.liveSourceStatus === CATALOGUE_AVAILABILITY_STATES.OFFICIAL_EXPORT_IMPORTED || status.importStatus === 'SUCCESS') {
-            return CATALOGUE_AVAILABILITY_STATES.OFFICIAL_EXPORT_IMPORTED;
-          }
-        }
-      } catch {
-        // Fallback to cache available
+      const completeness = this.getCompletenessMetadata();
+      if (completeness.completenessState === CATALOGUE_COMPLETENESS_STATES.COMPLETE) {
+        return CATALOGUE_AVAILABILITY_STATES.OFFICIAL_EXPORT_IMPORTED;
       }
       return CATALOGUE_AVAILABILITY_STATES.CACHE_AVAILABLE;
     }

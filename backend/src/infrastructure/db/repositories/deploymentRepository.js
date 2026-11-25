@@ -30,8 +30,16 @@ export class DeploymentRepository {
     return null;
   }
 
-  async createDeploymentPlan(plan, tenantId = 'DEFAULT-TENANT-S21') {
+  async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
     const client = await this._getClient();
+    if (!client) return null;
+    await client.query('BEGIN;');
+    await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
+    return client;
+  }
+
+  async createDeploymentPlan(plan, tenantId = 'DEFAULT-TENANT-S21') {
+    const client = await this._getTenantClient(tenantId);
     if (!client) {
       this.inMemoryPlans.set(plan.id, { ...plan, tenantId });
       return plan;
@@ -73,14 +81,18 @@ export class DeploymentRepository {
         plan.createdAt ? new Date(plan.createdAt) : new Date(),
         new Date()
       ]);
+      await client.query('COMMIT;');
       return plan;
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
     } finally {
       if (client && typeof client.release === 'function') client.release();
     }
   }
 
   async getDeploymentPlan(planId, tenantId = 'DEFAULT-TENANT-S21') {
-    const client = await this._getClient();
+    const client = await this._getTenantClient(tenantId);
     if (!client) {
       const p = this.inMemoryPlans.get(planId);
       return (p && (!tenantId || p.tenantId === tenantId)) ? p : null;
@@ -90,6 +102,7 @@ export class DeploymentRepository {
       const res = await client.query(`
         SELECT * FROM deployment_plans WHERE id = $1 AND tenant_id = $2;
       `, [planId, tenantId]);
+      await client.query('COMMIT;');
       if (res.rowCount === 0) return null;
       const row = res.rows[0];
       return {
@@ -111,6 +124,9 @@ export class DeploymentRepository {
         createdAt: row.created_at,
         updatedAt: row.updated_at
       };
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
     } finally {
       if (client && typeof client.release === 'function') client.release();
     }

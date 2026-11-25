@@ -87,7 +87,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 
           <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--studio-text-muted)' }}>
             {project
-              ? (project.description || '{project?.description || uiConfig.brand.tagline}')
+              ? (project.description || 'Clean Core custom SAP Fiori application synthesized for SAP S/4HANA.')
               : 'Architect, generate, validate and export Clean Core custom SAP Fiori applications for genuine functional gaps.'}
           </p>
         </div>
@@ -108,21 +108,17 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               border: '1px solid var(--studio-border)'
             }}
           >
-            <div>
-              <span style={{ color: 'var(--studio-text-subtle)', fontWeight: 600 }}>Project ID:</span>{' '}
-              <code style={{ fontWeight: 700, color: 'var(--studio-text-main)' }}>{project.projectId}</code>
-            </div>
-
             {project.sourceTransactionCode && (
-              <div>
-                <span style={{ color: '#94A3B8', fontWeight: 600 }}>T-Code:</span>{' '}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ color: 'var(--studio-text-subtle)', fontWeight: 600 }}>Source T-Code:</span>
                 <span
                   style={{
                     fontWeight: 700,
-                    padding: '1px 6px',
-                    borderRadius: '3px',
-                    backgroundColor: '#FEF3C7',
-                    color: '#92400E'
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    backgroundColor: '#EFF6FF',
+                    color: '#1D4ED8',
+                    border: '1px solid #BFDBFE'
                   }}
                 >
                   {project.sourceTransactionCode}
@@ -130,16 +126,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               </div>
             )}
 
-            {project.sourceAssessmentId && (
-              <div>
-                <span style={{ color: '#94A3B8', fontWeight: 600 }}>Assessment:</span>{' '}
-                <code style={{ color: '#0284C7' }}>{project.sourceAssessmentId}</code>
-              </div>
-            )}
-
             <div>
-              <span style={{ color: '#94A3B8', fontWeight: 600 }}>Target:</span>{' '}
-              <span style={{ fontWeight: 600 }}>
+              <span style={{ color: 'var(--studio-text-subtle)', fontWeight: 600 }}>Target Release:</span>{' '}
+              <span style={{ fontWeight: 600, color: 'var(--studio-text-main)' }}>
                 {project.targetRelease || 'SAP S/4HANA 2023'}
               </span>
               {project.sourceSystemId && (
@@ -149,6 +138,13 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                   {project.sourceClient ? ` / ${project.sourceClient}` : ''})
                 </span>
               )}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ color: 'var(--studio-text-subtle)', fontWeight: 600 }}>Project:</span>
+              <span style={{ fontSize: '11px', color: '#64748B' }}>
+                {project.projectId}
+              </span>
             </div>
           </div>
         )}

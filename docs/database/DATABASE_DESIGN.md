@@ -1,19 +1,23 @@
 # Fiorify — Database Design & Schema Specification
 
-## 1. Overview & Persistence Architecture
+## 1. Overview & Dual-Engine Persistence Architecture
 
-Fiorify uses PostgreSQL 15+ as its authoritative persistence engine.
-All migrations are strictly managed through sequential forward SQL scripts (`*.sql`) paired with complete rollback scripts (`*.down.sql`).
+Fiorify adopts a strict dual-engine database architecture governed by environment:
+- **Local Development & CI:** PostgreSQL 15+ (managed locally or via `embedded-postgres` runner).
+- **Production Target (SAP BTP Cloud Foundry):** SAP HANA Cloud (HDI Container) via `@sap/hana-client` driver.
+- **Fail-Closed Durability:** In production, durable database persistence is strictly mandatory. Silent fallback to local JSON files or in-memory state is forbidden (`PRODUCTION_PERSISTENCE_REQUIRED`).
 
-Persistence is configured via `backend/src/infrastructure/db/pool.js` with:
+All migrations are engine-aware, maintained as paired forward SQL (`*.sql`) and rollback scripts (`*.down.sql`) under `backend/src/infrastructure/db/migrations/postgres/` and `backend/src/infrastructure/db/migrations/hana/`.
+
+Connection pooling is governed via `backend/src/infrastructure/db/pool.js` and engine adapters (`PostgresAdapter` / `HanaAdapter`) with:
 - Connection pool size: `max: 20`
-- Connection idle timeout: `30,000 ms`
-- Connection lease timeout: `5,000 ms`
-- Mandatory multi-tenant scoping (`tenant_id` column present and indexed on every tenant-scoped table).
+- Connection idle timeout: `30,000 ms` (PostgreSQL) / `60,000 ms` (HANA)
+- Connection lease timeout: `5,000 ms` (PostgreSQL) / `10,000 ms` (HANA)
+- Mandatory multi-tenant scoping (`tenant_id` column present and indexed on every tenant-scoped table; PostgreSQL RLS policies in `008_postgresql_rls_policies.sql`).
 
 ---
 
-## 2. Migration Registry (001 through 007)
+## 2. Migration Registry (001 through 008)
 
 ```mermaid
 flowchart LR
@@ -23,19 +27,21 @@ flowchart LR
     M004 --> M005["005: Modernization Intelligence\n(scoring, fitgap)"]
     M005 --> M006["006: Specification Lifecycle\n(versions, approvals)"]
     M006 --> M007["007: Deployment Orchestration\n(plans, executions)"]
+    M007 --> M008["008: PostgreSQL RLS Policies\n(Row Level Security)"]
 ```
 
 ### Migration Inventory
 
-| Migration | Up Script | Down Script | Primary Tables Managed |
-|---|---|---|---|
-| **001** | `001_initial_schema.sql` | `001_initial_schema.down.sql` | `assessments`, `fiori_app_catalog`, `discovered_transactions`, `systems`, `assessment_history` |
-| **002** | `002_security_audit.sql` | `002_security_audit.down.sql` | `security_audit_events` |
-| **003** | `003_handoffs_and_approvals.sql` | `003_handoffs_and_approvals.down.sql` | `modernization_handoffs`, `modernization_approvals` |
-| **004** | `004_sap_system_registry.sql` | `004_sap_system_registry.down.sql` | `sap_system_registry`, `sap_diagnostic_logs` |
-| **005** | `005_modernization_intelligence.sql` | `005_modernization_intelligence.down.sql` | `fitgap_scoring_criteria`, `candidate_similarity_cache` |
-| **006** | `006_specification_lifecycle.sql` | `006_specification_lifecycle.down.sql` | `project_specification_versions`, `project_specification_approvals`, `generation_projects` |
-| **007** | `007_deployment_orchestration.sql` | `007_deployment_orchestration.down.sql` | `deployment_plans`, `deployment_approvals`, `deployment_executions` |
+| Migration | Up Script | Down Script | Dialect Support | Primary Tables Managed |
+|---|---|---|---|---|
+| **001** | `001_initial_schema.sql` | `001_initial_schema.down.sql` | PostgreSQL & SAP HANA Cloud | `assessments`, `fiori_app_catalog`, `discovered_transactions`, `systems`, `assessment_history` |
+| **002** | `002_security_audit.sql` | `002_security_audit.down.sql` | PostgreSQL & SAP HANA Cloud | `security_audit_events` |
+| **003** | `003_handoffs_and_approvals.sql` | `003_handoffs_and_approvals.down.sql` | PostgreSQL & SAP HANA Cloud | `modernization_handoffs`, `modernization_approvals` |
+| **004** | `004_sap_system_registry.sql` | `004_sap_system_registry.down.sql` | PostgreSQL & SAP HANA Cloud | `sap_system_profiles`, `sap_system_diagnostic_history` |
+| **005** | `005_modernization_intelligence.sql` | `005_modernization_intelligence.down.sql` | PostgreSQL & SAP HANA Cloud | `fiori_catalog_apps` ext, `transaction_discovery_executions`, `transaction_technical_objects` |
+| **006** | `006_specification_lifecycle.sql` | `006_specification_lifecycle.down.sql` | PostgreSQL & SAP HANA Cloud | `project_specification_versions`, `project_specification_approvals`, `generation_projects` ext |
+| **007** | `007_deployment_orchestration.sql` | `007_deployment_orchestration.down.sql` | PostgreSQL & SAP HANA Cloud | `deployment_plans`, `deployment_approvals`, `deployment_executions` |
+| **008** | `008_postgresql_rls_policies.sql` | `008_postgresql_rls_policies.down.sql` | PostgreSQL | Row-Level Security on all tenant-scoped tables (`assessments`, `security_audit_events`, etc.) |
 
 ---
 

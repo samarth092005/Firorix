@@ -4,6 +4,8 @@ import { mockSapAdapter } from '../adapters/mockSapAdapter.js';
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { USER_ROLES } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
+import { defaultDatabaseAdapter } from '../infrastructure/db/adapters/databaseAdapterFactory.js';
+import { DialectMigrationRunner } from '../infrastructure/db/migrator/dialectMigrationRunner.js';
 
 // IP Rate Limiter for Login Endpoint
 const loginRateLimitMap = new Map();
@@ -11,6 +13,9 @@ const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
 const MAX_LOGIN_ATTEMPTS = 15;
 
 function checkLoginRateLimit(ip) {
+  if (process.env.NODE_ENV === 'test') {
+    return { allowed: true };
+  }
   const now = Date.now();
   const record = loginRateLimitMap.get(ip);
   if (!record || now > record.resetTime) {
@@ -47,7 +52,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
   } = context;
 
   // 1. Health Check
-  if (req.method === 'GET' && url.pathname === '/api/v1/health') {
+  if (req.method === 'GET' && (url.pathname === '/api/v1/health' || url.pathname === '/health')) {
     const btpConfig = adapter.validateConfiguration();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(
@@ -74,7 +79,68 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     return true;
   }
 
-  // 1b. Demo Environment Reset (Cleans generation projects, handoffs, test assessments, and artifacts)
+  // 1a. Liveness Probe (DB-007)
+  if (req.method === 'GET' && (url.pathname === '/api/v1/health/liveness' || url.pathname === '/health/liveness')) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'UP', timestamp: new Date().toISOString() }, null, 2));
+    return true;
+  }
+
+  // 1b. Readiness Probe (DB-007)
+  if (req.method === 'GET' && (url.pathname === '/api/v1/health/readiness' || url.pathname === '/health/readiness')) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const dbAdapter = context.databaseAdapter || defaultDatabaseAdapter;
+    const dbCheck = await dbAdapter.healthCheck().catch((err) => ({ healthy: false, error: err.message, dialect: dbAdapter.getDialect() }));
+
+    let migrationsOk = true;
+    let migrationStatus = null;
+    try {
+      const runner = new DialectMigrationRunner({ adapter: dbAdapter });
+      migrationStatus = await runner.getStatus();
+      migrationsOk = migrationStatus.isFullyMigrated;
+    } catch (migErr) {
+      migrationsOk = false;
+      migrationStatus = { error: migErr.message };
+    }
+
+    const btpConfig = adapter ? adapter.validateConfiguration() : { isValid: true };
+    const isReady = dbCheck.healthy && (isProduction ? migrationsOk : true);
+    const statusCode = isReady ? 200 : 503;
+
+    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.end(
+      JSON.stringify(
+        {
+          status: isReady ? 'READY' : 'NOT_READY',
+          statusCode: isReady ? 'OK' : 'SERVICE_UNAVAILABLE',
+          timestamp: new Date().toISOString(),
+          environment: isProduction ? 'production' : 'development',
+          components: {
+            database: {
+              status: dbCheck.healthy ? 'UP' : 'DOWN',
+              dialect: dbCheck.dialect || dbAdapter.getDialect(),
+              latencyMs: dbCheck.latencyMs,
+              version: dbCheck.version,
+              error: dbCheck.error
+            },
+            migrations: {
+              status: migrationsOk ? 'UP_TO_DATE' : 'PENDING_MIGRATIONS',
+              appliedCount: migrationStatus?.totalApplied,
+              availableCount: migrationStatus?.totalAvailable
+            },
+            btpConnectivity: {
+              status: btpConfig.isValid ? 'CONFIGURED' : 'UNCONFIGURED'
+            }
+          }
+        },
+        null,
+        2
+      )
+    );
+    return true;
+  }
+
+  // 1c. Demo Environment Reset (Cleans generation projects, handoffs, test assessments, and artifacts)
   if (req.method === 'POST' && url.pathname === '/api/v1/system/reset-demo') {
     if (process.env.NODE_ENV === 'production') {
       res.writeHead(403, { 'Content-Type': 'application/json' });
@@ -190,9 +256,30 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
 
     const authResult = await authService.login(payload.email || payload.username, payload.password);
     if (!authResult.success) {
+      if (securityAuditLogger) {
+        securityAuditLogger.logEvent({
+          actor: payload.email || payload.username || 'unknown',
+          tenantId: 'AUTHENTICATION_GATE',
+          action: SECURITY_ACTIONS.LOGIN_FAILURE,
+          resource: '/api/v1/auth/login',
+          outcome: 'FAILED',
+          details: { error: authResult.error, reason: authResult.errorMessage, clientIp }
+        }).catch(() => {});
+      }
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, statusCode: 'UNAUTHORIZED', error: authResult.error, errorMessage: authResult.errorMessage }));
       return true;
+    }
+
+    if (securityAuditLogger) {
+      securityAuditLogger.logEvent({
+        actor: authResult.user?.id || 'authenticated_user',
+        tenantId: authResult.user?.tenantId || 'DEFAULT-TENANT-S21',
+        action: SECURITY_ACTIONS.LOGIN_SUCCESS,
+        resource: '/api/v1/auth/login',
+        outcome: 'SUCCESS',
+        details: { role: authResult.user?.role, email: authResult.user?.email, clientIp }
+      }).catch(() => {});
     }
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -205,14 +292,108 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     if (authHeader) {
       authService.logout(authHeader);
     }
+    if (securityAuditLogger) {
+      securityAuditLogger.logEvent({
+        actor: currentUser?.id || 'session_user',
+        tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
+        action: 'LOGOUT',
+        resource: '/api/v1/auth/logout',
+        outcome: 'SUCCESS',
+        details: { tokenRevoked: Boolean(authHeader) }
+      }).catch(() => {});
+    }
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true, message: 'Session successfully revoked.' }));
+    return true;
+  }
+
+  if (req.method === 'GET' && url.pathname === '/api/v1/auth/provider-info') {
+    const providerFactory = context.authProviderFactory;
+    const info = providerFactory ? providerFactory.getStatus() : { activeProvider: 'LOCAL_AUTH' };
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, ...info }, null, 2));
     return true;
   }
 
   if (req.method === 'GET' && url.pathname === '/api/v1/auth/me') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: true, authenticated: Boolean(currentUser), user: currentUser }));
+    return true;
+  }
+
+  // 2b. Admin User Management Routes (UI-003)
+  if (req.method === 'GET' && url.pathname === '/api/v1/admin/users') {
+    if (!requireRole(['ADMIN'])) return true;
+    const users = authService ? authService.listUsers() : [];
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, count: users.length, users }, null, 2));
+    return true;
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/v1/admin/users') {
+    if (!requireRole(['ADMIN'])) return true;
+    let body = '';
+    req.on('data', (c) => (body += c));
+    await new Promise((resolve) => req.on('end', resolve));
+    try {
+      const payload = JSON.parse(body || '{}');
+      if (!payload.email || !payload.name) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Name and email are required.' }));
+        return true;
+      }
+      const defaultPassword = payload.password || 'TemporaryPass@2026';
+      const created = await authService.registerUser(payload, defaultPassword);
+      if (securityAuditLogger) {
+        securityAuditLogger.logEvent({
+          actor: currentUser?.id || 'admin',
+          tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
+          action: 'USER_ADMIN',
+          resource: `/api/v1/admin/users/${created.id}`,
+          outcome: 'SUCCESS',
+          details: { createdUserId: created.id, email: created.email, role: created.role }
+        }).catch(() => {});
+      }
+      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, user: created }, null, 2));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'REGISTRATION_FAILED', errorMessage: err.message }));
+    }
+    return true;
+  }
+
+  if (req.method === 'PUT' && url.pathname.startsWith('/api/v1/admin/users/') && url.pathname.endsWith('/role')) {
+    if (!requireRole(['ADMIN'])) return true;
+    const parts = url.pathname.split('/');
+    const targetUserId = parts[parts.length - 2];
+    let body = '';
+    req.on('data', (c) => (body += c));
+    await new Promise((resolve) => req.on('end', resolve));
+    try {
+      const payload = JSON.parse(body || '{}');
+      if (!payload.role) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Target role is required.' }));
+        return true;
+      }
+      const updated = authService.updateUserRole(targetUserId, payload.role);
+      if (securityAuditLogger) {
+        securityAuditLogger.logEvent({
+          actor: currentUser?.id || 'admin',
+          tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
+          action: 'USER_ADMIN',
+          resource: `/api/v1/admin/users/${targetUserId}/role`,
+          outcome: 'SUCCESS',
+          details: { updatedUserId: targetUserId, newRole: updated.role }
+        }).catch(() => {});
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, user: updated }, null, 2));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'UPDATE_FAILED', errorMessage: err.message }));
+    }
     return true;
   }
 

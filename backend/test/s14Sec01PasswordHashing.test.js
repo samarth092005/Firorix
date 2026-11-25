@@ -232,8 +232,9 @@ test('Sprint 14.1.1 SEC-01 — Asynchronous Adaptive Scrypt & Concurrent Legacy 
       assert.ok(u.passwordHash.startsWith('scrypt:v1:'), `User ${u.id} must have modern scrypt:v1 hash`);
     }
 
-    // Default admin logs in cleanly
-    const adminLogin = await auth.login('admin@fiorify.corp', 'AdminPass@2026');
+    // Default admin logs in cleanly with environment-configured or test fixture password
+    const adminPass = process.env.FIORIFY_DEV_ADMIN_PASSWORD || 'fiorify-dev-admin-fixture';
+    const adminLogin = await auth.login('admin@fiorify.corp', adminPass);
     assert.strictEqual(adminLogin.success, true);
   });
 
@@ -250,18 +251,25 @@ test('Sprint 14.1.1 SEC-01 — Asynchronous Adaptive Scrypt & Concurrent Legacy 
     const startMemory = process.memoryUsage().heapUsed;
     const startTime = performance.now();
 
+    const adminPass = process.env.FIORIFY_DEV_ADMIN_PASSWORD || 'fiorify-dev-admin-fixture';
+    const consultantPass = process.env.FIORIFY_DEV_CONSULTANT_PASSWORD || 'fiorify-dev-consultant-fixture';
+    const approverPass = process.env.FIORIFY_DEV_APPROVER_PASSWORD || 'fiorify-dev-approver-fixture';
+    const architectPass = process.env.FIORIFY_DEV_ARCHITECT_PASSWORD || 'fiorify-dev-architect-fixture';
+    const requesterPass = process.env.FIORIFY_DEV_REQUESTER_PASSWORD || 'fiorify-dev-requester-fixture';
+    const viewerPass = process.env.FIORIFY_DEV_VIEWER_PASSWORD || 'fiorify-dev-viewer-fixture';
+
     // Benchmark 10 parallel logins simulating concurrent user burst
     const burst = await Promise.all([
-      auth.login('admin@fiorify.corp', 'AdminPass@2026'),
-      auth.login('consultant@fiorify.corp', 'ConsultantPass@2026'),
-      auth.login('approver@fiorify.corp', 'ApproverPass@2026'),
-      auth.login('architect@fiorify.corp', 'ArchitectPass@2026'),
-      auth.login('requester@fiorify.corp', 'RequesterPass@2026'),
-      auth.login('viewer@fiorify.corp', 'ViewerPass@2026'),
-      auth.login('admin@fiorify.corp', 'AdminPass@2026'),
-      auth.login('consultant@fiorify.corp', 'ConsultantPass@2026'),
-      auth.login('approver@fiorify.corp', 'ApproverPass@2026'),
-      auth.login('architect@fiorify.corp', 'ArchitectPass@2026')
+      auth.login('admin@fiorify.corp', adminPass),
+      auth.login('consultant@fiorify.corp', consultantPass),
+      auth.login('approver@fiorify.corp', approverPass),
+      auth.login('architect@fiorify.corp', architectPass),
+      auth.login('requester@fiorify.corp', requesterPass),
+      auth.login('viewer@fiorify.corp', viewerPass),
+      auth.login('admin@fiorify.corp', adminPass),
+      auth.login('consultant@fiorify.corp', consultantPass),
+      auth.login('approver@fiorify.corp', approverPass),
+      auth.login('architect@fiorify.corp', architectPass)
     ]);
 
     const elapsed = performance.now() - startTime;

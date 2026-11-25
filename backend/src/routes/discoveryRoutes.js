@@ -1,6 +1,7 @@
 import { mockSapAdapter } from '../adapters/mockSapAdapter.js';
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { defaultTransactionDiscoveryService } from '../services/transactionDiscoveryService.js';
+import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from '../services/standardTransactionKnowledge.js';
 
 const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
 
@@ -395,7 +396,7 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
       const candidates = matchResult.rankedCandidates || [];
       const rawClassification = matchResult.matchClassification || matchResult.statusCode;
-      const status = (rawClassification === 'STRONG_CANDIDATE' || rawClassification === 'VERIFIED_MATCH' || rawClassification === 'MATCH_FOUND')
+      const status = (rawClassification === 'STRONG_CANDIDATE' || rawClassification === 'VERIFIED_MATCH' || rawClassification === 'MATCH_FOUND' || rawClassification === 'VERIFIED_SUCCESSOR')
         ? 'MATCH_FOUND'
         : (candidates.length === 0 ? 'NO_STANDARD_APP_EXISTS' : (rawClassification || 'NO_VERIFIED_MATCH'));
       const overallStatus = status;
@@ -407,10 +408,12 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
           : (effectiveDiscovery.transactionIdentity?.sapExistenceVerification?.status !== 'NOT_FOUND' &&
              effectiveDiscovery.transactionIdentity?.sapExistenceVerification?.status !== 'UNINDEXED'),
         classification: effectiveDiscovery.classification || 'STANDARD',
-        description: effectiveDiscovery.description || effectiveDiscovery.transactionDescription,
-        program: effectiveDiscovery.program || effectiveDiscovery.programName,
+        description: (effectiveDiscovery.description && effectiveDiscovery.description !== 'SAP Transaction' && !effectiveDiscovery.description.startsWith('Assessment for '))
+          ? effectiveDiscovery.description
+          : (STANDARD_TRANSACTION_CATALOG[effectiveDiscovery.tcode]?.description || synthesizeTransactionTitle(effectiveDiscovery.tcode)),
+        program: effectiveDiscovery.program || effectiveDiscovery.programName || STANDARD_TRANSACTION_CATALOG[effectiveDiscovery.tcode]?.program || 'UNKNOWN',
         screenNumber: effectiveDiscovery.screenNumber || '0100',
-        packageName: effectiveDiscovery.package || effectiveDiscovery.packageName,
+        packageName: effectiveDiscovery.package || effectiveDiscovery.packageName || STANDARD_TRANSACTION_CATALOG[effectiveDiscovery.tcode]?.packageName || 'FBAS',
         originalSystem: effectiveDiscovery.classification === 'CUSTOM' ? (systemId.split('-')[0] || 'S21') : 'SAP',
         softwareComponent: effectiveDiscovery.softwareComponent || 'S4CORE 108',
         metadataStatus: effectiveDiscovery.exists === false ? 'NOT_AVAILABLE' : (effectiveDiscovery.missingEvidence?.length > 0 ? 'INCOMPLETE' : 'COMPLETE'),

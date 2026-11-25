@@ -208,34 +208,40 @@ describe('Fiorify Sprint 6 — Gateway Metadata & Transaction Discovery Unit Tes
   });
 
   it('SapTransactionDiscoveryAdapter returns NOT_FOUND for nonexistent transaction code', async () => {
-    const mockGatewayAdapter = {
-      getCatalogServices: async () => ({
-        success: true,
-        totalCount: 1318,
-        services: []
-      })
-    };
+    const origEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'test';
+    try {
+      const mockGatewayAdapter = {
+        getCatalogServices: async () => ({
+          success: true,
+          totalCount: 1318,
+          services: []
+        })
+      };
 
-    const mockBtpAdapter = {
-      executeRequest: async () => ({
-        success: false,
-        httpStatus: 403,
-        statusCode: 'ACCESS_DENIED'
-      })
-    };
+      const mockBtpAdapter = {
+        executeRequest: async () => ({
+          success: false,
+          httpStatus: 403,
+          statusCode: 'ACCESS_DENIED'
+        })
+      };
 
-    const adapter = new SapTransactionDiscoveryAdapter({
-      btpAdapter: mockBtpAdapter,
-      gatewayAdapter: mockGatewayAdapter
-    });
+      const adapter = new SapTransactionDiscoveryAdapter({
+        btpAdapter: mockBtpAdapter,
+        gatewayAdapter: mockGatewayAdapter
+      });
 
-    const result = await adapter.discoverTransaction('ZNONEXISTENT999');
+      const result = await adapter.discoverTransaction('ZNONEXISTENT999');
 
-    assert.strictEqual(result.success, false);
-    assert.strictEqual(result.statusCode, 'NOT_FOUND');
-    assert.strictEqual(result.verificationStatus, 'NOT_FOUND');
-    assert.strictEqual(result.httpStatus, 404);
-    assert.ok(result.errorMessage.includes('no verified record'));
+      assert.strictEqual(result.success, false);
+      assert.strictEqual(result.statusCode, 'NOT_FOUND');
+      assert.strictEqual(result.verificationStatus, 'NOT_FOUND');
+      assert.strictEqual(result.httpStatus, 404);
+      assert.ok(result.errorMessage.includes('no verified record'));
+    } finally {
+      process.env.NODE_ENV = origEnv;
+    }
   });
 
   it('SapTransactionDiscoveryAdapter returns LIVE_CONNECTION_FAILED on network failure without misdiagnosing NOT_FOUND', async () => {

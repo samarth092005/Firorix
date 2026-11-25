@@ -1,4 +1,4 @@
-name: FioriX CI Quality Baseline
+name: Fiorify CI Quality Baseline
 
 on:
   push:
@@ -158,6 +158,6 @@ jobs:
       - name: Complete CI Quality Gate
         run: |
           echo "========================================================"
-          echo "FioriX Milestone 1: CI Quality & Baseline Checks PASSED"
-          echo "Repository is validated and clean for Milestone 2."
+          echo "Fiorify CI Quality & Baseline Checks PASSED"
+          echo "Repository is validated and clean for Milestone 2.1."
           echo "========================================================"

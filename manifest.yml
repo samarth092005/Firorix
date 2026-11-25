@@ -8,13 +8,15 @@ applications:
     command: node backend/src/server.js
     env:
       NODE_ENV: production
-      Fiorify_PERSISTENCE: postgres
-      Fiorify_ENFORCE_AUTH: "true"
-      SAP_DESTINATION_NAME: S21
+      FIORIFY_PERSISTENCE: hana
+      FIORIFY_ENFORCE_AUTH: "true"
+      SAP_DESTINATION_NAME: S21_FIORI
       SAP_CLIENT: "200"
       SAP_TIMEOUT_MS: "15000"
+      MCP_ENABLED: "true"
+      MCP_AUTO_CONNECT: "true"
     services:
       - Fiorify-destination
       - Fiorify-connectivity
       - Fiorify-xsuaa
-      - Fiorify-postgres
+      - Fiorify-hana

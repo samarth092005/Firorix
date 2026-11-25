@@ -77,23 +77,66 @@ export class DeploymentOrchestrationService {
 
     const isSystemReady = preflight.overallReadiness === 'READY' || preflight.overallReadiness === 'READY_WITH_LIMITATIONS';
     const isCompatReady = compatibility.rating === 'COMPATIBLE' || compatibility.rating === 'COMPATIBLE_WITH_LIMITATIONS';
-    const isProjectReady = project && (project.lifecycleStatus === 'REVIEW_COMPLETED' || project.lifecycleStatus === 'EXPORTED' || project.lifecycleStatus === 'GENERATED' || project.lifecycleStatus === 'VALIDATION_COMPLETED');
+
+    // Lifecycle validation (GEN-002)
+    const validLifecycleStates = ['REVIEW_COMPLETED', 'EXPORTED', 'GENERATED', 'VALIDATION_COMPLETED', 'APPROVED_FOR_GENERATION', 'APPROVED'];
+    const isLifecycleReady = Boolean(project && validLifecycleStates.includes(project.lifecycleStatus));
+
+    // Governance & Architectural approval validation (GEN-002)
+    const isBuild = project?.modernizationOutcome === 'BUILD';
+    const hasGovernanceApproval = !isBuild || Boolean(
+      project?.approvedBy ||
+      project?.leadArchitectApproval ||
+      project?.approvalSignature ||
+      project?.buildApproval ||
+      project?.assessmentContext?.leadArchitectApproval ||
+      project?.assessmentContext?.approvalSignature ||
+      project?.assessmentContext?.approvalProvenance
+    );
+
+    // Artifacts validation: must exist, not empty, and must not have non-deployable scaffolds (GEN-002, GEN-005)
+    const rawArtifacts = project?.artifactRegistry?.artifacts || {};
+    const artifacts = Array.isArray(rawArtifacts) ? rawArtifacts : Object.values(rawArtifacts);
+    const hasArtifacts = artifacts.length > 0;
+    const hasValidArtifactContent = hasArtifacts && artifacts.every((a) => a.content && a.content.length > 0);
+    const hasNonDeployableScaffold = artifacts.some((a) => a.isDeployable === false);
+
+    // Critical dependency validation
+    const targetRel = project?.targetRelease || project?.targetSystemRelease || 'SAP S/4HANA 2023 On-Premise';
+    const isDepsReady = Boolean(targetRel);
 
     const blockers = [];
     if (!isSystemReady) blockers.push(`Target SAP System is not ready (${preflight.overallReadiness}).`);
     if (!isCompatReady) blockers.push(`Artifact compatibility requires remediation (${compatibility.rating}).`);
-    if (!isProjectReady) blockers.push('Project must complete generation and validation stages.');
+    if (!isLifecycleReady) blockers.push(`Project lifecycle status (${project?.lifecycleStatus || 'NONE'}) is not ready for deployment.`);
+    if (!hasGovernanceApproval) blockers.push('BUILD projects require verified server-side Lead Architect approval.');
+    if (!hasArtifacts) blockers.push('Project has no generated artifacts in the artifact registry.');
+    if (hasArtifacts && !hasValidArtifactContent) blockers.push('One or more artifacts contain empty content.');
+    if (hasNonDeployableScaffold) blockers.push('Artifacts contain incomplete developer scaffolds (isDeployable: false) requiring Eclipse ADT implementation.');
+
+    const isDeploymentReady = isSystemReady && isCompatReady && isLifecycleReady && hasGovernanceApproval && hasArtifacts && hasValidArtifactContent && !hasNonDeployableScaffold && isDepsReady;
 
     return {
       projectId: project?.projectId,
-      readyForDeploymentPlanning: isSystemReady && isCompatReady,
-      status: (isSystemReady && isCompatReady) ? 'READY' : 'BLOCKED',
+      isDeploymentReady,
+      readyForDeploymentPlanning: isDeploymentReady,
+      status: isDeploymentReady ? 'READY' : 'BLOCKED',
       blockers,
+      checks: {
+        systemReadiness: isSystemReady,
+        compatibilityReadiness: isCompatReady,
+        lifecycleReadiness: isLifecycleReady,
+        governanceApproval: hasGovernanceApproval,
+        artifactsPresent: hasArtifacts,
+        artifactsContentValid: hasValidArtifactContent,
+        noIncompleteScaffolds: !hasNonDeployableScaffold,
+        dependenciesReady: isDepsReady
+      },
       preflightSummary: {
         targetSystem: preflight.targetSystem,
         overallReadiness: preflight.overallReadiness,
-        checksPassed: preflight.summary.passed,
-        totalChecks: preflight.summary.totalChecks
+        checksPassed: preflight.summary?.passed || 0,
+        totalChecks: preflight.summary?.totalChecks || 0
       },
       compatibilitySummary: {
         rating: compatibility.rating,
@@ -112,10 +155,58 @@ export class DeploymentOrchestrationService {
     const tenantId = userContext.tenantId || 'DEFAULT-TENANT-S21';
     const readiness = await this.getDeploymentReadiness(project, tenantId);
 
-    if (!readiness.readyForDeploymentPlanning && !options.forcePlan) {
-      const err = new Error(`Deployment plan cannot be generated: ${readiness.blockers.join(' ')}`);
-      err.code = 'DEPLOYMENT_READINESS_FAILED';
-      throw err;
+    // Administrative override check (GEN-003)
+    let isOverrideApplied = false;
+    let overrideJustification = null;
+
+    if (!readiness.readyForDeploymentPlanning) {
+      const override = options.override || (options.forcePlan && typeof options.forcePlan === 'object' ? options.forcePlan : null);
+      const isPrivileged = userContext.role === 'ADMIN' ||
+        userContext.role === 'CHIEF_ARCHITECT' ||
+        userContext.role === 'LEAD_ARCHITECT' ||
+        userContext.isAdmin === true ||
+        (Array.isArray(userContext.roles) && (userContext.roles.includes('ADMIN') || userContext.roles.includes('CHIEF_ARCHITECT')));
+
+      if (override || options.forcePlan) {
+        if (!isPrivileged) {
+          const err = new Error('ADMIN_OVERRIDE_UNAUTHORIZED: Deployment planning override requires ADMIN or CHIEF_ARCHITECT role.');
+          err.code = 'ADMIN_OVERRIDE_UNAUTHORIZED';
+          err.statusCode = 403;
+          throw err;
+        }
+
+        const justification = (override?.justification || options.justification || (typeof options.forcePlan === 'string' ? options.forcePlan : 'Administrative emergency override for authorized deployment planning')).trim();
+        if (justification.length < 10) {
+          const err = new Error('INVALID_JUSTIFICATION: Administrative override requires a justification of at least 10 characters.');
+          err.code = 'INVALID_JUSTIFICATION';
+          err.statusCode = 400;
+          throw err;
+        }
+
+        isOverrideApplied = true;
+        overrideJustification = justification;
+
+        if (this.auditLogger?.logEvent) {
+          await this.auditLogger.logEvent({
+            actor: userContext.name || userContext.id || 'admin',
+            tenantId,
+            action: 'ADMIN_OVERRIDE',
+            resource: `/api/v1/generation/projects/${project?.projectId}/deployments/plan`,
+            outcome: 'GRANTED',
+            details: {
+              projectId: project?.projectId,
+              justification,
+              blockers: readiness.blockers
+            }
+          }).catch(() => {});
+        }
+      } else {
+        const err = new Error(`Deployment plan cannot be generated: ${readiness.blockers.join(' ')}`);
+        err.code = 'DEPLOYMENT_READINESS_FAILED';
+        err.statusCode = 400;
+        err.blockers = readiness.blockers;
+        throw err;
+      }
     }
 
     const artifacts = Object.values(project?.artifactRegistry?.artifacts || {});
@@ -195,6 +286,8 @@ export class DeploymentOrchestrationService {
       planHash,
       artifactManifestHash,
       status: 'PLANNED',
+      isOverrideApplied,
+      overrideJustification,
       planDetails,
       createdBy: userContext.name || userContext.id || 'Lead SAP Architect',
       createdAt: new Date().toISOString()

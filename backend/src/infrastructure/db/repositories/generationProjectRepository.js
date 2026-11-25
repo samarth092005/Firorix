@@ -13,11 +13,16 @@ export class GenerationProjectRepository {
     return await this.pool.connect();
   }
 
-  async createProject(project, tenantId = 'DEFAULT-TENANT-S21') {
+  async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
     const client = await this._getClient();
-    try {
-      await client.query('BEGIN;');
+    await client.query('BEGIN;');
+    await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
+    return client;
+  }
 
+  async createProject(project, tenantId = 'DEFAULT-TENANT-S21') {
+    const client = await this._getTenantClient(tenantId);
+    try {
       // Ensure tenant exists
       await client.query(`
         INSERT INTO tenants (tenant_id, name)
@@ -206,28 +211,33 @@ export class GenerationProjectRepository {
   }
 
   async getProjectById(projectId, tenantId = 'DEFAULT-TENANT-S21') {
-    const res = await this.pool.query(
-      'SELECT * FROM generation_projects WHERE project_id = $1 AND tenant_id = $2;',
-      [projectId, tenantId]
-    );
-    if (res.rowCount === 0) return null;
+    const client = await this._getTenantClient(tenantId);
+    try {
+      const res = await client.query(
+        'SELECT * FROM generation_projects WHERE project_id = $1 AND tenant_id = $2;',
+        [projectId, tenantId]
+      );
+      if (res.rowCount === 0) {
+        await client.query('COMMIT;');
+        return null;
+      }
 
-    const row = res.rows[0];
-    const specRes = await this.pool.query(
-      'SELECT spec_type, spec_version, spec_content FROM generation_specifications WHERE project_id = $1;',
-      [projectId]
-    );
-    const specsByType = {};
-    for (const s of specRes.rows) {
-      specsByType[s.spec_type] = s.spec_content;
-    }
+      const row = res.rows[0];
+      const specRes = await client.query(
+        'SELECT spec_type, spec_version, spec_content FROM generation_specifications WHERE project_id = $1;',
+        [projectId]
+      );
+      const specsByType = {};
+      for (const s of specRes.rows) {
+        specsByType[s.spec_type] = s.spec_content;
+      }
 
-    const eventsRes = await this.pool.query(
-      'SELECT event_id, timestamp, author, actor_id, action, details, previous_status, new_status FROM generation_activity_events WHERE project_id = $1 ORDER BY timestamp ASC, id ASC;',
-      [projectId]
-    );
+      const eventsRes = await client.query(
+        'SELECT event_id, timestamp, author, actor_id, action, details, previous_status, new_status FROM generation_activity_events WHERE project_id = $1 ORDER BY timestamp ASC, id ASC;',
+        [projectId]
+      );
 
-    const artifactsRes = await this.pool.query(
+      const artifactsRes = await client.query(
       'SELECT id, artifact_name, artifact_type, storage_driver, storage_path, content_hash, file_size_bytes, metadata, created_at FROM generation_artifacts WHERE project_id = $1 ORDER BY id ASC;',
       [projectId]
     );
@@ -316,43 +326,57 @@ export class GenerationProjectRepository {
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString()
     };
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 
   async listProjects(filter = {}, tenantId = 'DEFAULT-TENANT-S21') {
-    let query = 'SELECT project_id FROM generation_projects WHERE tenant_id = $1';
-    const params = [tenantId];
+    const client = await this._getTenantClient(tenantId);
+    try {
+      let query = 'SELECT project_id FROM generation_projects WHERE tenant_id = $1';
+      const params = [tenantId];
 
-    if (filter.lifecycleStatus || filter.status) {
-      params.push(filter.lifecycleStatus || filter.status);
-      query += ` AND lifecycle_status = $${params.length}`;
-    }
-    if (filter.origin) {
-      params.push(filter.origin);
-      query += ` AND origin = $${params.length}`;
-    }
-    if (filter.search) {
-      params.push(`%${filter.search}%`);
-      query += ` AND (project_name ILIKE $${params.length} OR description ILIKE $${params.length} OR source_transaction_code ILIKE $${params.length})`;
-    }
+      if (filter.lifecycleStatus || filter.status) {
+        params.push(filter.lifecycleStatus || filter.status);
+        query += ` AND lifecycle_status = $${params.length}`;
+      }
+      if (filter.origin) {
+        params.push(filter.origin);
+        query += ` AND origin = $${params.length}`;
+      }
+      if (filter.search) {
+        params.push(`%${filter.search}%`);
+        query += ` AND (project_name ILIKE $${params.length} OR description ILIKE $${params.length} OR source_transaction_code ILIKE $${params.length})`;
+      }
 
-    query += ' ORDER BY created_at DESC;';
-    const res = await this.pool.query(query, params);
+      query += ' ORDER BY created_at DESC;';
+      const res = await client.query(query, params);
+      await client.query('COMMIT;');
 
-    const projects = [];
-    for (const r of res.rows) {
-      const p = await this.getProjectById(r.project_id, tenantId);
-      if (p) projects.push(p);
+      const projects = [];
+      for (const r of res.rows) {
+        const p = await this.getProjectById(r.project_id, tenantId);
+        if (p) projects.push(p);
+      }
+      return projects;
+    } catch (err) {
+      await client.query('ROLLBACK;').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
     }
-    return projects;
   }
 
   async updateProject(projectId, updates, tenantId = 'DEFAULT-TENANT-S21') {
     const existing = await this.getProjectById(projectId, tenantId);
     if (!existing) return null;
 
-    const client = await this._getClient();
+    const client = await this._getTenantClient(tenantId);
     try {
-      await client.query('BEGIN;');
 
       const newName = updates.projectName || updates.name || existing.projectName;
       const newDesc = updates.description !== undefined ? updates.description : existing.description;

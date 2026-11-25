@@ -16,6 +16,7 @@
 
 import { defaultSapConnectivityProvider, SapConnectivityProvider } from './sapConnectivityProvider.js';
 import { CONNECTIVITY_STATUSES } from './sapErrorTaxonomy.js';
+import { btpDestinationAdapter, sanitizeHeaders, sanitizeErrorMessage } from '../../adapters/btpDestinationAdapter.js';
 
 export const CAPABILITY_KEYS = Object.freeze({
   DESTINATION_RESOLUTION: 'DESTINATION_RESOLUTION',
@@ -99,8 +100,14 @@ export class SapConnectionHealthService {
       };
     }
 
-    // 6. Probe: System Echo (/sap/bc/echo)
-    const echoRes = await this.provider.executeQuery('/sap/bc/echo', { ...options, destinationName, connectionMode });
+    // 6. Probe: System Echo (/sap/bc/echo with /sap/public/ping fallback)
+    let echoRes = await this.provider.executeQuery('/sap/bc/echo', { ...options, destinationName, connectionMode });
+    if (!echoRes.success && (echoRes.status === 403 || echoRes.status === 404)) {
+      const publicPing = await this.provider.executeQuery('/sap/public/ping', { ...options, destinationName, connectionMode });
+      if (publicPing.success || publicPing.status === 200) {
+        echoRes = publicPing;
+      }
+    }
     const isReachabilityError = echoRes.statusCode === 'TIMEOUT' || echoRes.statusCode === 'NETWORK_UNAVAILABLE';
 
     capabilities[CAPABILITY_KEYS.CLOUD_CONNECTOR_REACHABILITY] = {
@@ -173,7 +180,14 @@ export class SapConnectionHealthService {
 
     // 5. Probe: ADT Discovery (/sap/bc/adt/discovery)
     const adtPath = options.adtDiscoveryPath || '/sap/bc/adt/discovery';
-    const adtRes = await this.provider.executeQuery(adtPath, { ...options, destinationName, connectionMode });
+    const adtRes = await this.provider.executeQuery(adtPath, {
+      ...options,
+      destinationName,
+      connectionMode,
+      headers: {
+        Accept: 'application/atomsvc+xml, application/atom+xml, application/xml, application/json'
+      }
+    });
     let adtStatus = adtRes.success ? 'VERIFIED' : (adtRes.statusCode || 'UNAVAILABLE');
     let adtError = adtRes.errorMessage || null;
     let requiredAdtAuthorizations = [];
@@ -257,6 +271,178 @@ export class SapConnectionHealthService {
       entitySetsCount: entitySets.length,
       entitySets: entitySets.slice(0, 20),
       rawLength: xml.length
+    };
+  }
+
+  /**
+   * Executes the 7-substate safe connectivity health diagnostic (SAP-010).
+   * Distinguishes:
+   * 1. BTP service binding status
+   * 2. Destination lookup status
+   * 3. Connectivity proxy status
+   * 4. Cloud Connector tunnel status
+   * 5. SAP ICM reachability
+   * 6. SAP authentication status
+   * 7. SAP authorization / catalog status
+   */
+  async getDiagnostics(options = {}) {
+    const destinationName = options.destinationName || this.destinationName;
+    const sapClient = options.sapClient || this.sapClient;
+    const startTime = Date.now();
+
+    // 1. Service Binding Status
+    const destBinding = btpDestinationAdapter.inspectBinding('destination');
+    const connBinding = btpDestinationAdapter.inspectBinding('connectivity');
+    const xsuaaBinding = btpDestinationAdapter.inspectBinding('xsuaa');
+    const hanaBinding = btpDestinationAdapter.inspectBinding('hana');
+
+    let bindingStatus = 'UNBOUND';
+    if (destBinding.present && connBinding.present) {
+      bindingStatus = 'BOUND';
+    } else if (destBinding.present || connBinding.present) {
+      bindingStatus = 'PARTIAL';
+    }
+
+    const serviceBindings = {
+      status: bindingStatus,
+      destinationBinding: { present: destBinding.present, instanceName: destBinding.instanceName, plan: destBinding.plan, isConfigured: destBinding.isConfigured },
+      connectivityBinding: { present: connBinding.present, instanceName: connBinding.instanceName, plan: connBinding.plan, isConfigured: connBinding.isConfigured },
+      xsuaaBinding: { present: xsuaaBinding.present, instanceName: xsuaaBinding.instanceName, plan: xsuaaBinding.plan, isConfigured: xsuaaBinding.isConfigured },
+      hanaBinding: { present: hanaBinding.present, instanceName: hanaBinding.instanceName, plan: hanaBinding.plan, isConfigured: hanaBinding.isConfigured }
+    };
+
+    // 2. Destination Lookup Status
+    const destResolution = await btpDestinationAdapter.resolveDestination(destinationName);
+    const destinationLookup = {
+      status: destResolution.success ? 'RESOLVED' : (destResolution.statusCode || 'NOT_FOUND'),
+      destinationName,
+      proxyType: destResolution.destination?.proxyType || 'OnPremise',
+      authentication: destResolution.destination?.authentication || 'BasicAuthentication',
+      targetUrl: destResolution.destination?.url ? destResolution.destination.url.replace(/:[^:]*@/, ':***@') : null,
+      provenance: destResolution.provenance || 'NONE',
+      errorMessage: destResolution.errorMessage || null
+    };
+
+    // 3. Connectivity Proxy Status
+    const proxyHost = process.env.BTP_CONNECTIVITY_PROXY_HOST || (process.env.LOCAL_CONNECTIVITY_PROXY ? '127.0.0.1' : null);
+    const proxyPort = process.env.BTP_CONNECTIVITY_PROXY_PORT || (process.env.LOCAL_CONNECTIVITY_PROXY ? Number(process.env.LOCAL_CONNECTIVITY_PROXY.split(':').pop()) || 20003 : null);
+    const connectivityProxy = {
+      status: connBinding.present ? 'CONFIGURED' : (proxyHost ? 'LOCAL_TUNNEL' : 'UNCONFIGURED'),
+      proxyHost,
+      proxyPort
+    };
+
+    // 4. Cloud Connector Tunnel & 5. SAP ICM Reachability
+    let icmReachability = { status: 'UNTESTED', latencyMs: 0, endpoint: '/sap/bc/echo' };
+    let cloudConnectorTunnel = { status: 'PENDING_VERIFICATION', virtualHost: 'kbl_fiori:8000' };
+    let authentication = { status: 'UNTESTED', authType: 'BasicAuthentication', user: process.env.SAP_USER || 'int_samarth', password: '[REDACTED]' };
+    let gatewayCatalog = { status: 'UNTESTED', endpoint: '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/', requiredAuthorizations: ['S_SERVICE', 'S_RFC'] };
+
+    if (!destResolution.success && !options.forceProbe && !process.env.SAP_URL_OVERRIDE) {
+      cloudConnectorTunnel.status = 'BLOCKED_BY_DESTINATION';
+      icmReachability.status = 'BLOCKED_BY_DESTINATION';
+      authentication.status = 'BLOCKED';
+      gatewayCatalog.status = 'BLOCKED';
+    } else {
+      const probeStart = Date.now();
+      const echoRes = await this.provider.executeQuery('/sap/bc/echo', {
+        ...options,
+        destinationName,
+        connectionMode: options.connectionMode || (process.env.SAP_URL_OVERRIDE ? 'DIRECT_HTTP' : 'BTP_DESTINATION')
+      });
+      const probeLatency = Date.now() - probeStart;
+
+      if (echoRes.success || echoRes.status === 200) {
+        cloudConnectorTunnel.status = 'CONNECTED';
+        icmReachability = { status: 'REACHABLE', latencyMs: probeLatency, endpoint: '/sap/bc/echo' };
+        authentication.status = 'AUTHENTICATED';
+      } else if (echoRes.status === 401) {
+        cloudConnectorTunnel.status = 'CONNECTED';
+        icmReachability = { status: 'REACHABLE', latencyMs: probeLatency, endpoint: '/sap/bc/echo' };
+        authentication.status = 'AUTHENTICATION_FAILED';
+      } else if (echoRes.status === 403) {
+        cloudConnectorTunnel.status = 'CONNECTED';
+        icmReachability = { status: 'REACHABLE', latencyMs: probeLatency, endpoint: '/sap/bc/echo' };
+        authentication.status = 'AUTHENTICATED';
+      } else {
+        const isConnFail = echoRes.statusCode === 'TIMEOUT' || echoRes.statusCode === 'NETWORK_UNAVAILABLE' || echoRes.statusCode === 'CLOUD_CONNECTOR_UNAVAILABLE';
+        cloudConnectorTunnel.status = isConnFail ? 'UNREACHABLE' : 'FAILED';
+        cloudConnectorTunnel.error = echoRes.errorMessage || 'Tunnel connection failed';
+        icmReachability = { status: echoRes.statusCode === 'TIMEOUT' ? 'TIMEOUT' : 'UNREACHABLE', latencyMs: probeLatency, endpoint: '/sap/bc/echo' };
+        authentication.status = 'UNKNOWN';
+      }
+
+      // 7. Gateway Catalog Authorization Probe
+      if (cloudConnectorTunnel.status === 'CONNECTED' && authentication.status !== 'AUTHENTICATION_FAILED') {
+        const catRes = await this.provider.executeQuery('/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection?$top=1', {
+          ...options,
+          destinationName,
+          connectionMode: options.connectionMode || (process.env.SAP_URL_OVERRIDE ? 'DIRECT_HTTP' : 'BTP_DESTINATION')
+        });
+
+        if (catRes.success || catRes.status === 200) {
+          gatewayCatalog.status = 'AUTHORIZED';
+        } else if (catRes.status === 403) {
+          gatewayCatalog.status = 'AUTHORIZATION_FAILED';
+          gatewayCatalog.error = 'HTTP 403 Forbidden on Gateway Catalog. Verify PFCG object S_SERVICE.';
+        } else if (catRes.status === 404) {
+          gatewayCatalog.status = 'SERVICE_NOT_ACTIVATED';
+          gatewayCatalog.error = 'Service not activated in /IWFND/MAINT_SERVICE.';
+        } else {
+          gatewayCatalog.status = 'UNAVAILABLE';
+          gatewayCatalog.error = catRes.errorMessage || 'Failed to query catalog service';
+        }
+      } else {
+        gatewayCatalog.status = 'BLOCKED';
+      }
+    }
+
+    // Determine Overall Status
+    let overallStatus = CONNECTIVITY_STATUSES.CONNECTED;
+    if (cloudConnectorTunnel.status === 'UNREACHABLE' || icmReachability.status === 'UNREACHABLE' || icmReachability.status === 'TIMEOUT') {
+      overallStatus = CONNECTIVITY_STATUSES.CLOUD_CONNECTOR_UNAVAILABLE;
+    } else if (authentication.status === 'AUTHENTICATION_FAILED') {
+      overallStatus = CONNECTIVITY_STATUSES.AUTHENTICATION_FAILED;
+    } else if (gatewayCatalog.status === 'AUTHORIZATION_FAILED') {
+      overallStatus = CONNECTIVITY_STATUSES.AUTHORIZATION_BLOCKED;
+    } else if (destinationLookup.status !== 'RESOLVED') {
+      overallStatus = CONNECTIVITY_STATUSES.DESTINATION_NOT_FOUND;
+    } else if (bindingStatus === 'UNBOUND' && !process.env.SAP_URL_OVERRIDE) {
+      overallStatus = CONNECTIVITY_STATUSES.NOT_CONFIGURED;
+    } else if (gatewayCatalog.status !== 'AUTHORIZED') {
+      overallStatus = CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY;
+    }
+
+    return {
+      success: overallStatus === CONNECTIVITY_STATUSES.CONNECTED || overallStatus === CONNECTIVITY_STATUSES.PARTIAL_CONNECTIVITY,
+      timestamp: new Date().toISOString(),
+      responseTimeMs: Date.now() - startTime,
+      destinationName,
+      sapClient: String(sapClient).trim(),
+      overallStatus,
+      substates: {
+        serviceBindings,
+        destinationLookup,
+        connectivityProxy,
+        cloudConnectorTunnel,
+        icmReachability,
+        authentication,
+        gatewayCatalog
+      },
+      readOnlyPolicyEnforced: true,
+      tlsValidation: {
+        strictTlsEnforced: true,
+        rejectUnauthorized: process.env.NODE_ENV === 'production' ? true : (process.env.SAP_TLS_REJECT_UNAUTHORIZED !== 'false')
+      },
+      remediation: overallStatus === CONNECTIVITY_STATUSES.CONNECTED
+        ? null
+        : (overallStatus === CONNECTIVITY_STATUSES.CLOUD_CONNECTOR_UNAVAILABLE
+          ? 'Cloud Connector tunnel to S21 (http://kbl_fiori:8000) is unreachable. Check SCC status and local connectivity tunnel.'
+          : (overallStatus === CONNECTIVITY_STATUSES.AUTHENTICATION_FAILED
+            ? 'Verify technical user credentials in BTP destination S21.'
+            : (overallStatus === CONNECTIVITY_STATUSES.AUTHORIZATION_BLOCKED
+              ? 'Request Basis administrator to grant S_SERVICE authorization on /IWFND/CATALOGSERVICE.'
+              : 'Review BTP service bindings and landscape configuration.')))
     };
   }
 

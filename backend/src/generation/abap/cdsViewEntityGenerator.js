@@ -28,14 +28,7 @@ export function formatChildCdsViewName(prefixTag, rootName, childName) {
     .replace(/^Z_[IRC]_/i, '')
     .replace(/^Z[IRC]_/i, '')
     .replace(/[^a-zA-Z0-9_]/g, '');
-  const candidate = `${prefixTag}${cleanRoot}_${cleanChild}`;
-  if (candidate.length <= 30) {
-    return candidate;
-  }
-  const maxBody = 30 - prefixTag.length;
-  const rPart = cleanRoot.slice(0, 14);
-  const cPart = cleanChild.slice(0, Math.max(1, maxBody - rPart.length - 1));
-  return `${prefixTag}${rPart}_${cPart}`;
+  return `${prefixTag}${cleanRoot}_${cleanChild}`;
 }
 
 export function generateCdsEntities(project, architecture) {

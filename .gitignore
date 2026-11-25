@@ -47,7 +47,9 @@ data/generated_sample_fiori_app/
 
 # Export bundles & transient media
 backend/exports/
-docs/foundation.zip
+backend/public/
+*.zip
+scratch/
 screenshot_*.png
 
 # Logs
@@ -64,3 +66,4 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+.neon

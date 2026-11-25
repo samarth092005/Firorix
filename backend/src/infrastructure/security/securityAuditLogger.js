@@ -5,6 +5,14 @@ import { AuthService } from '../../services/authService.js';
 export const SECURITY_ACTIONS = Object.freeze({
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
   LOGIN_FAILURE: 'LOGIN_FAILURE',
+  LOGOUT: 'LOGOUT',
+  TOKEN_REFRESH: 'TOKEN_REFRESH',
+  TOKEN_REVOKED: 'TOKEN_REVOKED',
+  TOKEN_VERIFICATION_FAILED: 'TOKEN_VERIFICATION_FAILED',
+  RBAC_DENIED: 'RBAC_DENIED',
+  TENANT_ACCESS_DENIED: 'TENANT_ACCESS_DENIED',
+  SECURITY_CONFIGURATION_FAILURE: 'SECURITY_CONFIGURATION_FAILURE',
+  // Backward-compatible aliases
   AUTH_FAILURE: 'AUTH_FAILURE',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
   TENANT_ACCESS_VIOLATION: 'TENANT_ACCESS_VIOLATION',
@@ -17,7 +25,9 @@ export const SECURITY_ACTIONS = Object.freeze({
   PROJECT_MODIFIED: 'PROJECT_MODIFIED',
   ARTIFACT_GENERATED: 'ARTIFACT_GENERATED',
   ARTIFACT_EXPORTED: 'ARTIFACT_EXPORTED',
-  SECURITY_CONFIG_CHANGED: 'SECURITY_CONFIG_CHANGED'
+  SECURITY_CONFIG_CHANGED: 'SECURITY_CONFIG_CHANGED',
+  ADMIN_OVERRIDE: 'ADMIN_OVERRIDE',
+  GOVERNANCE_OVERRIDE: 'GOVERNANCE_OVERRIDE'
 });
 
 export class SecurityAuditLogger {
@@ -51,6 +61,7 @@ export class SecurityAuditLogger {
       const client = await this.pool.getClient();
       try {
         await client.query('BEGIN;');
+        await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
 
         // Ensure tenant exists
         await client.query(`
@@ -142,7 +153,10 @@ export class SecurityAuditLogger {
 
       query += ' ORDER BY id ASC LIMIT 200;';
       const res = await this.pool.query(query, params);
-      return res.rows;
+      if (res && res.rows && res.rows.length > 0) {
+        return res.rows;
+      }
+      return this._fallbackEvents.filter(e => e.tenantId === tenantId);
     } catch (e) {
       return this._fallbackEvents.filter(e => e.tenantId === tenantId);
     }

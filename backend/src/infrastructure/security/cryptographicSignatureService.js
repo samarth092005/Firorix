@@ -261,6 +261,140 @@ export class CryptographicSignatureService {
   }
 
   /**
+   * Computes deterministic SHA-256 manifest hash of an assessment's core artifacts (GOV-004).
+   */
+  computeArtifactManifestHash(assessment = {}) {
+    const canonicalArtifacts = {
+      assessmentId: assessment.id || assessment.assessmentId || '',
+      tcode: assessment.tcode || '',
+      systemId: assessment.systemId || 'S21-200',
+      client: assessment.client || '200',
+      targetRelease: assessment.targetRelease || 'SAP S/4HANA 2023',
+      outcome: assessment.recommendation?.canonicalOutcome || assessment.recommendation?.outcome || assessment.assessmentResult || 'BUILD',
+      candidateAppId: assessment.matchingFioriApp?.appId || assessment.candidateAppId || '',
+      fitGapScore: assessment.fitGapScore !== undefined ? Number(assessment.fitGapScore) : 0,
+      version: assessment.version !== undefined ? Number(assessment.version) : 1
+    };
+    return crypto.createHash('sha256').update(JSON.stringify(canonicalArtifacts)).digest('hex');
+  }
+
+  /**
+   * Constructs the canonical bound payload for approval signing (GOV-004).
+   */
+  buildCanonicalApprovalPayload(assessment = {}, approverContext = {}, options = {}) {
+    const approverId = approverContext.id || approverContext.userId || 'system-approver';
+    const tenantId = assessment.tenantId || approverContext.tenantId || 'DEFAULT-TENANT-S21';
+    const assessmentVersion = assessment.version !== undefined ? Number(assessment.version) : 1;
+    const specificationVersion = options.specificationVersion || assessment.specificationVersion || '1.0.0';
+    const artifactManifestHash = options.manifestHash || this.computeArtifactManifestHash(assessment);
+    const targetSystem = assessment.systemId || 'S21-200';
+    const sapClient = assessment.client || '200';
+    const approvalScope = options.scope || assessment.recommendation?.canonicalOutcome || assessment.recommendation?.outcome || 'BUILD';
+    const expiresAt = options.expiresAt || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(); // 90 days validity
+
+    return {
+      assessmentId: assessment.id,
+      tenantId,
+      specificationVersion,
+      artifactManifestHash,
+      targetSystem,
+      sapClient,
+      approverId,
+      approvalScope,
+      assessmentVersion,
+      expiresAt
+    };
+  }
+
+  /**
+   * Generates a cryptographically bound HMAC-SHA256 signature for assessment approval (GOV-004).
+   */
+  async signApproval(assessment = {}, approverContext = {}, options = {}) {
+    const canonicalPayload = this.buildCanonicalApprovalPayload(assessment, approverContext, options);
+    const serialized = JSON.stringify(canonicalPayload);
+    const signResult = await this.signPayload(serialized, options.keyVersion);
+
+    return {
+      signature: signResult.signature,
+      signatureAlgorithm: signResult.algorithm,
+      keyVersion: signResult.keyVersion,
+      signatureType: signResult.signatureType,
+      canonicalPayload,
+      boundFields: Object.keys(canonicalPayload)
+    };
+  }
+
+  /**
+   * Verifies an approval signature against the current assessment state (GOV-004, GOV-005).
+   */
+  async verifyApproval(assessment = {}, approvalObj = {}, options = {}) {
+    if (!approvalObj || !approvalObj.signature) {
+      return { valid: false, reason: 'MISSING_APPROVAL_SIGNATURE' };
+    }
+
+    const signature = approvalObj.signature;
+    let canonicalPayload = approvalObj.canonicalPayload;
+    if (!canonicalPayload) {
+      canonicalPayload = this.buildCanonicalApprovalPayload(assessment, {
+        id: approvalObj.approverId || approvalObj.approver,
+        tenantId: approvalObj.tenantId
+      }, {
+        scope: approvalObj.scope,
+        expiresAt: approvalObj.expiresAt
+      });
+    }
+
+    // 1. Verify Assessment ID match
+    if (canonicalPayload.assessmentId !== assessment.id) {
+      return { valid: false, reason: 'ASSESSMENT_ID_MISMATCH' };
+    }
+
+    // 2. Verify Tenant ID match
+    if (canonicalPayload.tenantId && assessment.tenantId && canonicalPayload.tenantId !== assessment.tenantId) {
+      return { valid: false, reason: 'TENANT_ID_MISMATCH' };
+    }
+
+    // 3. Verify Assessment Version match
+    const currentVersion = assessment.version !== undefined ? Number(assessment.version) : 1;
+    if (canonicalPayload.assessmentVersion !== currentVersion) {
+      return { valid: false, reason: 'ASSESSMENT_VERSION_MISMATCH' };
+    }
+
+    // 4. Verify Target System match
+    if (canonicalPayload.targetSystem && assessment.systemId && canonicalPayload.targetSystem !== assessment.systemId) {
+      return { valid: false, reason: 'TARGET_SYSTEM_MISMATCH' };
+    }
+
+    // 5. Verify Artifact Manifest Hash
+    const currentManifestHash = this.computeArtifactManifestHash(assessment);
+    if (canonicalPayload.artifactManifestHash !== currentManifestHash) {
+      return { valid: false, reason: 'ARTIFACT_MANIFEST_HASH_MISMATCH' };
+    }
+
+    // 6. Verify Expiry
+    if (canonicalPayload.expiresAt) {
+      const expTime = new Date(canonicalPayload.expiresAt).getTime();
+      if (!isNaN(expTime) && expTime < Date.now()) {
+        return { valid: false, reason: 'APPROVAL_EXPIRED' };
+      }
+    }
+
+    // 7. Verify Cryptographic HMAC Signature
+    const serialized = JSON.stringify(canonicalPayload);
+    const cryptoCheck = await this.verifySignature(serialized, signature);
+    if (!cryptoCheck.valid) {
+      return { valid: false, reason: cryptoCheck.reason || 'SIGNATURE_VERIFICATION_FAILED' };
+    }
+
+    return {
+      valid: true,
+      keyVersion: cryptoCheck.keyVersion,
+      signatureType: cryptoCheck.signatureType,
+      canonicalPayload
+    };
+  }
+
+  /**
    * Helper to set a rotated key at runtime
    */
   registerKey(version, secret) {

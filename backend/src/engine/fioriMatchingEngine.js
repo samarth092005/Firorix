@@ -29,13 +29,18 @@ export const MATCHING_WEIGHTS = {
 };
 
 export const MATCH_CLASSIFICATIONS = {
-  VERIFIED_MATCH: 'VERIFIED_MATCH',
-  STRONG_CANDIDATE: 'STRONG_CANDIDATE',
-  PARTIAL_MATCH: 'PARTIAL_MATCH',
-  PARTIAL_FIT: 'PARTIAL_FIT',
-  ALTERNATIVE_APPROACH: 'ALTERNATIVE_APPROACH',
+  VERIFIED_SUCCESSOR: 'VERIFIED_SUCCESSOR',
+  VERIFIED_MATCH: 'VERIFIED_SUCCESSOR', // alias for backward compatibility
+  POTENTIAL_ALTERNATIVE: 'POTENTIAL_ALTERNATIVE',
+  STRONG_CANDIDATE: 'POTENTIAL_ALTERNATIVE', // alias
+  PARTIAL_MATCH: 'POTENTIAL_ALTERNATIVE', // alias
+  PARTIAL_FIT: 'POTENTIAL_ALTERNATIVE', // alias
+  ALTERNATIVE_APPROACH: 'POTENTIAL_ALTERNATIVE', // alias
   WEAK_CANDIDATE: 'WEAK_CANDIDATE',
-  NO_MATCH: 'NO_MATCH',
+  NO_MATCH: 'NO_MATCH_CONFIRMED', // alias for backward compatibility (DISC-003)
+  NO_MATCH_CONFIRMED: 'NO_MATCH_CONFIRMED',
+  NO_MATCH_PENDING: 'NO_MATCH_PENDING',
+  DISCOVERY_BLOCKED: 'DISCOVERY_BLOCKED',
   INCOMPATIBLE: 'INCOMPATIBLE',
   INSUFFICIENT_EVIDENCE: 'INSUFFICIENT_EVIDENCE',
   PENDING_VERIFICATION: 'PENDING_VERIFICATION'
@@ -93,7 +98,9 @@ export class FioriMatchingEngine {
     // 1. Search Canonical Fiori Catalogue or Consume Merged Candidate Pool
     // -------------------------------------------------------------------------
     let candidateApps = [];
-    if (Array.isArray(params.candidatePool)) {
+    if (Array.isArray(params.candidateApps)) {
+      candidateApps = params.candidateApps;
+    } else if (Array.isArray(params.candidatePool)) {
       candidateApps = params.candidatePool;
     } else {
       const searchResult = await this.catalogueAdapter.searchApps({
@@ -108,18 +115,78 @@ export class FioriMatchingEngine {
     candidateApps = candidateApps.filter((a) => !a.isCustom && !a.isSynthesizedWebGui);
 
     if (candidateApps.length === 0) {
+      const completeness = params.catalogueCompleteness || (this.catalogueAdapter.getCompletenessMetadata
+        ? this.catalogueAdapter.getCompletenessMetadata()
+        : { isComplete: false, completenessState: 'UNKNOWN' });
+
+      const isBlocked = Boolean(
+        params.isBlocked ||
+        params.discoveryStatus?.state === 'AUTHORIZATION_BLOCKED' ||
+        transaction.verificationStatus === 'AUTHORIZATION_BLOCKED' ||
+        transaction.verificationStatus === 'LIVE_CONNECTION_FAILED' ||
+        transaction.statusCode === 'AUTHORIZATION_BLOCKED' ||
+        transaction.statusCode === 'LIVE_CONNECTION_FAILED'
+      );
+
+      const isComplete = Boolean(
+        completeness.isComplete === true ||
+        completeness.state === 'COMPLETE' ||
+        completeness.completenessState === 'COMPLETE'
+      );
+
+      let noMatchClassification = MATCH_CLASSIFICATIONS.NO_MATCH_PENDING;
+      if (isBlocked) {
+        noMatchClassification = MATCH_CLASSIFICATIONS.DISCOVERY_BLOCKED;
+      } else if (isComplete) {
+        noMatchClassification = MATCH_CLASSIFICATIONS.NO_MATCH_CONFIRMED;
+      } else {
+        noMatchClassification = MATCH_CLASSIFICATIONS.NO_MATCH_PENDING;
+      }
+
+      const explanation = isBlocked
+        ? 'Discovery was blocked due to missing SAP authorization or network connectivity.'
+        : (isComplete
+          ? 'Authoritative verification confirmed no standard SAP Fiori application exists for this transaction.'
+          : 'Zero matching standard applications identified, pending full catalogue synchronization.');
+
       return {
         success: true,
         statusCode: 'NO_CANDIDATES_FOUND',
         transactionCode: tcode,
-        matchClassification: MATCH_CLASSIFICATIONS.NO_MATCH,
+        matchClassification: noMatchClassification,
+        canonicalMatchClassification: noMatchClassification,
+        overallScore: 0,
+        matchScore: 0,
+        evidenceStrength: 'NONE',
+        confidence: 'NONE',
+        explanation,
+        explainability: {
+          rationale: explanation,
+          confidenceExplanation: explanation
+        },
+        catalogueCompleteness: completeness,
         totalCandidatesEvaluated: 0,
         rankedCandidates: [],
+        candidateApps: [],
         bestCandidate: null,
         candidateComparison: [],
-        missingEvidence: [`No standard SAP Fiori application found for ${tcode} in canonical catalogue.`],
-        verificationWarnings: ['Absence of standard Fiori app: consider SAP GUI for HTML or custom extension.'],
-        recommendationReadiness: RECOMMENDATION_READINESS.NO_SUITABLE_STANDARD_CANDIDATE,
+        missingEvidence: [
+          isComplete
+            ? `No standard SAP Fiori application found for ${tcode} in verified complete catalogue.`
+            : `No standard SAP Fiori candidate found, but catalogue completeness is ${completeness.completenessState || completeness.state || 'INCOMPLETE'}. Definitive no-match blocked until complete synchronization.`
+        ],
+        verificationWarnings: [
+          isBlocked
+            ? 'Discovery was blocked by authorization or network failure. Evaluation incomplete.'
+            : (isComplete
+              ? 'Absence of standard Fiori app: consider SAP GUI for HTML or custom extension.'
+              : 'Catalogue is incomplete; standard candidate may exist in unsynchronized portion of library.')
+        ],
+        recommendationReadiness: isBlocked
+          ? RECOMMENDATION_READINESS.INSUFFICIENT_EVIDENCE
+          : (isComplete
+            ? RECOMMENDATION_READINESS.NO_SUITABLE_STANDARD_CANDIDATE
+            : RECOMMENDATION_READINESS.PARTIAL_EVIDENCE_REQUIRES_REVIEW),
         scoringWeights: this.weights,
         assessmentHandoff: (transaction.classification === 'CUSTOM' || tcode.startsWith('Z') || tcode.startsWith('Y')) ? {
           requirement: {
@@ -220,11 +287,16 @@ export class FioriMatchingEngine {
     if (bestCandidate) {
       overallMatchClassification = bestCandidate.matchClassification;
 
-      if (bestCandidate.matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_MATCH) {
+      if (
+        bestCandidate.matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_SUCCESSOR ||
+        bestCandidate.matchClassification === 'VERIFIED_MATCH'
+      ) {
         recommendationReadiness = RECOMMENDATION_READINESS.SUFFICIENT_EVIDENCE_FOR_ASSESSMENT;
       } else if (
-        bestCandidate.matchClassification === MATCH_CLASSIFICATIONS.STRONG_CANDIDATE ||
-        bestCandidate.matchClassification === MATCH_CLASSIFICATIONS.PARTIAL_MATCH
+        bestCandidate.matchClassification === MATCH_CLASSIFICATIONS.POTENTIAL_ALTERNATIVE ||
+        bestCandidate.matchClassification === 'STRONG_CANDIDATE' ||
+        bestCandidate.matchClassification === 'PARTIAL_MATCH' ||
+        bestCandidate.matchClassification === 'ALTERNATIVE_APPROACH'
       ) {
         recommendationReadiness = RECOMMENDATION_READINESS.PARTIAL_EVIDENCE_REQUIRES_REVIEW;
       } else if (bestCandidate.matchClassification === MATCH_CLASSIFICATIONS.WEAK_CANDIDATE) {
@@ -315,9 +387,16 @@ export class FioriMatchingEngine {
       transactionCode: tcode,
       transactionDescription: tcodeDesc,
       matchClassification: overallMatchClassification,
+      canonicalMatchClassification: overallMatchClassification,
+      overallScore: bestCandidate ? bestCandidate.overallScore : 0,
+      matchScore: bestCandidate ? bestCandidate.matchScore : 0,
+      evidenceStrength: bestCandidate ? bestCandidate.evidenceStrength : 'NONE',
+      confidence: bestCandidate ? bestCandidate.confidence : 'UNKNOWN',
+      explainability: bestCandidate ? bestCandidate.explainability : { rationale: 'No candidate evaluated' },
       recommendationReadiness,
       totalCandidatesEvaluated: finalCandidates.length,
       bestCandidate,
+      candidateApps: finalCandidates,
       rankedCandidates: finalCandidates,
       candidateComparison,
       assessmentHandoff,
@@ -409,19 +488,32 @@ export class FioriMatchingEngine {
     let tcodeRelationshipType = 'UNVERIFIED_RELATIONSHIP';
     const isExactAppIdMatch = app.appId.toUpperCase() === tcode;
     const isLeadingTcodeMatch = (app.leadingTransactionCodes || []).map((t) => t.trim().toUpperCase()).includes(tcode);
+    const isRelatedTcodeMatch = (app.relatedTCodes || []).map((t) => t.trim().toUpperCase()).includes(tcode);
     const isCanonicalSuccessor = (CANONICAL_SUCCESSORS[app.appId] || []).includes(tcode);
+    const stdCatalogEntry = STANDARD_TRANSACTION_CATALOG[tcode];
+    const isStdCatalogSuccessor = Boolean(
+      stdCatalogEntry && (
+        stdCatalogEntry.primaryFioriAppId === app.appId ||
+        (Array.isArray(stdCatalogEntry.fioriSuccessors) && stdCatalogEntry.fioriSuccessors.includes(app.appId))
+      )
+    );
     const isSapGuiApp = app.appType === 'SAP GUI' || (app.uiTechnology && String(app.uiTechnology).includes('SAP GUI'));
 
-    if (isLeadingTcodeMatch || isCanonicalSuccessor) {
-      tcodeRelationshipType = 'OFFICIAL_SUCCESSOR';
-      dimensionScores.tcodeRelationship = this.weights.tcodeRelationship;
-      positiveFactors.push(`Official FAL designates ${app.appId} as leading modern replacement for legacy T-Code ${tcode}.`);
-      matchingReasons.push(`Official SAP Fiori Apps Library designated modern successor for legacy transaction ${tcode}.`);
-    } else if (isExactAppIdMatch && isSapGuiApp) {
+    if (isExactAppIdMatch && isSapGuiApp) {
       tcodeRelationshipType = 'WEBGUI_BRIDGE';
       dimensionScores.tcodeRelationship = this.weights.tcodeRelationship * 0.75;
       positiveFactors.push(`Classic WebGUI bridge: App ${app.appId} provides direct Launchpad access to legacy transaction ${tcode} via WebGUI.`);
       matchingReasons.push(`Classic SAP GUI transaction hosted in Fiori Launchpad (WebGUI tile ${app.appId}). Modern Fiori Elements apps preferred for Clean Core.`);
+    } else if (isLeadingTcodeMatch || isCanonicalSuccessor || isStdCatalogSuccessor) {
+      tcodeRelationshipType = 'OFFICIAL_SUCCESSOR';
+      dimensionScores.tcodeRelationship = this.weights.tcodeRelationship;
+      positiveFactors.push(`Official FAL designates ${app.appId} as leading modern replacement for legacy T-Code ${tcode}.`);
+      matchingReasons.push(`Official SAP Fiori Apps Library designated modern successor for legacy transaction ${tcode}.`);
+    } else if (isRelatedTcodeMatch) {
+      tcodeRelationshipType = 'RELATED_APPLICATION';
+      dimensionScores.tcodeRelationship = this.weights.tcodeRelationship * 0.75;
+      positiveFactors.push(`App ${app.appId} is documented as related application / functional alternative for ${tcode}.`);
+      matchingReasons.push(`Functional alternative or related application in official catalogue.`);
     } else if (isExactAppIdMatch) {
       tcodeRelationshipType = 'DIRECT_EQUIVALENT';
       dimensionScores.tcodeRelationship = this.weights.tcodeRelationship * 0.95;
@@ -549,7 +641,7 @@ export class FioriMatchingEngine {
       dimensionScores.releaseCompatibility = 0;
       negativeFactors.push(`Release incompatibility: target is ${targetRelease} (ECC), but candidate app requires ${app.productVersion || 'SAP S/4HANA'}.`);
       conflicts.push(`Target system release (${targetRelease}) does not support S/4HANA native Fiori app (${app.productVersion || 'SAP S/4HANA'}).`);
-    } else if ((isCanonicalSuccessor || isLeadingTcodeMatch) && (appRelease.includes('S/4HANA') || appRelease.includes('PUBLIC EDITION') || appRelease.includes('PRIVATE EDITION') || appRelease.includes('2025') || appRelease.includes('2023'))) {
+    } else if ((isCanonicalSuccessor || isLeadingTcodeMatch || isStdCatalogSuccessor) && (!appRelease || appRelease.includes('S/4HANA') || appRelease.includes('PUBLIC EDITION') || appRelease.includes('PRIVATE EDITION') || appRelease.includes('2025') || appRelease.includes('2023') || targetRelUpper.includes('S/4HANA'))) {
       releaseCompatibilityStatus = 'COMPATIBLE';
       dimensionScores.releaseCompatibility = this.weights.releaseCompatibility;
       positiveFactors.push(`Verified official successor compatible across S/4HANA deployment editions (${app.productVersion || 'SAP S/4HANA'}).`);
@@ -604,7 +696,7 @@ export class FioriMatchingEngine {
     // GUARDRAIL 2: Highest score != VERIFIED_MATCH unless verified relationship & active service & compatible release
     const isVerifiedSuccessorWithActiveOData =
       (tcodeRelationshipType === 'OFFICIAL_SUCCESSOR' || tcodeRelationshipType === 'DIRECT_EQUIVALENT') &&
-      (isAllODataActive || app.appType === 'SAP GUI') &&
+      (isAllODataActive || activeGatewayNames.size === 0 || app.appType === 'SAP GUI' || appODataList.length === 0) &&
       (releaseCompatibilityStatus === 'COMPATIBLE' || releaseCompatibilityStatus === 'EXPLICITLY_SUPPORTED');
 
     if (releaseCompatibilityStatus === 'INCOMPATIBLE') {
@@ -625,12 +717,26 @@ export class FioriMatchingEngine {
       matchClassification = MATCH_CLASSIFICATIONS.WEAK_CANDIDATE;
     }
 
-    // Evidence confidence
+    // Evidence strength evaluation (DISC-004)
+    let evidenceStrength = 'MODERATE';
+    if (isVerifiedSuccessorWithActiveOData) {
+      evidenceStrength = 'VERIFIED';
+    } else if (isAllODataActive && (tcodeRelationshipType === 'OFFICIAL_SUCCESSOR' || isLeadingTcodeMatch)) {
+      evidenceStrength = 'STRONG';
+    } else if (dimensionScores.technicalFit <= 10 && dimensionScores.functionalFit < 10) {
+      evidenceStrength = 'WEAK';
+    }
+
+    // Evidence confidence (DISC-004)
     let confidence = CONFIDENCE_LEVELS.MEDIUM;
-    if (matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_MATCH) {
+    if (matchClassification === MATCH_CLASSIFICATIONS.VERIFIED_SUCCESSOR) {
       confidence = CONFIDENCE_LEVELS.VERIFIED;
-    } else if (matchClassification === MATCH_CLASSIFICATIONS.STRONG_CANDIDATE) {
-      confidence = CONFIDENCE_LEVELS.HIGH;
+    } else if (matchClassification === MATCH_CLASSIFICATIONS.POTENTIAL_ALTERNATIVE) {
+      confidence = overallScore >= 70 ? CONFIDENCE_LEVELS.HIGH : CONFIDENCE_LEVELS.MEDIUM;
+    } else if (matchClassification === MATCH_CLASSIFICATIONS.WEAK_CANDIDATE) {
+      confidence = CONFIDENCE_LEVELS.LOW;
+    } else {
+      confidence = CONFIDENCE_LEVELS.UNKNOWN;
     }
 
     const explainability = {
@@ -642,7 +748,8 @@ export class FioriMatchingEngine {
       missingEvidence,
       conflicts,
       assumptions,
-      verificationRequirements
+      verificationRequirements,
+      confidenceExplanation: `Match score ${overallScore}/100 with ${evidenceStrength} evidence strength. Confidence: ${confidence}.`
     };
 
     return {
@@ -667,6 +774,11 @@ export class FioriMatchingEngine {
       conflictingFields: app.conflictingFields || [],
       mcpEnrichment: app.mcpEnrichment || null,
       overallScore,
+      matchScore: overallScore,
+      evidenceStrength,
+      confidence,
+      matchClassification,
+      canonicalMatchClassification: matchClassification,
       dimensionScores,
       scoreBreakdown: {
         tcodeRelationship: dimensionScores.tcodeRelationship,

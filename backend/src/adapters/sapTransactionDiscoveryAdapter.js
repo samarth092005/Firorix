@@ -300,6 +300,13 @@ export class SapTransactionDiscoveryAdapter {
           errorMessage: catalogResult?.errorMessage || 'Live SAP S21 connection failed during Gateway Catalog query.',
           evidence: [`S21 Gateway returned status: ${catalogResult?.statusCode || 'GATEWAY_UNAVAILABLE'}`],
           provenance: 'LIVE_SAP_S21',
+          discoveryProvenance: {
+            source: 'LIVE_SAP_S21',
+            sapSystem: systemId.split('-')[0] || 'S21',
+            sapClient: client,
+            retrievalTimestamp: new Date().toISOString(),
+            label: 'Authoritative S21 Discovery (Live Gateway Connection Failed)'
+          },
           timestamp: new Date().toISOString()
         };
       }
@@ -339,6 +346,9 @@ export class SapTransactionDiscoveryAdapter {
 
     // 6. Handle Confirmed Non-Existent
     if (registryResult.state === TRANSACTION_EXISTENCE_STATES.CONFIRMED_NON_EXISTENT) {
+      const searchedCount = catalogResult.totalCount !== undefined
+        ? catalogResult.totalCount
+        : (Array.isArray(catalogResult.services) ? catalogResult.services.length : 0);
       return {
         success: false,
         statusCode: 'NOT_FOUND',
@@ -347,15 +357,22 @@ export class SapTransactionDiscoveryAdapter {
         tcode,
         errorMessage: registryResult.reason || `Transaction code "${tcode}" has no verified record or related OData service in target SAP S21 Gateway Catalog.`,
         evidence: [
-          'S21 Gateway Catalog: 1,318 registered services searched; 0 matches found.',
+          `S21 Gateway Catalog: ${searchedCount} registered services searched; 0 matches found.`,
           `ADT Interface (/sap/bc/adt/discovery): ${adtProbe.status} (HTTP ${adtProbe.httpStatus}).`
         ],
         diagnostics: {
           adtProbe,
-          catalogServicesSearched: catalogResult.totalCount,
+          catalogServicesSearched: searchedCount,
           elapsedMs
         },
-        provenance: 'LIVE_SAP_S21',
+        provenance: registryResult.provenance || (options.isLiveMode ? 'LIVE_SAP_S21' : 'OFFLINE_DDIC_CATALOG'),
+        discoveryProvenance: {
+          source: registryResult.provenance || (options.isLiveMode ? 'LIVE_SAP_S21' : 'OFFLINE_DDIC_CATALOG'),
+          sapSystem: systemId.split('-')[0] || 'S21',
+          sapClient: client,
+          retrievalTimestamp: new Date().toISOString(),
+          label: 'Authoritative S21 Discovery (Not Found in Target)'
+        },
         timestamp: new Date().toISOString()
       };
     }
@@ -390,7 +407,13 @@ export class SapTransactionDiscoveryAdapter {
     let verificationStatus;
     let statusCode = 'SUCCESS';
 
-    if (registryResult.state === TRANSACTION_EXISTENCE_STATES.CONFIRMED_REGISTERED) {
+    if (registryResult.state === TRANSACTION_EXISTENCE_STATES.AUTHORIZATION_BLOCKED) {
+      verificationStatus = 'PENDING_VERIFICATION';
+      statusCode = 'AUTHORIZATION_BLOCKED';
+    } else if (
+      registryResult.state === TRANSACTION_EXISTENCE_STATES.CONFIRMED_REGISTERED ||
+      registryResult.state === TRANSACTION_EXISTENCE_STATES.CONFIRMED_EXISTING
+    ) {
       verificationStatus = isAdtAccessible ? 'FOUND' : 'PARTIALLY_AVAILABLE';
     } else if (correlatedServices.length > 0) {
       verificationStatus = 'PARTIALLY_AVAILABLE';
@@ -459,7 +482,23 @@ export class SapTransactionDiscoveryAdapter {
         catalogServicesCount: catalogResult.totalCount
       },
       evidence,
-      provenance: 'LIVE_SAP_S21',
+      tcode,
+      provenance: (options.isMock || options.isMockFixture)
+        ? 'SIMULATED_FIXTURE'
+        : (catalogResult.isOfflineFallback
+          ? (repoMetadata.isVerified ? 'AUTHORITATIVE_DDIC_SNAPSHOT' : 'OFFLINE_DDIC_CATALOG')
+          : 'LIVE_SAP_S21'),
+      discoveryProvenance: {
+        source: (options.isMock || options.isMockFixture)
+          ? 'SIMULATED_FIXTURE'
+          : (catalogResult.isOfflineFallback
+            ? (repoMetadata.isVerified ? 'AUTHORITATIVE_DDIC_SNAPSHOT' : 'OFFLINE_DDIC_CATALOG')
+            : 'LIVE_SAP_S21'),
+        sapSystem: systemId.split('-')[0] || 'S21',
+        sapClient: client,
+        retrievalTimestamp: new Date().toISOString(),
+        label: `Authoritative S21 Discovery (${repoMetadata.isVerified ? 'DDIC Verified' : 'Gateway Corroborated'})`
+      },
       timestamp: new Date().toISOString()
     };
   }

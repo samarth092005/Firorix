@@ -1,6 +1,7 @@
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { USER_ROLES, authService, PERMISSIONS } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
+import { sanitizeProtectedFields } from '../middleware/securityFieldSanitizer.js';
 
 const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
 
@@ -23,6 +24,40 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   } = context;
 
   let requestCounter = context.requestCounter || 1;
+
+  // Tenant Verification Helper (SEC-002, SEC-005)
+  async function checkAssessmentTenant(assessmentId, resourcePath) {
+    if (!currentUser?.tenantId) return { allowed: true };
+    try {
+      const existing = await assessmentStore.getById(assessmentId);
+      if (!existing) return { allowed: true, notFound: true };
+      if (existing.tenantId && existing.tenantId !== currentUser.tenantId) {
+        if (securityAuditLogger) {
+          securityAuditLogger.logEvent({
+            actor: currentUser.id || 'anonymous',
+            tenantId: currentUser.tenantId,
+            action: SECURITY_ACTIONS.TENANT_ACCESS_VIOLATION,
+            resource: resourcePath || `/api/v1/assessments/${assessmentId}`,
+            outcome: 'DENIED',
+            details: { targetTenant: existing.tenantId, userTenant: currentUser.tenantId }
+          }).catch(() => {});
+        }
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            success: false,
+            statusCode: 'FORBIDDEN',
+            error: 'TenantAccessDenied',
+            errorMessage: `Access denied to assessment belonging to tenant "${existing.tenantId}". Current tenant is "${currentUser.tenantId}".`
+          })
+        );
+        return { allowed: false };
+      }
+      return { allowed: true, record: existing };
+    } catch {
+      return { allowed: true };
+    }
+  }
 
 
 
@@ -78,7 +113,23 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const requestId = correlationId || `REQ-ASM-${String(requestCounter++).padStart(6, '0')}`;
 
     try {
-      const record = await assessmentStore.create(payload, requestId);
+      // SEC-004 & SEC-005: Sanitize client-controlled protected security fields and enforce user/tenant context
+      const cleanPayload = sanitizeProtectedFields(payload, {
+        strict: false,
+        onViolation: (violations) => {
+          if (securityAuditLogger?.logEvent) {
+            securityAuditLogger.logEvent({
+              actor: currentUser?.id || 'anonymous',
+              tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
+              action: SECURITY_ACTIONS.UNAUTHORIZED_ACCESS_ATTEMPT || 'PROTECTED_FIELD_STRIPPED',
+              resource: url.pathname,
+              outcome: 'STRIPPED',
+              details: { detectedFields: violations }
+            }).catch(() => {});
+          }
+        }
+      });
+      const record = await assessmentStore.create(cleanPayload, requestId, currentUser);
 
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(
@@ -155,6 +206,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   // 5. GET /api/v1/assessments/:id/audit
   if (req.method === 'GET' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/audit')) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/audit'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     try {
       const auditEvents = await assessmentStore.getAuditHistory(assessmentId);
       if (auditEvents === null) {
@@ -194,6 +247,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   // 6. POST /api/v1/assessments/:id/archive
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/archive')) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/archive'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     let bodyLength = 0;
     let isAborted = false;
@@ -275,6 +330,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     !url.pathname.endsWith('/deployment-readiness')
   ) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     let bodyLength = 0;
     let isAborted = false;
@@ -319,11 +376,20 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     }
 
     try {
+      const requestedLifecycle = payload.lifecycleStatus || payload.status;
+      const cleanPayload = sanitizeProtectedFields(payload, { strict: false });
+      if (requestedLifecycle) {
+        cleanPayload.lifecycleStatus = requestedLifecycle;
+      }
+      const userCtx = (currentUser && !currentUser.isDefaultViewer) ? currentUser : null;
+      const author = payload.author || cleanPayload.author || (userCtx ? userCtx.name : null) || 'System Administrator';
+      const comment = payload.comment || cleanPayload.comment || '';
       const updated = await assessmentStore.update(
         assessmentId,
-        payload,
-        payload.author || 'System Administrator',
-        payload.comment || ''
+        cleanPayload,
+        author,
+        comment,
+        userCtx
       );
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -363,7 +429,7 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
         );
         return true;
       }
-      if (err.code === 'INVALID_STATE_TRANSITION' || err.code === 'VALIDATION_ERROR') {
+      if (err.code === 'INVALID_LIFECYCLE_TRANSITION' || err.code === 'INVALID_STATE_TRANSITION' || err.code === 'VALIDATION_ERROR') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(
           JSON.stringify({
@@ -386,6 +452,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/submit-review')) {
     if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN])) return true;
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/submit-review'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     req.on('data', (c) => (body += c));
     await new Promise((resolve) => req.on('end', resolve));
@@ -409,6 +477,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/approve')) {
     if (!requireRole([USER_ROLES.APPROVER, USER_ROLES.ADMIN, USER_ROLES.LEAD_ARCHITECT])) return true;
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/approve'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     req.on('data', (c) => (body += c));
     await new Promise((resolve) => req.on('end', resolve));
@@ -452,6 +522,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/reject')) {
     if (!requireRole([USER_ROLES.APPROVER, USER_ROLES.ADMIN])) return true;
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/reject'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     req.on('data', (c) => (body += c));
     await new Promise((resolve) => req.on('end', resolve));
@@ -472,9 +544,101 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     return true;
   }
 
+  // 10b. POST /api/v1/assessments/:id/override (Privileged & Audited Governance Override - GOV-008)
+  if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/override')) {
+    const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/override'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
+
+    const hasOverridePermission = currentUser && !currentUser.isUnauthenticated && (
+      authService.hasPermission(currentUser, PERMISSIONS.ADMIN_OVERRIDE) ||
+      authService.hasPermission(currentUser, 'Fiorify.admin.override') ||
+      (currentUser.role === USER_ROLES.ADMIN && authService.hasPermission(currentUser, PERMISSIONS.ADMIN_ACCESS))
+    );
+
+    if (!hasOverridePermission) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        statusCode: 'UNAUTHORIZED_OVERRIDE',
+        error: 'Forbidden',
+        errorMessage: 'Administrative override requires explicit authenticated ADMIN authorization with Fiorify.admin.override permission.'
+      }));
+      return true;
+    }
+
+    let body = '';
+    req.on('data', (c) => (body += c));
+    await new Promise((resolve) => req.on('end', resolve));
+
+    let payload = {};
+    if (body.trim().length > 0) {
+      try { payload = JSON.parse(body); } catch { /* ignore */ }
+    }
+
+    const validScopes = ['BUILD', 'ADD_AND_CONFIGURE'];
+    const overrideScope = payload.scope || 'BUILD';
+    if (!validScopes.includes(overrideScope)) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        statusCode: 'VALIDATION_ERROR',
+        error: 'Validation Error',
+        errorMessage: `Invalid override scope "${overrideScope}". Allowed scopes: ${validScopes.join(', ')}.`
+      }));
+      return true;
+    }
+
+    const reason = String(payload.reason || payload.overrideReason || payload.comment || '').trim();
+    if (reason.length < 10) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        statusCode: 'VALIDATION_ERROR',
+        error: 'Validation Error',
+        errorMessage: 'Governance override requires a documented business justification (minimum 10 characters).'
+      }));
+      return true;
+    }
+
+    try {
+      const updated = await assessmentStore.approve(assessmentId, currentUser, reason, true);
+      if (securityAuditLogger?.logEvent) {
+        securityAuditLogger.logEvent({
+          actor: currentUser?.id || 'admin',
+          tenantId: currentUser?.tenantId || 'DEFAULT',
+          action: SECURITY_ACTIONS.ADMIN_OVERRIDE,
+          resource: `/api/v1/assessments/${assessmentId}/override`,
+          outcome: 'GRANTED',
+          details: { reason, scope: payload.scope || 'BUILD' }
+        }).catch(() => {});
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        statusCode: 'OVERRIDE_APPROVED',
+        assessment: updated,
+        override: {
+          overriddenBy: currentUser.id || currentUser.name,
+          overriddenAt: new Date().toISOString(),
+          reason,
+          scope: payload.scope || 'BUILD'
+        }
+      }, null, 2));
+    } catch (err) {
+      const status = err.code === 'NOT_FOUND' ? 404 : ((err.code === 'SEPARATION_OF_DUTIES_VIOLATION' || err.code === 'UNAUTHORIZED_OVERRIDE') ? 403 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+    }
+    return true;
+  }
+
   // 11. GET /api/v1/assessments/:id/verify-audit
   if (req.method === 'GET' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/verify-audit')) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/verify-audit'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     try {
       const verification = await assessmentStore.verifyAuditChain(assessmentId);
       res.writeHead(verification.valid ? 200 : 400, { 'Content-Type': 'application/json' });
@@ -499,6 +663,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   if (req.method === 'PUT' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/deployment-readiness')) {
     if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN])) return true;
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/deployment-readiness'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     req.on('data', (c) => (body += c));
     await new Promise((resolve) => req.on('end', resolve));
@@ -597,6 +763,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   // 17. POST /api/v1/assessments/:id/modernization-action
   if (req.method === 'POST' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/modernization-action')) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/modernization-action'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     let body = '';
     let bodyLength = 0;
     let isAborted = false;
@@ -644,6 +812,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   // 18. GET /api/v1/assessments/:id/modernization-decisions
   if (req.method === 'GET' && url.pathname.startsWith('/api/v1/assessments/') && url.pathname.endsWith('/modernization-decisions')) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/modernization-decisions'.length));
+    const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
+    if (!tenantCheck.allowed) return true;
     try {
       const decisions = await assessmentStore.getModernizationDecisions(assessmentId);
       if (decisions === null) {
@@ -720,6 +890,33 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
 
   // 20. GET /api/v1/assessments (List Assessments)
   if (req.method === 'GET' && url.pathname === '/api/v1/assessments') {
+    const clientTenantId = url.searchParams.get('tenantId');
+    const hasAdminAccess = currentUser?.role === USER_ROLES.ADMIN ||
+      (Array.isArray(currentUser?.scopes) && currentUser?.scopes.includes('Fiorify.admin.access'));
+
+    if (clientTenantId && currentUser?.tenantId && clientTenantId !== currentUser.tenantId && !hasAdminAccess) {
+      if (securityAuditLogger?.logEvent) {
+        securityAuditLogger.logEvent({
+          actor: currentUser.id || 'anonymous',
+          tenantId: currentUser.tenantId,
+          action: SECURITY_ACTIONS.TENANT_ACCESS_VIOLATION,
+          resource: '/api/v1/assessments',
+          outcome: 'DENIED',
+          details: { targetTenant: clientTenantId, userTenant: currentUser.tenantId }
+        }).catch(() => {});
+      }
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          success: false,
+          statusCode: 'FORBIDDEN',
+          error: 'TenantAccessDenied',
+          errorMessage: `Client parameter cannot override authenticated tenant boundary "${currentUser.tenantId}".`
+        })
+      );
+      return true;
+    }
+
     const businessArea = url.searchParams.get('businessArea') || undefined;
     const status = url.searchParams.get('status') || undefined;
     const lifecycleStatus = url.searchParams.get('lifecycleStatus') || undefined;
@@ -738,7 +935,8 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
         systemId,
         search,
         sortBy,
-        sortOrder
+        sortOrder,
+        tenantId: (hasAdminAccess && clientTenantId) ? clientTenantId : currentUser?.tenantId
       });
 
       res.writeHead(200, { 'Content-Type': 'application/json' });

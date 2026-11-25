@@ -33,8 +33,10 @@
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
     "createdAt": "2026-11-06T07:58:43.599Z",
-    "updatedAt": "2026-11-13T10:30:26.407Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -84,7 +86,10 @@
         "1. Basis Team: Activate OData and ICF nodes in S21 client 200.",
         "2. Security Team: Assign business catalogue in Fiori Launchpad Content Manager.",
         "3. Functional Lead: Execute UAT testing for outgoing payments."
-      ]
+      ],
+      "businessOutcome": "ADD_AND_CONFIGURE",
+      "governanceState": null,
+      "isBusinessOutcome": true
     },
     "remediationPlan": [],
     "actionableRemediationPlan": [],
@@ -153,7 +158,11 @@
     "applicationRequirements": null,
     "discoveryMetadata": null,
     "evidenceNotes": [],
-    "leadArchitectApproval": null
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": "ADD_AND_CONFIGURE",
+    "canonicalOutcome": null
   },
   {
     "id": "ASM-1793964013891-FB50-HF72",
@@ -175,8 +184,10 @@
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
     "createdAt": "2026-11-06T11:20:13.891Z",
-    "updatedAt": "2026-11-13T10:30:26.407Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -250,7 +261,11 @@
     "applicationRequirements": null,
     "discoveryMetadata": null,
     "evidenceNotes": [],
-    "leadArchitectApproval": null
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null
   },
   {
     "id": "ASM-E2E-9406",
@@ -263,8 +278,8 @@
     "release": "SAP S/4HANA 2023",
     "classification": "STANDARD",
     "businessArea": "Sourcing & Procurement",
-    "status": "APPROVED",
-    "lifecycleStatus": "APPROVED",
+    "status": "COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
     "assessmentResult": "EXPLICIT_SUCCESSOR",
     "fitGapScore": 92,
     "scoreCoverage": 90,
@@ -285,8 +300,10 @@
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
     "createdAt": "2026-11-08T07:51:19.402Z",
-    "updatedAt": "2026-11-13T10:30:26.407Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -317,7 +334,10 @@
     "identifiedGaps": [],
     "recommendation": {
       "outcome": "ADD_AND_CONFIGURE",
-      "recommendedAction": "Deploy standard Fiori app Manage Purchase Orders"
+      "recommendedAction": "Deploy standard Fiori app Manage Purchase Orders",
+      "businessOutcome": "ADD_AND_CONFIGURE",
+      "governanceState": null,
+      "isBusinessOutcome": true
     },
     "remediationPlan": [],
     "actionableRemediationPlan": [],
@@ -363,62 +383,6 @@
         },
         "previousHash": "891bc5cb58360930daa3e55e418d0fffc1edbe2da939af3e35a4db40bb5a93de",
         "integrityHash": "e703e062602a827908dbc472b75f3d6cbe8483bb1994fab4d14e25d670eedb94"
-      },
-      {
-        "eventId": "AUD-1794564693250-64JC",
-        "timestamp": "2026-11-13T10:11:33.250Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "RECOMMENDATION_COMPLETED",
-        "newState": "PENDING_REVIEW",
-        "action": "STATE_TRANSITION",
-        "comment": "Submitted for architectural review prior to handoff approval",
-        "details": {},
-        "previousHash": "e703e062602a827908dbc472b75f3d6cbe8483bb1994fab4d14e25d670eedb94",
-        "integrityHash": "2512187a82e719e3ea3a0838e725486546c5b39826af7a1f21576bcba8186fed"
-      },
-      {
-        "eventId": "AUD-1794564693265-PQ64",
-        "timestamp": "2026-11-13T10:11:33.265Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "PENDING_REVIEW",
-        "newState": "APPROVED",
-        "action": "STATE_TRANSITION",
-        "comment": "Synchronized architect approval from generation handoff HND-1794564693231-C9E7F4",
-        "details": {},
-        "previousHash": "2512187a82e719e3ea3a0838e725486546c5b39826af7a1f21576bcba8186fed",
-        "integrityHash": "32bee6b484b99d61167a038b328cf409966757b9a7ad18c93b1642610a912603"
-      },
-      {
-        "eventId": "AUD-1794564693632-PCX3",
-        "timestamp": "2026-11-13T10:11:33.632Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "UPDATED",
-        "comment": "Synchronized architect approval from generation handoff HND-GEN-ME21N-FE8A70",
-        "details": {},
-        "previousHash": "32bee6b484b99d61167a038b328cf409966757b9a7ad18c93b1642610a912603",
-        "integrityHash": "8e51574ace90110f9110333120d43ac7d67166d7b338efe27469e50cb28a0136"
-      },
-      {
-        "eventId": "AUD-1794564693683-BH8F",
-        "timestamp": "2026-11-13T10:11:33.683Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "UPDATED",
-        "comment": "Synchronized architect approval from generation handoff HND-GEN-ME21N-2D8A56",
-        "details": {},
-        "previousHash": "8e51574ace90110f9110333120d43ac7d67166d7b338efe27469e50cb28a0136",
-        "integrityHash": "c034a0e68973c84070775894e8e4be218e6b11461a23a0e6fdc720d1ed35fdc9"
       }
     ],
     "versionHistory": [
@@ -435,20 +399,6 @@
         "lifecycleStatus": "RECOMMENDATION_COMPLETED",
         "fitGapScore": 92,
         "modifiedBy": "Lead SAP Architect"
-      },
-      {
-        "version": 3,
-        "savedAt": "2026-11-13T10:11:33.250Z",
-        "lifecycleStatus": "PENDING_REVIEW",
-        "fitGapScore": 92,
-        "modifiedBy": "Enterprise System Administrator"
-      },
-      {
-        "version": 4,
-        "savedAt": "2026-11-13T10:11:33.265Z",
-        "lifecycleStatus": "APPROVED",
-        "fitGapScore": 92,
-        "modifiedBy": "Enterprise System Administrator"
       }
     ],
     "requirement": null,
@@ -461,13 +411,11 @@
       "TSTC ME21N verified",
       "Official FAL candidate matched"
     ],
-    "leadArchitectApproval": {
-      "approved": true,
-      "approver": "Enterprise System Administrator",
-      "approverId": "USR-ADMIN-01",
-      "timestamp": "2026-11-13T10:11:33.653Z",
-      "justification": "Architect-approved custom RAP development under Clean Core Tier 2."
-    }
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": "ADD_AND_CONFIGURE",
+    "canonicalOutcome": null
   },
   {
     "id": "TEST-1",
@@ -489,8 +437,10 @@
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
     "createdAt": "2026-11-11T07:49:04.382Z",
-    "updatedAt": "2026-11-13T10:30:26.407Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -564,266 +514,37 @@
     "applicationRequirements": null,
     "discoveryMetadata": null,
     "evidenceNotes": [],
-    "leadArchitectApproval": null
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null
   },
   {
-    "id": "ASM-ME51N-F2229",
-    "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "REQ-ASM-000002",
-    "tcode": "ME51N",
+    "id": "ASM-1794850449016-VA01-P94F",
+    "tenantId": "TENANT-ALPHA",
+    "requestId": "REQ-01",
+    "tcode": "VA01",
     "systemId": "S21-200",
     "client": "200",
-    "targetRelease": "SAP S/4HANA 2023 Private Edition",
-    "release": "SAP S/4HANA 2023 Private Edition",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
     "classification": "STANDARD",
-    "businessArea": "Sourcing and Procurement",
+    "businessArea": "General Business Area",
     "status": "COMPLETED",
     "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-    "assessmentResult": "EXPLICIT_SUCCESSOR",
-    "fitGapScore": 92,
-    "scoreCoverage": 85,
-    "matchingFioriApp": {
-      "appId": "F2229",
-      "appName": "Manage Purchase Requisitions Professional",
-      "appType": "SAP Fiori elements (Transactional)",
-      "uiTechnology": "SAP Fiori elements",
-      "releaseCompatibility": "COMPATIBLE",
-      "sourceLabel": "Official SAP Fiori Apps Reference Library",
-      "businessRoles": [
-        "Purchaser (SAP_BR_PURCHASER)"
-      ],
-      "odataServices": [
-        "MM_PUR_PR_PROFNL_MAINTAIN_SRV (OData V2)"
-      ]
-    },
-    "gapsCount": 0,
-    "evidenceConfidence": "HIGH",
-    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T06:29:37.743Z",
-    "updatedAt": "2026-11-13T10:30:26.407Z",
-    "createdBy": "USR-CONS-01",
-    "creatorName": "Lead SAP Architect",
-    "creatorRole": "SAP_CONSULTANT",
-    "assessmentLevel": "TRANSACTION",
-    "parentAssessmentId": null,
-    "childAssessmentIds": [],
-    "businessProcessId": null,
-    "deploymentReadiness": {
-      "stage": "DEV_READINESS",
-      "devReady": false,
-      "qasValidated": false,
-      "businessAccepted": false,
-      "productionReady": false,
-      "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T06:30:48.911Z"
-    },
-    "description": "Create Purchase Requisition",
-    "subArea": "Purchasing",
-    "programName": "SAPLMEGUI",
-    "screenNumber": "1000",
-    "packageName": "ME",
-    "originalSystem": "SAP",
-    "softwareComponent": "S4CORE 108",
-    "rationale": "F2229 (Manage Purchase Requisitions Professional) is the official certified Fiori elements successor for ME51N/ME52N/ME53N in S/4HANA 2023 with full purchase requisition creation and approval workflows.",
-    "dimensionResults": null,
-    "dimensions": null,
-    "scoringBreakdown": null,
-    "identifiedGaps": [],
-    "recommendation": {
-      "outcome": "ADD_AND_CONFIGURE",
-      "recommendedAction": "Adopt official standard SAP Fiori application F2229. Activate OData service MM_PUR_PR_PROFNL_MAINTAIN_SRV and assign business role SAP_BR_PURCHASER.",
-      "supportingEvidence": [
-        "Designated successor in SAP Fiori Apps Reference Library.",
-        "Full support for professional requisitioning, account assignment, and approval limits."
-      ]
-    },
-    "remediationPlan": [],
-    "actionableRemediationPlan": [],
-    "governanceGuardrailsApplied": [],
-    "evidenceReferences": [],
-    "missingEvidence": [],
-    "conflictingEvidence": [],
-    "verifiedCapabilities": [],
-    "missingCapabilities": [],
-    "auditEvents": [
-      {
-        "eventId": "AUD-ME51N-INIT",
-        "timestamp": "2026-11-13T06:29:37.749Z",
-        "author": "SAP Lead Consultant",
-        "action": "CREATED",
-        "newState": "COMPLETED",
-        "comment": "Assessment created and verified against S21-200 and FAL.",
-        "actorId": "USR-CONS-01",
-        "actorRole": "SAP_CONSULTANT",
-        "previousHash": "GENESIS",
-        "integrityHash": "c114fef419914611211acd38731496048f2ce5b6335f2e33b5cabe433a6fbe56"
-      }
-    ],
-    "versionHistory": [
-      {
-        "version": 1,
-        "savedAt": "2026-11-13T06:29:37.743Z",
-        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-        "fitGapScore": 92,
-        "modifiedBy": "Lead SAP Architect"
-      }
-    ],
-    "requirement": null,
-    "candidate": null,
-    "context": null,
-    "businessContext": null,
-    "applicationRequirements": null,
-    "discoveryMetadata": null,
-    "evidenceNotes": [],
-    "leadArchitectApproval": null
-  },
-  {
-    "id": "ASM-F024-MODERN",
-    "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "REQ-ASM-000003",
-    "tcode": "F024",
-    "systemId": "S21-200",
-    "client": "200",
-    "targetRelease": "SAP S/4HANA 2023 Private Edition",
-    "release": "SAP S/4HANA 2023 Private Edition",
-    "classification": "CUSTOM",
-    "businessArea": "Sourcing and Procurement",
-    "status": "COMPLETED",
-    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-    "assessmentResult": "CUSTOM_BUILD",
-    "fitGapScore": 68,
-    "scoreCoverage": 90,
-    "matchingFioriApp": {
-      "appId": "GEN-F024-57246D",
-      "appName": "Vendor Evaluation & Purchasing Line Items",
-      "appType": "Clean Core RAP / Fiori Elements",
-      "uiTechnology": "SAP Fiori elements (RAP)",
-      "releaseCompatibility": "COMPATIBLE",
-      "sourceLabel": "Fiorify Generation Studio",
-      "businessRoles": [
-        "Purchasing Specialist (Z_BR_PURCHASING_SPEC)"
-      ],
-      "odataServices": [
-        "ZUI_PURCHASE_ORDER_ITEMS_O4 (OData V4)"
-      ]
-    },
-    "gapsCount": 2,
-    "evidenceConfidence": "HIGH",
-    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T06:29:37.750Z",
-    "updatedAt": "2026-11-13T10:30:26.407Z",
-    "createdBy": "USR-CONS-01",
-    "creatorName": "Lead SAP Architect",
-    "creatorRole": "SAP_CONSULTANT",
-    "assessmentLevel": "TRANSACTION",
-    "parentAssessmentId": null,
-    "childAssessmentIds": [],
-    "businessProcessId": null,
-    "deploymentReadiness": {
-      "stage": "DEV_READINESS",
-      "devReady": false,
-      "qasValidated": false,
-      "businessAccepted": false,
-      "productionReady": false,
-      "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T06:30:48.911Z"
-    },
-    "description": "Purchasing Line Item Process & Vendor Evaluation",
-    "subArea": "Purchasing",
-    "programName": "SAPLF024",
-    "screenNumber": "0100",
-    "packageName": "ZPUR_CORE",
-    "originalSystem": "SAP",
-    "softwareComponent": "HOME",
-    "rationale": "F024 has proprietary business logic with dynpro screens. 100% functional gap against standard Fiori catalogue. Successfully synthesized and exported via Fiorify Generation Studio (8/8 phases completed, Clean Core RAP & Fiori Elements).",
-    "dimensionResults": null,
-    "dimensions": null,
-    "scoringBreakdown": null,
-    "identifiedGaps": [],
-    "recommendation": {
-      "outcome": "BUILD",
-      "recommendedAction": "Clean Core RAP Modernization. Deploy synthesized CDS View Entity, Managed Behavior Definition, and Fiori Elements List Report.",
-      "supportingEvidence": [
-        "Generation Studio Project GEN-F024-57246D completed with 8 of 8 phases.",
-        "Zero modifications to standard SAP core.",
-        "Export bundle validated for S21-200."
-      ]
-    },
-    "remediationPlan": [],
-    "actionableRemediationPlan": [],
-    "governanceGuardrailsApplied": [],
-    "evidenceReferences": [],
-    "missingEvidence": [],
-    "conflictingEvidence": [],
-    "verifiedCapabilities": [],
-    "missingCapabilities": [],
-    "auditEvents": [
-      {
-        "eventId": "AUD-F024-INIT",
-        "timestamp": "2026-11-13T06:29:37.750Z",
-        "author": "SAP Lead Consultant",
-        "action": "EXPORT_COMPLETED",
-        "newState": "COMPLETED",
-        "comment": "Generation Studio project GEN-F024-57246D exported (100% complete).",
-        "actorId": "USR-CONS-01",
-        "actorRole": "SAP_CONSULTANT",
-        "previousHash": "GENESIS",
-        "integrityHash": "98b9788ff28118cfd195dc12e84a9f5206eff84c647f7a93f46eb86ebef3ada3"
-      }
-    ],
-    "versionHistory": [
-      {
-        "version": 1,
-        "savedAt": "2026-11-13T06:29:37.750Z",
-        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-        "fitGapScore": 68,
-        "modifiedBy": "Lead SAP Architect"
-      }
-    ],
-    "requirement": null,
-    "candidate": null,
-    "context": null,
-    "businessContext": null,
-    "applicationRequirements": null,
-    "discoveryMetadata": null,
-    "evidenceNotes": [],
-    "leadArchitectApproval": null
-  },
-  {
-    "id": "ASM-1794551736296-FB01-5A5B",
-    "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "fx-mwelrpp1-3h4vz6",
-    "tcode": "FB01",
-    "systemId": "S21-200",
-    "client": "200",
-    "targetRelease": "SAP S/4HANA 2023 Private Edition",
-    "release": "SAP S/4HANA 2023 Private Edition",
-    "classification": "STANDARD",
-    "businessArea": "General Core Processing",
-    "status": "COMPLETED",
-    "lifecycleStatus": "MATCHING_COMPLETED",
-    "assessmentResult": "EXPLICIT_SUCCESSOR",
+    "assessmentResult": "STANDARD_FIT",
     "fitGapScore": 0,
     "scoreCoverage": 50,
-    "matchingFioriApp": {
-      "appId": "F0717",
-      "appName": "Manage Journal Entries",
-      "appType": "Transactional",
-      "uiTechnology": "SAP Fiori (SAPUI5)",
-      "releaseCompatibility": "COMPATIBLE",
-      "sourceLabel": "Official SAP Apps Reference Library (MCP Assisted)",
-      "businessRoles": [],
-      "odataServices": [
-        "CA_OC_OUTPUT_REQUEST_SRV",
-        "FAC_FINANCIAL_DOCUMENT_SRV_01"
-      ]
-    },
+    "matchingFioriApp": null,
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T06:35:36.296Z",
-    "updatedAt": "2026-11-13T10:30:26.408Z",
-    "createdBy": "USR-BAEBA8D1",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
+    "createdAt": "2026-11-16T17:34:09.016Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
+    "createdBy": "USR-01",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
     "assessmentLevel": "TRANSACTION",
@@ -837,17 +558,21 @@
       "businessAccepted": false,
       "productionReady": false,
       "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T06:35:36.296Z"
+      "lastUpdated": "2026-11-16T17:34:09.016Z"
     },
-    "description": "Post Document",
+    "description": "Create Sales Order",
     "subArea": "",
-    "programName": "SAPMF05A",
-    "screenNumber": "0100",
+    "programName": "",
+    "screenNumber": "",
     "packageName": "FBAS",
     "originalSystem": "SAP",
     "softwareComponent": "S4CORE 108",
     "rationale": "",
-    "dimensionResults": null,
+    "dimensionResults": {
+      "compatibility": {
+        "status": "VERIFIED_FIT"
+      }
+    },
     "dimensions": null,
     "scoringBreakdown": null,
     "identifiedGaps": [],
@@ -862,29 +587,29 @@
     "missingCapabilities": [],
     "auditEvents": [
       {
-        "eventId": "AUD-1794551736296-T0VJ",
-        "timestamp": "2026-11-13T06:35:36.296Z",
+        "eventId": "AUD-1794850449016-IG4A",
+        "timestamp": "2026-11-16T17:34:09.016Z",
         "author": "Lead SAP Architect",
-        "actorId": "USR-BAEBA8D1",
+        "actorId": "USR-01",
         "actorRole": "SAP_CONSULTANT",
         "previousState": null,
-        "newState": "MATCHING_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
         "action": "CREATED",
         "comment": "Initial assessment record created.",
         "details": {
-          "tcode": "FB01",
+          "tcode": "VA01",
           "fitGapScore": 0,
-          "assessmentResult": "EXPLICIT_SUCCESSOR"
+          "assessmentResult": "STANDARD_FIT"
         },
         "previousHash": "GENESIS",
-        "integrityHash": "c7f9937e513e0b989748b6eb1942db3134609fa9f899e3194ddc00261b4b9265"
+        "integrityHash": "c51111e33c1eb4b31dabebd45daeed87a7c057e1c2ae9442efede0c5989dff2a"
       }
     ],
     "versionHistory": [
       {
         "version": 1,
-        "savedAt": "2026-11-13T06:35:36.296Z",
-        "lifecycleStatus": "MATCHING_COMPLETED",
+        "savedAt": "2026-11-16T17:34:09.016Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
         "fitGapScore": 0,
         "modifiedBy": "Lead SAP Architect"
       }
@@ -892,56 +617,29 @@
     "requirement": null,
     "candidate": null,
     "context": null,
-    "businessContext": {
-      "businessProcess": "General Core Processing",
-      "primaryScenario": "Operational execution of transaction FB01",
-      "selectedRequirements": [
-        "Real-time dictionary validation",
-        "Authorization check"
-      ],
-      "expectedFunctionality": [
-        "Screen navigation",
-        "Data persistence"
-      ],
-      "assessmentObjective": "Evaluate modern Fiori alternative or WebGUI feasibility for FB01 in S21.",
-      "businessCriticality": "HIGH"
-    },
-    "applicationRequirements": {
-      "relevantBusinessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
-      "knownODataService": "CA_OC_OUTPUT_REQUEST_SRV",
-      "requiredFunctionality": [
-        "Audit Logging",
-        "Real-time Validation"
-      ],
-      "knownLimitations": "",
-      "targetReleaseProfile": "SAP S/4HANA 2023 Private Edition",
-      "isUserProvidedUnverified": false
-    },
-    "discoveryMetadata": {
-      "description": "Post Document",
-      "programName": "SAPMF05A",
-      "screenNumber": "0100",
-      "packageName": "FBAS",
-      "classification": "STANDARD",
-      "originalSystem": "SAP",
-      "softwareComponent": "S4CORE 108"
-    },
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
     "evidenceNotes": [],
-    "leadArchitectApproval": null
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null
   },
   {
-    "id": "ASM-1794554210132-ST22-DCU9",
-    "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "fx-mwen8qir-60chd0",
-    "tcode": "ST22",
+    "id": "ASM-1794850449041-ME21N-MSSM",
+    "tenantId": "TENANT-BETA",
+    "requestId": "REQ-02",
+    "tcode": "ME21N",
     "systemId": "S21-200",
     "client": "200",
-    "targetRelease": "SAP S/4HANA 2023 Private Edition",
-    "release": "SAP S/4HANA 2023 Private Edition",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
     "classification": "STANDARD",
-    "businessArea": "General Core Processing",
-    "status": "APPROVED",
-    "lifecycleStatus": "APPROVED",
+    "businessArea": "General Business Area",
+    "status": "COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
     "assessmentResult": "CUSTOM_RAP_REQUIRED",
     "fitGapScore": 0,
     "scoreCoverage": 50,
@@ -949,9 +647,11 @@
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T07:16:50.133Z",
-    "updatedAt": "2026-11-13T10:30:26.408Z",
-    "createdBy": "USR-BAEBA8D1",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
+    "createdAt": "2026-11-16T17:34:09.041Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
+    "createdBy": "USR-02",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
     "assessmentLevel": "TRANSACTION",
@@ -965,27 +665,25 @@
       "businessAccepted": false,
       "productionReady": false,
       "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T07:16:50.133Z"
+      "lastUpdated": "2026-11-16T17:34:09.041Z"
     },
-    "description": "ABAP Dump Analysis (ABAP Runtime Errors)",
+    "description": "Create Purchase Order",
     "subArea": "",
-    "programName": "SAPMS380",
-    "screenNumber": "0100",
-    "packageName": "SABP",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "FBAS",
     "originalSystem": "SAP",
-    "softwareComponent": "SAP_BASIS",
-    "rationale": "Generation Studio handoff HND-1794554216426-109990 created in stage DRAFT. Architect sign-off recorded.",
-    "dimensionResults": null,
+    "softwareComponent": "S4CORE 108",
+    "rationale": "",
+    "dimensionResults": {
+      "compatibility": {
+        "status": "NO_FIT"
+      }
+    },
     "dimensions": null,
     "scoringBreakdown": null,
     "identifiedGaps": [],
-    "recommendation": {
-      "outcome": "BUILD",
-      "canonicalOutcome": "BUILD",
-      "recommendationType": "BUILD",
-      "rationale": "Generation Studio handoff HND-1794554216426-109990 created in stage DRAFT. Architect sign-off recorded.",
-      "targetTier": "TIER_2_CLOUD_DEVELOPER"
-    },
+    "recommendation": null,
     "remediationPlan": [],
     "actionableRemediationPlan": [],
     "governanceGuardrailsApplied": [],
@@ -996,280 +694,557 @@
     "missingCapabilities": [],
     "auditEvents": [
       {
-        "eventId": "AUD-1794554210133-WD0G",
-        "timestamp": "2026-11-13T07:16:50.133Z",
+        "eventId": "AUD-1794850449041-4CYJ",
+        "timestamp": "2026-11-16T17:34:09.041Z",
         "author": "Lead SAP Architect",
-        "actorId": "USR-BAEBA8D1",
+        "actorId": "USR-02",
         "actorRole": "SAP_CONSULTANT",
         "previousState": null,
         "newState": "RECOMMENDATION_COMPLETED",
         "action": "CREATED",
         "comment": "Initial assessment record created.",
         "details": {
-          "tcode": "ST22",
+          "tcode": "ME21N",
           "fitGapScore": 0,
-          "assessmentResult": "PENDING_VERIFICATION"
+          "assessmentResult": "CUSTOM_RAP_REQUIRED"
         },
         "previousHash": "GENESIS",
-        "integrityHash": "3c04281800b5f972836775aaefb030ce169b36f14def5abd60ea8bae0308cecf"
-      },
-      {
-        "eventId": "AUD-1794554216441-NE4E",
-        "timestamp": "2026-11-13T07:16:56.441Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "RECOMMENDATION_COMPLETED",
-        "newState": "PENDING_REVIEW",
-        "action": "STATE_TRANSITION",
-        "comment": "Submitted for architectural review prior to handoff approval",
-        "details": {},
-        "previousHash": "3c04281800b5f972836775aaefb030ce169b36f14def5abd60ea8bae0308cecf",
-        "integrityHash": "d601fb483ea9ea332de466afe75f46cdbc38e06ac37fc721f2be6f149321ce8c"
-      },
-      {
-        "eventId": "AUD-1794554216451-1F6F",
-        "timestamp": "2026-11-13T07:16:56.451Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "PENDING_REVIEW",
-        "newState": "APPROVED",
-        "action": "STATE_TRANSITION",
-        "comment": "Synchronized architect approval from generation handoff HND-1794554216426-109990",
-        "details": {},
-        "previousHash": "d601fb483ea9ea332de466afe75f46cdbc38e06ac37fc721f2be6f149321ce8c",
-        "integrityHash": "714e0d40e597cccb7ca70f558f9b7914ea6e32b86b26d0db22a619c6a0b60c0d"
-      },
-      {
-        "eventId": "AUD-MOD-1794554216469-344B36",
-        "timestamp": "2026-11-13T07:16:56.469Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "BUILD_PROJECT",
-        "comment": "Generation Studio handoff HND-1794554216426-109990 created in stage DRAFT. Architect sign-off recorded.",
-        "details": {
-          "actionType": "BUILD_PROJECT",
-          "handoffId": "HND-1794554216426-109990",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "previousHash": "714e0d40e597cccb7ca70f558f9b7914ea6e32b86b26d0db22a619c6a0b60c0d",
-        "integrityHash": "c1dcdaa1fadc79a58287b49dd1858c599437280ba7b0245aeaf01f884f031e6d"
-      },
-      {
-        "eventId": "AUD-1794554216677-NK64",
-        "timestamp": "2026-11-13T07:16:56.677Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "UPDATED",
-        "comment": "Synchronized architect approval from generation handoff HND-GEN-ST22-6C6674",
-        "details": {},
-        "previousHash": "c1dcdaa1fadc79a58287b49dd1858c599437280ba7b0245aeaf01f884f031e6d",
-        "integrityHash": "977f00f07bd91056e3247d75b4e5a3ad7a853007654e8d659616e4135eebe9ff"
-      },
-      {
-        "eventId": "AUD-MOD-1794554216701-A83BD0",
-        "timestamp": "2026-11-13T07:16:56.701Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "BUILD_PROJECT",
-        "comment": "Generation Studio handoff HND-GEN-ST22-6C6674 created in stage DRAFT. Architect sign-off recorded.",
-        "details": {
-          "actionType": "BUILD_PROJECT",
-          "handoffId": "HND-GEN-ST22-6C6674",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "previousHash": "977f00f07bd91056e3247d75b4e5a3ad7a853007654e8d659616e4135eebe9ff",
-        "integrityHash": "6b677e145a3047f74e019bb3d30fe2bdd3b54cf10cd260c6e3640ae74a0c5bc2"
-      },
-      {
-        "eventId": "AUD-1794554216773-PTL0",
-        "timestamp": "2026-11-13T07:16:56.773Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "UPDATED",
-        "comment": "Synchronized architect approval from generation handoff HND-GEN-ST22-322121",
-        "details": {},
-        "previousHash": "6b677e145a3047f74e019bb3d30fe2bdd3b54cf10cd260c6e3640ae74a0c5bc2",
-        "integrityHash": "86a368231e1c58f1622a35b3ebdd004418e4e8e68bc8f0b7370ae13870da7c36"
-      },
-      {
-        "eventId": "AUD-MOD-1794554216815-11D464",
-        "timestamp": "2026-11-13T07:16:56.815Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "BUILD_PROJECT",
-        "comment": "Generation Studio handoff HND-GEN-ST22-322121 created in stage DRAFT. Architect sign-off recorded.",
-        "details": {
-          "actionType": "BUILD_PROJECT",
-          "handoffId": "HND-GEN-ST22-322121",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "previousHash": "86a368231e1c58f1622a35b3ebdd004418e4e8e68bc8f0b7370ae13870da7c36",
-        "integrityHash": "9fa8cc2ba299311585e582636b397a707e19721c8b093ebed1d4786e5819b1ad"
-      },
-      {
-        "eventId": "AUD-1794556206730-PH15",
-        "timestamp": "2026-11-13T07:50:06.730Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "UPDATED",
-        "comment": "Synchronized architect approval from generation handoff HND-1794556206709-39140E",
-        "details": {},
-        "previousHash": "9fa8cc2ba299311585e582636b397a707e19721c8b093ebed1d4786e5819b1ad",
-        "integrityHash": "61661553c069fe446105a51b0e1301fb20572b7e6d1d49515da22b7ee9b21f73"
-      },
-      {
-        "eventId": "AUD-MOD-1794556206747-5A34D1",
-        "timestamp": "2026-11-13T07:50:06.747Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "BUILD_PROJECT",
-        "comment": "Generation Studio handoff HND-1794556206709-39140E created in stage DRAFT. Architect sign-off recorded.",
-        "details": {
-          "actionType": "BUILD_PROJECT",
-          "handoffId": "HND-1794556206709-39140E",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "previousHash": "61661553c069fe446105a51b0e1301fb20572b7e6d1d49515da22b7ee9b21f73",
-        "integrityHash": "de707ff2fde48571af77c2d69a6b9120dcf71b45af6332df40bdaa1024bc69b7"
+        "integrityHash": "224d2b0aa07cf20f0fe8db71929a3d9d5e194bed55e09afa4c140f25b6d7ba09"
       }
     ],
     "versionHistory": [
       {
         "version": 1,
-        "savedAt": "2026-11-13T07:16:50.133Z",
+        "savedAt": "2026-11-16T17:34:09.041Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 0,
+        "modifiedBy": "Lead SAP Architect"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [],
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null
+  },
+  {
+    "id": "ASM-1794850449095-FB01-7I7Y",
+    "tenantId": "TENANT-GAMMA",
+    "requestId": "REQ-03",
+    "tcode": "FB01",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "General Business Area",
+    "status": "APPROVED",
+    "lifecycleStatus": "APPROVED",
+    "assessmentResult": "CUSTOM_RAP_REQUIRED",
+    "fitGapScore": 0,
+    "scoreCoverage": 50,
+    "matchingFioriApp": null,
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
+    "createdAt": "2026-11-16T17:34:09.095Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
+    "createdBy": "USR-01",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-16T17:34:09.095Z"
+    },
+    "description": "Post Document",
+    "subArea": "",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "FBAS",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "",
+    "dimensionResults": {
+      "compatibility": {
+        "status": "NO_FIT"
+      }
+    },
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": null,
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794850449095-E6WR",
+        "timestamp": "2026-11-16T17:34:09.095Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "FB01",
+          "fitGapScore": 0,
+          "assessmentResult": "CUSTOM_RAP_REQUIRED"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "12e14673d58b6ffe50d1f8efdec8e30f7fab20a68bdbb91c4a0a60e845519ebd"
+      },
+      {
+        "eventId": "AUD-1794850449133-OTQ5",
+        "timestamp": "2026-11-16T17:34:09.133Z",
+        "author": "USR-ARCH",
+        "actorId": "USR-ARCH",
+        "actorRole": "LEAD_ARCHITECT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "PENDING_REVIEW",
+        "action": "STATE_TRANSITION",
+        "comment": "Submitted for architectural review prior to handoff approval",
+        "details": {},
+        "previousHash": "12e14673d58b6ffe50d1f8efdec8e30f7fab20a68bdbb91c4a0a60e845519ebd",
+        "integrityHash": "3f67873a224d46f7ac83aceb080892b9ccc5f759604b33c6bd7c49baf34bbce0"
+      },
+      {
+        "eventId": "AUD-1794850449159-TOX5",
+        "timestamp": "2026-11-16T17:34:09.159Z",
+        "author": "USR-ARCH",
+        "actorId": "USR-ARCH",
+        "actorRole": "LEAD_ARCHITECT",
+        "previousState": "PENDING_REVIEW",
+        "newState": "APPROVED",
+        "action": "STATE_TRANSITION",
+        "comment": "Synchronized architect approval from generation handoff HND-1794850449119-FCE693",
+        "details": {},
+        "previousHash": "3f67873a224d46f7ac83aceb080892b9ccc5f759604b33c6bd7c49baf34bbce0",
+        "integrityHash": "3a4302362b4ba4895328f1b7d2eaceb3819e47d20f2bc014b0b652c2fccfbd32"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-16T17:34:09.095Z",
         "lifecycleStatus": "RECOMMENDATION_COMPLETED",
         "fitGapScore": 0,
         "modifiedBy": "Lead SAP Architect"
       },
       {
         "version": 2,
-        "savedAt": "2026-11-13T07:16:56.441Z",
+        "savedAt": "2026-11-16T17:34:09.133Z",
         "lifecycleStatus": "PENDING_REVIEW",
         "fitGapScore": 0,
-        "modifiedBy": "Enterprise System Administrator"
+        "modifiedBy": "USR-ARCH"
       },
       {
         "version": 3,
-        "savedAt": "2026-11-13T07:16:56.451Z",
+        "savedAt": "2026-11-16T17:34:09.159Z",
         "lifecycleStatus": "APPROVED",
         "fitGapScore": 0,
-        "modifiedBy": "Enterprise System Administrator"
+        "modifiedBy": "USR-ARCH"
       }
     ],
     "requirement": null,
     "candidate": null,
     "context": null,
-    "businessContext": {
-      "businessProcess": "General Core Processing",
-      "primaryScenario": "Operational execution of transaction ST22",
-      "selectedRequirements": [
-        "Real-time dictionary validation",
-        "Authorization check"
-      ],
-      "expectedFunctionality": [
-        "Screen navigation",
-        "Data persistence"
-      ],
-      "assessmentObjective": "Evaluate modern Fiori alternative or WebGUI feasibility for ST22 in S21.",
-      "businessCriticality": "HIGH"
-    },
-    "applicationRequirements": {
-      "relevantBusinessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
-      "knownODataService": "Service binding determined by FAL",
-      "requiredFunctionality": [
-        "Audit Logging",
-        "Real-time Validation"
-      ],
-      "knownLimitations": "",
-      "targetReleaseProfile": "SAP S/4HANA 2023 Private Edition",
-      "isUserProvidedUnverified": false
-    },
-    "discoveryMetadata": {
-      "description": "ABAP Dump Analysis (ABAP Runtime Errors)",
-      "programName": "SAPMS380",
-      "screenNumber": "0100",
-      "packageName": "SABP",
-      "classification": "STANDARD",
-      "originalSystem": "SAP",
-      "softwareComponent": "SAP_BASIS"
-    },
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
     "evidenceNotes": [],
     "leadArchitectApproval": {
       "approved": true,
-      "approver": "Enterprise System Administrator",
-      "approverId": "USR-ADMIN-01",
-      "timestamp": "2026-11-13T07:50:06.709Z",
-      "justification": "Proprietary transaction ST22 with 0 standard Fiori successor coverage. Custom RAP List Report required."
-    }
+      "approverId": "USR-ARCH",
+      "approverName": "USR-ARCH",
+      "approvedAt": "2026-11-16T17:34:09.159Z",
+      "decision": "APPROVED",
+      "scope": "BUILD",
+      "isOverride": false,
+      "signature": "sig:v1:f3801cb1e5c91efcb0975fab02e4b6bb521c7459528bc7b944507737cc565a69",
+      "signatureAlgorithm": "HMAC-SHA256",
+      "canonicalPayload": {
+        "assessmentId": "ASM-1794850449095-FB01-7I7Y",
+        "tenantId": "TENANT-GAMMA",
+        "specificationVersion": "1.0.0",
+        "artifactManifestHash": "c78432ea9b48a154e6594698ccbd2fe570a85d17f55d99da30af1b542ff94b77",
+        "targetSystem": "S21-200",
+        "sapClient": "200",
+        "approverId": "USR-ARCH",
+        "approvalScope": "BUILD",
+        "assessmentVersion": 1,
+        "expiresAt": "2027-02-14T17:34:09.157Z"
+      }
+    },
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null
   },
   {
-    "id": "ASM-1794562374225-F2665-I8WS",
+    "id": "ASM-1794850449207-VF01-9S1X",
     "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "fx-mwes3pz6-7u7ngc",
-    "tcode": "F2665",
+    "requestId": "REQ-SOD",
+    "tcode": "VF01",
     "systemId": "S21-200",
     "client": "200",
-    "targetRelease": "SAP S/4HANA 2023 Private Edition",
-    "release": "SAP S/4HANA 2023 Private Edition",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
     "classification": "STANDARD",
-    "businessArea": "General Core Processing",
-    "status": "COMPLETED",
-    "lifecycleStatus": "MATCHING_COMPLETED",
-    "assessmentResult": "EXPLICIT_SUCCESSOR",
+    "businessArea": "General Business Area",
+    "status": "PENDING_REVIEW",
+    "lifecycleStatus": "PENDING_REVIEW",
+    "assessmentResult": "STANDARD_FIT",
     "fitGapScore": 0,
     "scoreCoverage": 50,
-    "matchingFioriApp": {
-      "appId": "F2665",
-      "appName": "Schedule BOP Run",
-      "appType": "Transactional",
-      "uiTechnology": "SAP Fiori: Generic Job Scheduling Framework",
-      "releaseCompatibility": "COMPATIBLE",
-      "sourceLabel": "Official SAP Apps Reference Library (MCP Assisted)",
-      "businessRoles": [],
-      "odataServices": [
-        "APJ_JOB_MANAGEMENT_SRV"
-      ]
-    },
+    "matchingFioriApp": null,
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
     "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T09:32:54.226Z",
-    "updatedAt": "2026-11-13T10:30:26.408Z",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
+    "createdAt": "2026-11-16T17:34:09.208Z",
+    "updatedAt": "2026-11-16T17:34:09.265Z",
+    "createdBy": "USR-CONS-42",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-16T17:34:09.208Z"
+    },
+    "description": "Create Billing Document",
+    "subArea": "",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "FBAS",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "",
+    "dimensionResults": {
+      "compatibility": {
+        "status": "VERIFIED_FIT"
+      }
+    },
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": null,
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794850449208-CE1O",
+        "timestamp": "2026-11-16T17:34:09.208Z",
+        "author": "Consultant Sam",
+        "actorId": "USR-CONS-42",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "VF01",
+          "fitGapScore": 0,
+          "assessmentResult": "STANDARD_FIT"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "36a19931222dae486100748b2246c6d00909a4feda3a0c2925c9a57366d8d7c3"
+      },
+      {
+        "eventId": "AUD-1794850449226-9FPL",
+        "timestamp": "2026-11-16T17:34:09.226Z",
+        "author": "Consultant Sam",
+        "actorId": "USR-CONS-42",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "PENDING_REVIEW",
+        "action": "SUBMITTED_FOR_REVIEW",
+        "comment": "Submitted",
+        "details": {},
+        "previousHash": "36a19931222dae486100748b2246c6d00909a4feda3a0c2925c9a57366d8d7c3",
+        "integrityHash": "03782e8fe60f5e5252c3cafb891883c9ba670ffe622342e24ddcabe0fa26d283"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-16T17:34:09.208Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 0,
+        "modifiedBy": "Consultant Sam"
+      },
+      {
+        "version": 2,
+        "savedAt": "2026-11-16T17:34:09.226Z",
+        "lifecycleStatus": "PENDING_REVIEW",
+        "fitGapScore": 0,
+        "modifiedBy": "Consultant Sam"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [],
+    "leadArchitectApproval": null,
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null
+  },
+  {
+    "id": "ASM-1794850449266-VA02-AZVE",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-SOD-2",
+    "tcode": "VA02",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "release": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "General Business Area",
+    "status": "APPROVED",
+    "lifecycleStatus": "APPROVED",
+    "assessmentResult": "STANDARD_FIT",
+    "fitGapScore": 0,
+    "scoreCoverage": 50,
+    "matchingFioriApp": null,
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
+    "legacyOriginalOutcome": null,
+    "migrationRationale": null,
+    "createdAt": "2026-11-16T17:34:09.266Z",
+    "updatedAt": "2026-11-16T17:34:09.306Z",
+    "createdBy": "USR-CONS-55",
+    "creatorName": "Consultant Alex",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-16T17:34:09.266Z"
+    },
+    "description": "Change Sales Order",
+    "subArea": "",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "FBAS",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "",
+    "dimensionResults": {
+      "compatibility": {
+        "status": "VERIFIED_FIT"
+      }
+    },
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": null,
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794850449266-FTIM",
+        "timestamp": "2026-11-16T17:34:09.266Z",
+        "author": "Consultant Alex",
+        "actorId": "USR-CONS-55",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "VA02",
+          "fitGapScore": 0,
+          "assessmentResult": "STANDARD_FIT"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "2f96c4b357bcef01739a40cd9f2ef08e19aef36e68772e9ff2008b27ccb9c7f3"
+      },
+      {
+        "eventId": "AUD-1794850449282-1Y5F",
+        "timestamp": "2026-11-16T17:34:09.282Z",
+        "author": "Consultant Alex",
+        "actorId": "USR-CONS-55",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "PENDING_REVIEW",
+        "action": "SUBMITTED_FOR_REVIEW",
+        "comment": "Submitted",
+        "details": {},
+        "previousHash": "2f96c4b357bcef01739a40cd9f2ef08e19aef36e68772e9ff2008b27ccb9c7f3",
+        "integrityHash": "25f010476710b8cb1583583f2fbb17256444b1dacc7ef6957ec568ebb8eb1aa5"
+      },
+      {
+        "eventId": "AUD-1794850449306-L7UI",
+        "timestamp": "2026-11-16T17:34:09.306Z",
+        "author": "Approver Dana",
+        "actorId": "USR-APPR-99",
+        "actorRole": "APPROVER",
+        "previousState": "PENDING_REVIEW",
+        "newState": "APPROVED",
+        "action": "APPROVED",
+        "comment": "Formally approved",
+        "details": {},
+        "previousHash": "25f010476710b8cb1583583f2fbb17256444b1dacc7ef6957ec568ebb8eb1aa5",
+        "integrityHash": "7db359952a5c018af98e486b463994f5a1d1b64195379c358342f9c2195b8fd3"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-16T17:34:09.266Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 0,
+        "modifiedBy": "Consultant Alex"
+      },
+      {
+        "version": 2,
+        "savedAt": "2026-11-16T17:34:09.282Z",
+        "lifecycleStatus": "PENDING_REVIEW",
+        "fitGapScore": 0,
+        "modifiedBy": "Consultant Alex"
+      },
+      {
+        "version": 3,
+        "savedAt": "2026-11-16T17:34:09.306Z",
+        "lifecycleStatus": "APPROVED",
+        "fitGapScore": 0,
+        "modifiedBy": "Approver Dana"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": [],
+    "leadArchitectApproval": {
+      "approved": true,
+      "approverId": "USR-APPR-99",
+      "approverName": "Approver Dana",
+      "approvedAt": "2026-11-16T17:34:09.306Z",
+      "decision": "APPROVED",
+      "scope": "ADD_AND_CONFIGURE",
+      "isOverride": false,
+      "signature": "sig:v1:30372734aebc06be3df3b7de4f8f71017b395b531c85aa0a422fdfab7df9dba4",
+      "signatureAlgorithm": "HMAC-SHA256",
+      "canonicalPayload": {
+        "assessmentId": "ASM-1794850449266-VA02-AZVE",
+        "tenantId": "DEFAULT-TENANT-S21",
+        "specificationVersion": "1.0.0",
+        "artifactManifestHash": "d6063ed3a3eb3b2391ebbad804472e2254f112b389cee3a29a48b1ff2f22365d",
+        "targetSystem": "S21-200",
+        "sapClient": "200",
+        "approverId": "USR-APPR-99",
+        "approvalScope": "BUILD",
+        "assessmentVersion": 1,
+        "expiresAt": "2027-02-14T17:34:09.306Z"
+      }
+    },
+    "modernizationDecisions": [],
+    "modernizationDecision": null,
+    "outcome": null,
+    "canonicalOutcome": null,
+    "action": "APPROVED",
+    "isOverride": false,
+    "governanceReview": {
+      "approvedBy": "USR-APPR-99",
+      "approvedByName": "Approver Dana",
+      "approvedAt": "2026-11-16T17:34:09.306Z",
+      "decision": "APPROVED",
+      "isOverride": false,
+      "comments": "Formally approved"
+    },
+    "approvalSignature": "sig:v1:30372734aebc06be3df3b7de4f8f71017b395b531c85aa0a422fdfab7df9dba4"
+  },
+  {
+    "id": "ASM-MOD-TEST-001",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-ASM-110711",
+    "tcode": "F-53",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "Financial Accounting",
+    "status": "RECOMMENDATION_COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+    "assessmentResult": "EXPLICIT_SUCCESSOR",
+    "fitGapScore": 82,
+    "scoreCoverage": 50,
+    "matchingFioriApp": {
+      "appId": "F1367",
+      "appName": "Manage Journal Entries",
+      "appType": "SAP Fiori elements",
+      "uiTechnology": "SAP Fiori elements",
+      "releaseCompatibility": "COMPATIBLE",
+      "sourceLabel": "Official SAP Fiori Apps Reference Library",
+      "businessRoles": [],
+      "odataServices": []
+    },
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-10T15:05:10.711Z",
+    "updatedAt": "2026-11-11T09:38:03.180Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1284,307 +1259,24 @@
       "businessAccepted": false,
       "productionReady": false,
       "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T09:33:39.609Z"
+      "lastUpdated": "2026-11-10T15:05:11.021Z"
     },
-    "description": "Post Outgoing Payments",
-    "subArea": "",
-    "programName": "SAPLUISCM_GEN_APPS",
-    "screenNumber": "0100",
-    "packageName": "UISCM_GEN_APPS",
-    "originalSystem": "SAP",
-    "softwareComponent": "S4CORE 108",
-    "rationale": "",
-    "dimensionResults": null,
-    "dimensions": null,
-    "scoringBreakdown": null,
-    "identifiedGaps": [],
-    "recommendation": null,
-    "remediationPlan": [],
-    "actionableRemediationPlan": [],
-    "governanceGuardrailsApplied": [],
-    "evidenceReferences": [],
-    "missingEvidence": [],
-    "conflictingEvidence": [],
-    "verifiedCapabilities": [],
-    "missingCapabilities": [],
-    "auditEvents": [
-      {
-        "eventId": "AUD-1794562374226-GYBO",
-        "timestamp": "2026-11-13T09:32:54.226Z",
-        "author": "Lead SAP Architect",
-        "actorId": "USR-BAEBA8D1",
-        "actorRole": "SAP_CONSULTANT",
-        "previousState": null,
-        "newState": "MATCHING_COMPLETED",
-        "action": "CREATED",
-        "comment": "Initial assessment record created.",
-        "details": {
-          "tcode": "F2665",
-          "fitGapScore": 0,
-          "assessmentResult": "EXPLICIT_SUCCESSOR"
-        },
-        "previousHash": "GENESIS",
-        "integrityHash": "c674a4cc1b0808edc7618b1c3108d2a46b225b733fff51659ebcb46c00380f2d"
-      },
-      {
-        "eventId": "AUD-MOD-1794562419609-8F695D",
-        "timestamp": "2026-11-13T09:33:39.609Z",
-        "author": "Enterprise System Administrator",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "MATCHING_COMPLETED",
-        "newState": "MATCHING_COMPLETED",
-        "action": "CONFIGURE_ADOPT_READINESS",
-        "comment": "Modernization Decision Stage 4: Recorded adoption readiness checklist (4/4 prerequisites acknowledged) for S21-200 client 200.",
-        "details": {
-          "actionType": "CONFIGURE_ADOPT_READINESS",
-          "checklist": {
-            "pfcgRole": "VERIFIED",
-            "flpCatalog": "VERIFIED",
-            "odataMaint": "VERIFIED",
-            "sicfNode": "VERIFIED"
-          },
-          "tcode": "F2665",
-          "appId": "F2665",
-          "systemId": "S21-200",
-          "client": "200",
-          "role": "SAP_BR_ORDER_FULFILLMNT_MNGR",
-          "odataService": "APJ_JOB_MANAGEMENT_SRV",
-          "acknowledgedCount": 4,
-          "totalSteps": 4
-        },
-        "previousHash": "c674a4cc1b0808edc7618b1c3108d2a46b225b733fff51659ebcb46c00380f2d",
-        "integrityHash": "b071486caa0bd234cbf615bf85e4f392ac396200a298d9375c655e7e6397f193"
-      }
-    ],
-    "versionHistory": [
-      {
-        "version": 1,
-        "savedAt": "2026-11-13T09:32:54.226Z",
-        "lifecycleStatus": "MATCHING_COMPLETED",
-        "fitGapScore": 0,
-        "modifiedBy": "Lead SAP Architect"
-      }
-    ],
-    "requirement": null,
-    "candidate": null,
-    "context": null,
-    "businessContext": {
-      "businessProcess": "General Core Processing",
-      "primaryScenario": "Operational execution of transaction F2665",
-      "selectedRequirements": [
-        "Real-time dictionary validation",
-        "Authorization check"
-      ],
-      "expectedFunctionality": [
-        "Screen navigation",
-        "Data persistence"
-      ],
-      "assessmentObjective": "Evaluate modern Fiori alternative or WebGUI feasibility for F2665 in S21.",
-      "businessCriticality": "HIGH"
-    },
-    "applicationRequirements": {
-      "relevantBusinessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
-      "knownODataService": "APJ_JOB_MANAGEMENT_SRV",
-      "requiredFunctionality": [
-        "Audit Logging",
-        "Real-time Validation"
-      ],
-      "knownLimitations": "",
-      "targetReleaseProfile": "SAP S/4HANA 2023 Private Edition",
-      "isUserProvidedUnverified": false
-    },
-    "discoveryMetadata": {
-      "description": "Schedule BOP Run",
-      "programName": "SAPLUISCM_GEN_APPS",
-      "screenNumber": "0100",
-      "packageName": "UISCM_GEN_APPS",
-      "classification": "STANDARD",
-      "originalSystem": "SAP",
-      "softwareComponent": "S4CORE 108"
-    },
-    "evidenceNotes": [],
-    "leadArchitectApproval": null
-  },
-  {
-    "id": "ASM-1794564783619-F_31-DZWY",
-    "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "fx-mwetjd2u-wk783p",
-    "tcode": "F-31",
-    "systemId": "S21-200",
-    "client": "200",
-    "targetRelease": "SAP S/4HANA 2023 Private Edition",
-    "release": "SAP S/4HANA 2023 Private Edition",
-    "classification": "STANDARD",
-    "businessArea": "General Core Processing",
-    "status": "COMPLETED",
-    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-    "assessmentResult": "PENDING_VERIFICATION",
-    "fitGapScore": 0,
-    "scoreCoverage": 50,
-    "matchingFioriApp": null,
-    "gapsCount": 0,
-    "evidenceConfidence": "MEDIUM",
-    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T10:13:03.619Z",
-    "updatedAt": "2026-11-13T10:30:26.408Z",
-    "createdBy": "USR-BAEBA8D1",
-    "creatorName": "Lead SAP Architect",
-    "creatorRole": "SAP_CONSULTANT",
-    "assessmentLevel": "TRANSACTION",
-    "parentAssessmentId": null,
-    "childAssessmentIds": [],
-    "businessProcessId": null,
-    "deploymentReadiness": {
-      "stage": "DEV_READINESS",
-      "devReady": false,
-      "qasValidated": false,
-      "businessAccepted": false,
-      "productionReady": false,
-      "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T10:13:03.619Z"
-    },
-    "description": "Clear Customer",
-    "subArea": "",
-    "programName": "SAPLFIBP",
-    "screenNumber": "0100",
-    "packageName": "FIBP",
-    "originalSystem": "SAP",
-    "softwareComponent": "S4CORE 108",
-    "rationale": "",
-    "dimensionResults": null,
-    "dimensions": null,
-    "scoringBreakdown": null,
-    "identifiedGaps": [],
-    "recommendation": null,
-    "remediationPlan": [],
-    "actionableRemediationPlan": [],
-    "governanceGuardrailsApplied": [],
-    "evidenceReferences": [],
-    "missingEvidence": [],
-    "conflictingEvidence": [],
-    "verifiedCapabilities": [],
-    "missingCapabilities": [],
-    "auditEvents": [
-      {
-        "eventId": "AUD-1794564783619-GXY4",
-        "timestamp": "2026-11-13T10:13:03.619Z",
-        "author": "Lead SAP Architect",
-        "actorId": "USR-BAEBA8D1",
-        "actorRole": "SAP_CONSULTANT",
-        "previousState": null,
-        "newState": "RECOMMENDATION_COMPLETED",
-        "action": "CREATED",
-        "comment": "Initial assessment record created.",
-        "details": {
-          "tcode": "F-31",
-          "fitGapScore": 0,
-          "assessmentResult": "PENDING_VERIFICATION"
-        },
-        "previousHash": "GENESIS",
-        "integrityHash": "c165d8e18840b2bcd3822f0949f0d2684185637cba4651e86d0061364be7cc7f"
-      }
-    ],
-    "versionHistory": [
-      {
-        "version": 1,
-        "savedAt": "2026-11-13T10:13:03.619Z",
-        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-        "fitGapScore": 0,
-        "modifiedBy": "Lead SAP Architect"
-      }
-    ],
-    "requirement": null,
-    "candidate": null,
-    "context": null,
-    "businessContext": {
-      "businessProcess": "General Core Processing",
-      "primaryScenario": "Operational execution of transaction F-31",
-      "selectedRequirements": [
-        "Real-time dictionary validation",
-        "Authorization check"
-      ],
-      "expectedFunctionality": [
-        "Screen navigation",
-        "Data persistence"
-      ],
-      "assessmentObjective": "Evaluate modern Fiori alternative or WebGUI feasibility for F-31 in S21.",
-      "businessCriticality": "HIGH"
-    },
-    "applicationRequirements": {
-      "relevantBusinessRole": "SAP_BR_BUSINESS_PROCESS_SPECIALIST",
-      "knownODataService": "Service binding determined by FAL",
-      "requiredFunctionality": [
-        "Audit Logging",
-        "Real-time Validation"
-      ],
-      "knownLimitations": "",
-      "targetReleaseProfile": "SAP S/4HANA 2023 Private Edition",
-      "isUserProvidedUnverified": false
-    },
-    "discoveryMetadata": {
-      "description": "Post Outgoing Payments",
-      "programName": "SAPLFIBP",
-      "screenNumber": "0100",
-      "packageName": "FIBP",
-      "classification": "STANDARD",
-      "originalSystem": "SAP",
-      "softwareComponent": "S4CORE 108"
-    },
-    "evidenceNotes": [],
-    "leadArchitectApproval": null
-  },
-  {
-    "id": "ASM-1794565826408-F_31-7NMP",
-    "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "REQ-ASM-000001",
-    "tcode": "F-31",
-    "systemId": "S21-200",
-    "client": "200",
-    "targetRelease": "SAP S/4HANA 2023",
-    "release": "SAP S/4HANA 2023",
-    "classification": "STANDARD",
-    "businessArea": "General Business Area",
-    "status": "COMPLETED",
-    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-    "assessmentResult": "PENDING_VERIFICATION",
-    "fitGapScore": 0,
-    "scoreCoverage": 50,
-    "matchingFioriApp": null,
-    "gapsCount": 0,
-    "evidenceConfidence": "MEDIUM",
-    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T10:30:26.409Z",
-    "updatedAt": "2026-11-13T10:30:26.409Z",
-    "createdBy": "USR-BAEBA8D1",
-    "creatorName": "Lead SAP Architect",
-    "creatorRole": "SAP_CONSULTANT",
-    "assessmentLevel": "TRANSACTION",
-    "parentAssessmentId": null,
-    "childAssessmentIds": [],
-    "businessProcessId": null,
-    "deploymentReadiness": {
-      "stage": "DEV_READINESS",
-      "devReady": false,
-      "qasValidated": false,
-      "businessAccepted": false,
-      "productionReady": false,
-      "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T10:30:26.409Z"
-    },
-    "description": "Clear Customer",
+    "description": "Assessment for F-53",
     "subArea": "",
     "programName": "",
     "screenNumber": "",
-    "packageName": "FBAS",
+    "packageName": "",
     "originalSystem": "SAP",
     "softwareComponent": "S4CORE 108",
-    "rationale": "",
+    "rationale": "Standard Fiori application F0773 matches outgoing payment processing.",
     "dimensionResults": null,
     "dimensions": null,
     "scoringBreakdown": null,
     "identifiedGaps": [],
-    "recommendation": null,
+    "recommendation": {
+      "outcome": "ADOPT",
+      "rationale": "Standard Fiori application F0773 matches outgoing payment processing."
+    },
     "remediationPlan": [],
     "actionableRemediationPlan": [],
     "governanceGuardrailsApplied": [],
@@ -1595,8 +1287,8 @@
     "missingCapabilities": [],
     "auditEvents": [
       {
-        "eventId": "AUD-1794565826409-2994",
-        "timestamp": "2026-11-13T10:30:26.409Z",
+        "eventId": "AUD-1794323110711-SHLB",
+        "timestamp": "2026-11-10T15:05:10.711Z",
         "author": "Lead SAP Architect",
         "actorId": "USR-BAEBA8D1",
         "actorRole": "SAP_CONSULTANT",
@@ -1605,20 +1297,178 @@
         "action": "CREATED",
         "comment": "Initial assessment record created.",
         "details": {
-          "tcode": "F-31",
-          "fitGapScore": 0,
-          "assessmentResult": "PENDING_VERIFICATION"
+          "tcode": "F-53",
+          "fitGapScore": 82,
+          "assessmentResult": "EXPLICIT_SUCCESSOR"
         },
         "previousHash": "GENESIS",
-        "integrityHash": "52039552bd0f645ea2b44af478bf4a674a3c3251eb43acc7bfecac5304ded2b2"
+        "integrityHash": "a41dc3da17a51e2aa45a0e2633e6d40daecf275713d42d3b933755f192f6ef27"
+      },
+      {
+        "eventId": "AUD-MOD-1794323110794-BD6133",
+        "timestamp": "2026-11-10T15:05:10.793Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CONFIGURE_ADOPT_READINESS",
+        "comment": "Configured initial enablement prerequisites for F0773.",
+        "details": {
+          "actionType": "CONFIGURE_ADOPT_READINESS",
+          "checklist": {
+            "productReleaseCompatibility": "VERIFIED",
+            "odataServices": "VERIFIED",
+            "serviceRegistration": "PENDING",
+            "icfUi5Services": "PENDING",
+            "systemAlias": "VERIFIED",
+            "businessCatalogue": "PENDING",
+            "pfcgBusinessRoles": "PENDING",
+            "launchpadAvailability": "NOT_VERIFIED",
+            "userAuthorization": "NOT_VERIFIED"
+          }
+        },
+        "previousHash": "a41dc3da17a51e2aa45a0e2633e6d40daecf275713d42d3b933755f192f6ef27",
+        "integrityHash": "e9d0fc8d8dbcf39fcde9f9cc082b97326e90de9191d9b018a28536649233f14b"
+      },
+      {
+        "eventId": "AUD-MOD-1794323110822-8B96BD",
+        "timestamp": "2026-11-10T15:05:10.822Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "EXTEND_PLAN",
+        "comment": "Saved Key User extension specification for F0773.",
+        "details": {
+          "actionType": "EXTEND_PLAN",
+          "targetApp": "F0773",
+          "tier": "TIER_1_KEY_USER",
+          "cleanCoreTier": "TIER_1_KEY_USER",
+          "notes": "Key User custom field addition for bank clearing reference.",
+          "missingCapabilities": [
+            "Proprietary settlement validation rule"
+          ]
+        },
+        "previousHash": "e9d0fc8d8dbcf39fcde9f9cc082b97326e90de9191d9b018a28536649233f14b",
+        "integrityHash": "15a428def2d5d0f20e3136fc7de8a7a3962fc4d4cf67bed9743aa3a7ea7ef5af"
+      },
+      {
+        "eventId": "AUD-MOD-1794323110942-EDCB2C",
+        "timestamp": "2026-11-10T15:05:10.942Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Modernization action BUILD_PROJECT recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "leadArchitectApproval": true,
+          "architectApproved": true,
+          "architectName": "Chief Enterprise Architect",
+          "justification": "Strategic decision to replace dynpro F-53 with proprietary RAP clearing pipeline."
+        },
+        "previousHash": "15a428def2d5d0f20e3136fc7de8a7a3962fc4d4cf67bed9743aa3a7ea7ef5af",
+        "integrityHash": "8415ded3f0a390ec8aa78d4deeddb21529511730b2abad8a7f3f20cac32c6be9"
+      },
+      {
+        "eventId": "AUD-MOD-1794323110968-37CF2B",
+        "timestamp": "2026-11-10T15:05:10.968Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "ADD_FOUND",
+        "comment": "Modernization action ADD_FOUND recorded.",
+        "details": {
+          "actionType": "ADD_FOUND",
+          "appId": "F1367",
+          "appName": "Manage Journal Entries",
+          "uiTechnology": "SAP Fiori elements",
+          "releaseCompatibility": "COMPATIBLE",
+          "sourceLabel": "Official SAP Fiori Apps Reference Library"
+        },
+        "previousHash": "8415ded3f0a390ec8aa78d4deeddb21529511730b2abad8a7f3f20cac32c6be9",
+        "integrityHash": "a8e03d5c880c77d390cc5befcd3905f9470b12860d5aeba49803f081a9a1eb8b"
+      },
+      {
+        "eventId": "AUD-MOD-1794323110993-FA7E97",
+        "timestamp": "2026-11-10T15:05:10.993Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "ADD_FOUND",
+        "comment": "Modernization action ADD_FOUND recorded.",
+        "details": {
+          "actionType": "ADD_FOUND",
+          "appId": "F1367",
+          "appName": "Manage Journal Entries"
+        },
+        "previousHash": "a8e03d5c880c77d390cc5befcd3905f9470b12860d5aeba49803f081a9a1eb8b",
+        "integrityHash": "de5bb896efcbee405fc21c06fa566d84eb081a066dbb0a9c226b0dff8d5f4e00"
+      },
+      {
+        "eventId": "AUD-MOD-1794323111021-518C22",
+        "timestamp": "2026-11-10T15:05:11.021Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CONFIGURE_ADOPT_READINESS",
+        "comment": "Modernization action CONFIGURE_ADOPT_READINESS recorded.",
+        "details": {
+          "actionType": "CONFIGURE_ADOPT_READINESS",
+          "checklist": {
+            "productReleaseCompatibility": "VERIFIED",
+            "odataServices": "VERIFIED",
+            "serviceRegistration": "VERIFIED",
+            "icfUi5Services": "VERIFIED",
+            "systemAlias": "VERIFIED",
+            "businessCatalogue": "VERIFIED",
+            "pfcgBusinessRoles": "VERIFIED",
+            "launchpadAvailability": "VERIFIED",
+            "userAuthorization": "VERIFIED"
+          }
+        },
+        "previousHash": "de5bb896efcbee405fc21c06fa566d84eb081a066dbb0a9c226b0dff8d5f4e00",
+        "integrityHash": "d66498863a2adc31723056aae6054c79898d8cffbc0d07708e3141b85c96a83c"
+      },
+      {
+        "eventId": "AUD-MOD-1794323111047-4876DC",
+        "timestamp": "2026-11-10T15:05:11.047Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "EXTEND_PLAN",
+        "comment": "Modernization action EXTEND_PLAN recorded.",
+        "details": {
+          "actionType": "EXTEND_PLAN",
+          "targetApp": "F1367",
+          "tier": "TIER_2_CLOUD_DEVELOPER",
+          "notes": "ADT Released BAdI implementation for customer tax ledger calculation.",
+          "missingCapabilities": [
+            "Local Tax Ledger Computation"
+          ]
+        },
+        "previousHash": "d66498863a2adc31723056aae6054c79898d8cffbc0d07708e3141b85c96a83c",
+        "integrityHash": "e2a28a66fd265fb825675a07538622218016e7e9a9cee7c409da294042d8a2ff"
       }
     ],
     "versionHistory": [
       {
         "version": 1,
-        "savedAt": "2026-11-13T10:30:26.409Z",
+        "savedAt": "2026-11-10T15:05:10.711Z",
         "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-        "fitGapScore": 0,
+        "fitGapScore": 82,
         "modifiedBy": "Lead SAP Architect"
       }
     ],
@@ -1628,31 +1478,29 @@
     "businessContext": null,
     "applicationRequirements": null,
     "discoveryMetadata": null,
-    "evidenceNotes": [],
-    "leadArchitectApproval": null
+    "evidenceNotes": []
   },
   {
-    "id": "ASM-1794565835901-F_31-DLCO",
+    "id": "ASM-PROP-ZPAY-001",
     "tenantId": "DEFAULT-TENANT-S21",
-    "requestId": "REQ-ASM-000001",
-    "tcode": "F-31",
+    "requestId": "REQ-ASM-110846",
+    "tcode": "ZPAY_CUSTOM",
     "systemId": "S21-200",
     "client": "200",
     "targetRelease": "SAP S/4HANA 2023",
-    "release": "SAP S/4HANA 2023",
-    "classification": "STANDARD",
-    "businessArea": "General Business Area",
+    "classification": "CUSTOM",
+    "businessArea": "Treasury Management",
     "status": "APPROVED",
     "lifecycleStatus": "APPROVED",
     "assessmentResult": "CUSTOM_RAP_REQUIRED",
-    "fitGapScore": 0,
+    "fitGapScore": 12,
     "scoreCoverage": 50,
     "matchingFioriApp": null,
     "gapsCount": 0,
     "evidenceConfidence": "MEDIUM",
-    "provenance": "Fiorify_FIT_GAP_ASSESSMENT_ENGINE",
-    "createdAt": "2026-11-13T10:30:35.901Z",
-    "updatedAt": "2026-11-13T10:31:09.823Z",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-10T15:05:10.846Z",
+    "updatedAt": "2026-11-11T09:38:03.263Z",
     "createdBy": "USR-BAEBA8D1",
     "creatorName": "Lead SAP Architect",
     "creatorRole": "SAP_CONSULTANT",
@@ -1667,26 +1515,23 @@
       "businessAccepted": false,
       "productionReady": false,
       "approvedForDeployment": false,
-      "lastUpdated": "2026-11-13T10:30:35.901Z"
+      "lastUpdated": "2026-11-10T15:05:10.846Z"
     },
-    "description": "Clear Customer",
+    "description": "Assessment for ZPAY_CUSTOM",
     "subArea": "",
     "programName": "",
     "screenNumber": "",
-    "packageName": "FBAS",
+    "packageName": "",
     "originalSystem": "SAP",
     "softwareComponent": "S4CORE 108",
-    "rationale": "",
+    "rationale": "Zero standard Fiori apps match this proprietary payment engine.",
     "dimensionResults": null,
     "dimensions": null,
     "scoringBreakdown": null,
     "identifiedGaps": [],
     "recommendation": {
       "outcome": "BUILD",
-      "canonicalOutcome": "BUILD",
-      "recommendationType": "BUILD",
-      "rationale": "Generation Studio handoff HND-1794565869686-A49709 created in stage DRAFT. Architect sign-off recorded.",
-      "targetTier": "TIER_2_CLOUD_DEVELOPER"
+      "rationale": "Zero standard Fiori apps match this proprietary payment engine."
     },
     "remediationPlan": [],
     "actionableRemediationPlan": [],
@@ -1698,8 +1543,8 @@
     "missingCapabilities": [],
     "auditEvents": [
       {
-        "eventId": "AUD-1794565835901-8O4P",
-        "timestamp": "2026-11-13T10:30:35.901Z",
+        "eventId": "AUD-1794323110846-MUMW",
+        "timestamp": "2026-11-10T15:05:10.846Z",
         "author": "Lead SAP Architect",
         "actorId": "USR-BAEBA8D1",
         "actorRole": "SAP_CONSULTANT",
@@ -1708,119 +1553,210 @@
         "action": "CREATED",
         "comment": "Initial assessment record created.",
         "details": {
-          "tcode": "F-31",
-          "fitGapScore": 0,
-          "assessmentResult": "PENDING_VERIFICATION"
+          "tcode": "ZPAY_CUSTOM",
+          "fitGapScore": 12,
+          "assessmentResult": "CUSTOM_RAP_REQUIRED"
         },
         "previousHash": "GENESIS",
-        "integrityHash": "76b15edf976666c5cc12c1930837e7759fbdb865149942c705a06adcd349035a"
+        "integrityHash": "55c0fa3be67152083158fb9df404936767105f440c886b061bd68fc3efbc84f2"
       },
       {
-        "eventId": "AUD-1794565869700-KV6J",
-        "timestamp": "2026-11-13T10:31:09.700Z",
-        "author": "Admin",
+        "eventId": "AUD-MOD-1794323110880-DFFD82",
+        "timestamp": "2026-11-10T15:05:10.880Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-1794323110875-33638B created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-1794323110875-33638B",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "55c0fa3be67152083158fb9df404936767105f440c886b061bd68fc3efbc84f2",
+        "integrityHash": "f7365b8ebdc5ff2456d9eb1ca7e6b6e44b65212f1245443bd7f9216357f53bd2"
+      },
+      {
+        "eventId": "AUD-MOD-1794323111092-B9BD71",
+        "timestamp": "2026-11-10T15:05:11.092Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-1794323111074-0B8D3A created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-1794323111074-0B8D3A",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "f7365b8ebdc5ff2456d9eb1ca7e6b6e44b65212f1245443bd7f9216357f53bd2",
+        "integrityHash": "268e2cc6e532ff1a9c788d7274173cf1d2f39e7761fd4b6fbc16db1252b79ea4"
+      },
+      {
+        "eventId": "AUD-MOD-1794323111132-DE06C0",
+        "timestamp": "2026-11-10T15:05:11.132Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-1794323111115-74B67F created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-1794323111115-74B67F",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "268e2cc6e532ff1a9c788d7274173cf1d2f39e7761fd4b6fbc16db1252b79ea4",
+        "integrityHash": "db59b607420bed0569fb1a3d7fda3bc4bb614aeb0ad6632b1240b5e42f3ad3f4"
+      },
+      {
+        "eventId": "AUD-MOD-1794366647688-7F606E",
+        "timestamp": "2026-11-11T03:10:47.688Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-1794366647665-9D815D created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-1794366647665-9D815D",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "db59b607420bed0569fb1a3d7fda3bc4bb614aeb0ad6632b1240b5e42f3ad3f4",
+        "integrityHash": "40dfd9f7b1e9252b7f560071b47c9513f35ca299a70eb6bcd16a473da8976fab"
+      },
+      {
+        "eventId": "AUD-MOD-1794388187529-323CF8",
+        "timestamp": "2026-11-11T09:09:47.529Z",
+        "author": "Enterprise System Administrator",
         "actorId": "USR-ADMIN-01",
         "actorRole": "ADMIN",
         "previousState": "RECOMMENDATION_COMPLETED",
-        "newState": "PENDING_REVIEW",
-        "action": "STATE_TRANSITION",
-        "comment": "Submitted for architectural review prior to handoff approval",
-        "details": {},
-        "previousHash": "76b15edf976666c5cc12c1930837e7759fbdb865149942c705a06adcd349035a",
-        "integrityHash": "bc2fdfb51fef688b10926736fe6867b98145a0168826bdc2bedb10146d8e8785"
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-GEN-QA-TEST-1794388187445 created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-GEN-QA-TEST-1794388187445",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "40dfd9f7b1e9252b7f560071b47c9513f35ca299a70eb6bcd16a473da8976fab",
+        "integrityHash": "6489d945b0328673472dabfd1ea575a1b4d81faad512b96e164d0ccc5e139b2e"
       },
       {
-        "eventId": "AUD-1794565869711-X3UC",
-        "timestamp": "2026-11-13T10:31:09.711Z",
-        "author": "Admin",
+        "eventId": "AUD-MOD-1794388735977-13ABD7",
+        "timestamp": "2026-11-11T09:18:55.977Z",
+        "author": "Enterprise System Administrator",
         "actorId": "USR-ADMIN-01",
         "actorRole": "ADMIN",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "BUILD_PROJECT",
+        "comment": "Generation Studio handoff HND-GEN-QA-TEST-1794388735885 created in stage DRAFT. Architect sign-off recorded.",
+        "details": {
+          "actionType": "BUILD_PROJECT",
+          "handoffId": "HND-GEN-QA-TEST-1794388735885",
+          "proposedAppType": "RAP_MANAGED",
+          "stage": "DRAFT",
+          "approvalStatus": "APPROVED",
+          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+        },
+        "previousHash": "6489d945b0328673472dabfd1ea575a1b4d81faad512b96e164d0ccc5e139b2e",
+        "integrityHash": "f815b26b1b997f42ef0a5b6f443d63aaa346ad2790438148014852cc50b6004c"
+      },
+      {
+        "eventId": "AUD-1794389774307-6ERM",
+        "timestamp": "2026-11-11T09:36:14.307Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-CONS-01",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": "RECOMMENDATION_COMPLETED",
+        "newState": "PENDING_REVIEW",
+        "action": "SUBMITTED_FOR_REVIEW",
+        "comment": "Custom payment application requires custom RAP Managed BO under Clean Core Tier 2.",
+        "details": {},
+        "previousHash": "f815b26b1b997f42ef0a5b6f443d63aaa346ad2790438148014852cc50b6004c",
+        "integrityHash": "85687b6bf118c90e3704401459a3ea3f121fdba287dfee04b48df695b195449b"
+      },
+      {
+        "eventId": "AUD-1794389774327-QXPZ",
+        "timestamp": "2026-11-11T09:36:14.326Z",
+        "author": "Enterprise Architecture Board Approver",
+        "actorId": "USR-APPR-01",
+        "actorRole": "APPROVER",
         "previousState": "PENDING_REVIEW",
         "newState": "APPROVED",
-        "action": "STATE_TRANSITION",
-        "comment": "Synchronized architect approval from generation handoff HND-1794565869686-A49709",
+        "action": "APPROVED",
+        "comment": "Approved for Generation Studio custom build.",
         "details": {},
-        "previousHash": "bc2fdfb51fef688b10926736fe6867b98145a0168826bdc2bedb10146d8e8785",
-        "integrityHash": "e1f91d5b93fe3b2d72e1cac365808f0133a0e58c3cc9ae2da24c2a585ea2a5d4"
+        "previousHash": "85687b6bf118c90e3704401459a3ea3f121fdba287dfee04b48df695b195449b",
+        "integrityHash": "8952e2ec77dd750f822825bc95470e886060d670a26d616afbcf597a29eaa14e"
       },
       {
-        "eventId": "AUD-MOD-1794565869734-A50733",
-        "timestamp": "2026-11-13T10:31:09.734Z",
-        "author": "Admin",
+        "eventId": "AUD-MOD-1794389883263-AE1319",
+        "timestamp": "2026-11-11T09:38:03.263Z",
+        "author": "Enterprise System Administrator",
         "actorId": "USR-ADMIN-01",
         "actorRole": "ADMIN",
         "previousState": "APPROVED",
         "newState": "APPROVED",
         "action": "BUILD_PROJECT",
-        "comment": "Generation Studio handoff HND-1794565869686-A49709 created in stage DRAFT. Architect sign-off recorded.",
+        "comment": "Generation Studio handoff HND-GEN-ZPAY_CUSTOM-0B8FE7 created in stage DRAFT. Architect sign-off recorded.",
         "details": {
           "actionType": "BUILD_PROJECT",
-          "handoffId": "HND-1794565869686-A49709",
+          "handoffId": "HND-GEN-ZPAY_CUSTOM-0B8FE7",
           "proposedAppType": "RAP_MANAGED",
           "stage": "DRAFT",
           "approvalStatus": "APPROVED",
           "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
         },
-        "previousHash": "e1f91d5b93fe3b2d72e1cac365808f0133a0e58c3cc9ae2da24c2a585ea2a5d4",
-        "integrityHash": "1fc56fb671c5cf72eb40c60ee5f48c79ccd8daf1ae8b77a14ea7a6e93bec3dbd"
-      },
-      {
-        "eventId": "AUD-1794565869804-7ACJ",
-        "timestamp": "2026-11-13T10:31:09.804Z",
-        "author": "Admin",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "UPDATED",
-        "comment": "Synchronized architect approval from generation handoff HND-GEN-F-31-978B17",
-        "details": {},
-        "previousHash": "1fc56fb671c5cf72eb40c60ee5f48c79ccd8daf1ae8b77a14ea7a6e93bec3dbd",
-        "integrityHash": "cff991ad035657eb6fa6ad1a3dcbec53c2ff425c20e5572ad902ab3cef4ac085"
-      },
-      {
-        "eventId": "AUD-MOD-1794565869823-F31F23",
-        "timestamp": "2026-11-13T10:31:09.823Z",
-        "author": "Admin",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "previousState": "APPROVED",
-        "newState": "APPROVED",
-        "action": "BUILD_PROJECT",
-        "comment": "Generation Studio handoff HND-GEN-F-31-978B17 created in stage DRAFT. Architect sign-off recorded.",
-        "details": {
-          "actionType": "BUILD_PROJECT",
-          "handoffId": "HND-GEN-F-31-978B17",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "previousHash": "cff991ad035657eb6fa6ad1a3dcbec53c2ff425c20e5572ad902ab3cef4ac085",
-        "integrityHash": "d1eec3dd88928a77a8463571b18101e8e9b9691cf8e0d8756f1477e2b7005d9e"
+        "previousHash": "8952e2ec77dd750f822825bc95470e886060d670a26d616afbcf597a29eaa14e",
+        "integrityHash": "c7f033b0a27284ede5dc6a5e4e65a225e4369be28aa2164c794bd0be75d242b4"
       }
     ],
     "versionHistory": [
       {
         "version": 1,
-        "savedAt": "2026-11-13T10:30:35.901Z",
+        "savedAt": "2026-11-10T15:05:10.846Z",
         "lifecycleStatus": "RECOMMENDATION_COMPLETED",
-        "fitGapScore": 0,
+        "fitGapScore": 12,
         "modifiedBy": "Lead SAP Architect"
       },
       {
         "version": 2,
-        "savedAt": "2026-11-13T10:31:09.700Z",
+        "savedAt": "2026-11-11T09:36:14.307Z",
         "lifecycleStatus": "PENDING_REVIEW",
-        "fitGapScore": 0,
-        "modifiedBy": "Admin"
+        "fitGapScore": 12,
+        "modifiedBy": "Lead SAP Architect"
       },
       {
         "version": 3,
-        "savedAt": "2026-11-13T10:31:09.711Z",
+        "savedAt": "2026-11-11T09:36:14.326Z",
         "lifecycleStatus": "APPROVED",
-        "fitGapScore": 0,
-        "modifiedBy": "Admin"
+        "fitGapScore": 12,
+        "modifiedBy": "Enterprise Architecture Board Approver"
       }
     ],
     "requirement": null,
@@ -1830,76 +1766,148 @@
     "applicationRequirements": null,
     "discoveryMetadata": null,
     "evidenceNotes": [],
-    "leadArchitectApproval": {
-      "approved": true,
-      "approver": "Admin",
-      "approverId": "USR-ADMIN-01",
-      "timestamp": "2026-11-13T10:31:09.785Z",
-      "justification": "Custom RAP Managed Application approved by Lead Architect."
-    },
-    "approvalStatus": "APPROVED",
-    "handoffId": "HND-GEN-F-31-978B17",
     "modernizationDecisions": [
       {
-        "actionId": "ACT-1794565869734-448500",
+        "actionId": "ACT-1794389883263-F2B164",
         "actionType": "BUILD_PROJECT",
-        "timestamp": "2026-11-13T10:31:09.734Z",
-        "author": "Admin",
+        "timestamp": "2026-11-11T09:38:03.263Z",
+        "author": "Enterprise System Administrator",
         "actorId": "USR-ADMIN-01",
         "actorRole": "ADMIN",
         "details": {
-          "handoffId": "HND-1794565869686-A49709",
+          "handoffId": "HND-GEN-ZPAY_CUSTOM-0B8FE7",
           "proposedAppType": "RAP_MANAGED",
           "stage": "DRAFT",
           "approvalStatus": "APPROVED",
           "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
         },
-        "comment": "Generation Studio handoff HND-1794565869686-A49709 created in stage DRAFT. Architect sign-off recorded.",
-        "idempotencyKey": null
-      },
-      {
-        "actionId": "ACT-1794565869823-640659",
-        "actionType": "BUILD_PROJECT",
-        "timestamp": "2026-11-13T10:31:09.823Z",
-        "author": "Admin",
-        "actorId": "USR-ADMIN-01",
-        "actorRole": "ADMIN",
-        "details": {
-          "handoffId": "HND-GEN-F-31-978B17",
-          "proposedAppType": "RAP_MANAGED",
-          "stage": "DRAFT",
-          "approvalStatus": "APPROVED",
-          "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
-        },
-        "comment": "Generation Studio handoff HND-GEN-F-31-978B17 created in stage DRAFT. Architect sign-off recorded.",
+        "comment": "Generation Studio handoff HND-GEN-ZPAY_CUSTOM-0B8FE7 created in stage DRAFT. Architect sign-off recorded.",
         "idempotencyKey": null
       }
     ],
     "buildProject": {
-      "handoffId": "HND-GEN-F-31-978B17",
+      "handoffId": "HND-GEN-ZPAY_CUSTOM-0B8FE7",
       "proposedAppType": "RAP_MANAGED",
       "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER",
       "architectApproved": true,
-      "approverName": "Admin",
-      "justification": "Generation Studio handoff HND-GEN-F-31-978B17 created in stage DRAFT. Architect sign-off recorded.",
-      "lastUpdated": "2026-11-13T10:31:09.823Z"
+      "approverName": "Enterprise System Administrator",
+      "justification": "Generation Studio handoff HND-GEN-ZPAY_CUSTOM-0B8FE7 created in stage DRAFT. Architect sign-off recorded.",
+      "lastUpdated": "2026-11-11T09:38:03.263Z"
     },
     "modernizationDecision": {
-      "actionId": "ACT-1794565869823-640659",
+      "actionId": "ACT-1794389883263-F2B164",
       "actionType": "BUILD_PROJECT",
-      "timestamp": "2026-11-13T10:31:09.823Z",
-      "author": "Admin",
+      "timestamp": "2026-11-11T09:38:03.263Z",
+      "author": "Enterprise System Administrator",
       "actorId": "USR-ADMIN-01",
       "actorRole": "ADMIN",
       "details": {
-        "handoffId": "HND-GEN-F-31-978B17",
+        "handoffId": "HND-GEN-ZPAY_CUSTOM-0B8FE7",
         "proposedAppType": "RAP_MANAGED",
         "stage": "DRAFT",
         "approvalStatus": "APPROVED",
         "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
       },
-      "comment": "Generation Studio handoff HND-GEN-F-31-978B17 created in stage DRAFT. Architect sign-off recorded.",
+      "comment": "Generation Studio handoff HND-GEN-ZPAY_CUSTOM-0B8FE7 created in stage DRAFT. Architect sign-off recorded.",
       "idempotencyKey": null
     }
+  },
+  {
+    "id": "ASM-INCOMPLETE-CAT-001",
+    "tenantId": "DEFAULT-TENANT-S21",
+    "requestId": "REQ-ASM-110907",
+    "tcode": "ME21N",
+    "systemId": "S21-200",
+    "client": "200",
+    "targetRelease": "SAP S/4HANA 2023",
+    "classification": "STANDARD",
+    "businessArea": "Sourcing and Procurement",
+    "status": "RECOMMENDATION_COMPLETED",
+    "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+    "assessmentResult": "INVESTIGATE_CATALOGUE_INFO",
+    "fitGapScore": 40,
+    "scoreCoverage": 50,
+    "matchingFioriApp": null,
+    "gapsCount": 0,
+    "evidenceConfidence": "MEDIUM",
+    "provenance": "FIORIX_FIT_GAP_ASSESSMENT_ENGINE",
+    "createdAt": "2026-11-10T15:05:10.907Z",
+    "updatedAt": "2026-11-11T09:38:03.180Z",
+    "createdBy": "USR-BAEBA8D1",
+    "creatorName": "Lead SAP Architect",
+    "creatorRole": "SAP_CONSULTANT",
+    "assessmentLevel": "TRANSACTION",
+    "parentAssessmentId": null,
+    "childAssessmentIds": [],
+    "businessProcessId": null,
+    "deploymentReadiness": {
+      "stage": "DEV_READINESS",
+      "devReady": false,
+      "qasValidated": false,
+      "businessAccepted": false,
+      "productionReady": false,
+      "approvedForDeployment": false,
+      "lastUpdated": "2026-11-10T15:05:10.907Z"
+    },
+    "description": "Assessment for ME21N",
+    "subArea": "",
+    "programName": "",
+    "screenNumber": "",
+    "packageName": "",
+    "originalSystem": "SAP",
+    "softwareComponent": "S4CORE 108",
+    "rationale": "Catalogue lookup incomplete.",
+    "dimensionResults": null,
+    "dimensions": null,
+    "scoringBreakdown": null,
+    "identifiedGaps": [],
+    "recommendation": {
+      "outcome": "INVESTIGATE_CATALOGUE_INFO",
+      "rationale": "Catalogue lookup incomplete."
+    },
+    "remediationPlan": [],
+    "actionableRemediationPlan": [],
+    "governanceGuardrailsApplied": [],
+    "evidenceReferences": [],
+    "missingEvidence": [],
+    "conflictingEvidence": [],
+    "verifiedCapabilities": [],
+    "missingCapabilities": [],
+    "auditEvents": [
+      {
+        "eventId": "AUD-1794323110907-W6H3",
+        "timestamp": "2026-11-10T15:05:10.907Z",
+        "author": "Lead SAP Architect",
+        "actorId": "USR-BAEBA8D1",
+        "actorRole": "SAP_CONSULTANT",
+        "previousState": null,
+        "newState": "RECOMMENDATION_COMPLETED",
+        "action": "CREATED",
+        "comment": "Initial assessment record created.",
+        "details": {
+          "tcode": "ME21N",
+          "fitGapScore": 40,
+          "assessmentResult": "INVESTIGATE_CATALOGUE_INFO"
+        },
+        "previousHash": "GENESIS",
+        "integrityHash": "9ca6140b0986cb7917f853e1bc16e61995a9a37dfe1d3fd90769bff172673404"
+      }
+    ],
+    "versionHistory": [
+      {
+        "version": 1,
+        "savedAt": "2026-11-10T15:05:10.907Z",
+        "lifecycleStatus": "RECOMMENDATION_COMPLETED",
+        "fitGapScore": 40,
+        "modifiedBy": "Lead SAP Architect"
+      }
+    ],
+    "requirement": null,
+    "candidate": null,
+    "context": null,
+    "businessContext": null,
+    "applicationRequirements": null,
+    "discoveryMetadata": null,
+    "evidenceNotes": []
   }
 ]
