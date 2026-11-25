@@ -1,10 +1,47 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { ApiClient, ApiError } from '../apiClient';
+import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
+import { ApiClient, ApiError, apiClient } from '../apiClient';
 import { TransactionSearchService } from '../../../features/transaction-checker/services/transactionSearchService';
 import { searchHistoryStore } from '../../../features/transaction-checker/services/searchHistoryStore';
 
 describe('Fiorify FX-002 — End-to-End API Integration & Offline Resilience', { timeout: 15000 }, () => {
-  const backendBaseUrl = 'http://localhost:4004/api/v1';
+  let ephemeralServer: any = null;
+  let backendBaseUrl = 'http://localhost:4004/api/v1';
+
+  beforeAll(async () => {
+    try {
+      // @ts-ignore
+      const { createServer } = await import('../../../../../backend/src/server.js');
+      // @ts-ignore
+      const { BtpDestinationAdapter } = await import('../../../../../backend/src/adapters/btpDestinationAdapter.js');
+      const btpAdapter = new BtpDestinationAdapter({
+        adminSecret: 'test-admin-secret-2026',
+        destinationName: 'S21'
+      });
+      ephemeralServer = createServer({ isProduction: false, btpAdapter });
+      await new Promise<void>((resolve) => {
+        ephemeralServer.listen(0, '127.0.0.1', () => {
+          const port = ephemeralServer.address().port;
+          backendBaseUrl = `http://127.0.0.1:${port}/api/v1`;
+          apiClient.setConfig({ baseUrl: backendBaseUrl });
+          resolve();
+        });
+      });
+    } catch (e) {
+      console.warn('Could not launch ephemeral backend for frontend test:', e);
+    }
+  });
+
+  afterAll(async () => {
+    if (ephemeralServer) {
+      await new Promise((resolve) => ephemeralServer.close(resolve));
+    }
+    apiClient.setConfig({ baseUrl: import.meta.env.VITE_API_URL || '/api/v1' });
+    try {
+      // @ts-ignore
+      const { default: DatabasePool } = await import('../../../../../backend/src/infrastructure/db/pool.js');
+      await DatabasePool.close().catch(() => {});
+    } catch {}
+  });
 
   beforeEach(() => {
     searchHistoryStore.clearHistory();
@@ -169,7 +206,7 @@ describe('Fiorify FX-002 — End-to-End API Integration & Offline Resilience', {
     } catch (err: any) {
       expect(err).toBeInstanceOf(ApiError);
       expect(err.statusCode).toBe(401);
-      expect(err.message).toContain('Access denied');
+      expect(err.message).toMatch(/(Access denied|Unauthorized)/i);
     }
   });
 

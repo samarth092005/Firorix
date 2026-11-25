@@ -135,6 +135,34 @@ export class SecurityAuditLogger {
    */
   async listEvents(filter = {}, tenantId = 'DEFAULT-TENANT-S21') {
     try {
+      if (this.pool && typeof this.pool.withTenantClient === 'function') {
+        const rows = await this.pool.withTenantClient(tenantId, async (client) => {
+          let query = 'SELECT * FROM security_audit_events WHERE tenant_id = $1';
+          const params = [tenantId];
+
+          if (filter.action) {
+            params.push(filter.action);
+            query += ` AND action = $${params.length}`;
+          }
+          if (filter.outcome) {
+            params.push(filter.outcome);
+            query += ` AND outcome = $${params.length}`;
+          }
+          if (filter.actor) {
+            params.push(filter.actor);
+            query += ` AND actor = $${params.length}`;
+          }
+
+          query += ' ORDER BY id ASC LIMIT 200;';
+          const res = await client.query(query, params);
+          return res && res.rows ? res.rows : [];
+        });
+        if (rows && rows.length > 0) {
+          return rows;
+        }
+        return this._fallbackEvents.filter(e => e.tenantId === tenantId);
+      }
+
       let query = 'SELECT * FROM security_audit_events WHERE tenant_id = $1';
       const params = [tenantId];
 

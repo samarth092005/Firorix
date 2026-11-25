@@ -268,9 +268,16 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         setProgressState('COMPLETED');
       }
 
-      // Automatically show Discovery Verification Popup Modal
-      if (discoRes) {
+      // If T-Code does not exist, or exists but has NO standard Fiori app match,
+      // prompt with the Discovery Verification / Clean Core Modernization modal.
+      // If it exists AND has standard Fiori apps, show Reference Configuration directly on the workspace without an intrusive modal.
+      const hasStandardApp = catCandidates && catCandidates.length > 0;
+      const tcodeExists = discoRes?.exists !== false && discoRes?.verificationStatus !== 'NOT_FOUND';
+
+      if (!tcodeExists || !hasStandardApp) {
         setIsVerificationModalOpen(true);
+      } else {
+        setIsVerificationModalOpen(false);
       }
 
       // Pre-populate business scope if a preset matches
@@ -362,27 +369,61 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
       // 2. Auto-create assessment if not already existing
       let targetId = '';
       try {
+        const knownPrograms: Record<string, { program: string; package: string; description: string; role: string }> = {
+          MIGO: { program: 'SAPLMIGO', package: 'MB', description: 'Goods Movement', role: 'SAP_BR_WAREHOUSE_CLERK' },
+          ME21N: { program: 'SAPLMEGUI', package: 'ME', description: 'Create Purchase Order', role: 'SAP_BR_PURCHASER' },
+          VA01: { program: 'SAPMV45A', package: 'VA', description: 'Create Sales Order', role: 'SAP_BR_INTERNAL_SALES_REP' },
+          FB01: { program: 'SAPMF05A', package: 'FBAS', description: 'Post Document', role: 'SAP_BR_GL_ACCOUNTANT' },
+          FB50: { program: 'SAPMF05A', package: 'FBAS', description: 'Enter G/L Account Document', role: 'SAP_BR_GL_ACCOUNTANT' },
+          'F-53': { program: 'SAPMF05A', package: 'FBAS', description: 'Post Outgoing Payments - For Suppliers', role: 'SAP_BR_AP_ACCOUNTANT' },
+          'F-28': { program: 'SAPMF05A', package: 'FBAS', description: 'Post Incoming Payments - For Customers', role: 'SAP_BR_AR_ACCOUNTANT' },
+          ST22: { program: 'SAPMS380', package: 'SABP', description: 'ABAP Dump Analysis (ABAP Runtime Errors)', role: 'SAP_BR_ADMINISTRATOR' },
+          BP: { program: 'SAPLBUS_LOCATOR', package: 'BUPA', description: 'Maintain Business Partner', role: 'SAP_BR_MASTER_DATA_SPECIALIST' },
+          MIRO: { program: 'SAPLMR1M', package: 'MRM', description: 'Enter Incoming Invoice', role: 'SAP_BR_AP_ACCOUNTANT' }
+        };
+        const known = knownPrograms[cleanTcode.toUpperCase()];
+        const effectiveProgram = metadata.programName || known?.program || (cleanTcode.startsWith('Z') ? `Z_${cleanTcode}` : 'SAP_RUNTIME');
+        const effectivePackage = metadata.packageName || known?.package || (cleanTcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS');
+        const effectiveDescription = (known?.description && tcodeDescription.startsWith('Transaction ')) ? known.description : tcodeDescription;
+
         const created = await assessmentService.createAssessment({
           tcode: cleanTcode,
-          description: tcodeDescription,
+          description: effectiveDescription,
           systemId,
           client,
           targetRelease,
           matchingFioriApp: candidateApp,
           fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
           assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : (metadata?.classification === 'CUSTOM' ? 'CUSTOM_RAP_REQUIRED' : 'PENDING_VERIFICATION'),
-          status: 'COMPLETED',
-          lifecycleStatus: candidateApp ? 'MATCHING_COMPLETED' : 'RECOMMENDATION_COMPLETED',
+          status: 'IN_PROGRESS',
+          lifecycleStatus: candidateApp ? 'MATCHING_IN_PROGRESS' : 'EVALUATION_IN_PROGRESS',
+          businessArea: known?.package === 'MB' ? 'Materials Management (MM)' : (metadata?.classification === 'CUSTOM' ? 'Custom Extension' : 'Core Enterprise Process'),
+          classification: metadata?.classification || (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? 'CUSTOM' : 'STANDARD'),
+          programName: effectiveProgram,
+          packageName: effectivePackage,
+          screenNumber: metadata.screenNumber || '0001',
+          recommendation: {
+            outcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
+            canonicalOutcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
+            businessOutcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
+            action: candidateApp
+              ? `Add & Configure Standard SAP Fiori Application (${candidateApp.appId} — ${candidateApp.appName})`
+              : `Modernize ${cleanTcode} via Custom RAP & Fiori Elements Blueprint`,
+            confidence: candidateApp ? 'HIGH' : 'MEDIUM',
+            justification: candidateApp
+              ? `Official SAP Fiori successor ${candidateApp.appId} satisfies 100% S/4HANA 2023 release baseline requirements for ${cleanTcode}.`
+              : `Clean Core RAP modernization required due to 100% functional gap in standard Fiori catalogue.`
+          },
           businessContext: {
             businessProcess,
-            primaryScenario: primaryScenario || `Operational execution of ${cleanTcode} (${tcodeDescription})`,
+            primaryScenario: primaryScenario || `Operational execution of ${cleanTcode} (${effectiveDescription})`,
             selectedRequirements: ['Real-time dictionary validation', 'Authorization check'],
             expectedFunctionality: ['Screen navigation', 'Data persistence'],
-            assessmentObjective: `Evaluate modern Fiori alternative or WebGUI feasibility for ${cleanTcode} (${tcodeDescription}) in S21.`,
+            assessmentObjective: `Evaluate modern Fiori alternative or WebGUI feasibility for ${cleanTcode} (${effectiveDescription}) in S21.`,
             businessCriticality: criticality
           },
           applicationRequirements: {
-            relevantBusinessRole: selectedCandidate?.appId === 'F1612' || selectedCandidate?.appId === 'F0773'
+            relevantBusinessRole: known?.role || (selectedCandidate?.appId === 'F1612' || selectedCandidate?.appId === 'F0773'
               ? 'SAP_BR_AP_ACCOUNTANT'
               : selectedCandidate?.appId === 'F0842A'
               ? 'SAP_BR_PURCHASER'
@@ -394,7 +435,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
               ? 'SAP_BR_INTERNAL_SALES_REP'
               : cleanTcode.startsWith('F-53') || cleanTcode.startsWith('FB60')
               ? 'SAP_BR_AP_ACCOUNTANT'
-              : 'SAP_BR_BUSINESS_PROCESS_SPECIALIST',
+              : 'SAP_BR_BUSINESS_PROCESS_SPECIALIST'),
             knownODataService: selectedCandidate?.odataServices?.[0] || 'Service binding determined by FAL',
             requiredFunctionality: ['Audit Logging', 'Real-time Validation'],
             knownLimitations: '',
@@ -402,11 +443,11 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             isUserProvidedUnverified: false
           },
           discoveryMetadata: {
-            description: tcodeDescription,
-            programName: metadata.programName || (cleanTcode === 'F-31' ? 'SAPMF05A' : 'SAPMF05A'),
-            screenNumber: metadata.screenNumber || '0100',
-            packageName: metadata.packageName || 'FBAS',
-            classification: metadata.classification || 'STANDARD',
+            description: effectiveDescription,
+            programName: effectiveProgram,
+            screenNumber: metadata.screenNumber || '0001',
+            packageName: effectivePackage,
+            classification: metadata.classification || (cleanTcode.startsWith('Z') ? 'CUSTOM' : 'STANDARD'),
             originalSystem: metadata.originalSystem || 'SAP',
             softwareComponent: metadata.softwareComponent || 'S4CORE 108'
           },
@@ -1083,6 +1124,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
               <button
                 type="button"
                 className="fiori-btn fiori-btn-primary"
+                disabled={isProceeding}
                 onClick={handleOpenAssessmentWorkbench}
                 style={{
                   fontSize: '12px',
@@ -1093,10 +1135,11 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   alignItems: 'center',
                   gap: '6px',
                   backgroundColor: 'var(--fiori-primary, #0A6ED1)',
-                  color: '#FFFFFF'
+                  color: '#FFFFFF',
+                  cursor: isProceeding ? 'wait' : 'pointer'
                 }}
               >
-                <span>Open Assessment Workbench</span>
+                <span>{isProceeding ? 'Opening Assessment...' : (selectedCandidate || candidates[0] ? `View Assessment & Fiori App (${(selectedCandidate || candidates[0]).appId})` : 'Open Assessment Workbench')}</span>
                 <ArrowRight size={14} />
               </button>
             </div>

@@ -32,6 +32,7 @@ import { LocalAuthenticationProvider } from '../src/infrastructure/security/loca
 import { DemoAuthenticationProvider } from '../src/infrastructure/security/demoAuthProvider.js';
 import { AuthProviderFactory } from '../src/infrastructure/security/authProviderFactory.js';
 import { SecurityAuditLogger, SECURITY_ACTIONS } from '../src/infrastructure/security/securityAuditLogger.js';
+import DatabasePool from '../src/infrastructure/db/pool.js';
 
 describe('Fiorify Milestone 2: Enterprise Authentication & Identity (AUTH-001 to IDP-012)', () => {
   let server;
@@ -80,6 +81,7 @@ describe('Fiorify Milestone 2: Enterprise Authentication & Identity (AUTH-001 to
         fs.unlinkSync(testStoragePath);
       }
     } catch {}
+    await DatabasePool.close().catch(() => {});
   });
 
   // ==========================================
@@ -578,11 +580,13 @@ describe('Fiorify Milestone 2: Enterprise Authentication & Identity (AUTH-001 to
       });
 
       // Verify secrets are redacted
-      const saved1 = logger._fallbackEvents.find(e => e.eventId === e1.event_id || e.eventId === e1.eventId);
+      const events = await logger.listEvents({}, tenantId);
+      const saved1 = events.find(e => (e.event_id || e.eventId) === (e1.event_id || e1.eventId));
       assert.ok(saved1);
-      assert.strictEqual(saved1.details.password, '[REDACTED]');
-      assert.strictEqual(saved1.details.token, '[REDACTED]');
-      assert.strictEqual(saved1.details.clientIp, '127.0.0.1');
+      const details = typeof saved1.details === 'string' ? JSON.parse(saved1.details) : saved1.details;
+      assert.strictEqual(details.password, '[REDACTED]');
+      assert.strictEqual(details.token, '[REDACTED]');
+      assert.strictEqual(details.clientIp, '127.0.0.1');
 
       // 2. Log event 2 (Chained)
       const e2 = await logger.logEvent({

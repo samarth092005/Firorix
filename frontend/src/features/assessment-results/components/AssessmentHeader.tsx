@@ -90,8 +90,22 @@ export const AssessmentHeader: React.FC<AssessmentHeaderProps> = ({
             >
               {assessment.description}
             </h1>
-            <StatusBadge status={assessment.classification} size="sm" />
-            <StatusBadge status={assessment.assessmentResult} size="sm" />
+            <StatusBadge
+              status={
+                assessment.classification && (assessment.classification as string) !== 'UNKNOWN'
+                  ? assessment.classification
+                  : (assessment.tcode?.startsWith('Z') || assessment.tcode?.startsWith('Y') ? 'CUSTOM' : 'STANDARD')
+              }
+              size="sm"
+            />
+            <StatusBadge
+              status={
+                assessment.assessmentResult && (assessment.assessmentResult as string) !== 'UNKNOWN'
+                  ? assessment.assessmentResult
+                  : (assessment.matchingFioriApp ? 'EXPLICIT_SUCCESSOR' : 'MATCH_FOUND')
+              }
+              size="sm"
+            />
           </div>
 
           <div

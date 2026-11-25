@@ -96,6 +96,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   const [suggestModalOpen, setSuggestModalOpen] = useState<boolean>(false);
   const [isSuggesting, setIsSuggesting] = useState<boolean>(false);
   const [suggestedModel, setSuggestedModel] = useState<any>(null);
+  const [selectedArchetypePattern, setSelectedArchetypePattern] = useState<'MASTER_DETAIL' | 'FLAT_OBJECT' | 'ANALYTICAL'>('MASTER_DETAIL');
 
   // CDS search state
   const [cdsSearch, setCdsSearch] = useState('');
@@ -410,19 +411,82 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
     }
   };
 
+  const getActiveModelForPattern = () => {
+    if (!suggestedModel) return null;
+    if (selectedArchetypePattern === 'MASTER_DETAIL') {
+      return suggestedModel;
+    }
+    if (selectedArchetypePattern === 'FLAT_OBJECT') {
+      const root = suggestedModel.entities?.[0];
+      const items = suggestedModel.entities?.[1];
+      if (!root) return suggestedModel;
+      const combinedFields = [
+        ...(root.fields || []),
+        ...(items?.fields || []).map((f: any) => ({
+          ...f,
+          name: f.name === 'ID' || f.name === 'UUID' ? `Item${f.name}` : f.name,
+          isKey: false
+        }))
+      ];
+      return {
+        ...suggestedModel,
+        rootEntity: root.name,
+        entities: [{ ...root, fields: combinedFields }],
+        relationships: []
+      };
+    }
+    if (selectedArchetypePattern === 'ANALYTICAL') {
+      const root = suggestedModel.entities?.[0];
+      if (!root) return suggestedModel;
+      const analyticalFields = [
+        ...(root.fields || []),
+        {
+          id: 'FLD-MEASURE-01',
+          name: 'TotalQuantity',
+          dataType: 'QUANTITY',
+          length: 13,
+          scale: 3,
+          isKey: false,
+          isNullable: true,
+          semanticRole: 'MEASURE',
+          provenance: 'INFERRED_PATTERN'
+        },
+        {
+          id: 'FLD-MEASURE-02',
+          name: 'TotalAmount',
+          dataType: 'CURR',
+          length: 15,
+          scale: 2,
+          isKey: false,
+          isNullable: true,
+          semanticRole: 'MEASURE',
+          provenance: 'INFERRED_PATTERN'
+        }
+      ];
+      return {
+        ...suggestedModel,
+        rootEntity: `${root.name}_Cube`,
+        entities: [{ ...root, name: `${root.name}_Cube`, fields: analyticalFields }],
+        relationships: []
+      };
+    }
+    return suggestedModel;
+  };
+
   // Apply Suggested Data Model
   const handleApplySuggestion = async () => {
-    if (!suggestedModel) return;
+    const activeModel = getActiveModelForPattern();
+    if (!activeModel) return;
     try {
       setIsLoading(true);
       await defaultFrontendGenerationProjectService.saveDataModel(project.projectId, {
-        entities: suggestedModel.entities,
-        relationships: suggestedModel.relationships
+        entities: activeModel.entities,
+        relationships: activeModel.relationships
       });
       setSuggestModalOpen(false);
       await loadDataModel();
       await handleValidate();
-      setSuccessMsg('Evidence-driven CDS data model applied successfully!');
+      setSuccessMsg(`Evidence-driven CDS data model (${selectedArchetypePattern}) applied successfully!`);
     } catch (err: any) {
       setError(err.message || 'Failed to apply suggested data model.');
     } finally {
@@ -1183,15 +1247,71 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
 
             {/* Scrollable Content */}
             <div style={{ padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* Architectural Pattern Selection */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
+                  Select Clean Core Architectural Pattern:
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedArchetypePattern('MASTER_DETAIL')}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: `2px solid ${selectedArchetypePattern === 'MASTER_DETAIL' ? '#0284C7' : '#E2E8F0'}`,
+                      backgroundColor: selectedArchetypePattern === 'MASTER_DETAIL' ? '#F0F9FF' : '#FFFFFF',
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Master-Detail Document</div>
+                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Header + Line Items composition (e.g. Orders, Receipts)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedArchetypePattern('FLAT_OBJECT')}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: `2px solid ${selectedArchetypePattern === 'FLAT_OBJECT' ? '#0284C7' : '#E2E8F0'}`,
+                      backgroundColor: selectedArchetypePattern === 'FLAT_OBJECT' ? '#F0F9FF' : '#FFFFFF',
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Single Object Page</div>
+                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Flat transactional entity with field groups</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedArchetypePattern('ANALYTICAL')}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: `2px solid ${selectedArchetypePattern === 'ANALYTICAL' ? '#0284C7' : '#E2E8F0'}`,
+                      backgroundColor: selectedArchetypePattern === 'ANALYTICAL' ? '#F0F9FF' : '#FFFFFF',
+                      textAlign: 'left',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>Analytical Reporting Cube</div>
+                    <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>Dimension hierarchy with aggregated measures</div>
+                  </button>
+                </div>
+              </div>
+
               {/* Evidence Provenance Summary Bar */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
                 <div style={{ padding: '12px', background: '#F1F5F9', borderRadius: '8px' }}>
                   <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 600 }}>Root Entity</div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>{suggestedModel.rootEntity}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>{getActiveModelForPattern()?.rootEntity || suggestedModel.rootEntity}</div>
                 </div>
                 <div style={{ padding: '12px', background: '#F1F5F9', borderRadius: '8px' }}>
                   <div style={{ fontSize: '11px', color: '#64748B', textTransform: 'uppercase', fontWeight: 600 }}>Entities Proposed</div>
-                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>{suggestedModel.entities?.length || 0}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>{getActiveModelForPattern()?.entities?.length || suggestedModel.entities?.length || 0}</div>
                 </div>
                 <div style={{ padding: '12px', background: '#F0FDF4', borderRadius: '8px', border: '1px solid #BBF7D0' }}>
                   <div style={{ fontSize: '11px', color: '#166534', textTransform: 'uppercase', fontWeight: 600 }}>Verified / Proven</div>
@@ -1236,7 +1356,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
                 <div style={{ fontSize: '14px', fontWeight: 600, color: '#0F172A' }}>
                   Proposed Entities & Field Architecture:
                 </div>
-                {suggestedModel.entities?.map((ent: any, idx: number) => (
+                {(getActiveModelForPattern()?.entities || suggestedModel.entities)?.map((ent: any, idx: number) => (
                   <div
                     key={idx}
                     style={{

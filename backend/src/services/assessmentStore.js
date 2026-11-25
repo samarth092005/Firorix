@@ -348,7 +348,8 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
   const classification = String(
     input.classification ||
     input.discoveryMetadata?.classification ||
-    'STANDARD'
+    STANDARD_TRANSACTION_CATALOG[tcode]?.classification ||
+    (tcode.startsWith('Z') || tcode.startsWith('Y') ? 'CUSTOM' : 'STANDARD')
   ).toUpperCase();
 
   // 6. Business Area
@@ -670,13 +671,13 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
         ? reqObj.title
         : STANDARD_TRANSACTION_CATALOG[tcode]?.description || synthesizeTransactionTitle(tcode)
     ),
-    subArea: input.subArea || '',
-    programName: input.programName || input.discoveryMetadata?.programName || STANDARD_TRANSACTION_CATALOG[tcode]?.program || '',
+    subArea: input.subArea || STANDARD_TRANSACTION_CATALOG[tcode]?.subArea || '',
+    programName: input.programName || input.discoveryMetadata?.programName || STANDARD_TRANSACTION_CATALOG[tcode]?.program || (tcode.startsWith('Z') ? `Z_${tcode}` : 'SAP_RUNTIME'),
     screenNumber: input.screenNumber || input.discoveryMetadata?.screenNumber || STANDARD_TRANSACTION_CATALOG[tcode]?.screenNumber || '0100',
-    packageName: input.packageName || input.discoveryMetadata?.packageName || STANDARD_TRANSACTION_CATALOG[tcode]?.packageName || (tcode === 'F-53' || tcode === 'F-28' || tcode === 'FB03' ? 'FBAS' : (tcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS')),
-    originalSystem: input.originalSystem || input.discoveryMetadata?.originalSystem || 'SAP',
+    packageName: input.packageName || input.discoveryMetadata?.packageName || STANDARD_TRANSACTION_CATALOG[tcode]?.packageName || (tcode === 'MIGO' ? 'MB' : (tcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS')),
+    originalSystem: input.originalSystem || input.discoveryMetadata?.originalSystem || (tcode.startsWith('Z') ? 'S21' : 'SAP'),
     softwareComponent: input.softwareComponent || input.discoveryMetadata?.softwareComponent || STANDARD_TRANSACTION_CATALOG[tcode]?.softwareComponent || 'S4CORE 108',
-    rationale: input.rationale || recommendation?.rationale || '',
+    rationale: input.rationale || recommendation?.rationale || recommendation?.justification || (matchingFioriApp ? `Standard SAP Fiori application ${matchingFioriApp.appId} (${matchingFioriApp.appName}) fully satisfies business capability requirements for ${tcode} on S/4HANA 2023.` : ''),
 
     // Complete Fit-Gap Evaluation preservation (FITGAP-02)
     dimensionResults: assessmentObj.dimensionResults || input.dimensionResults || null,

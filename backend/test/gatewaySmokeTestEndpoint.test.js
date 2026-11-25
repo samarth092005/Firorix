@@ -12,6 +12,7 @@ describe('Fiorify Sprint 5.1 — HTTP Server & Gateway Smoke Test Endpoint Secur
 
   const mockAdapter = new BtpDestinationAdapter({
     adminSecret: TEST_ADMIN_SECRET,
+    destinationName: 'S21',
     vcapServices: {
       destination: [
         {

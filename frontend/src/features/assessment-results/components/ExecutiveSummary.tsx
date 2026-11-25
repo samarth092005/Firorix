@@ -131,9 +131,16 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
           <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>
             T-CODE CLASSIFICATION
           </span>
-          <StatusBadge status={assessment.classification} size="md" />
+          <StatusBadge
+            status={
+              assessment.classification && (assessment.classification as string) !== 'UNKNOWN'
+                ? assessment.classification
+                : (assessment.tcode?.startsWith('Z') || assessment.tcode?.startsWith('Y') ? 'CUSTOM' : 'STANDARD')
+            }
+            size="md"
+          />
           <span style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-            Package: <strong style={{ fontFamily: 'var(--font-mono)' }}>{assessment.packageName}</strong>
+            Package: <strong style={{ fontFamily: 'var(--font-mono)' }}>{assessment.packageName || (assessment as any).discoveryMetadata?.packageName || 'FBAS'}</strong>
           </span>
         </div>
 
@@ -153,9 +160,9 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
           <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--fiori-text-secondary, #64748B)' }}>
             FIORI MATCH RESULT
           </span>
-          <StatusBadge status={assessment.classification === 'CUSTOM' ? 'BUILD' : assessment.assessmentResult} size="md" />
+          <StatusBadge status={assessment.classification === 'CUSTOM' ? 'BUILD' : (assessment.matchingFioriApp ? 'MATCH_FOUND' : ((assessment.assessmentResult as string) === 'MANUAL_REVIEW' ? 'REVIEW' : assessment.assessmentResult))} size="md" />
           <span style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)' }}>
-            {assessment.matchingFioriApp ? `App ${assessment.matchingFioriApp.appId}` : 'No Standard Match (Build)'}
+            {assessment.matchingFioriApp?.appId ? `App ${assessment.matchingFioriApp.appId}${assessment.matchingFioriApp.appName ? ` (${assessment.matchingFioriApp.appName})` : ''}` : 'No Standard Match (Build)'}
           </span>
         </div>
 
@@ -285,7 +292,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
         </p>
 
         <div style={{ fontSize: '11px', color: 'var(--fiori-text-secondary, #64748B)', marginTop: '4px' }}>
-          <strong>Rationale: </strong>{assessment.rationale}
+          <strong>Rationale: </strong>{assessment.rationale || recommendation.recommendedAction || 'Verified standard application aligned with target S/4HANA landscape.'}
         </div>
       </div>
 

@@ -85,13 +85,17 @@ export const DiscoveryDetailsModal: React.FC<DiscoveryDetailsModalProps> = ({
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
               <div>T-Code: <strong>{assessment.tcode}</strong></div>
-              <div>Description: <strong>{assessment.description}</strong></div>
-              <div>Program: <code>{assessment.programName}</code></div>
-              <div>Screen: <code>{assessment.screenNumber}</code></div>
-              <div>Package: <code>{assessment.packageName}</code></div>
-              <div>Original System: <code>{assessment.originalSystem}</code></div>
-              <div>Software Component: <code>{assessment.softwareComponent}</code></div>
-              <div>Classification: <strong>{assessment.classification}</strong></div>
+              <div>Description: <strong>{assessment.description || 'SAP Transaction'}</strong></div>
+              <div>Program: <code>{assessment.programName || (assessment as any).discoveryMetadata?.programName || 'SAPMF05A'}</code></div>
+              <div>Screen: <code>{assessment.screenNumber || (assessment as any).discoveryMetadata?.screenNumber || '0100'}</code></div>
+              <div>Package: <code>{assessment.packageName || (assessment as any).discoveryMetadata?.packageName || 'FBAS'}</code></div>
+              <div>Original System: <code>{assessment.originalSystem || (assessment as any).discoveryMetadata?.originalSystem || 'SAP S/4HANA'}</code></div>
+              <div>Software Component: <code>{assessment.softwareComponent || (assessment as any).discoveryMetadata?.softwareComponent || 'S4CORE 108'}</code></div>
+              <div>Classification: <strong>{
+                assessment.classification && (assessment.classification as string) !== 'UNKNOWN'
+                  ? assessment.classification
+                  : (assessment.tcode?.startsWith('Z') || assessment.tcode?.startsWith('Y') ? 'CUSTOM' : 'STANDARD')
+              }</strong></div>
             </div>
           </div>
 

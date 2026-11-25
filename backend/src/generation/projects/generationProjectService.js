@@ -322,7 +322,10 @@ export class GenerationProjectService {
     });
 
     const rootEntityName = archetype.rootEntityName || `Z_I_${cleanTcode}`;
-    const initialRequirements = [...(archetype.initialRequirements || [])];
+    const initialRequirements = (archetype.initialRequirements || []).map((r) => ({
+      ...r,
+      status: 'DRAFT'
+    }));
 
     if (Array.isArray(identifiedGaps)) {
       identifiedGaps.forEach((gap, idx) => {
@@ -332,7 +335,7 @@ export class GenerationProjectService {
           title: `Custom Requirement: ${gapTitle.slice(0, 60)}`,
           category: 'BUSINESS',
           priority: 'SHOULD_HAVE',
-          status: 'CONFIRMED',
+          status: 'DRAFT',
           sourceType: 'FIT_GAP_FINDING',
           source: 'FIT_GAP_FINDING',
           description: gapTitle,

@@ -1021,12 +1021,14 @@ export class EvidenceEngine {
       };
     }
 
-    // Check 0B: Pending Target Landscape Verification
+    // Check 0B: Pending Target Landscape Verification (when no candidate app is confirmed)
     if (
-      assessment.overallStatus === 'PENDING_VERIFICATION' ||
-      assessment.assessmentResult === 'PENDING_VERIFICATION' ||
-      assessment.verificationStatus === 'PENDING_VERIFICATION' ||
-      compatibility?.status === 'PENDING_VERIFICATION'
+      !appId && (
+        assessment.overallStatus === 'PENDING_VERIFICATION' ||
+        assessment.assessmentResult === 'PENDING_VERIFICATION' ||
+        assessment.verificationStatus === 'PENDING_VERIFICATION' ||
+        compatibility?.status === 'PENDING_VERIFICATION'
+      )
     ) {
       return {
         outcome: 'PENDING_VERIFICATION',
@@ -1215,7 +1217,8 @@ export class EvidenceEngine {
     }
 
     // Outcome A: Standard Fiori Successor -> ADD_AND_CONFIGURE
-    if (assessment.assessmentResult === 'EXPLICIT_SUCCESSOR' && appId) {
+    const rawRes = String(assessment.assessmentResult || '').toUpperCase();
+    if (appId && (rawRes === 'EXPLICIT_SUCCESSOR' || rawRes === 'ADD_AND_CONFIGURE' || rawRes === 'MATCH_FOUND' || rawRes === 'MANUAL_REVIEW' || assessment.recommendation?.outcome === 'ADD_AND_CONFIGURE' || !assessment.assessmentResult)) {
       return {
         outcome: 'ADD_AND_CONFIGURE',
         canonicalOutcome: 'ADD_AND_CONFIGURE',

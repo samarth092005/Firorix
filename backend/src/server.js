@@ -19,7 +19,7 @@ import { technicalEvidenceEngine } from './engine/technicalEvidenceEngine.js';
 import { fioriMatchingEngine } from './engine/fioriMatchingEngine.js';
 import { defaultMcpService } from './mcp/services/mcpService.js';
 import { defaultMcpDiscoveryOrchestrator } from './mcp/discovery/index.js';
-import { defaultAuthService, USER_ROLES } from './services/authService.js';
+import { defaultAuthService, USER_ROLES, PERMISSIONS } from './services/authService.js';
 import { defaultSecurityAuditLogger, SECURITY_ACTIONS } from './infrastructure/security/securityAuditLogger.js';
 import { defaultAuthProviderFactory } from './infrastructure/security/authProviderFactory.js';
 import { createAuthMiddleware } from './middleware/authMiddleware.js';

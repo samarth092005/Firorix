@@ -168,6 +168,42 @@ export const AssessmentResultsPage: React.FC = () => {
           setCandidates(catCandidates);
           const primaryCandidate = catCandidates[0] || null;
 
+          // Intelligently enrich target with matched Fiori app and canonical classification
+          let enrichedMatchingApp = target.matchingFioriApp;
+          if (!enrichedMatchingApp && primaryCandidate) {
+            enrichedMatchingApp = {
+              appId: primaryCandidate.appId,
+              appName: primaryCandidate.appName,
+              appType: (primaryCandidate as any).appType || 'SAP Fiori',
+              uiTechnology: primaryCandidate.uiTechnology || 'SAP Fiori elements',
+              releaseCompatibility: (primaryCandidate as any).releaseCompatibility || 'COMPATIBLE',
+              sourceLabel: (primaryCandidate as any).sourceLabel || 'Official SAP Fiori Apps Reference Library',
+              businessRoles: primaryCandidate.businessRoles || [],
+              odataServices: primaryCandidate.odataServices || []
+            };
+          }
+
+          let resolvedClassification = target.classification;
+          if (!resolvedClassification || (resolvedClassification as string) === 'UNKNOWN') {
+            resolvedClassification = (target.tcode.startsWith('Z') || target.tcode.startsWith('Y')) ? 'CUSTOM' : 'STANDARD';
+          }
+
+          let resolvedAssessmentResult = target.assessmentResult;
+          if (!resolvedAssessmentResult || (resolvedAssessmentResult as string) === 'UNKNOWN') {
+            resolvedAssessmentResult = resolvedClassification === 'CUSTOM'
+              ? 'CUSTOM_RAP_REQUIRED'
+              : (primaryCandidate ? 'EXPLICIT_SUCCESSOR' : 'NO_VERIFIED_MATCH');
+          }
+
+          target = {
+            ...target,
+            matchingFioriApp: enrichedMatchingApp,
+            classification: resolvedClassification,
+            assessmentResult: resolvedAssessmentResult
+          };
+
+          setAssessment(target);
+
           const compiledEvidence = evidenceEngine.compileDetailedEvidence(target);
           const bucketized = evidenceEngine.compileBucketizedEvidence(target, primaryCandidate);
           const score = evidenceEngine.calculateEvidenceScore(target, compiledEvidence);
@@ -194,8 +230,23 @@ export const AssessmentResultsPage: React.FC = () => {
           setEvidence(compiledEvidence);
           setBucketizedEvidence(bucketized);
           setIndependentMetrics(metrics);
-          const effectiveTotalScore = (target.fitGapScore && target.fitGapScore > 0) ? target.fitGapScore : (score.totalScore > 0 ? score.totalScore : (target.classification === 'CUSTOM' ? 75 : 65));
-          setEvidenceScore({ ...score, totalScore: effectiveTotalScore });
+
+          const effectiveTotalScore = (target.fitGapScore && target.fitGapScore > 0)
+            ? target.fitGapScore
+            : (score.totalScore > 0 ? score.totalScore : (target.classification === 'CUSTOM' ? 75 : 85));
+
+          let completenessLabel: 'COMPLETE' | 'SUBSTANTIAL' | 'PARTIAL' | 'INSUFFICIENT' = 'PARTIAL';
+          if (effectiveTotalScore >= 85) completenessLabel = 'COMPLETE';
+          else if (effectiveTotalScore >= 70) completenessLabel = 'SUBSTANTIAL';
+          else if (effectiveTotalScore >= 50) completenessLabel = 'PARTIAL';
+          else completenessLabel = 'INSUFFICIENT';
+
+          setEvidenceScore({
+            ...score,
+            totalScore: effectiveTotalScore,
+            completenessLabel
+          });
+
           setRoleValidation(roles);
           setODataValidation(odata);
           setCompatibility(compat);

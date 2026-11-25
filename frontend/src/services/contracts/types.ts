@@ -292,6 +292,12 @@ export interface AssessmentCreationRequest {
   targetRelease: string;
   businessContext: BusinessContext;
   applicationRequirements: ApplicationRequirements;
+  businessArea?: string;
+  classification?: string;
+  programName?: string;
+  packageName?: string;
+  screenNumber?: string;
+  recommendation?: any;
   discoveryMetadata: {
     description: string;
     programName: string;

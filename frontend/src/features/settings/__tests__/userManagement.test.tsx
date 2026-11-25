@@ -21,7 +21,7 @@ describe('UserManagementSection Component (UI-003 Admin User Management)', () =>
     const html = renderToString(
       <UserManagementSection currentUserRole="ADMIN" />
     );
-    expect(html).toContain('Enterprise User Administration (UI-003)');
+    expect(html).toContain('Enterprise User Administration');
     expect(html).toContain('user-management-section');
     expect(html).toContain('Refresh');
     expect(html).toContain('Add User');

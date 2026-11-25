@@ -802,10 +802,8 @@ export class AuthService {
     if (typeof roleOrUser === 'object') {
       if (roleOrUser.isBuildArchitectApprover === true) return true;
       if (roleOrUser.role === USER_ROLES.LEAD_ARCHITECT || roleOrUser.role === 'CHIEF_ARCHITECT') return true;
-      if (roleOrUser.role === USER_ROLES.ADMIN || roleOrUser.role === 'ADMIN') return true;
       if (Array.isArray(roleOrUser.scopes) && (
         roleOrUser.scopes.includes(PERMISSIONS.BUILD_ARCHITECT_APPROVER) ||
-        roleOrUser.scopes.includes('Fiorify.admin.access') ||
         roleOrUser.scopes.includes('Fiorify.admin.override')
       )) return true;
       if (Array.isArray(roleOrUser.permissions) && (
@@ -815,7 +813,7 @@ export class AuthService {
       if (Array.isArray(roleOrUser.policies) && roleOrUser.policies.includes('BUILD_ARCHITECT_APPROVER')) return true;
       if (roleOrUser.authorizationPolicy?.canApproveBuild === true) return true;
     }
-    if (roleOrUser === USER_ROLES.ADMIN || roleOrUser === 'ADMIN') return true;
+    if (roleOrUser === USER_ROLES.LEAD_ARCHITECT || roleOrUser === 'CHIEF_ARCHITECT') return true;
     return this.hasPermission(roleOrUser, PERMISSIONS.BUILD_ARCHITECT_APPROVER);
   }
 
