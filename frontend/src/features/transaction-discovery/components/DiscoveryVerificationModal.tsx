@@ -73,6 +73,8 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         style={{
           backgroundColor: '#FFFFFF',
           borderRadius: '12px',
@@ -286,9 +288,13 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                     </span>
                   </div>
                   <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: hasStandardApp ? '#15803D' : '#1E40AF' }}>
-                    {hasStandardApp
-                      ? '✓ Verified in SAP DDIC & Official Standard Fiori Application Found'
-                      : '✓ Verified in SAP DDIC • ⚠️ No Standard Fiori App (100% Functional Gap)'}
+                    {metadata.verificationStatus === 'PENDING_VERIFICATION'
+                      ? (hasStandardApp
+                          ? 'Official Standard Fiori Application Found • DDIC details pending direct S21 read'
+                          : 'Pending live S21 DDIC confirmation • No Standard Fiori App found')
+                      : (hasStandardApp
+                          ? '✓ Verified in SAP DDIC & Official Standard Fiori Application Found'
+                          : '✓ Verified in SAP DDIC • ⚠️ No Standard Fiori App (100% Functional Gap)')}
                   </p>
                 </div>
               </div>
@@ -333,9 +339,9 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px',
-                      backgroundColor: '#ECFDF5',
-                      color: '#047857',
-                      border: '1px solid #A7F3D0',
+                      backgroundColor: metadata.verificationStatus === 'PENDING_VERIFICATION' ? '#FEF3C7' : '#ECFDF5',
+                      color: metadata.verificationStatus === 'PENDING_VERIFICATION' ? '#92400E' : '#047857',
+                      border: `1px solid ${metadata.verificationStatus === 'PENDING_VERIFICATION' ? '#FDE68A' : '#A7F3D0'}`,
                       borderRadius: '12px',
                       padding: '2px 8px',
                       fontSize: '11px',
@@ -343,7 +349,11 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                     }}
                   >
                     <CheckCircle2 size={12} />
-                    <span>ACTIVE IN {systemId} ({client})</span>
+                    <span>
+                      {metadata.verificationStatus === 'PENDING_VERIFICATION'
+                        ? `PENDING DDIC READ (${systemId})`
+                        : `ACTIVE IN ${systemId} (${client})`}
+                    </span>
                   </span>
                 </div>
 

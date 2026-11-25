@@ -174,6 +174,7 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
         return true;
       }
 
+      console.error('[AssessmentRoutes] POST /api/v1/assessments error:', err);
       const sanitized = sanitizeErrorMessage(err.message || 'Storage error');
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(

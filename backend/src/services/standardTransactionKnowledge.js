@@ -34,9 +34,13 @@ export function synthesizeTransactionTitle(tcode) {
   // Standard SAP Prefix Modules
   if (/^ME/i.test(clean)) return `Purchasing & Sourcing Processing (${clean})`;
   if (/^MM/i.test(clean)) return `Material Master Management (${clean})`;
+  if (/^MC/i.test(clean)) return `Logistics Information System (LIS) Analysis (${clean})`;
   if (/^VA/i.test(clean)) return `Sales Order Processing (${clean})`;
   if (/^VF/i.test(clean)) return `Billing & Invoicing Processing (${clean})`;
   if (/^VL/i.test(clean)) return `Outbound Delivery Processing (${clean})`;
+  if (/^VK/i.test(clean)) return `Sales Pricing & Condition Maintenance (${clean})`;
+  if (/^(OV|OX)/i.test(clean)) return `Enterprise Structure Configuration (${clean})`;
+  if (/^OB/i.test(clean)) return `Financial Accounting Customizing (${clean})`;
   if (/^(FB|F-|FS)/i.test(clean)) return `Financial Accounting & Posting (${clean})`;
   if (/^(IW|PM)/i.test(clean)) return `Plant Maintenance Work Order (${clean})`;
   if (/^(CO|MD|CR|CS)/i.test(clean)) return `Production Planning & Orders (${clean})`;
@@ -44,6 +48,7 @@ export function synthesizeTransactionTitle(tcode) {
   if (/^(KS|KP|KO)/i.test(clean)) return `Controlling & Cost Accounting (${clean})`;
   if (/^(PA|PB)/i.test(clean)) return `Human Capital Management (${clean})`;
   if (/^(QA|QE|QP)/i.test(clean)) return `Quality Management Processing (${clean})`;
+  if (/^(LT|LX)/i.test(clean)) return `Warehouse Management Operations (${clean})`;
   if (/^(ST|SM|SE|SU|PF)/i.test(clean)) return `System Administration & Diagnostics (${clean})`;
 
   return `SAP Transaction ${clean}`;

@@ -242,12 +242,24 @@ export class TransactionRegistryProvider {
       }
 
       if (adtProbe.accessible && (!options.adtTx || !options.adtTx.found)) {
+        // Never mark a valid SAP transaction as CONFIRMED_NON_EXISTENT solely from quickSearch miss.
+        // Only return CONFIRMED_NON_EXISTENT when explicitly confirmed absent or in test fixtures.
+        if (options.adtTx && options.adtTx.explicitlyNotFound) {
+          return {
+            state: TRANSACTION_EXISTENCE_STATES.CONFIRMED_NON_EXISTENT,
+            exists: false,
+            tcode: cleanTcode,
+            reason: `Transaction "${cleanTcode}" does not exist in SAP system S21 repository.`,
+            provenance: 'LIVE_SAP_S21_ADT_VERIFIED'
+          };
+        }
         return {
-          state: TRANSACTION_EXISTENCE_STATES.CONFIRMED_NON_EXISTENT,
-          exists: false,
+          state: TRANSACTION_EXISTENCE_STATES.PENDING_VERIFICATION,
+          exists: null,
           tcode: cleanTcode,
-          reason: `Transaction "${cleanTcode}" does not exist in SAP system S21 repository.`,
-          provenance: 'LIVE_SAP_S21_ADT_VERIFIED'
+          classification: syntax.isCustom ? 'CUSTOM' : (syntax.pattern === 'PARTNER_NAMESPACE' ? 'PARTNER' : 'STANDARD'),
+          reason: `Transaction "${cleanTcode}" could not be confirmed via ADT quickSearch on S21 (may require direct TSTC table read authorization).`,
+          provenance: 'LIVE_SAP_S21_ADT_UNCONFIRMED'
         };
       }
     }
@@ -368,11 +380,11 @@ export class RepositoryMetadataProvider {
       };
     }
 
-    if (options.adtTx && options.adtTx.packageName) {
+    if (options.adtTx && options.adtTx.found) {
       return {
-        program: 'SAPL' + options.adtTx.packageName,
-        screenNumber: '0100',
-        packageName: options.adtTx.packageName,
+        program: options.adtTx.program || 'PENDING_VERIFICATION',
+        screenNumber: options.adtTx.screenNumber || '0100',
+        packageName: options.adtTx.packageName || (isCustom ? 'Z_PENDING_VERIFICATION' : 'PENDING_VERIFICATION'),
         softwareComponent: isCustom ? 'HOME' : 'S4CORE 108',
         originalSystem: isCustom ? 'S21' : 'SAP',
         classification: isCustom ? 'CUSTOM' : 'STANDARD',

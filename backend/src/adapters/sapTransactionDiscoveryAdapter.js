@@ -192,52 +192,152 @@ export class SapTransactionDiscoveryAdapter {
   }
 
   /**
-   * Performs live SAP ADT repository quick search for a transaction code.
+   * Decodes basic XML/HTML entities returned by SAP ADT endpoints.
    */
-  async searchAdtTransaction(tcode) {
-    try {
-      const response = await this.btpAdapter.executeRequest({
-        path: `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeURIComponent(tcode)}&maxResults=10`,
-        method: 'GET',
-        headers: {
-          Accept: 'application/xml, text/xml, */*'
-        }
-      });
-      if (response && response.success && response.data) {
-        const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-        const tagRegex = /<adtcore:objectReference\b[^>]*\/>/gi;
-        const tags = raw.match(tagRegex) || [];
+  _decodeXmlEntities(str) {
+    if (!str || typeof str !== 'string') return str;
+    return str
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .trim();
+  }
 
-        let bestTag = null;
-        for (const tag of tags) {
-          const nameMatch = tag.match(/adtcore:name="([^"]+)"/i);
-          if (nameMatch && nameMatch[1].toUpperCase() === tcode.toUpperCase()) {
-            const typeMatch = tag.match(/adtcore:type="([^"]+)"/i);
-            const type = typeMatch ? typeMatch[1].toUpperCase() : '';
-            // Prioritize SAP Transaction Object (TRAN/T or TRAN) over Function Groups (FUGR), Programs, etc.
-            if (type.startsWith('TRAN')) {
-              bestTag = tag;
-              break;
-            }
-            if (!bestTag) {
-              bestTag = tag;
-            }
-          }
-        }
+  /**
+   * Fetches read-only ADT transaction object XML to extract program (PGMNA) and screen (DYPNO).
+   */
+  async fetchAdtTransactionDetails(tcode, objectUri = null) {
+    const candidatePaths = [];
+    if (objectUri && typeof objectUri === 'string' && objectUri.startsWith('/sap/bc/adt/')) {
+      candidatePaths.push(objectUri);
+    }
+    const vitPath = `/sap/bc/adt/vit/wb/object_type/trant/object_name/${encodeURIComponent(tcode.toUpperCase())}`;
+    if (!candidatePaths.includes(vitPath)) {
+      candidatePaths.push(vitPath);
+    }
 
-        if (bestTag) {
-          const nameMatch = bestTag.match(/adtcore:name="([^"]+)"/i);
-          const pkgMatch = bestTag.match(/adtcore:packageName="([^"]+)"/i);
-          const descMatch = bestTag.match(/adtcore:description="([^"]+)"/i);
+    for (const detailPath of candidatePaths) {
+      try {
+        const res = await this.btpAdapter.executeRequest({
+          path: detailPath,
+          method: 'GET',
+          headers: { Accept: 'application/xml, text/xml, */*' }
+        });
+        if (!res || !res.success || !res.data) continue;
+        const xml = typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
+
+        // Extract program name from SAP ADT transaction XML representations
+        const progMatch =
+          xml.match(/(?:programName|abapProgram|program|PGMNA)="([^"]+)"/i) ||
+          xml.match(/<(?:\w+:)?(?:programName|program|PGMNA)[^>]*>([^<]+)<\/(?:\w+:)?(?:programName|program|PGMNA)>/i) ||
+          xml.match(/<adtcore:objectReference[^>]*adtcore:type="PROG[^"]*"[^>]*adtcore:name="([^"]+)"/i);
+
+        const screenMatch =
+          xml.match(/(?:screenNumber|dynpro|DYPNO)="([^"]+)"/i) ||
+          xml.match(/<(?:\w+:)?(?:screenNumber|dynpro|DYPNO)[^>]*>([^<]+)<\/(?:\w+:)?(?:screenNumber|dynpro|DYPNO)>/i);
+
+        const pkgMatch =
+          xml.match(/adtcore:packageName="([^"]+)"/i) ||
+          xml.match(/<adtcore:packageRef[^>]*adtcore:name="([^"]+)"/i);
+
+        const descMatch = xml.match(/adtcore:description="([^"]+)"/i);
+
+        if (progMatch || screenMatch || pkgMatch) {
           return {
             found: true,
-            tcode: nameMatch ? nameMatch[1] : tcode,
-            packageName: pkgMatch ? pkgMatch[1] : null,
-            description: descMatch ? descMatch[1] : null,
-            provenance: 'LIVE_SAP_S21_ADT'
+            program: progMatch ? progMatch[1].trim().toUpperCase() : null,
+            screenNumber: screenMatch ? screenMatch[1].trim() : null,
+            packageName: pkgMatch ? pkgMatch[1].trim().toUpperCase() : null,
+            description: descMatch ? this._decodeXmlEntities(descMatch[1]) : null
           };
         }
+      } catch {
+        // Try next candidate path
       }
+    }
+    return null;
+  }
+
+  /**
+   * Performs live SAP ADT repository quick search for a transaction code (filtered to TRAN first).
+   */
+  async searchAdtTransaction(tcode) {
+    const cleanTcode = String(tcode || '').trim().toUpperCase();
+    const searchPaths = [
+      `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeURIComponent(cleanTcode)}&objectType=TRAN&maxResults=10`,
+      `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${encodeURIComponent(cleanTcode)}&maxResults=25`
+    ];
+
+    try {
+      let bestTag = null;
+      for (const searchPath of searchPaths) {
+        const response = await this.btpAdapter.executeRequest({
+          path: searchPath,
+          method: 'GET',
+          headers: {
+            Accept: 'application/xml, text/xml, */*'
+          }
+        });
+
+        if (response && response.success && response.data) {
+          const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+          const tagRegex = /<adtcore:objectReference\b[^>]*\/>/gi;
+          const tags = raw.match(tagRegex) || [];
+
+          for (const tag of tags) {
+            const nameMatch = tag.match(/adtcore:name="([^"]+)"/i);
+            if (nameMatch && nameMatch[1].toUpperCase() === cleanTcode) {
+              const typeMatch = tag.match(/adtcore:type="([^"]+)"/i);
+              const type = typeMatch ? typeMatch[1].toUpperCase() : '';
+              if (type.startsWith('TRAN')) {
+                bestTag = tag;
+                break;
+              }
+              if (!bestTag) {
+                bestTag = tag;
+              }
+            }
+          }
+          if (bestTag) break;
+        }
+      }
+
+      if (bestTag) {
+        const nameMatch = bestTag.match(/adtcore:name="([^"]+)"/i);
+        const pkgMatch = bestTag.match(/adtcore:packageName="([^"]+)"/i);
+        const descMatch = bestTag.match(/adtcore:description="([^"]+)"/i);
+        const uriMatch = bestTag.match(/adtcore:uri="([^"]+)"/i);
+
+        const details = await this.fetchAdtTransactionDetails(cleanTcode, uriMatch ? uriMatch[1] : null);
+
+        return {
+          found: true,
+          tcode: nameMatch ? nameMatch[1].toUpperCase() : cleanTcode,
+          packageName: (details?.packageName || (pkgMatch ? pkgMatch[1] : null)) || null,
+          program: details?.program || null,
+          screenNumber: details?.screenNumber || null,
+          description: details?.description || (descMatch ? this._decodeXmlEntities(descMatch[1]) : null),
+          uri: uriMatch ? uriMatch[1] : null,
+          provenance: 'LIVE_SAP_S21_ADT'
+        };
+      }
+
+      // Direct VIT transaction object fallback even if quickSearch missed it
+      const directDetails = await this.fetchAdtTransactionDetails(cleanTcode, null);
+      if (directDetails && directDetails.found) {
+        return {
+          found: true,
+          tcode: cleanTcode,
+          packageName: directDetails.packageName || null,
+          program: directDetails.program || null,
+          screenNumber: directDetails.screenNumber || null,
+          description: directDetails.description || null,
+          provenance: 'LIVE_SAP_S21_ADT'
+        };
+      }
+
       return { found: false };
     } catch {
       return { found: false };

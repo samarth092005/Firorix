@@ -226,6 +226,14 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         if (pipelineRes && pipelineRes.discovery) {
           const disc = pipelineRes.discovery as any;
           const isNotFound = disc.exists === false || disc.statusCode === 'NOT_FOUND' || disc.verificationStatus === 'NOT_FOUND' || disc.classification === 'NOT_FOUND';
+          const resolvedProgram = disc.programName || disc.program || null;
+          const resolvedPackage = disc.packageName || disc.package || null;
+          const isPendingDdic = !isNotFound && (!resolvedProgram || !resolvedPackage || disc.verificationStatus === 'PENDING_VERIFICATION');
+          const mappedCandidates = ((pipelineRes.candidates || []) as any[]).map((cand) => ({
+            ...cand,
+            technicalComponent: cand.technicalComponent || cand.softwareComponent || disc.softwareComponent || 'S4CORE 108'
+          }));
+
           discoRes = {
             requestId,
             tcode: cleanTcode,
@@ -234,27 +242,27 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             targetRelease,
             timestamp: new Date().toISOString(),
             exists: !isNotFound,
-            verificationStatus: isNotFound ? 'NOT_FOUND' : 'VERIFIED',
+            verificationStatus: isNotFound ? 'NOT_FOUND' : (isPendingDdic ? 'PENDING_VERIFICATION' : (disc.verificationStatus || 'VERIFIED')),
             classification: isNotFound ? 'NOT_FOUND' : (disc.classification || 'STANDARD'),
             description: disc.description || disc.transactionDescription || (isNotFound ? 'Transaction Does Not Exist' : `${cleanTcode} Business Transaction`),
-            programName: disc.programName || disc.program || (isNotFound ? null : (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? `Z_${cleanTcode}` : 'SAP_RUNTIME')),
+            programName: isNotFound ? null : (resolvedProgram || 'Pending DDIC Read'),
             screenNumber: disc.screenNumber || '0100',
-            packageName: disc.packageName || 'FBAS',
-            originalSystem: disc.originalSystem || 'SAP',
+            packageName: isNotFound ? null : (resolvedPackage || (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? 'Z_CUSTOM' : 'Pending DDIC Read')),
+            originalSystem: disc.originalSystem || (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? 'S21' : 'SAP'),
             softwareComponent: disc.softwareComponent || 'S4CORE 108',
-            metadataStatus: disc.metadataStatus || (isNotFound ? 'NOT_AVAILABLE' : 'COMPLETE'),
-            isLiveVerified: isLiveSystem,
+            metadataStatus: disc.metadataStatus || (isNotFound ? 'NOT_AVAILABLE' : (isPendingDdic ? 'PARTIAL' : 'COMPLETE')),
+            isLiveVerified: isLiveSystem && !isPendingDdic,
             provenance: isLiveSystem ? 'LIVE_SAP_S21' : 'CURATED_DEMO_FIXTURE',
-            catalogueCandidates: (pipelineRes.candidates || []) as any,
+            catalogueCandidates: mappedCandidates as any,
             tadirEvidence: disc.tadirEvidence || {
               pgmid: 'R3TR',
               object: 'TRAN',
               objName: cleanTcode,
-              devclass: disc.packageName || 'FBAS',
+              devclass: resolvedPackage || 'Pending DDIC Read',
               srcsystem: disc.originalSystem || 'SAP'
             }
           };
-          catCandidates = (pipelineRes.candidates || []) as any;
+          catCandidates = mappedCandidates as any;
         }
       } catch (pipeErr: any) {
         console.warn('[Discovery Workspace] Backend match pipeline fallback:', pipeErr?.message);
@@ -290,17 +298,8 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         setProgressState('COMPLETED');
       }
 
-      // If T-Code does not exist, or exists but has NO standard Fiori app match,
-      // prompt with the Discovery Verification / Clean Core Modernization modal.
-      // If it exists AND has standard Fiori apps, show Reference Configuration directly on the workspace without an intrusive modal.
-      const hasStandardApp = catCandidates && catCandidates.length > 0;
-      const tcodeExists = discoRes?.exists !== false && discoRes?.verificationStatus !== 'NOT_FOUND';
-
-      if (!tcodeExists || !hasStandardApp) {
-        setIsVerificationModalOpen(true);
-      } else {
-        setIsVerificationModalOpen(false);
-      }
+      // Never auto-open an intrusive modal on search results; keep workspace clean and let user open Verification Summary on demand.
+      setIsVerificationModalOpen(false);
 
       // Pre-populate business scope if a preset matches and user hasn't customized it
       if (!isScopeCustomized) {
@@ -406,8 +405,10 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           MIRO: { program: 'SAPLMR1M', package: 'MRM', description: 'Enter Incoming Invoice', role: 'SAP_BR_AP_ACCOUNTANT' }
         };
         const known = knownPrograms[cleanTcode.toUpperCase()];
-        const effectiveProgram = metadata.programName || known?.program || (cleanTcode.startsWith('Z') ? `Z_${cleanTcode}` : 'SAP_RUNTIME');
-        const effectivePackage = metadata.packageName || known?.package || (cleanTcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS');
+        const rawProg = metadata.programName && metadata.programName !== 'Pending DDIC Read' ? metadata.programName : null;
+        const rawPkg = metadata.packageName && metadata.packageName !== 'Pending DDIC Read' ? metadata.packageName : null;
+        const effectiveProgram = rawProg || known?.program || (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? `Z_${cleanTcode}` : 'PENDING_VERIFICATION');
+        const effectivePackage = rawPkg || known?.package || (cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y') ? 'Z_CUSTOM' : 'PENDING_VERIFICATION');
         const effectiveDescription = (known?.description && tcodeDescription.startsWith('Transaction ')) ? known.description : tcodeDescription;
 
         const created = await assessmentService.createAssessment({
@@ -1183,60 +1184,6 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
             </div>
           </div>
 
-          {/* Custom Gap Alert Banner (when no standard app exists in catalogue) */}
-          {candidates.length === 0 && (
-            <div
-              style={{
-                backgroundColor: '#EFF6FF',
-                border: '1px solid #BFDBFE',
-                borderRadius: '8px',
-                padding: '16px 20px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '14px'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '8px', backgroundColor: '#DBEAFE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0066FF' }}>
-                  <Code2 size={22} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#1E3A8A' }}>
-                    No Standard SAP Fiori App Available &bull; 100% Functional Gap Detected
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#3B82F6', marginTop: '2px' }}>
-                    Transaction {metadata.tcode} ({metadata.programName}) has no certified standard Fiori app. Modernize via Clean Core RAP &amp; Fiori Elements.
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                disabled={isProceeding}
-                onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '8px 18px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: isProceeding ? '#94A3B8' : '#0066FF',
-                  color: '#FFFFFF',
-                  fontSize: '12.5px',
-                  fontWeight: 700,
-                  cursor: isProceeding ? 'wait' : 'pointer',
-                  boxShadow: '0 2px 4px rgba(0, 102, 255, 0.2)'
-                }}
-              >
-                <span>{isProceeding ? 'Proceeding to Modernization...' : 'Proceed to Modernization & Custom Build'}</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          )}
-
           {/* Core Dual Architectural Cards */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '20px' }}>
             {/* Left Card: Verified SAP DDIC Profile */}
@@ -1510,7 +1457,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                       </div>
 
                       <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px dashed #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: '14px', fontSize: '11px', color: '#64748B' }}>
-                        <span>Component: <strong style={{ color: '#102A43' }}>{selectedCandidate.technicalComponent || 'N/A'}</strong></span>
+                        <span>Component: <strong style={{ color: '#102A43' }}>{selectedCandidate.technicalComponent || (selectedCandidate as any).softwareComponent || metadata.softwareComponent || 'S4CORE 108'}</strong></span>
                         <span>Release: <strong style={{ color: '#102A43' }}>{selectedCandidate.supportedProductRelease || targetRelease}</strong></span>
                         {selectedCandidate.odataServices && selectedCandidate.odataServices.length > 0 && (
                           <span>OData: <strong style={{ color: '#0A6ED1', fontFamily: 'var(--font-mono, monospace)' }}>{selectedCandidate.odataServices[0]}</strong></span>
@@ -1567,33 +1514,22 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
-                        100% FUNCTIONAL GAP DETECTED
+                        NO STANDARD APP &bull; CUSTOM RAP BUILD
                       </span>
                       <span style={{ fontSize: '11px', color: '#64748B' }}>
                         Target: <strong>{systemId} ({client})</strong>
                       </span>
                     </div>
 
-                    {/* 4 Pillars Breakdown for BUILD */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#0066FF', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>1. Verdict &amp; Recommendation</span>
-                        <strong style={{ color: '#0066FF' }}>BUILD_CUSTOM_RAP</strong> — T-Code verified in S21 DDIC, but zero certified Fiori apps match in official catalogue. Custom Clean Core RAP application required.
+                      <div style={{ padding: '10px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px', lineHeight: 1.5, color: '#334155' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#0066FF', display: 'block', textTransform: 'uppercase', marginBottom: '3px' }}>Target Clean Core Architecture</span>
+                        Zero certified SAP Fiori apps match <strong>{metadata.tcode}</strong> in the official Fiori Apps Reference Library. Replace legacy Dynpro screen <code>{metadata.screenNumber || '0100'}</code> with a <strong>Clean Core Managed RAP &amp; Fiori Elements (List Report + Object Page)</strong> application.
                       </div>
 
-                      <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#B45309', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>2. Fit-Gap &amp; Scope Matrix</span>
-                        <strong style={{ color: '#B45309' }}>100% Functional Gap</strong> — Legacy dynpro screen <code>{metadata.screenNumber || '0100'}</code> will be replaced by a modern Fiori Elements (List Report + Object Page) architecture.
-                      </div>
-
-                      <div style={{ padding: '8px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#475569', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>3. Technical &amp; Audit Proof</span>
-                        Verified in system <strong>{systemId} ({client})</strong>: Program <code>{metadata.programName || 'N/A'}</code>, Package <code>{metadata.packageName || 'N/A'}</code>, Component <code>{metadata.softwareComponent || 'S4CORE'}</code>.
-                      </div>
-
-                      <div style={{ padding: '8px 12px', backgroundColor: '#EFF6FF', borderRadius: '4px', border: '1px solid #BFDBFE', fontSize: '12px' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#1E40AF', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>4. Modernization Decision</span>
-                        <strong style={{ color: '#1E3A8A' }}>PROCEED_TO_GENERATION_STUDIO</strong> — Synthesize ABAP Active/Draft Tables, CDS Entities, Managed RAP BDEF, and UI5 Frontend.
+                      <div style={{ padding: '10px 12px', backgroundColor: '#EFF6FF', borderRadius: '4px', border: '1px solid #BFDBFE', fontSize: '12px', lineHeight: 1.5, color: '#1E3A8A' }}>
+                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#1E40AF', display: 'block', textTransform: 'uppercase', marginBottom: '3px' }}>Deliverables in Generation Studio</span>
+                        CDS Interface &amp; Projection Views (<code>I_</code> / <code>C_</code> with <code>@UI</code> annotations), Managed RAP BDEF with Draft, OData V4 Service Binding, and interactive Fiori Elements preview.
                       </div>
                     </div>
 
