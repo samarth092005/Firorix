@@ -151,6 +151,7 @@ export class SapTransactionDiscoveryAdapter {
         }
       });
 
+      console.info(`[S21 ADT Probe] path=/sap/bc/adt/discovery httpStatus=${response?.httpStatus} success=${Boolean(response?.success)}`);
       if (response.httpStatus === 403) {
         return {
           accessible: false,
@@ -225,6 +226,7 @@ export class SapTransactionDiscoveryAdapter {
           method: 'GET',
           headers: { Accept: 'application/xml, text/xml, */*' }
         });
+        console.info(`[S21 ADT Detail] tcode=${tcode} path=${detailPath} httpStatus=${res?.httpStatus} success=${Boolean(res?.success)}`);
         if (!res || !res.success || !res.data) continue;
         const xml = typeof res.data === 'string' ? res.data : JSON.stringify(res.data);
 
@@ -281,10 +283,12 @@ export class SapTransactionDiscoveryAdapter {
           }
         });
 
+        console.info(`[S21 ADT Search] tcode=${cleanTcode} path=${searchPath} httpStatus=${response?.httpStatus} success=${Boolean(response?.success)}`);
         if (response && response.success && response.data) {
           const raw = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
           const tagRegex = /<adtcore:objectReference\b[^>]*\/>/gi;
           const tags = raw.match(tagRegex) || [];
+          console.info(`[S21 ADT Search] tcode=${cleanTcode} objectReferenceCount=${tags.length}`);
 
           for (const tag of tags) {
             const nameMatch = tag.match(/adtcore:name="([^"]+)"/i);
