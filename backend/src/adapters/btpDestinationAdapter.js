@@ -140,6 +140,92 @@ export function sanitizeDestination(dest) {
   return clone;
 }
 
+/**
+ * Extracts bounded, credential-free HTTP error evidence from an SAP/Cloud Connector response.
+ * Never exposes passwords, cookies, Authorization headers, or tokens.
+ */
+export function extractSafeHttpErrorEvidence(response, requestContext = {}) {
+  const httpStatus = response?.status ?? null;
+  const sanitizedHeaders = sanitizeHeaders(response?.headers || {});
+  const lowerHeaders = Object.fromEntries(
+    Object.entries(sanitizedHeaders).map(([k, v]) => [k.toLowerCase(), v])
+  );
+
+  let rawBody = '';
+  if (response?.data !== undefined && response?.data !== null) {
+    rawBody = typeof response.data === 'string'
+      ? response.data
+      : (() => {
+          try {
+            return JSON.stringify(response.data);
+          } catch {
+            return String(response.data);
+          }
+        })();
+  }
+
+  const scrubbedBody = sanitizeErrorMessage(rawBody)
+    .replace(/(cookie\s*[:=]\s*)[^\r\n;]+/gi, '$1[REDACTED]')
+    .trim();
+  const bodySnippet = scrubbedBody.length > 800 ? `${scrubbedBody.slice(0, 800)}...[truncated]` : scrubbedBody;
+
+  let sapErrorCode = null;
+  let sapErrorMessage = null;
+  if (response?.data && typeof response.data === 'object') {
+    sapErrorCode = response.data?.error?.code || response.data?.code || null;
+    sapErrorMessage = response.data?.error?.message?.value || response.data?.error?.message || response.data?.message || null;
+  } else if (scrubbedBody) {
+    const xmlCodeMatch = scrubbedBody.match(/<(?:[a-z0-9_-]+:)?code[^>]*>([^<]+)<\/(?:[a-z0-9_-]+:)?code>/i);
+    const xmlMsgMatch = scrubbedBody.match(/<(?:[a-z0-9_-]+:)?message[^>]*>([^<]+)<\/(?:[a-z0-9_-]+:)?message>/i);
+    if (xmlCodeMatch) sapErrorCode = xmlCodeMatch[1].trim();
+    if (xmlMsgMatch) sapErrorMessage = sanitizeErrorMessage(xmlMsgMatch[1].trim());
+  }
+
+  const serverHeader = String(lowerHeaders['server'] || '');
+  const sapSystem = lowerHeaders['sap-system'] || null;
+  const sapClientHeader = lowerHeaders['sap-client'] || null;
+  const contentType = lowerHeaders['content-type'] || null;
+
+  let originHint = 'UNKNOWN';
+  if (
+    /cloud connector|access denied to resource|x-scc/i.test(scrubbedBody) ||
+    lowerHeaders['x-scc-route'] !== undefined ||
+    /sap cloud connector/i.test(serverHeader)
+  ) {
+    originHint = 'SAP_CLOUD_CONNECTOR';
+  } else if (sapErrorCode || /\/IWBEP\/|\/IWFND\/|SADT_|SY\/530/i.test(scrubbedBody) || sapSystem || sapClientHeader) {
+    originHint = 'SAP_APPLICATION_OR_ICF';
+  } else if (/ucon|icm|sap netweaver application server/i.test(`${serverHeader} ${scrubbedBody}`)) {
+    originHint = 'SAP_ICM_OR_UCON';
+  }
+
+  return {
+    httpStatus,
+    originHint,
+    sapErrorCode,
+    sapErrorMessage: sapErrorMessage ? sanitizeErrorMessage(String(sapErrorMessage)) : null,
+    responseHeaders: {
+      server: lowerHeaders['server'] || null,
+      contentType,
+      sapSystem,
+      sapClient: sapClientHeader,
+      sapServer: lowerHeaders['sap-server'] || null,
+      sapErrId: lowerHeaders['sap-err-id'] || null,
+      xSapRequestId: lowerHeaders['x-sap-request-id'] || null
+    },
+    bodySnippet: bodySnippet || null,
+    requestContext: {
+      destination: requestContext.destination || null,
+      sapClient: requestContext.sapClient || null,
+      authentication: requestContext.authentication || null,
+      proxyType: requestContext.proxyType || null,
+      user: requestContext.user || null,
+      method: requestContext.method || 'GET',
+      path: requestContext.path || null
+    }
+  };
+}
+
 export class BtpDestinationAdapter {
   constructor(options = {}) {
     this.destinationName = options.destinationName || process.env.SAP_DESTINATION_NAME || 'S21';
@@ -570,18 +656,27 @@ export class BtpDestinationAdapter {
     } catch (err) {
       // If Cloud SDK fails (e.g. in local mode when OnPremise virtual host is contacted without CF internal proxy),
       // handle execution error cleanly
-      return this.handleExecutionError(err, path, sanitizedReqHeaders);
+      return this.handleExecutionError(err, path, sanitizedReqHeaders, {
+        destination: targetDestination?.name || this.destinationName,
+        sapClient: String(this.sapClient).trim(),
+        authentication: targetDestination?.authentication || null,
+        proxyType: targetDestination?.proxyType || null,
+        user: targetDestination?.username || null,
+        method: upperMethod,
+        path
+      });
     }
   }
 
   /**
    * Normalizes and sanitizes HTTP / network / SDK execution errors.
    */
-  handleExecutionError(err, path, requestHeaders) {
+  handleExecutionError(err, path, requestHeaders, safeRequestContext = {}) {
     const response = err?.response;
     const httpStatus = response?.status;
     const rawMessage = err?.message || 'Unknown execution error';
     const cleanMessage = sanitizeErrorMessage(rawMessage);
+    const diagnostics = response ? extractSafeHttpErrorEvidence(response, { ...safeRequestContext, path }) : null;
 
     // 1. Timeout detection
     const isTimeout =
@@ -619,7 +714,8 @@ export class BtpDestinationAdapter {
         statusCode: 'AUTHORIZATION_FAILED',
         httpStatus: 403,
         errorMessage: `SAP Gateway Authorization Failed (HTTP 403) on destination "${this.destinationName}" (Client ${this.sapClient}). The technical user lacks authorization (check PFCG object S_SERVICE for target service).`,
-        details: { path, destination: this.destinationName, client: this.sapClient }
+        details: { path, destination: this.destinationName, client: this.sapClient },
+        diagnostics
       };
     }
 

@@ -4,6 +4,7 @@ import {
   BtpDestinationAdapter,
   sanitizeHeaders,
   sanitizeErrorMessage,
+  extractSafeHttpErrorEvidence,
   GATEWAY_CATALOG_PATH
 } from '../src/adapters/btpDestinationAdapter.js';
 
@@ -112,55 +113,67 @@ describe('Fiorify Sprint 5.1 — BTP Destination Adapter Unit Tests', () => {
 
   // 4. Successful destination resolution with mocked SDK boundary
   it('successfully resolves destination and executes smoke test with mocked SDK boundary', async () => {
-    let capturedDestName = null;
-    let capturedReqConfig = null;
+    const prevDestName = process.env.SAP_DESTINATION_NAME;
+    const prevSapClient = process.env.SAP_CLIENT;
+    process.env.SAP_DESTINATION_NAME = 'S21';
+    process.env.SAP_CLIENT = '200';
 
-    const mockGetDestination = async ({ destinationName }) => {
-      capturedDestName = destinationName;
-      return MOCK_DESTINATION_OBJECT;
-    };
+    try {
+      let capturedDestName = null;
+      let capturedReqConfig = null;
 
-    const mockExecuteHttpRequest = async (dest, reqConfig) => {
-      capturedReqConfig = reqConfig;
-      return {
-        status: 200,
-        headers: { 'content-type': 'application/json' },
-        data: {
-          d: {
-            results: [
-              {
-                TechnicalServiceName: 'CATALOGSERVICE',
-                Version: '0002',
-                Description: 'SAP Gateway Service Catalog'
-              }
-            ]
-          }
-        }
+      const mockGetDestination = async ({ destinationName }) => {
+        capturedDestName = destinationName;
+        return MOCK_DESTINATION_OBJECT;
       };
-    };
 
-    const adapter = new BtpDestinationAdapter({
-      vcapServices: MOCK_VALID_VCAP,
-      sdkGetDestination: mockGetDestination,
-      sdkExecuteHttpRequest: mockExecuteHttpRequest,
-      adminSecret: 'adm123'
-    });
+      const mockExecuteHttpRequest = async (dest, reqConfig) => {
+        capturedReqConfig = reqConfig;
+        return {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+          data: {
+            d: {
+              results: [
+                {
+                  TechnicalServiceName: 'CATALOGSERVICE',
+                  Version: '0002',
+                  Description: 'SAP Gateway Service Catalog'
+                }
+              ]
+            }
+          }
+        };
+      };
 
-    const resolution = await adapter.resolveDestination('S21');
-    assert.strictEqual(resolution.success, true);
-    assert.strictEqual(resolution.destination.name, 'S21');
-    assert.strictEqual(capturedDestName, 'S21');
+      const adapter = new BtpDestinationAdapter({
+        vcapServices: MOCK_VALID_VCAP,
+        sdkGetDestination: mockGetDestination,
+        sdkExecuteHttpRequest: mockExecuteHttpRequest,
+        adminSecret: 'adm123'
+      });
 
-    const smokeResult = await adapter.executeSmokeTest();
-    assert.strictEqual(smokeResult.success, true);
-    assert.strictEqual(smokeResult.statusCode, 'SUCCESS');
-    assert.strictEqual(smokeResult.httpStatus, 200);
-    assert.strictEqual(smokeResult.destination, 'S21');
-    assert.strictEqual(smokeResult.sapClient, '200');
-    assert.strictEqual(smokeResult.targetEndpoint, GATEWAY_CATALOG_PATH);
-    assert.strictEqual(smokeResult.gatewayResponse.servicesReturned, 1);
-    assert.strictEqual(smokeResult.gatewayResponse.sampleService.technicalServiceName, 'CATALOGSERVICE');
-    assert.strictEqual(smokeResult.gatewayResponse.sampleService.version, '0002');
+      const resolution = await adapter.resolveDestination('S21');
+      assert.strictEqual(resolution.success, true);
+      assert.strictEqual(resolution.destination.name, 'S21');
+      assert.strictEqual(capturedDestName, 'S21');
+
+      const smokeResult = await adapter.executeSmokeTest();
+      assert.strictEqual(smokeResult.success, true);
+      assert.strictEqual(smokeResult.statusCode, 'SUCCESS');
+      assert.strictEqual(smokeResult.httpStatus, 200);
+      assert.strictEqual(smokeResult.destination, 'S21');
+      assert.strictEqual(smokeResult.sapClient, '200');
+      assert.strictEqual(smokeResult.targetEndpoint, GATEWAY_CATALOG_PATH);
+      assert.strictEqual(smokeResult.gatewayResponse.servicesReturned, 1);
+      assert.strictEqual(smokeResult.gatewayResponse.sampleService.technicalServiceName, 'CATALOGSERVICE');
+      assert.strictEqual(smokeResult.gatewayResponse.sampleService.version, '0002');
+    } finally {
+      if (prevDestName === undefined) delete process.env.SAP_DESTINATION_NAME;
+      else process.env.SAP_DESTINATION_NAME = prevDestName;
+      if (prevSapClient === undefined) delete process.env.SAP_CLIENT;
+      else process.env.SAP_CLIENT = prevSapClient;
+    }
   });
 
   // 5. Gateway HTTP 401
@@ -392,5 +405,41 @@ describe('Fiorify Sprint 5.1 — BTP Destination Adapter Unit Tests', () => {
     assert.ok(scrubbedMsg.includes('Bearer [REDACTED]'));
     assert.ok(scrubbedMsg.includes('client_secret=[REDACTED]'));
     assert.ok(scrubbedMsg.includes('Basic [REDACTED]'));
+  });
+
+  it('preserves safe HTTP 403 origin diagnostics without exposing credentials or cookies', async () => {
+    const ccEvidence = extractSafeHttpErrorEvidence(
+      {
+        status: 403,
+        headers: {
+          server: 'SAP Cloud Connector',
+          'set-cookie': 'JSESSIONID=secret-cookie',
+          authorization: 'Basic c2VjcmV0'
+        },
+        data: 'Access denied to resource /sap/bc/adt/discovery on virtual host s21fiori:8000'
+      },
+      { destination: 'S21_FIORI', sapClient: '200', user: 'int_samarth', path: '/sap/bc/adt/discovery' }
+    );
+    assert.strictEqual(ccEvidence.originHint, 'SAP_CLOUD_CONNECTOR');
+    assert.strictEqual(ccEvidence.requestContext.user, 'int_samarth');
+    assert.strictEqual(JSON.stringify(ccEvidence).includes('secret-cookie'), false);
+    assert.strictEqual(JSON.stringify(ccEvidence).includes('c2VjcmV0'), false);
+
+    const sapEvidence = extractSafeHttpErrorEvidence(
+      {
+        status: 403,
+        headers: {
+          server: 'SAP NetWeaver Application Server / ABAP 758',
+          'sap-system': 'S21',
+          'sap-client': '200'
+        },
+        data: { error: { code: '/IWFND/CM_COS/064', message: { value: 'No service found for namespace' } } }
+      },
+      { destination: 'S21_FIORI', sapClient: '200', user: 'int_samarth', path: GATEWAY_CATALOG_PATH }
+    );
+    assert.strictEqual(sapEvidence.originHint, 'SAP_APPLICATION_OR_ICF');
+    assert.strictEqual(sapEvidence.sapErrorCode, '/IWFND/CM_COS/064');
+    assert.strictEqual(sapEvidence.responseHeaders.sapSystem, 'S21');
+    assert.strictEqual(sapEvidence.responseHeaders.sapClient, '200');
   });
 });

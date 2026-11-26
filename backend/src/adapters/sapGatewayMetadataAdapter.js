@@ -388,6 +388,8 @@ export class SapGatewayMetadataAdapter {
           httpStatus: 200,
           isFallback: true,
           provenance: 'S21_BASELINE_SNAPSHOT',
+          upstreamStatus: response.httpStatus || null,
+          upstreamDiagnostics: response.diagnostics || null,
           notice: response.httpStatus === 403
             ? 'Live Gateway service /IWFND/CATALOGSERVICE returned HTTP 403 on S21:200 (service registration in /IWFND/MAINT_SERVICE required). Serving verified SAP S/4HANA 2023 baseline catalog.'
             : `Live S21 Gateway catalog query responded with ${response.httpStatus || 'error'}. Serving verified SAP S/4HANA 2023 baseline catalog.`

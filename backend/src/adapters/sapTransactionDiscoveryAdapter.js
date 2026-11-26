@@ -153,12 +153,19 @@ export class SapTransactionDiscoveryAdapter {
 
       console.info(`[S21 ADT Probe] path=/sap/bc/adt/discovery httpStatus=${response?.httpStatus} success=${Boolean(response?.success)}`);
       if (response.httpStatus === 403) {
+        const diag = response.diagnostics || null;
+        if (diag) {
+          console.info(
+            `[S21 ADT 403 Diagnostics] originHint=${diag.originHint} sapErrorCode=${diag.sapErrorCode || 'NONE'} server=${diag.responseHeaders?.server || 'NONE'} sapSystem=${diag.responseHeaders?.sapSystem || 'NONE'} sapClient=${diag.responseHeaders?.sapClient || 'NONE'}`
+          );
+        }
         return {
           accessible: false,
           httpStatus: 403,
           status: 'UNAUTHORIZED',
-          code: 'SADT_RESOURCE_003',
-          message: 'No authorization to access the resource /sap/bc/adt/discovery.',
+          code: diag?.sapErrorCode || 'SADT_RESOURCE_003',
+          message: diag?.sapErrorMessage || 'No authorization to access the resource /sap/bc/adt/discovery.',
+          diagnostics: diag,
           requiredAuthorizations: [
             'PFCG Authorization Object: S_ADT_RES (Activity 03: Display)',
             'PFCG Authorization Object: S_DEVELOP (Activity 03: Display for object types PROG, TRAN, DEVC)',
@@ -247,11 +254,56 @@ export class SapTransactionDiscoveryAdapter {
         const descMatch = xml.match(/adtcore:description="([^"]+)"/i);
 
         if (progMatch || screenMatch || pkgMatch) {
+          let program = progMatch ? progMatch[1].trim().toUpperCase() : null;
+          let screenNumber = screenMatch ? screenMatch[1].trim() : null;
+          let packageName = pkgMatch ? pkgMatch[1].trim().toUpperCase() : null;
+          let softwareComponent = null;
+
+          // Follow-up read-only ADT objectproperties lookup if PGMNA/DYPNO absent from VIT wrapper
+          if (!program || !screenNumber) {
+            try {
+              const propPath = `/sap/bc/adt/repository/informationsystem/objectproperties/values?uri=${encodeURIComponent(detailPath)}`;
+              const propRes = await this.btpAdapter.executeRequest({
+                path: propPath,
+                method: 'GET',
+                headers: { Accept: 'application/xml, text/xml, */*' }
+              });
+              if (propRes?.success && propRes.data) {
+                const propXml = typeof propRes.data === 'string' ? propRes.data : JSON.stringify(propRes.data);
+                const pMatch = propXml.match(/(?:PGMNA|programName|program)[^">]*["']?\s*(?:value=|>)["']?([A-Z0-9_\/]{2,40})/i);
+                const sMatch = propXml.match(/(?:DYPNO|screenNumber|dynpro)[^">]*["']?\s*(?:value=|>)["']?([0-9]{1,4})/i);
+                if (!program && pMatch) program = pMatch[1].trim().toUpperCase();
+                if (!screenNumber && sMatch) screenNumber = sMatch[1].trim();
+              }
+            } catch {
+              // Optional enrichment
+            }
+          }
+
+          // Follow-up read-only ADT package lookup for software component (TDEVC)
+          if (packageName) {
+            try {
+              const pkgRes = await this.btpAdapter.executeRequest({
+                path: `/sap/bc/adt/packages/${encodeURIComponent(packageName)}`,
+                method: 'GET',
+                headers: { Accept: 'application/xml, text/xml, */*' }
+              });
+              if (pkgRes?.success && pkgRes.data) {
+                const pkgXml = typeof pkgRes.data === 'string' ? pkgRes.data : JSON.stringify(pkgRes.data);
+                const swMatch = pkgXml.match(/(?:softwareComponent|pak:name|dlvunit)="([^"]+)"/i);
+                if (swMatch) softwareComponent = swMatch[1].trim().toUpperCase();
+              }
+            } catch {
+              // Optional enrichment
+            }
+          }
+
           return {
             found: true,
-            program: progMatch ? progMatch[1].trim().toUpperCase() : null,
-            screenNumber: screenMatch ? screenMatch[1].trim() : null,
-            packageName: pkgMatch ? pkgMatch[1].trim().toUpperCase() : null,
+            program,
+            screenNumber,
+            packageName,
+            softwareComponent,
             description: descMatch ? this._decodeXmlEntities(descMatch[1]) : null
           };
         }

@@ -117,10 +117,12 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [candidates, setCandidates] = useState<CatalogueReference[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<CatalogueReference | null>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [fallbackNotice, setFallbackNotice] = useState<string | null>(null);
   const [mcpPipelineResult, setMcpPipelineResult] = useState<UnifiedDiscoveryMatchResult | null>(null);
   const [isVerificationModalOpen, setIsVerificationModalOpen] = useState<boolean>(false);
   const [isRolesExpanded, setIsRolesExpanded] = useState<boolean>(false);
   const [isProceeding, setIsProceeding] = useState<boolean>(false);
+  const [useMcp, setUseMcp] = useState<boolean>(true);
 
   // Business Scope & Intake (Expandable Drawer)
   const [isScopeDrawerOpen, setIsScopeDrawerOpen] = useState<boolean>(false);
@@ -130,8 +132,35 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
   const [activeCategory, setActiveCategory] = useState<'ALL' | 'FI' | 'MM' | 'SD' | 'CUSTOM'>('ALL');
   const [isScopeCustomized, setIsScopeCustomized] = useState<boolean>(false);
 
-  // Available systems from adapter
-  const availableSystems = mockSapAdapter.getAvailableSystems();
+  // Available systems from live registry with mockSapAdapter fallback
+  const [availableSystems, setAvailableSystems] = useState(() => mockSapAdapter.getAvailableSystems());
+
+  useEffect(() => {
+    let mounted = true;
+    apiClient.getSystems()
+      .then((res: any) => {
+        if (!mounted) return;
+        const list = Array.isArray(res) ? res : res?.systems;
+        if (Array.isArray(list) && list.length > 0) {
+          setAvailableSystems(
+            list.map((s: any) => ({
+              systemId: s.systemId || s.id,
+              systemName: s.systemName || s.name || s.systemId || s.id,
+              client: s.client || '200',
+              release: s.release || s.targetRelease || 'SAP S/4HANA 2023 Private Edition',
+              mode: (s.mode === 'LIVE_SAP' || s.mode === 'MOCK' ? s.mode : ((s.systemId || s.id) === 'S21-200' ? 'LIVE_SAP' : 'MOCK')) as 'LIVE_SAP' | 'MOCK',
+              active: s.active ?? true
+            }))
+          );
+        }
+      })
+      .catch(() => {
+        // Keep mockSapAdapter systems when backend is offline
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleResetSearch = () => {
     setTcode('');
@@ -198,6 +227,11 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
     }
 
     setSearchError(null);
+    setFallbackNotice(null);
+    setMetadata(null);
+    setCandidates([]);
+    setSelectedCandidate(null);
+    setMcpPipelineResult(null);
     setIsLoading(true);
     setProgressState('CONNECTING');
 
@@ -219,8 +253,8 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           targetRelease,
           language: 'EN',
           useLiveSap: isLiveSystem,
-          mcpOptions: { enabled: false },
-          useMcp: false
+          mcpOptions: { enabled: useMcp },
+          useMcp
         });
 
         if (pipelineRes && pipelineRes.discovery) {
@@ -228,7 +262,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           const isNotFound = disc.exists === false || disc.statusCode === 'NOT_FOUND' || disc.verificationStatus === 'NOT_FOUND' || disc.classification === 'NOT_FOUND';
           const resolvedProgram = disc.programName || disc.program || null;
           const resolvedPackage = disc.packageName || disc.package || null;
-          const isPendingDdic = !isNotFound && (!resolvedProgram || !resolvedPackage || disc.verificationStatus === 'PENDING_VERIFICATION');
+          const isPendingDdic = !isNotFound && (disc.verificationStatus === 'PENDING_VERIFICATION' || (!resolvedProgram && !resolvedPackage));
           const mappedCandidates = ((pipelineRes.candidates || []) as any[]).map((cand) => ({
             ...cand,
             technicalComponent: cand.technicalComponent || cand.softwareComponent || disc.softwareComponent || 'S4CORE 108'
@@ -266,10 +300,14 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         }
       } catch (pipeErr: any) {
         console.warn('[Discovery Workspace] Backend match pipeline fallback:', pipeErr?.message);
+        setFallbackNotice(
+          `Backend / SAP S21 discovery unavailable (${pipeErr?.message || 'network/auth error'}). Showing local offline catalogue fallback.`
+        );
       }
 
       // If backend was unreachable or returned empty, graceful fallback to local adapters
       if (!discoRes) {
+        setFallbackNotice((prev) => prev || 'Backend returned no discovery payload. Showing local offline catalogue fallback.');
         const [localDisco, localCat] = await Promise.all([
           sapDiscoveryAdapter.inspectTransaction({
             requestId,
@@ -298,8 +336,8 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         setProgressState('COMPLETED');
       }
 
-      // Never auto-open an intrusive modal on search results; keep workspace clean and let user open Verification Summary on demand.
-      setIsVerificationModalOpen(false);
+      // Auto-open Verification Summary Modal on search completion so user immediately sees DDIC & Fiori outcome
+      setIsVerificationModalOpen(true);
 
       // Pre-populate business scope if a preset matches and user hasn't customized it
       if (!isScopeCustomized) {
@@ -344,18 +382,6 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
 
     setIsProceeding(true);
     try {
-      // 1. Check existing assessments
-      try {
-        const existingAssessments = await assessmentService.getAssessments();
-        const existing = existingAssessments.find((a) => a.tcode.toUpperCase() === cleanTcode.toUpperCase());
-        if (existing) {
-          navigate(`/assessment-results?id=${existing.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
-          return;
-        }
-      } catch (checkErr) {
-        console.warn('[UnifiedDiscoveryWorkspace] Note checking existing assessments:', checkErr);
-      }
-
       const candidateApp = selectedCandidate ? {
         appId: selectedCandidate.appId,
         appName: selectedCandidate.appName,
@@ -366,6 +392,61 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         businessRoles: (selectedCandidate as any).businessRoles || [],
         odataServices: selectedCandidate.odataServices || []
       } : null;
+
+      const resolvedAssessmentResult = candidateApp
+        ? 'EXPLICIT_SUCCESSOR'
+        : metadata?.classification === 'CUSTOM'
+        ? 'CUSTOM_RAP_REQUIRED'
+        : 'NO_VERIFIED_MATCH';
+      const resolvedRecommendation = {
+        outcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
+        canonicalOutcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
+        businessOutcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
+        action: candidateApp
+          ? `Add & Configure Standard SAP Fiori Application (${candidateApp.appId} — ${candidateApp.appName})`
+          : `Modernize ${cleanTcode} via Custom RAP & Fiori Elements Blueprint`,
+        confidence: candidateApp ? 'HIGH' : 'MEDIUM',
+        justification: candidateApp
+          ? `Official SAP Fiori successor ${candidateApp.appId} satisfies 100% S/4HANA 2023 release baseline requirements for ${cleanTcode}.`
+          : `Clean Core RAP modernization required due to 0 standard Fiori matches in official catalogue.`
+      };
+
+      // 1. Check existing assessments and sync latest discovery metadata & verdict if found
+      try {
+        const existingAssessments = await assessmentService.getAssessments();
+        const existing = existingAssessments.find((a) => a.tcode.toUpperCase() === cleanTcode.toUpperCase());
+        if (existing) {
+          try {
+            await assessmentService.updateAssessment(existing.id, {
+              matchingFioriApp: candidateApp,
+              assessmentResult: resolvedAssessmentResult,
+              recommendation: resolvedRecommendation,
+              fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
+              programName:
+                metadata.programName && metadata.programName !== 'Pending DDIC Read'
+                  ? metadata.programName
+                  : existing.programName,
+              packageName:
+                metadata.packageName && metadata.packageName !== 'Pending DDIC Read'
+                  ? metadata.packageName
+                  : existing.packageName,
+              discoveryMetadata: {
+                ...(existing as any).discoveryMetadata,
+                programName: metadata.programName || existing.programName,
+                packageName: metadata.packageName || existing.packageName,
+                screenNumber: metadata.screenNumber || existing.screenNumber,
+                classification: metadata.classification || existing.classification
+              }
+            });
+          } catch (syncErr) {
+            console.warn('[UnifiedDiscoveryWorkspace] Could not sync existing assessment:', syncErr);
+          }
+          navigate(`/assessment-results?id=${existing.id}&tcode=${cleanTcode}&tab=${effectiveTab}`);
+          return;
+        }
+      } catch (checkErr) {
+        console.warn('[UnifiedDiscoveryWorkspace] Note checking existing assessments:', checkErr);
+      }
 
       const tcodeDescription = (
         metadata?.description && !metadata.description.startsWith('Assessment for ') && metadata.description !== cleanTcode
@@ -419,7 +500,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           targetRelease,
           matchingFioriApp: candidateApp,
           fitScore: candidateApp ? (mcpPipelineResult?.matching?.bestCandidate?.overallScore || 92) : (metadata?.classification === 'CUSTOM' ? 75 : 50),
-          assessmentResult: candidateApp ? 'EXPLICIT_SUCCESSOR' : (metadata?.classification === 'CUSTOM' ? 'CUSTOM_RAP_REQUIRED' : 'PENDING_VERIFICATION'),
+          assessmentResult: resolvedAssessmentResult,
           status: 'IN_PROGRESS',
           lifecycleStatus: candidateApp ? 'MATCHING_IN_PROGRESS' : 'EVALUATION_IN_PROGRESS',
           businessArea: known?.package === 'MB' ? 'Materials Management (MM)' : (metadata?.classification === 'CUSTOM' ? 'Custom Extension' : 'Core Enterprise Process'),
@@ -427,18 +508,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           programName: effectiveProgram,
           packageName: effectivePackage,
           screenNumber: metadata.screenNumber || '0001',
-          recommendation: {
-            outcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
-            canonicalOutcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
-            businessOutcome: candidateApp ? 'ADD_AND_CONFIGURE' : 'BUILD',
-            action: candidateApp
-              ? `Add & Configure Standard SAP Fiori Application (${candidateApp.appId} — ${candidateApp.appName})`
-              : `Modernize ${cleanTcode} via Custom RAP & Fiori Elements Blueprint`,
-            confidence: candidateApp ? 'HIGH' : 'MEDIUM',
-            justification: candidateApp
-              ? `Official SAP Fiori successor ${candidateApp.appId} satisfies 100% S/4HANA 2023 release baseline requirements for ${cleanTcode}.`
-              : `Clean Core RAP modernization required due to 100% functional gap in standard Fiori catalogue.`
-          },
+          recommendation: resolvedRecommendation,
           businessContext: {
             businessProcess,
             primaryScenario: primaryScenario || `Operational execution of ${cleanTcode} (${effectiveDescription})`,
@@ -535,26 +605,54 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '11.5px', flexWrap: 'wrap' }}>
-            <div
+            {(() => {
+              const selectedSys = availableSystems.find((s) => s.systemId === systemId);
+              const isLiveTarget = selectedSys ? selectedSys.mode === 'LIVE_SAP' : systemId === 'S21-200';
+              return (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '4px 10px',
+                    borderRadius: '14px',
+                    backgroundColor: isLiveTarget ? '#F0FDF4' : '#FFFBEB',
+                    border: `1px solid ${isLiveTarget ? '#BBF7D0' : '#FDE68A'}`,
+                    color: isLiveTarget ? '#166534' : '#92400E',
+                    fontWeight: 600
+                  }}
+                >
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: isLiveTarget ? '#16A34A' : '#F59E0B', display: 'inline-block' }} />
+                  <span>Target: {systemId}</span>
+                  <span style={{ color: isLiveTarget ? '#86EFAC' : '#FCD34D' }}>•</span>
+                  <span>Client {client}</span>
+                  <span style={{ color: isLiveTarget ? '#86EFAC' : '#FCD34D' }}>•</span>
+                  <span style={{ fontWeight: 700 }}>{isLiveTarget ? 'LIVE_SAP' : 'DEMO_MOCK'}</span>
+                </div>
+              );
+            })()}
+
+            <button
+              type="button"
+              onClick={() => setUseMcp((prev) => !prev)}
+              title="Toggle SAP Fiori MCP Assisted Discovery"
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
                 padding: '4px 10px',
                 borderRadius: '14px',
-                backgroundColor: '#F0FDF4',
-                border: '1px solid #BBF7D0',
-                color: '#166534',
-                fontWeight: 600
+                backgroundColor: useMcp ? '#EFF6FF' : '#F8FAFC',
+                border: `1px solid ${useMcp ? '#93C5FD' : '#E2E8F0'}`,
+                color: useMcp ? '#1D4ED8' : '#64748B',
+                fontWeight: 600,
+                fontSize: '11.5px',
+                cursor: 'pointer'
               }}
             >
-              <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#16A34A', display: 'inline-block' }} />
-              <span>Target: {systemId}</span>
-              <span style={{ color: '#86EFAC' }}>•</span>
-              <span>Client {client}</span>
-              <span style={{ color: '#86EFAC' }}>•</span>
-              <span style={{ fontWeight: 700 }}>LIVE_SAP</span>
-            </div>
+              <Sparkles size={12} />
+              <span>MCP Assisted: {useMcp ? 'ON' : 'OFF'}</span>
+            </button>
 
             <div
               style={{
@@ -796,6 +894,13 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
           <div style={{ padding: '8px 12px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '4px', fontSize: '12px', color: '#991B1B', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <AlertTriangle size={14} />
             <span>{searchError}</span>
+          </div>
+        )}
+
+        {fallbackNotice && !searchError && (
+          <div style={{ padding: '8px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '4px', fontSize: '12px', color: '#92400E', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <AlertTriangle size={14} />
+            <span><strong>Offline Fallback Mode:</strong> {fallbackNotice}</span>
           </div>
         )}
       </div>
@@ -1682,7 +1787,34 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         systemId={systemId}
         client={client}
         targetRelease={targetRelease}
+        isProceeding={isProceeding}
         onProceedToAssessment={handleOpenAssessmentWorkbench}
+        onLogNotFound={async () => {
+          if (!metadata || isProceeding) return;
+          setIsProceeding(true);
+          try {
+            const created = await assessmentService.createAssessment({
+              tcode: metadata.tcode,
+              description: 'Transaction Does Not Exist in SAP DDIC',
+              systemId,
+              client,
+              targetRelease,
+              assessmentResult: 'NOT_FOUND',
+              status: 'COMPLETED',
+              classification: 'NOT_FOUND',
+              programName: 'N/A',
+              packageName: 'N/A'
+            } as any);
+            setIsVerificationModalOpen(false);
+            if (created?.id) {
+              navigate(`/assessment-history`);
+            }
+          } catch (err: any) {
+            setSearchError(err?.message || 'Failed to log Not-Found audit record.');
+          } finally {
+            setIsProceeding(false);
+          }
+        }}
         onResetSearch={() => {
           setMetadata(null);
           setCandidates([]);
