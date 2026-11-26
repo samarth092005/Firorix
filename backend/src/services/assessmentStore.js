@@ -672,9 +672,9 @@ export function normalizeAssessmentRecord(input, requestId = null, userContext =
         : STANDARD_TRANSACTION_CATALOG[tcode]?.description || synthesizeTransactionTitle(tcode)
     ),
     subArea: input.subArea || STANDARD_TRANSACTION_CATALOG[tcode]?.subArea || '',
-    programName: input.programName || input.discoveryMetadata?.programName || STANDARD_TRANSACTION_CATALOG[tcode]?.program || (tcode.startsWith('Z') ? `Z_${tcode}` : 'SAP_RUNTIME'),
+    programName: input.programName || input.discoveryMetadata?.programName || STANDARD_TRANSACTION_CATALOG[tcode]?.program || (tcode.startsWith('Z') || tcode.startsWith('Y') ? `Z_${tcode}` : 'Pending DDIC Read'),
     screenNumber: input.screenNumber || input.discoveryMetadata?.screenNumber || STANDARD_TRANSACTION_CATALOG[tcode]?.screenNumber || '0100',
-    packageName: input.packageName || input.discoveryMetadata?.packageName || STANDARD_TRANSACTION_CATALOG[tcode]?.packageName || (tcode === 'MIGO' ? 'MB' : (tcode.startsWith('Z') ? 'Z_CUSTOM' : 'FBAS')),
+    packageName: input.packageName || input.discoveryMetadata?.packageName || STANDARD_TRANSACTION_CATALOG[tcode]?.packageName || (tcode.startsWith('Z') || tcode.startsWith('Y') ? 'Z_CUSTOM' : 'Pending DDIC Read'),
     originalSystem: input.originalSystem || input.discoveryMetadata?.originalSystem || (tcode.startsWith('Z') ? 'S21' : 'SAP'),
     softwareComponent: input.softwareComponent || input.discoveryMetadata?.softwareComponent || STANDARD_TRANSACTION_CATALOG[tcode]?.softwareComponent || 'S4CORE 108',
     rationale: input.rationale || recommendation?.rationale || recommendation?.justification || (matchingFioriApp ? `Standard SAP Fiori application ${matchingFioriApp.appId} (${matchingFioriApp.appName}) fully satisfies business capability requirements for ${tcode} on S/4HANA 2023.` : ''),

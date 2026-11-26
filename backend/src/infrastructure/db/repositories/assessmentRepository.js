@@ -108,7 +108,7 @@ export class AssessmentRepository {
         validCandidateAppId,
         candidate.appName || rawCandidateId || null,
         candidate.matchScore || (candidate.appId ? 92 : null),
-        rec.action || (candidate.appId ? 'ADD_AND_CONFIGURE' : (tcode.startsWith('Z') || tcode.startsWith('Y') ? 'BUILD' : 'ADD_AND_CONFIGURE')),
+        rec.action || (candidate.appId ? 'ADD_AND_CONFIGURE' : 'BUILD'),
         rec.confidence || (candidate.appId ? 'HIGH' : 'MEDIUM'),
         rec.justification || assessment.rationale || (candidate.appId ? `Official SAP Fiori successor ${candidate.appId} matches standard transaction ${tcode}.` : null),
         assessment.verificationStatus || 'VERIFIED_COMPLETE',
@@ -119,7 +119,16 @@ export class AssessmentRepository {
         assessment.evidenceConfidence || 'MEDIUM',
         assessment.provenance || 'ASSESSMENT_ENGINE',
         assessment.readinessState || rec.readinessState || rec.state || 'REVIEW',
-        JSON.stringify(assessment.scoringBreakdown || assessment.scores || rec.scoringBreakdown || {}),
+        JSON.stringify({
+          ...(assessment.scoringBreakdown || assessment.scores || rec.scoringBreakdown || {}),
+          discoveryMetadata: {
+            programName: assessment.programName || assessment.discoveryMetadata?.programName || null,
+            packageName: assessment.packageName || assessment.discoveryMetadata?.packageName || null,
+            screenNumber: assessment.screenNumber || assessment.discoveryMetadata?.screenNumber || null,
+            softwareComponent: assessment.softwareComponent || assessment.discoveryMetadata?.softwareComponent || null,
+            originalSystem: assessment.originalSystem || assessment.discoveryMetadata?.originalSystem || null
+          }
+        }),
         assessment.createdBy || 'admin',
         assessment.createdAt || new Date().toISOString()
       ]);
@@ -217,11 +226,23 @@ export class AssessmentRepository {
       const tcKey = String(row.transaction_code || '').trim().toUpperCase();
       const catalogInfo = STANDARD_TRANSACTION_CATALOG[tcKey] || {};
       const isCustomTcode = tcKey.startsWith('Z') || tcKey.startsWith('Y');
+      let parsedBreakdown = {};
+      try {
+        parsedBreakdown = typeof row.scoring_breakdown === 'string'
+          ? JSON.parse(row.scoring_breakdown)
+          : (row.scoring_breakdown || {});
+      } catch {
+        parsedBreakdown = {};
+      }
+      const savedMeta = parsedBreakdown.discoveryMetadata || {};
+      const validSavedProg = savedMeta.programName && savedMeta.programName !== 'Pending DDIC Read' ? savedMeta.programName : null;
+      const validSavedPkg = savedMeta.packageName && savedMeta.packageName !== 'Pending DDIC Read' ? savedMeta.packageName : null;
+
       const resolvedClassification = isCustomTcode ? 'CUSTOM' : (catalogInfo.classification || 'STANDARD');
-      const resolvedProgram = catalogInfo.program || (isCustomTcode ? `Z_${tcKey}` : 'SAP_RUNTIME');
-      const resolvedPackage = catalogInfo.packageName || (isCustomTcode ? 'Z_CUSTOM' : (tcKey === 'MIGO' ? 'MB' : 'FBAS'));
-      const resolvedScreen = catalogInfo.screenNumber || '0100';
-      const resolvedComponent = catalogInfo.softwareComponent || 'S4CORE 108';
+      const resolvedProgram = validSavedProg || catalogInfo.program || (isCustomTcode ? `Z_${tcKey}` : 'Pending DDIC Read');
+      const resolvedPackage = validSavedPkg || catalogInfo.packageName || (isCustomTcode ? 'Z_CUSTOM' : 'Pending DDIC Read');
+      const resolvedScreen = savedMeta.screenNumber || catalogInfo.screenNumber || '0100';
+      const resolvedComponent = savedMeta.softwareComponent || catalogInfo.softwareComponent || 'S4CORE 108';
       const resolvedBusinessArea = row.business_area || catalogInfo.lineOfBusiness || catalogInfo.functionalArea || (isCustomTcode ? 'Custom Extension' : 'Core Enterprise Process');
 
       const rawCandidateId = row.candidate_app_id || (catalogInfo.primaryFioriAppId && !isCustomTcode ? catalogInfo.primaryFioriAppId : null);
@@ -280,9 +301,10 @@ export class AssessmentRepository {
       status: row.lifecycle_status,
       ...(() => {
         const rawAction = String(row.recommendation_action || '').toUpperCase();
-        let resolvedAction = hasStandardCandidate ? 'ADD_AND_CONFIGURE' : rawAction;
-        let resolvedOutcome = hasStandardCandidate ? 'ADD_AND_CONFIGURE' : rawAction;
-        let resolvedCanonical = hasStandardCandidate ? 'ADD_AND_CONFIGURE' : rawAction;
+        const normalizedNoMatchAction = (rawAction === 'ADD_AND_CONFIGURE' || !rawAction) ? 'BUILD' : rawAction;
+        let resolvedAction = hasStandardCandidate ? 'ADD_AND_CONFIGURE' : normalizedNoMatchAction;
+        let resolvedOutcome = hasStandardCandidate ? 'ADD_AND_CONFIGURE' : normalizedNoMatchAction;
+        let resolvedCanonical = hasStandardCandidate ? 'ADD_AND_CONFIGURE' : normalizedNoMatchAction;
         let legacyOriginal = null;
         let migrationRationale = null;
 
