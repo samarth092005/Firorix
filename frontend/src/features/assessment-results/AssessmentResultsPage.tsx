@@ -278,7 +278,7 @@ export const AssessmentResultsPage: React.FC = () => {
               ? 'CUSTOM_RAP_REQUIRED'
               : (primaryCandidate ? 'EXPLICIT_SUCCESSOR' : 'NO_VERIFIED_MATCH');
           } else if (!enrichedMatchingApp && catCandidates.length === 0 && (resolvedAssessmentResult as string) === 'ADD_AND_CONFIGURE') {
-            resolvedAssessmentResult = 'CUSTOM_BUILD';
+            resolvedAssessmentResult = 'NO_VERIFIED_MATCH';
           }
 
           target = {
