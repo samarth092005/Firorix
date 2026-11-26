@@ -30,7 +30,7 @@ import {
   CdsRegistryEntry,
   StudioInternalView
 } from '../types';
-import { defaultFrontendGenerationProjectService } from '../services/generationProjectService';
+import { defaultFrontendGenerationProjectService, authFetch } from '../services/generationProjectService';
 
 interface DataModelDesignerProps {
   project: GenerationProject;
@@ -87,6 +87,13 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Live S21 OData $metadata import state
+  const [s21ImportOpen, setS21ImportOpen] = useState<boolean>(false);
+  const [s21Search, setS21Search] = useState<string>(project.sourceTransactionCode || '');
+  const [s21Services, setS21Services] = useState<any[]>([]);
+  const [s21Loading, setS21Loading] = useState<boolean>(false);
+  const [s21Importing, setS21Importing] = useState<boolean>(false);
 
   // Modal dialog states
   const [entityModalOpen, setEntityModalOpen] = useState<boolean>(false);
@@ -178,7 +185,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   // Add Entity
   const handleCreateEntity = async () => {
     if (!newEntity.name.trim()) {
-      alert('Entity name is required.');
+      setError('Entity name is required.');
       return;
     }
 
@@ -276,7 +283,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   // Add Field
   const handleAddField = async () => {
     if (!selectedEntityId || !newField.name?.trim()) {
-      alert('Field name is required.');
+      setError('Field name is required.');
       return;
     }
 
@@ -326,7 +333,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   // Add Relationship
   const handleAddRelationship = async () => {
     if (!newRel.name.trim() || !newRel.sourceEntityId || !newRel.targetEntityId) {
-      alert('Relationship name, source, and target are required.');
+      setError('Relationship name, source, and target are required.');
       return;
     }
 
@@ -440,6 +447,108 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
     }
   };
 
+  // Search live S21 OData Gateway Catalog
+  const handleSearchS21Services = async (queryText?: string) => {
+    setS21Loading(true);
+    setError(null);
+    try {
+      const q = (queryText !== undefined ? queryText : s21Search).trim();
+      const res = await authFetch(`/api/v1/gateway/services?search=${encodeURIComponent(q)}&limit=15`);
+      const data = await res.json();
+      setS21Services(Array.isArray(data.services) ? data.services : []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to query S21 OData catalog.');
+    } finally {
+      setS21Loading(false);
+    }
+  };
+
+  const mapEdmTypeToAbap = (edmType: string = '') => {
+    const t = String(edmType).toLowerCase();
+    if (t.includes('decimal') || t.includes('double') || t.includes('single')) return { abapType: 'abap.dec', length: 15, decimals: 2 };
+    if (t.includes('int16') || t.includes('int32') || t.includes('byte')) return { abapType: 'abap.int4', length: 10, decimals: 0 };
+    if (t.includes('int64')) return { abapType: 'abap.int8', length: 19, decimals: 0 };
+    if (t.includes('datetime') || t.includes('date')) return { abapType: 'abap.dats', length: 8, decimals: 0 };
+    if (t.includes('time')) return { abapType: 'abap.tims', length: 6, decimals: 0 };
+    if (t.includes('boolean')) return { abapType: 'abap.boolean', length: 1, decimals: 0 };
+    if (t.includes('guid')) return { abapType: 'sysuuid_x16', length: 16, decimals: 0 };
+    return { abapType: 'abap.char', length: 40, decimals: 0 };
+  };
+
+  const handleImportS21Metadata = async (service: any) => {
+    const serviceId = service.id || service.technicalServiceName;
+    if (!serviceId) return;
+    setS21Importing(true);
+    setError(null);
+    try {
+      const res = await authFetch(`/api/v1/gateway/services/${encodeURIComponent(serviceId)}/metadata`);
+      const data = await res.json();
+      const entityTypes = data?.metadata?.entityTypes || data?.entityTypes || [];
+      if (!Array.isArray(entityTypes) || entityTypes.length === 0) {
+        throw new Error(`No EntityTypes returned in $metadata for ${serviceId}.`);
+      }
+
+      const selectedTypes = entityTypes.slice(0, 4);
+      const importedEntities: any[] = selectedTypes.map((et: any, idx: number) => {
+        const cleanName = String(et.name || `Entity${idx + 1}`).replace(/[^a-zA-Z0-9_]/g, '').slice(0, 22);
+        const keyNames = new Set((et.keys || []).map((k: any) => String(k).toLowerCase()));
+        const props = (et.properties || []).slice(0, 12);
+        const fields = props.map((p: any, fIdx: number) => {
+          const isKey = keyNames.has(String(p.name || '').toLowerCase()) || (keyNames.size === 0 && fIdx === 0);
+          const mapped = mapEdmTypeToAbap(p.type);
+          return {
+            fieldId: `FLD-${idx}-${fIdx}-${Date.now()}`,
+            name: String(p.name || `Field${fIdx + 1}`).replace(/[^a-zA-Z0-9_]/g, ''),
+            label: p.label || p.name || `Field ${fIdx + 1}`,
+            abapType: mapped.abapType,
+            length: p.maxLength ? Number(p.maxLength) || mapped.length : mapped.length,
+            decimals: mapped.decimals,
+            isKey,
+            isNullable: !isKey && p.nullable !== false,
+            semanticRole: isKey ? 'KEY' : 'GENERAL'
+          };
+        });
+        return {
+          entityId: `ENT-S21-${idx}-${Date.now()}`,
+          name: cleanName,
+          businessName: et.name || cleanName,
+          entityType: idx === 0 ? 'ROOT' : 'CHILD',
+          isRoot: idx === 0,
+          tableName: `Z${cleanName.toUpperCase().slice(0, 14)}`,
+          fields
+        };
+      });
+
+      const rootId = importedEntities[0].entityId;
+      const rootKeyField = importedEntities[0].fields?.[0]?.name || 'ID';
+      const importedRels: GenerationRelationship[] = importedEntities.slice(1).map((child, idx) => ({
+        relationshipId: `REL-S21-${idx}-${Date.now()}`,
+        name: `_${child.name}`,
+        sourceEntityId: rootId,
+        targetEntityId: child.entityId,
+        relationshipType: 'COMPOSITION',
+        cardinality: '[0..*]',
+        mapping: [{
+          sourceField: rootKeyField,
+          targetField: child.fields?.[0]?.name || rootKeyField
+        }]
+      }));
+
+      await defaultFrontendGenerationProjectService.saveDataModel(project.projectId, {
+        entities: importedEntities,
+        relationships: importedRels
+      });
+      setS21ImportOpen(false);
+      await loadDataModel();
+      await handleValidate();
+      setSuccessMsg(`Imported ${importedEntities.length} live EntityType(s) from S21 OData service ${service.technicalServiceName || serviceId}.`);
+    } catch (err: any) {
+      setError(err.message || 'Failed to import S21 OData $metadata.');
+    } finally {
+      setS21Importing(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
       {/* Top Banner & Validation Controls */}
@@ -490,6 +599,30 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
             title="Derive entities and fields from verified discovery facts"
           >
             <Sparkles size={16} color="#38BDF8" /> {isSuggesting ? 'Analyzing Discovery...' : 'Suggest Data Model'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setS21ImportOpen(true);
+              if (s21Services.length === 0) handleSearchS21Services(s21Search);
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '8px 14px',
+              background: '#FFFFFF',
+              color: '#0F172A',
+              border: '1px solid #CBD5E1',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title="Import real EntityTypes and ABAP-mapped fields from live S21 OData $metadata"
+          >
+            <Database size={16} color="#0284C7" /> Import S21 OData $metadata
           </button>
 
           <button
@@ -1422,6 +1555,62 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
               >
                 <CheckCircle2 size={16} /> Apply Suggested Data Model
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Live S21 OData $metadata Import Modal */}
+      {s21ImportOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px' }}>
+          <div style={{ background: '#fff', borderRadius: '10px', width: '100%', maxWidth: '680px', maxHeight: '80vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.15)' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#0F172A' }}>Import Schema from Live S21 OData $metadata</h3>
+                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#64748B' }}>Search live S21 Gateway services and import EntityTypes, keys, and ABAP-typed fields.</p>
+              </div>
+              <button type="button" onClick={() => setS21ImportOpen(false)} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748B' }}>&times;</button>
+            </div>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', gap: '8px' }}>
+              <input
+                type="text"
+                value={s21Search}
+                onChange={(e) => setS21Search(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSearchS21Services(); }}
+                placeholder="Search S21 OData services (e.g. WORK, ORDER, PARTNER)..."
+                style={{ flex: 1, padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '6px', fontSize: '13px' }}
+              />
+              <button
+                type="button"
+                onClick={() => handleSearchS21Services()}
+                disabled={s21Loading}
+                style={{ padding: '8px 14px', background: '#0284C7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                {s21Loading ? 'Searching...' : 'Search S21'}
+              </button>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {s21Services.length === 0 && !s21Loading && (
+                <div style={{ padding: '24px', textAlign: 'center', color: '#64748B', fontSize: '13px' }}>
+                  No matching S21 OData services found. Try a broader keyword like <code>API_</code> or <code>WORK</code>.
+                </div>
+              )}
+              {s21Services.map((svc: any) => (
+                <div key={svc.id || svc.technicalServiceName} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', border: '1px solid #E2E8F0', borderRadius: '6px', background: '#F8FAFC' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>{svc.technicalServiceName || svc.id}</div>
+                    <div style={{ fontSize: '11.5px', color: '#475569' }}>{svc.title || svc.description || 'SAP S/4HANA OData Service'}</div>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={s21Importing}
+                    onClick={() => handleImportS21Metadata(svc)}
+                    style={{ padding: '6px 12px', background: '#0F172A', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {s21Importing ? 'Importing...' : 'Import Schema'}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

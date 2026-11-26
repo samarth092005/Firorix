@@ -221,6 +221,30 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
         </div>
       </div>
 
+      {/* Stale Architecture Warning if Data Model changed after evaluation */}
+      {(() => {
+        const dmUpdated = (project.dataModelSpec as any)?.updatedAt ? new Date((project.dataModelSpec as any).updatedAt).getTime() : 0;
+        const archEvaluated = (architecture as any)?.evaluatedAt ? new Date((architecture as any).evaluatedAt).getTime() : ((architecture as any)?.updatedAt ? new Date((architecture as any).updatedAt).getTime() : 0);
+        if (dmUpdated > 0 && archEvaluated > 0 && dmUpdated > archEvaluated) {
+          return (
+            <div style={{ padding: '12px 16px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', color: '#92400E', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={16} color="#D97706" />
+                <span><strong>Needs Re-evaluation:</strong> The CDS Data Model was updated after this RAP architecture was evaluated.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleReevaluate}
+                style={{ padding: '5px 12px', backgroundColor: '#F59E0B', color: '#FFFFFF', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+              >
+                Re-evaluate Now
+              </button>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
       {error && (
         <div style={{ padding: '12px 16px', backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '6px', color: '#991B1B', fontSize: '13px' }}>
           {error}
@@ -344,6 +368,24 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
                   <li key={i}>{n}</li>
                 ))}
               </ul>
+            </div>
+          </div>
+
+          {/* ABAP Cloud Object Naming Blueprint */}
+          <div style={{ backgroundColor: '#FFFFFF', padding: '20px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <FileCode2 size={18} color="#0284C7" />
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
+                ABAP Cloud Naming Blueprint
+              </h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#475569' }}>
+              <div><strong>Interface View:</strong> <code>ZI_{(architecture?.rootEntity?.name || project.sourceTransactionCode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 24)}</code></div>
+              <div><strong>Projection View:</strong> <code>ZC_{(architecture?.rootEntity?.name || project.sourceTransactionCode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 24)}</code></div>
+              <div><strong>Behavior Pool:</strong> <code>ZBP_I_{(architecture?.rootEntity?.name || project.sourceTransactionCode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 22)}</code></div>
+              <div><strong>Service Binding (V4):</strong> <code>ZUI_{(architecture?.rootEntity?.name || project.sourceTransactionCode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20)}_O4</code></div>
+              <div><strong>Persistence Table:</strong> <code>{rootTable || architecture?.rootEntity?.tableName || 'Z_PERSIST'}</code></div>
+              {draftEnabled && <div><strong>Draft Table:</strong> <code>{draftTable || architecture?.rootEntity?.draftTableName || 'Z_DRAFT'}</code></div>}
             </div>
           </div>
 

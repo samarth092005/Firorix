@@ -201,9 +201,43 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
                   <div style={{ fontSize: '12px', color: '#64748B' }}>{gate.details}</div>
                 </div>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: gate.passed ? '#16A34A' : '#DC2626' }}>
-                {gate.passed ? 'PASSED' : 'GATE FAILED'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: gate.passed ? '#16A34A' : '#DC2626' }}>
+                  {gate.passed ? 'PASSED' : 'GATE FAILED'}
+                </span>
+                {!gate.passed && onNavigateView && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = `${gate.id || ''} ${gate.name || ''} ${gate.details || ''}`.toLowerCase();
+                      if (text.includes('requirement') || text.includes('scope')) {
+                        onNavigateView('requirements');
+                      } else if (text.includes('architecture') || text.includes('rap') || text.includes('draft') || text.includes('table')) {
+                        onNavigateView('architecture');
+                      } else {
+                        onNavigateView('data-model');
+                      }
+                    }}
+                    style={{
+                      padding: '4px 10px',
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #FCA5A5',
+                      borderRadius: '4px',
+                      color: '#B91C1C',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {(() => {
+                      const text = `${gate.id || ''} ${gate.name || ''} ${gate.details || ''}`.toLowerCase();
+                      if (text.includes('requirement') || text.includes('scope')) return 'Fix in Requirements →';
+                      if (text.includes('architecture') || text.includes('rap') || text.includes('draft') || text.includes('table')) return 'Fix in Architecture →';
+                      return 'Fix in Data Model →';
+                    })()}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
