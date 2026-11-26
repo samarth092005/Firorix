@@ -33,7 +33,6 @@ import { RecommendationPanel } from './components/RecommendationPanel';
 import { AssessmentExportModal } from './components/AssessmentExportModal';
 import { DiscoveryDetailsModal } from './components/DiscoveryDetailsModal';
 import { ModernizationDecisionPanel } from './components/ModernizationDecisionPanel';
-import { localStore } from '../../services/mock/localStore';
 import {
   BucketizedEvidenceItem,
   IndependentAssessmentMetrics
@@ -78,11 +77,9 @@ export const AssessmentResultsPage: React.FC = () => {
   const tcodeQuery = searchParams.get('tcode');
   const tabQueryRaw = searchParams.get('tab')?.toUpperCase();
 
-  // Map legacy / multiple tab params into canonical 4-stage tabs
-  let initialTab: 'VERDICT' | 'FIT_GAP' | 'TECHNICAL_EVIDENCE' | 'MODERNIZATION_DECISION' = 'VERDICT';
-  if (tabQueryRaw === 'TECHNICAL_EVIDENCE' || tabQueryRaw === 'TECHNICAL_VALIDATION' || tabQueryRaw === 'EVIDENCE') {
-    initialTab = 'TECHNICAL_EVIDENCE';
-  } else if (tabQueryRaw === 'FIT_GAP' || tabQueryRaw === 'FITGAP' || tabQueryRaw === 'CANDIDATE_COMPARISON' || tabQueryRaw === 'COMPARISON') {
+  // Map legacy / multiple tab params strictly into canonical 3-stage tabs (VERDICT, FIT_GAP, MODERNIZATION_DECISION)
+  let initialTab: 'VERDICT' | 'FIT_GAP' | 'MODERNIZATION_DECISION' = 'VERDICT';
+  if (tabQueryRaw === 'FIT_GAP' || tabQueryRaw === 'FITGAP' || tabQueryRaw === 'CANDIDATE_COMPARISON' || tabQueryRaw === 'COMPARISON') {
     initialTab = 'FIT_GAP';
   } else if (tabQueryRaw === 'MODERNIZATION_DECISION' || tabQueryRaw === 'DECISION' || tabQueryRaw === 'MODERNIZATION') {
     initialTab = 'MODERNIZATION_DECISION';
@@ -102,17 +99,15 @@ export const AssessmentResultsPage: React.FC = () => {
   const [systemAvailability, setSystemAvailability] = useState<SystemAvailabilityAudit | null>(null);
   const [recommendation, setRecommendation] = useState<AssessmentRecommendation | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'VERDICT' | 'FIT_GAP' | 'TECHNICAL_EVIDENCE' | 'MODERNIZATION_DECISION'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'VERDICT' | 'FIT_GAP' | 'MODERNIZATION_DECISION'>(initialTab);
 
   // Keep activeTab in sync with URL search parameter
   useEffect(() => {
-    if (tabQueryRaw === 'TECHNICAL_EVIDENCE' || tabQueryRaw === 'TECHNICAL_VALIDATION' || tabQueryRaw === 'EVIDENCE') {
-      setActiveTab('TECHNICAL_EVIDENCE');
-    } else if (tabQueryRaw === 'FIT_GAP' || tabQueryRaw === 'FITGAP' || tabQueryRaw === 'CANDIDATE_COMPARISON' || tabQueryRaw === 'COMPARISON') {
+    if (tabQueryRaw === 'FIT_GAP' || tabQueryRaw === 'FITGAP' || tabQueryRaw === 'CANDIDATE_COMPARISON' || tabQueryRaw === 'COMPARISON') {
       setActiveTab('FIT_GAP');
     } else if (tabQueryRaw === 'MODERNIZATION_DECISION' || tabQueryRaw === 'DECISION' || tabQueryRaw === 'MODERNIZATION') {
       setActiveTab('MODERNIZATION_DECISION');
-    } else if (tabQueryRaw === 'VERDICT') {
+    } else if (tabQueryRaw === 'VERDICT' || tabQueryRaw === 'TECHNICAL_EVIDENCE' || tabQueryRaw === 'TECHNICAL_VALIDATION' || tabQueryRaw === 'EVIDENCE') {
       setActiveTab('VERDICT');
     }
   }, [tabQueryRaw]);
@@ -203,15 +198,21 @@ export const AssessmentResultsPage: React.FC = () => {
           }
         }
 
-        if (!target && records.length > 0) {
+        if (!target && !targetId && !tcodeQuery && records.length > 0) {
           target = records[0];
         }
 
         if (target) {
+          const fiTcodes = ['F-53', 'F-28', 'FB03', 'FB01', 'FB50'];
+          const defaultPkg = fiTcodes.includes(target.tcode.toUpperCase())
+            ? 'FBAS'
+            : target.classification === 'CUSTOM'
+            ? 'Z_CUSTOM'
+            : 'Unassigned';
           target = {
             ...target,
             release: target.release || (target as any).targetRelease || 'SAP S/4HANA 2023 Private Edition',
-            packageName: target.packageName || (target as any).discoveryMetadata?.packageName || (target.tcode === 'F-53' || target.tcode === 'F-28' || target.tcode === 'FB03' ? 'FBAS' : 'FBAS')
+            packageName: target.packageName || (target as any).discoveryMetadata?.packageName || defaultPkg
           };
         }
 
@@ -219,6 +220,35 @@ export const AssessmentResultsPage: React.FC = () => {
 
         if (target) {
           const catCandidates = await fioriCatalogueAdapter.getAppsByTCode(target.tcode);
+          // Preserve discovery/backend-matched Fiori app at the top if not already in local catalogue
+          if (
+            target.matchingFioriApp?.appId &&
+            !catCandidates.some((c) => c.appId === target!.matchingFioriApp!.appId)
+          ) {
+            const m = target.matchingFioriApp;
+            const uiTech = (
+              ['SAP Fiori elements', 'SAPUI5 freestyle', 'SAP GUI for HTML', 'Web Dynpro', 'UNKNOWN'].includes(m.uiTechnology)
+                ? m.uiTechnology
+                : 'SAP Fiori elements'
+            ) as CatalogueReference['uiTechnology'];
+            catCandidates.unshift({
+              appId: m.appId,
+              appName: m.appName || m.appId,
+              description: `Official SAP Fiori match for ${target.tcode} (${m.appName || m.appId}).`,
+              relatedTCodes: [target.tcode],
+              supportedProductRelease: target.release || 'SAP S/4HANA 2023',
+              uiTechnology: uiTech,
+              businessRoles: m.businessRoles || [],
+              businessCatalogues: [],
+              odataServices: m.odataServices || [],
+              technicalComponent: target.softwareComponent || 'S4CORE 108',
+              implementationInfo: m.sourceLabel || 'Discovery Match',
+              officialSourceUrl: `https://fioriappslibrary.hana.ondemand.com/sap/fix/externalViewer/#/detail/Apps('${encodeURIComponent(m.appId)}')`,
+              sourceVerificationDate: new Date().toISOString().split('T')[0],
+              importVersion: 'discovery-sync',
+              isCuratedDemoData: false
+            });
+          }
           setCandidates(catCandidates);
           const primaryCandidate = catCandidates[0] || null;
 
@@ -247,6 +277,8 @@ export const AssessmentResultsPage: React.FC = () => {
             resolvedAssessmentResult = resolvedClassification === 'CUSTOM'
               ? 'CUSTOM_RAP_REQUIRED'
               : (primaryCandidate ? 'EXPLICIT_SUCCESSOR' : 'NO_VERIFIED_MATCH');
+          } else if (!enrichedMatchingApp && catCandidates.length === 0 && (resolvedAssessmentResult as string) === 'ADD_AND_CONFIGURE') {
+            resolvedAssessmentResult = 'CUSTOM_BUILD';
           }
 
           target = {
@@ -267,7 +299,15 @@ export const AssessmentResultsPage: React.FC = () => {
           const sysAvail = evidenceEngine.evaluateSystemAvailability(target, primaryCandidate);
           const rec = evidenceEngine.generateRecommendation(target, primaryCandidate, compat, sysAvail);
 
-          const finalRec: AssessmentRecommendation = target.recommendation?.outcome
+          const hasNoStandardApp = !enrichedMatchingApp && catCandidates.length === 0;
+          const finalRec: AssessmentRecommendation = hasNoStandardApp
+            ? {
+                ...rec,
+                outcome: 'BUILD',
+                canonicalOutcome: 'BUILD',
+                businessOutcome: 'BUILD'
+              }
+            : target.recommendation?.outcome
             ? {
                 outcome: target.recommendation.outcome,
                 canonicalOutcome: target.recommendation.canonicalOutcome || evidenceEngine.mapToCanonicalOutcome(target.recommendation.outcome, sysAvail),
@@ -317,7 +357,7 @@ export const AssessmentResultsPage: React.FC = () => {
     loadData();
   }, [routeId, idQuery, tcodeQuery]);
 
-  const handleTabChange = (tab: 'VERDICT' | 'FIT_GAP' | 'TECHNICAL_EVIDENCE' | 'MODERNIZATION_DECISION') => {
+  const handleTabChange = (tab: 'VERDICT' | 'FIT_GAP' | 'MODERNIZATION_DECISION') => {
     setActiveTab(tab);
     setSearchParams(
       (prev) => {
@@ -352,22 +392,7 @@ export const AssessmentResultsPage: React.FC = () => {
 
     const cleanTcode = assessment.tcode.toUpperCase();
 
-    // 1. If stored in localStore
-    const stored = localStore.getFitGap().filter(
-      (r) => r.assessmentId === assessment.id || r.candidateAppId === candidates[0]?.appId
-    );
-    if (stored.length > 0) {
-      return stored.map((s) => ({
-        requirementId: s.requirementId,
-        requirementTitle: s.requirementTitle,
-        coverageStatus: s.coverageStatus === 'UNSUPPORTED' ? 'NOT_SUPPORTED' : s.coverageStatus === 'PARTIAL' ? 'PARTIALLY_SUPPORTED' : s.coverageStatus,
-        gapExplanation: s.gapExplanation,
-        evidence: s.evidence,
-        dimension: 'Functional Scope'
-      }));
-    }
-
-    // 2. Case B: NO Standard App in Catalogue -> 100% Functional Gap (Custom Clean Core RAP Build)
+    // 1. Case B: NO Standard App in Catalogue -> 100% Functional Gap (Custom Clean Core RAP Build)
     if (candidates.length === 0) {
       return [
         {
