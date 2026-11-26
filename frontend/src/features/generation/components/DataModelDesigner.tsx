@@ -89,11 +89,23 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Live S21 OData $metadata import state
+  const deriveS21Keywords = () => {
+    const stopWords = new Set(['create', 'change', 'display', 'maintain', 'list', 'overview', 'process', 'processing', 'manage', 'transaction', 'tcode', 'standard', 'sap', 'current', 'for', 'and', 'the', 'with', 'in', 'of', 'to']);
+    const rawText = `${project.description || ''} ${project.projectName || ''}`.replace(/[^a-zA-Z0-9\s]/g, ' ');
+    const words = rawText
+      .split(/\s+/)
+      .map((w) => w.trim().toUpperCase())
+      .filter((w) => w.length >= 3 && !stopWords.has(w.toLowerCase()) && w !== String(project.sourceTransactionCode || '').toUpperCase());
+    const combined = words.length >= 2 ? [`${words[0]}${words[1]}`, ...words] : words;
+    return Array.from(new Set(combined));
+  };
+
   const [s21ImportOpen, setS21ImportOpen] = useState<boolean>(false);
-  const [s21Search, setS21Search] = useState<string>(project.sourceTransactionCode || '');
+  const [s21Search, setS21Search] = useState<string>(() => deriveS21Keywords()[0] || 'API_');
   const [s21Services, setS21Services] = useState<any[]>([]);
   const [s21Loading, setS21Loading] = useState<boolean>(false);
   const [s21Importing, setS21Importing] = useState<boolean>(false);
+  const [s21MatchNote, setS21MatchNote] = useState<string>('');
 
   // Modal dialog states
   const [entityModalOpen, setEntityModalOpen] = useState<boolean>(false);
@@ -447,15 +459,39 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
     }
   };
 
-  // Search live S21 OData Gateway Catalog
-  const handleSearchS21Services = async (queryText?: string) => {
+  // Search live S21 OData Gateway Catalog with smart domain keyword fallback
+  const handleSearchS21Services = async (queryText?: string, autoMode: boolean = false) => {
     setS21Loading(true);
     setError(null);
+    setS21MatchNote('');
     try {
+      const fetchSvc = async (q: string) => {
+        const res = await authFetch(`/api/v1/gateway/services?search=${encodeURIComponent(q)}&limit=15`);
+        const data = await res.json();
+        return Array.isArray(data.services) ? data.services : [];
+      };
+
+      if (autoMode) {
+        const keywords = deriveS21Keywords();
+        for (const kw of keywords) {
+          const found = await fetchSvc(kw);
+          if (found.length > 0) {
+            setS21Search(kw);
+            setS21Services(found);
+            setS21MatchNote(`Auto-matched ${found.length} S21 service(s) for "${kw}"`);
+            return;
+          }
+        }
+        const fallbackApis = await fetchSvc('API_');
+        setS21Search('API_');
+        setS21Services(fallbackApis);
+        setS21MatchNote('No exact keyword match — showing standard S21 API_* services.');
+        return;
+      }
+
       const q = (queryText !== undefined ? queryText : s21Search).trim();
-      const res = await authFetch(`/api/v1/gateway/services?search=${encodeURIComponent(q)}&limit=15`);
-      const data = await res.json();
-      setS21Services(Array.isArray(data.services) ? data.services : []);
+      const found = await fetchSvc(q);
+      setS21Services(found);
     } catch (err: any) {
       setError(err.message || 'Failed to query S21 OData catalog.');
     } finally {
@@ -605,7 +641,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
             type="button"
             onClick={() => {
               setS21ImportOpen(true);
-              if (s21Services.length === 0) handleSearchS21Services(s21Search);
+              if (s21Services.length === 0) handleSearchS21Services(undefined, true);
             }}
             style={{
               display: 'inline-flex',
@@ -1571,23 +1607,43 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
               </div>
               <button type="button" onClick={() => setS21ImportOpen(false)} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#64748B' }}>&times;</button>
             </div>
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', gap: '8px' }}>
-              <input
-                type="text"
-                value={s21Search}
-                onChange={(e) => setS21Search(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleSearchS21Services(); }}
-                placeholder="Search S21 OData services (e.g. WORK, ORDER, PARTNER)..."
-                style={{ flex: 1, padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '6px', fontSize: '13px' }}
-              />
-              <button
-                type="button"
-                onClick={() => handleSearchS21Services()}
-                disabled={s21Loading}
-                style={{ padding: '8px 14px', background: '#0284C7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-              >
-                {s21Loading ? 'Searching...' : 'Search S21'}
-              </button>
+            <div style={{ padding: '12px 20px', borderBottom: '1px solid #F1F5F9', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="text"
+                  value={s21Search}
+                  onChange={(e) => setS21Search(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleSearchS21Services(); }}
+                  placeholder="Search S21 OData services (e.g. WORK, ORDER, API_)..."
+                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '6px', fontSize: '13px' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSearchS21Services()}
+                  disabled={s21Loading}
+                  style={{ padding: '8px 14px', background: '#0284C7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  {s21Loading ? 'Searching...' : 'Search S21'}
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {[
+                  { label: 'Recommended', action: () => handleSearchS21Services(undefined, true) },
+                  { label: 'Standard APIs (API_*)', action: () => { setS21Search('API_'); handleSearchS21Services('API_'); } },
+                  { label: 'CDS Views (*_CDS)', action: () => { setS21Search('_CDS'); handleSearchS21Services('_CDS'); } },
+                  { label: 'Fiori UI (ZUI_*)', action: () => { setS21Search('ZUI_'); handleSearchS21Services('ZUI_'); } }
+                ].map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={chip.action}
+                    style={{ padding: '4px 10px', fontSize: '11px', fontWeight: 600, borderRadius: '12px', border: '1px solid #CBD5E1', background: '#F8FAFC', color: '#334155', cursor: 'pointer' }}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+                {s21MatchNote && <span style={{ fontSize: '11px', color: '#0284C7', marginLeft: 'auto', fontWeight: 600 }}>{s21MatchNote}</span>}
+              </div>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {s21Services.length === 0 && !s21Loading && (
