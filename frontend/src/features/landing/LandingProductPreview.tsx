@@ -12,7 +12,6 @@ import {
   Lock
 } from 'lucide-react';
 import { HERO_PRODUCT_PREVIEW_DATA } from './landingPreviewData';
-import './LandingProductPreview.css';
 
 export const LandingProductPreview: React.FC = () => {
   const data = HERO_PRODUCT_PREVIEW_DATA;
