@@ -13,7 +13,8 @@ applications:
     health-check-timeout: 60
     health-check-invocation-timeout: 10
     env:
-      NODE_ENV: production
+      NODE_ENV: staging
+      FIORIFY_AUTH_PROVIDER: LOCAL
       FIORIFY_PERSISTENCE: postgres
       FIORIFY_ALLOW_POSTGRES_IN_PRODUCTION: "true"
       FIORIFY_ENFORCE_AUTH: "true"

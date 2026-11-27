@@ -187,7 +187,7 @@ export const authService = {
    */
   logout(): void {
     const token = this.getToken();
-    if (token) {
+    if (token && !token.startsWith('fiorify_demo_token_')) {
       fetch('/api/v1/auth/logout', {
         method: 'POST',
         headers: {
