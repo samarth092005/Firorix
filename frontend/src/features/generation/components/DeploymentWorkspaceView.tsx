@@ -47,6 +47,11 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
   const [latestApproval, setLatestApproval] = useState<any | null>(null);
   const [execution, setExecution] = useState<DeploymentExecution | null>(null);
 
+  const [targetSystem, setTargetSystem] = useState<string>(project?.sourceSystemId || 'S21');
+  const [targetClient, setTargetClient] = useState<string>(project?.sourceClient || '200');
+  const [targetPackage, setTargetPackage] = useState<string>('$TMP');
+  const [approvalComment, setApprovalComment] = useState<string>('Approved by Chief Architect for SAP DEV staging verification.');
+
   // Load initial diagnostics
   useEffect(() => {
     loadPreflightAndReadiness();
@@ -62,6 +67,23 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
       ]);
       setPreflight(preflightData);
       setReadiness(readinessData.readiness);
+
+      // Restore persisted deployment plan across view switches
+      try {
+        const savedPlanId = typeof sessionStorage !== 'undefined'
+          ? sessionStorage.getItem(`fiorify_deploy_plan_${project.projectId}`)
+          : null;
+        if (savedPlanId) {
+          const planRes = await defaultFrontendGenerationProjectService.getDeploymentPlan(savedPlanId);
+          if (planRes?.plan) {
+            setPlan(planRes.plan);
+            if (planRes.latestApproval) setLatestApproval(planRes.latestApproval);
+            if (planRes.latestExecution) setExecution(planRes.latestExecution);
+          }
+        }
+      } catch {
+        // Ignore if saved plan no longer exists
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load SAP preflight data.');
     } finally {
@@ -74,12 +96,15 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
     setError(null);
     try {
       const res = await defaultFrontendGenerationProjectService.generateDeploymentPlan(project.projectId, {
-        targetSystem: 'S21',
-        targetClient: '200',
-        targetPackage: '$TMP',
+        targetSystem: targetSystem.trim() || 'S21',
+        targetClient: targetClient.trim() || '200',
+        targetPackage: targetPackage.trim() || '$TMP',
         forcePlan: true
       });
       setPlan(res.plan);
+      if (res.plan?.id && typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(`fiorify_deploy_plan_${project.projectId}`, res.plan.id);
+      }
       setActiveTab('PLAN');
     } catch (err: any) {
       setError(err.message || 'Failed to generate deployment plan.');
@@ -94,7 +119,7 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
     setError(null);
     try {
       const res = await defaultFrontendGenerationProjectService.approveDeploymentPlan(plan.id, {
-        comments: 'Approved by Chief Architect for SAP S21 DEV deployment verification.'
+        comments: approvalComment.trim() || 'Approved by Chief Architect for SAP DEV staging verification.'
       });
       setLatestApproval(res.approval);
       setPlan(prev => prev ? { ...prev, status: 'APPROVED' } : null);
@@ -146,7 +171,7 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
           <div className="preview-banner-content">
             <div className="preview-banner-title-row">
               <h2 className="preview-banner-title">
-                SAP DEV Deployment &amp; System Verification ({project?.sourceSystemId || 'S21'})
+                SAP Staging, Preflight &amp; Handover Plan ({targetSystem})
               </h2>
               <span className="preview-banner-badge" style={{ backgroundColor: '#DEF7EC', color: '#03543F' }}>
                 <span className="preview-banner-badge-dot" style={{ backgroundColor: '#10B981' }} />
@@ -219,6 +244,69 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
               </button>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Target Staging Parameters */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '12px',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '8px',
+          padding: '12px 16px'
+        }}
+      >
+        <div>
+          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+            TARGET SAP SYSTEM
+          </label>
+          <input
+            type="text"
+            className="fiori-input"
+            value={targetSystem}
+            onChange={(e) => setTargetSystem(e.target.value.toUpperCase())}
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: '12px', height: '34px' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+            CLIENT
+          </label>
+          <input
+            type="text"
+            className="fiori-input"
+            value={targetClient}
+            onChange={(e) => setTargetClient(e.target.value)}
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: '12px', height: '34px' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+            ABAP PACKAGE
+          </label>
+          <input
+            type="text"
+            className="fiori-input"
+            value={targetPackage}
+            onChange={(e) => setTargetPackage(e.target.value.toUpperCase())}
+            placeholder="$TMP or ZFIORIFY"
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: '12px', height: '34px' }}
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+            ARCHITECT SIGN-OFF COMMENT
+          </label>
+          <input
+            type="text"
+            className="fiori-input"
+            value={approvalComment}
+            onChange={(e) => setApprovalComment(e.target.value)}
+            style={{ width: '100%', boxSizing: 'border-box', fontSize: '12px', height: '34px' }}
+          />
         </div>
       </div>
 

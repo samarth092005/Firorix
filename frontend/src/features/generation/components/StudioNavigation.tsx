@@ -41,19 +41,19 @@ interface StageDefinition {
 const STAGES: StageDefinition[] = [
   {
     id: 1,
-    title: 'Stage 1: Scope & Data Model',
+    title: 'Scope & Model',
     subtitle: 'Requirements & CDS Entities',
     views: ['requirements', 'data-model'],
     defaultView: 'requirements',
     subItems: [
-      { id: 'requirements', label: 'Requirements Backlog', icon: FileText },
+      { id: 'requirements', label: 'Requirements', icon: FileText },
       { id: 'data-model', label: 'CDS Data Model', icon: Database }
     ]
   },
   {
     id: 2,
-    title: 'Stage 2: Architecture & Governance',
-    subtitle: 'RAP Pattern & 13-Gate Review',
+    title: 'Architecture & Review',
+    subtitle: 'RAP Pattern & 13-Gate Check',
     views: ['architecture', 'spec-lifecycle'],
     defaultView: 'architecture',
     subItems: [
@@ -63,19 +63,19 @@ const STAGES: StageDefinition[] = [
   },
   {
     id: 3,
-    title: 'Stage 3: Synthesis & Live Preview',
-    subtitle: 'ABAP, Fiori & Local Sandbox',
+    title: 'Build & Preview',
+    subtitle: 'ABAP, Fiori & Live Sandbox',
     views: ['abap-generator', 'ui-generator', 'preview-validation'],
-    defaultView: 'preview-validation',
+    defaultView: 'abap-generator',
     subItems: [
-      { id: 'abap-generator', label: 'ABAP Cloud Artifacts', icon: Code2 },
-      { id: 'ui-generator', label: 'Fiori Elements Manifest', icon: LayoutTemplate },
+      { id: 'abap-generator', label: 'ABAP Cloud Code', icon: Code2 },
+      { id: 'ui-generator', label: 'Fiori Elements UI', icon: LayoutTemplate },
       { id: 'preview-validation', label: 'Live Fiori Sandbox', icon: CheckCircle2 }
     ]
   },
   {
     id: 4,
-    title: 'Stage 4: Package & Deploy',
+    title: 'Package & Deploy',
     subtitle: 'ZIP Export & SAP DEV Staging',
     views: ['review-export', 'deployment'],
     defaultView: 'review-export',
@@ -108,9 +108,14 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
     const hasArtifacts = artifacts.length > 0;
     const lifecycle = project.lifecycleStatus || '';
 
+    const reqItems = project.requirementsSpec?.items || [];
+    const hasPendingReqs = reqItems.some((r) => r.status === 'DRAFT');
+    const hasConfirmedReqs = reqItems.some((r) => r.status === 'CONFIRMED');
+    const hasEntities = (project.dataModelSpec?.entities?.length || 0) > 0;
+
     switch (stageId) {
       case 1:
-        return (project.dataModelSpec?.entities?.length || 0) > 0 || hasArtifacts;
+        return (hasEntities && hasConfirmedReqs && !hasPendingReqs) || hasArtifacts;
       case 2:
         return Boolean(project.approvedBy) || lifecycle === 'READY_FOR_GENERATION' || lifecycle === 'GENERATED' || lifecycle === 'VALIDATION_COMPLETED' || lifecycle === 'EXPORTED';
       case 3:
@@ -122,30 +127,9 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
     }
   };
 
-  // If in Dashboard mode (no project active or projects view selected)
+  // Dashboard already has its own clean header & action bar
   if (isDashboard) {
-    return (
-      <div className="studio-stepper-container" aria-label="Projects Dashboard Navigation">
-        <div className="studio-dashboard-nav-banner">
-          <div className="studio-dashboard-nav-title">
-            <FolderKanban size={18} color="var(--studio-primary, #0066FF)" />
-            <span>Projects Dashboard</span>
-            <span className="studio-dashboard-nav-sub">
-              Select or open a project below to enter the 4-Stage Application Engineering Pipeline.
-            </span>
-          </div>
-          <button
-            type="button"
-            className="studio-pill-utility"
-            onClick={() => onSelectView('environment')}
-            title="Inspect Environment and Toolchain Diagnostics"
-          >
-            <Wrench size={13} />
-            <span>System Toolchain</span>
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -189,43 +173,31 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
       {/* ========================================================================= */}
       {/* TIER 2: FOCUSED SUB-VIEW PILL SWITCHER                                     */}
       {/* ========================================================================= */}
-      <div className="studio-pill-bar">
-        <div className="studio-pills-group" role="tablist" aria-label="Stage Workspace Views">
-          <span className="studio-pills-label">Active Workspace:</span>
-          {currentStage.subItems.map((sub) => {
-            const SubIcon = sub.icon;
-            const isSubActive = activeView === sub.id && !isEnvironment;
+      {!isEnvironment && (
+        <div className="studio-pill-bar">
+          <div className="studio-pills-group" role="tablist" aria-label="Stage Workspace Views">
+            {currentStage.subItems.map((sub) => {
+              const SubIcon = sub.icon;
+              const isSubActive = activeView === sub.id;
 
-            return (
-              <button
-                key={sub.id}
-                type="button"
-                role="tab"
-                aria-selected={isSubActive}
-                onClick={() => onSelectView(sub.id)}
-                className={`studio-pill-btn ${isSubActive ? 'active' : ''}`}
-                title={`Open ${sub.label}`}
-              >
-                <SubIcon size={14} />
-                <span>{sub.label}</span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={sub.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSubActive}
+                  onClick={() => onSelectView(sub.id)}
+                  className={`studio-pill-btn ${isSubActive ? 'active' : ''}`}
+                  title={`Open ${sub.label}`}
+                >
+                  <SubIcon size={14} />
+                  <span>{sub.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-
-        {/* Global Utility Toolchain Diagnostics Link */}
-        <div className="studio-pill-right">
-          <button
-            type="button"
-            className={`studio-pill-utility ${isEnvironment ? 'active' : ''}`}
-            onClick={() => onSelectView('environment')}
-            title="Inspect Environment and Toolchain Diagnostics"
-          >
-            <Wrench size={13} />
-            <span>Toolchain Diagnostics</span>
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

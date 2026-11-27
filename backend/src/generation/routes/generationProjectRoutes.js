@@ -3,8 +3,7 @@ import { SECURITY_ACTIONS } from '../../infrastructure/security/securityAuditLog
 import { sanitizeProtectedFields } from '../../middleware/securityFieldSanitizer.js';
 import { defaultGenerationReadinessEngine } from '../projects/generationReadinessEngine.js';
 import { defaultSpecificationVersioningService } from '../projects/specificationVersioningService.js';
-
-const MAX_BODY_SIZE = 100 * 1024; // 100KB limit
+import { readJsonBody } from '../../api/index.js';
 
 /**
  * Handles Generation Studio Project Lifecycle Routes (GEN-01, GEN-02)
@@ -28,40 +27,7 @@ export async function handleGenerationProjectRoutes(req, res, url, context = {})
     return false;
   }
 
-  // Helper to read JSON body safely
-  const readJson = () =>
-    new Promise((resolve, reject) => {
-      let body = '';
-      let bodyLength = 0;
-      let isAborted = false;
-
-      req.on('data', (chunk) => {
-        if (isAborted) return;
-        bodyLength += chunk.length;
-        if (bodyLength > MAX_BODY_SIZE) {
-          isAborted = true;
-          req.destroy();
-          const err = new Error('Payload exceeds maximum allowed size (100KB).');
-          err.code = 'PAYLOAD_TOO_LARGE';
-          reject(err);
-          return;
-        }
-        body += chunk;
-      });
-
-      req.on('end', () => {
-        if (isAborted) return;
-        try {
-          resolve(JSON.parse(body || '{}'));
-        } catch {
-          const err = new Error('Malformed JSON payload.');
-          err.code = 'BAD_REQUEST';
-          reject(err);
-        }
-      });
-
-      req.on('error', reject);
-    });
+  const readJson = () => readJsonBody(req);
 
   // 1. GET /api/v1/generation/projects - List Generation Projects
   if (req.method === 'GET' && url.pathname === '/api/v1/generation/projects') {

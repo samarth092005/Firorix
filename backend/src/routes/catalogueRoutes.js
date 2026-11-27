@@ -1,5 +1,6 @@
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { USER_ROLES } from '../services/authService.js';
+import { readJsonBody } from '../api/index.js';
 
 const MAX_IMPORT_BODY_SIZE = 10 * 1024 * 1024; // 10MB body limit for catalogue exports
 
@@ -310,19 +311,14 @@ export async function handleCatalogueRoutes(req, res, url, context = {}) {
   if (req.method === 'POST' && url.pathname === '/api/v1/fiori-catalogue/sync') {
     if (!requireRole([USER_ROLES.ADMIN])) return true;
 
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
     let payload = {};
-    if (body.trim().length > 0) {
-      try {
-        payload = JSON.parse(body);
-      } catch {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
-        return true;
-      }
+    try {
+      payload = await readJsonBody(req, { maxBytes: MAX_IMPORT_BODY_SIZE });
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+      return true;
     }
 
     try {
@@ -354,17 +350,11 @@ export async function handleCatalogueRoutes(req, res, url, context = {}) {
       return true;
     }
 
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
     let payload = {};
-    if (body.trim().length > 0) {
-      try {
-        payload = JSON.parse(body);
-      } catch {
-        // Optional payload
-      }
+    try {
+      payload = await readJsonBody(req);
+    } catch {
+      // Optional payload
     }
 
     try {

@@ -3,19 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
   Menu,
   Bell,
-  Layers,
   CheckCircle2,
-  AlertCircle,
   ChevronDown,
   Server,
   Sparkles,
-  ExternalLink,
   LogOut,
   User,
-  Clock,
-  Settings,
   ShieldCheck,
-  Scale,
   X,
   Trash2,
   Inbox,
@@ -27,10 +21,10 @@ import { useApp } from '../../app/providers';
 import { ConfirmDialog } from '../dialogs/ConfirmDialog';
 import { authService } from '../../services/authService';
 import { notificationService, AppNotification } from '../../services/notificationService';
-import { SystemStatusIndicator } from '../common/SystemStatusIndicator';
 import { uiConfig } from '../../config/uiConfig';
 import { FiorifyLogo } from '../common/FiorifyLogo';
 import { SystemConnectionState } from '../../services/contracts/types';
+import { formatRelativeTime } from '../../utils/dateUtils';
 
 export interface TopNavigationProps {
   onToggleSidebar: () => void;
@@ -71,25 +65,6 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-
-  // Format relative timestamp
-  const formatRelativeTime = (isoString: string): string => {
-    try {
-      const now = Date.now();
-      const past = new Date(isoString).getTime();
-      const diffMs = now - past;
-      const diffMins = Math.floor(diffMs / 60000);
-      if (diffMins < 1) return 'Just now';
-      if (diffMins < 60) return `${diffMins}m ago`;
-      const diffHours = Math.floor(diffMins / 60);
-      if (diffHours < 24) return `${diffHours}h ago`;
-      const diffDays = Math.floor(diffHours / 24);
-      if (diffDays === 1) return 'Yesterday';
-      return `${diffDays}d ago`;
-    } catch {
-      return 'Recent';
-    }
-  };
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);

@@ -57,6 +57,7 @@ describe('Fiorify Milestone 3: Database Engineering (DB-001 to DB-010)', () => {
   describe('DB-004 & DB-005: Production Fail-Closed Policy & Binding Resolution', () => {
     const originalEnv = process.env.NODE_ENV;
     const originalVcap = process.env.VCAP_SERVICES;
+    const originalPersistence = process.env.FIORIFY_PERSISTENCE;
 
     after(() => {
       process.env.NODE_ENV = originalEnv;
@@ -64,6 +65,11 @@ describe('Fiorify Milestone 3: Database Engineering (DB-001 to DB-010)', () => {
         process.env.VCAP_SERVICES = originalVcap;
       } else {
         delete process.env.VCAP_SERVICES;
+      }
+      if (originalPersistence !== undefined) {
+        process.env.FIORIFY_PERSISTENCE = originalPersistence;
+      } else {
+        delete process.env.FIORIFY_PERSISTENCE;
       }
     });
 
@@ -77,6 +83,7 @@ describe('Fiorify Milestone 3: Database Engineering (DB-001 to DB-010)', () => {
 
     it('2. In production, missing SAP HANA Cloud binding triggers fail-closed error', () => {
       process.env.NODE_ENV = 'production';
+      delete process.env.FIORIFY_PERSISTENCE;
       delete process.env.VCAP_SERVICES;
       delete process.env.HANA_HOST;
 
@@ -213,6 +220,63 @@ describe('Fiorify Milestone 3: Database Engineering (DB-001 to DB-010)', () => {
       assert.ok(data.components.database);
       assert.ok(data.components.migrations);
       assert.ok(data.components.btpConnectivity);
+    });
+  });
+
+  // ========================================================
+  // HANA Migration Splitting & SystemRegistry HANA Support
+  // ========================================================
+  describe('SAP HANA Cloud Migration & Registry Compatibility', () => {
+    it('1. DialectMigrationRunner.splitSqlStatements splits HANA DDL safely while respecting comments and literals', () => {
+      const sql = `
+        -- leading comment with ; semicolon
+        CREATE TABLE schema_migrations (version NVARCHAR(64) PRIMARY KEY);
+        /* block comment ; */
+        CREATE TABLE tenants (tenant_id NVARCHAR(64) PRIMARY KEY, note NVARCHAR(64) DEFAULT 'a;b');
+      `;
+      const stmts = DialectMigrationRunner.splitSqlStatements(sql);
+      assert.strictEqual(stmts.length, 2);
+      assert.match(stmts[0], /^CREATE TABLE schema_migrations/i);
+      assert.match(stmts[1], /DEFAULT 'a;b'/);
+    });
+
+    it('2. DialectMigrationRunner skips duplicate CREATE TABLE schema_migrations during HANA _executeMigrationSql', async () => {
+      const executed = [];
+      const mockAdapter = {
+        getDialect: () => 'hana',
+        getClient: async () => ({
+          query: async (sql) => {
+            executed.push(sql);
+            return { rows: [] };
+          },
+          release: () => {}
+        })
+      };
+      const runner = new DialectMigrationRunner({ adapter: mockAdapter, dialect: 'hana' });
+      const client = await mockAdapter.getClient();
+      await runner._executeMigrationSql(
+        client,
+        'CREATE TABLE schema_migrations (version NVARCHAR(64)); CREATE TABLE tenants (tenant_id NVARCHAR(64));',
+        { isUp: true }
+      );
+      assert.strictEqual(executed.length, 1);
+      assert.match(executed[0], /^CREATE TABLE tenants/i);
+    });
+
+    it('3. SystemRegistry accepts FIORIFY_PERSISTENCE=hana in production mode', async () => {
+      const prevNodeEnv = process.env.NODE_ENV;
+      const prevPersist = process.env.FIORIFY_PERSISTENCE;
+      try {
+        process.env.NODE_ENV = 'production';
+        process.env.FIORIFY_PERSISTENCE = 'hana';
+        const { SystemRegistry } = await import('../src/adapters/systemRegistry.js');
+        const reg = new SystemRegistry({ repository: { list: async () => [] } });
+        assert.strictEqual(reg.useDatabase, true);
+      } finally {
+        process.env.NODE_ENV = prevNodeEnv;
+        if (prevPersist === undefined) delete process.env.FIORIFY_PERSISTENCE;
+        else process.env.FIORIFY_PERSISTENCE = prevPersist;
+      }
     });
   });
 });

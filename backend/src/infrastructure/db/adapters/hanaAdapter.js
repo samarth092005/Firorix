@@ -12,6 +12,7 @@
  */
 
 import { DatabaseAdapter } from './databaseAdapter.js';
+import { adaptParameterizedSql } from './sqlDialectHelper.js';
 
 export class HanaAdapter extends DatabaseAdapter {
   constructor(options = {}) {
@@ -88,13 +89,13 @@ export class HanaAdapter extends DatabaseAdapter {
 
   /**
    * Adapts PostgreSQL-style $1, $2 query parameters to HANA positional ? parameters.
-   * @param {string} sql 
+   * Delegates to adaptParameterizedSql so reused $N placeholders expand safely.
+   * @param {string} sql
    * @returns {string} Adapted SQL
    */
   static adaptSql(sql) {
     if (!sql || typeof sql !== 'string') return sql;
-    // Replace $1, $2, etc. with ?
-    return sql.replace(/\$\d+/g, '?');
+    return adaptParameterizedSql(sql, [], 'hana').sql;
   }
 
   async connect() {
@@ -153,10 +154,10 @@ export class HanaAdapter extends DatabaseAdapter {
       throw new Error('HanaAdapter connection is not available.');
     }
 
-    const adaptedSql = HanaAdapter.adaptSql(text);
+    const { sql: adaptedSql, params: expandedParams } = adaptParameterizedSql(text, params, 'hana');
 
     return new Promise((resolve, reject) => {
-      this.client.exec(adaptedSql, params, (err, rows) => {
+      this.client.exec(adaptedSql, expandedParams, (err, rows) => {
         if (err) return reject(err);
         resolve({
           rows: Array.isArray(rows) ? rows : (rows ? [rows] : []),

@@ -1,11 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { TopNavigation } from './TopNavigation';
 import { Sidebar } from './Sidebar';
+import { systemHealthService } from '../../services/systemHealthService';
+import { SystemConnectionState } from '../../services/contracts/types';
 
 export const AppShell: React.FC = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [systemConnectionState, setSystemConnectionState] = useState<SystemConnectionState>('DEMO_MODE');
+
+  useEffect(() => {
+    let active = true;
+    systemHealthService
+      .getSystemHealth()
+      .then((health) => {
+        if (active && health?.connectionState) {
+          setSystemConnectionState(health.connectionState);
+        }
+      })
+      .catch(() => {
+        // Keep safe DEMO_MODE fallback if backend health probe is unreachable
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleToggleSidebar = () => {
     // If mobile width, toggle drawer; otherwise toggle collapsed
@@ -30,7 +50,7 @@ export const AppShell: React.FC = () => {
       <TopNavigation
         onToggleSidebar={handleToggleSidebar}
         isSidebarCollapsed={isSidebarCollapsed}
-        systemConnectionState="DEMO_MODE"
+        systemConnectionState={systemConnectionState}
       />
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>

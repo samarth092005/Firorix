@@ -35,7 +35,7 @@ export class GenerationHandoffStore {
     this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
 
     const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || process.env.FIORIX_PERSISTENCE || '').toLowerCase();
-    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres');
+    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (['postgres', 'hana'].includes(persistenceEnv));
     this.repository = options.repository || (this.useDatabase ? new GenerationHandoffRepository() : null);
 
     if (process.env.NODE_ENV === 'production' && !this.useDatabase && !options.allowVolatileStoreInProduction) {

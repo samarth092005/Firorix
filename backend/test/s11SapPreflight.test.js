@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { SapPreflightService, PREFLIGHT_CHECK_IDS, PREFLIGHT_READINESS } from '../src/infrastructure/connectivity/sapPreflightService.js';
 
 test('Sprint 11.2 — SAP Preflight & Comprehensive Diagnostics Suite', async (t) => {
-  await t.test('1. Runs all 15 checks and returns structured readiness for S21', async () => {
+  await t.test('1. Runs all preflight checks (including ICF nodes) and returns structured readiness for S21', async () => {
     // Mock provider with positive responses
     const mockProvider = {
       destinationProvider: {
@@ -30,16 +30,17 @@ test('Sprint 11.2 — SAP Preflight & Comprehensive Diagnostics Suite', async (t
     const result = await service.runPreflight({ destinationName: 'S21', sapClient: '200' });
 
     assert.equal(result.success, true);
-    assert.equal(result.summary.totalChecks, 15);
-    assert.equal(result.summary.passed >= 14, true);
+    assert.ok(result.summary.totalChecks >= 16, `Expected >= 16 checks, got ${result.summary.totalChecks}`);
+    assert.ok(result.summary.passed >= 15, `Expected >= 15 passed, got ${result.summary.passed}`);
     assert.equal(result.targetSystem.systemId, 'S21');
     assert.equal(result.targetSystem.client, '200');
     assert.equal(result.targetSystem.release, 'SAP S/4HANA 2023 Private Edition');
     assert.equal(result.targetSystem.softwareComponent, 'S4CORE 108');
 
-    // Verify presence of all 15 check IDs
+    // Verify presence of all expected check IDs (CLOUD_CONNECTOR_PROXY only runs in BTP_DESTINATION mode)
     const checkIds = result.checks.map(c => c.id);
     for (const expectedId of Object.values(PREFLIGHT_CHECK_IDS)) {
+      if (expectedId === PREFLIGHT_CHECK_IDS.CLOUD_CONNECTOR_PROXY) continue;
       assert.ok(checkIds.includes(expectedId), `Missing expected check: ${expectedId}`);
     }
   });

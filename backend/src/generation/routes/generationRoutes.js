@@ -26,47 +26,7 @@ import { defaultDeploymentOrchestrationService } from '../deployment/deploymentO
 import { defaultSapPreflightService } from '../../infrastructure/connectivity/sapPreflightService.js';
 import { defaultSapArtifactCompatibilityEngine } from '../validation/sapArtifactCompatibilityEngine.js';
 import { defaultSapPostDeploymentVerifier } from '../deployment/sapPostDeploymentVerifier.js';
-
-const MAX_BODY_SIZE = 100 * 1024; // 100KB limit
-
-function readJsonBody(req) {
-  return new Promise((resolve, reject) => {
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        const err = new Error('Payload exceeds maximum allowed size (100KB).');
-        err.code = 'PAYLOAD_TOO_LARGE';
-        reject(err);
-        return;
-      }
-      body += chunk;
-    });
-
-    req.on('end', () => {
-      if (isAborted) return;
-      if (!body || !body.trim()) {
-        resolve({});
-        return;
-      }
-      try {
-        resolve(JSON.parse(body));
-      } catch {
-        const err = new Error('Malformed JSON payload.');
-        err.code = 'BAD_REQUEST';
-        reject(err);
-      }
-    });
-
-    req.on('error', reject);
-  });
-}
+import { readJsonBody } from '../../api/index.js';
 
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -884,13 +844,16 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
     const subPath = prevContentMatch[2] || '/';
     let session = previewManager.sessionStore?.getSession?.(projectId);
 
-    // Auto-start preview session if not currently running (e.g. after container restart or direct URL navigation)
+    if (!currentUser || currentUser.isUnauthenticated) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'UNAUTHORIZED', error: 'Authentication required to access preview content.' }));
+      return true;
+    }
+
+    // Auto-start preview session if not currently running (e.g. after container restart)
     if (!session || session.status !== 'RUNNING') {
       try {
-        const previewUser = (currentUser && !currentUser.isUnauthenticated)
-          ? currentUser
-          : { role: 'ADMIN', id: 'SYSTEM', isAdmin: true, tenantId: process.env.FIORIFY_TENANT_ID || 'DEFAULT-TENANT-S21' };
-        await previewManager.startPreview(projectId, {}, previewUser);
+        await previewManager.startPreview(projectId, {}, currentUser);
         session = previewManager.sessionStore?.getSession?.(projectId);
       } catch (autoErr) {
         console.error('[Preview Proxy Auto-Start Error]', autoErr?.message || autoErr);

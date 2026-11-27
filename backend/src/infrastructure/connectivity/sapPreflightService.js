@@ -21,8 +21,26 @@
  * SECURITY DIRECTIVE: Strictly read-only (GET/HEAD only). Redacts all credentials and secrets.
  */
 
+import net from 'node:net';
 import { defaultSapConnectivityProvider, SapConnectivityProvider } from './sapConnectivityProvider.js';
 import { CONNECTIVITY_STATUSES } from './sapErrorTaxonomy.js';
+
+function probeTcpPort(host, port, timeoutMs = 500) {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host, port: Number(port) });
+    let settled = false;
+    const done = (reachable) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(reachable);
+    };
+    socket.setTimeout(timeoutMs);
+    socket.on('connect', () => done(true));
+    socket.on('timeout', () => done(false));
+    socket.on('error', () => done(false));
+  });
+}
 
 export const PREFLIGHT_CHECK_IDS = Object.freeze({
   BASE_URL: 'BASE_URL',
@@ -39,7 +57,9 @@ export const PREFLIGHT_CHECK_IDS = Object.freeze({
   AUTHORIZATION_DIAGNOSTICS: 'AUTHORIZATION_DIAGNOSTICS',
   REPOSITORY_INSPECTION: 'REPOSITORY_INSPECTION',
   PACKAGE_VISIBILITY: 'PACKAGE_VISIBILITY',
-  TRANSPORT_VISIBILITY: 'TRANSPORT_VISIBILITY'
+  TRANSPORT_VISIBILITY: 'TRANSPORT_VISIBILITY',
+  CLOUD_CONNECTOR_PROXY: 'CLOUD_CONNECTOR_PROXY',
+  ICF_NODES_ACCESSIBILITY: 'ICF_NODES_ACCESSIBILITY'
 });
 
 export const PREFLIGHT_READINESS = Object.freeze({
@@ -145,15 +165,51 @@ export class SapPreflightService {
         } else {
           rawDestination = destRes.rawDestination;
           targetBaseUrl = rawDestination.url;
+          const proxyType = rawDestination.proxyType || rawDestination.ProxyType || 'OnPremise';
+          const locationId = rawDestination.locationId || rawDestination.CloudConnectorLocationId || null;
           recordCheck(
             PREFLIGHT_CHECK_IDS.BASE_URL,
             'Base URL & Destination Resolution',
             'NETWORK',
             'PASSED',
-            { destinationName, url: targetBaseUrl.replace(/:[^:]*@/, ':***@'), provenance: destRes.provenance },
+            { destinationName, url: targetBaseUrl.replace(/:[^:]*@/, ':***@'), proxyType, locationId, provenance: destRes.provenance },
             null,
             Date.now() - t0
           );
+
+          // B14 & B19: Cloud Connector ProxyType, LocationId & Local Connectivity Proxy check
+          const localProxy = process.env.LOCAL_CONNECTIVITY_PROXY;
+          if (proxyType === 'OnPremise' && !process.env.VCAP_SERVICES && !process.env.SAP_URL_OVERRIDE && localProxy) {
+            let proxyReachable = false;
+            try {
+              const proxyUrl = new URL(localProxy);
+              proxyReachable = await probeTcpPort(proxyUrl.hostname, proxyUrl.port || 20003, 500);
+            } catch {}
+            recordCheck(
+              PREFLIGHT_CHECK_IDS.CLOUD_CONNECTOR_PROXY,
+              'Cloud Connector & Local Connectivity Proxy',
+              'NETWORK',
+              proxyReachable ? 'PASSED' : 'WARNING',
+              { proxyType, locationId, localConnectivityProxy: localProxy, tunnelReachable: proxyReachable },
+              proxyReachable ? null : `Local connectivity proxy (${localProxy}) is not listening. Open a CF SSH tunnel to Fiorify-connectivity or set SAP_URL_OVERRIDE for direct LAN access.`,
+              0
+            );
+          } else {
+            recordCheck(
+              PREFLIGHT_CHECK_IDS.CLOUD_CONNECTOR_PROXY,
+              'Cloud Connector Routing & ProxyType',
+              'NETWORK',
+              'PASSED',
+              {
+                proxyType,
+                locationId: locationId || '(default)',
+                connectivityBindingPresent: Boolean(process.env.VCAP_SERVICES),
+                directOverrideActive: Boolean(process.env.SAP_URL_OVERRIDE)
+              },
+              null,
+              0
+            );
+          }
         }
       } else {
         const parsed = new URL(targetBaseUrl);
@@ -539,6 +595,39 @@ export class SapPreflightService {
       },
       null,
       Date.now() - t14
+    );
+
+    // 16. ICF / SICF NODES ACCESSIBILITY (Read-Only HEAD/GET for FLP & WebGUI)
+    const t15 = Date.now();
+    const flpRes = await this.provider.executeQuery('/sap/bc/ui2/flp', {
+      ...options,
+      method: 'HEAD',
+      destinationName,
+      connectionMode,
+      baseUrl: targetBaseUrl
+    }).catch((e) => ({ success: false, status: 0, errorMessage: e.message }));
+    const webguiRes = await this.provider.executeQuery('/sap/bc/gui/sap/its/webgui', {
+      ...options,
+      method: 'HEAD',
+      destinationName,
+      connectionMode,
+      baseUrl: targetBaseUrl
+    }).catch((e) => ({ success: false, status: 0, errorMessage: e.message }));
+
+    const isNodeAvailable = (r) => Boolean(r && (r.success || [200, 302, 401, 403].includes(r.status)));
+    const flpAvailable = isNodeAvailable(flpRes);
+    const webguiAvailable = isNodeAvailable(webguiRes);
+    recordCheck(
+      PREFLIGHT_CHECK_IDS.ICF_NODES_ACCESSIBILITY,
+      'SAP Fiori Launchpad & WebGUI ICF Nodes (SICF)',
+      'NETWORK',
+      flpAvailable && webguiAvailable ? 'PASSED' : 'WARNING',
+      {
+        flpNode: { path: '/sap/bc/ui2/flp', active: flpAvailable, httpStatus: flpRes?.status || 0 },
+        webguiNode: { path: '/sap/bc/gui/sap/its/webgui', active: webguiAvailable, httpStatus: webguiRes?.status || 0 }
+      },
+      flpAvailable && webguiAvailable ? null : 'Verify /sap/bc/ui2/flp and /sap/bc/gui/sap/its/webgui are activated in transaction SICF.',
+      Date.now() - t15
     );
 
     // Calculate Overall Readiness

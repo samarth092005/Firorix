@@ -29,46 +29,13 @@ import {
   StudioInternalView
 } from '../types';
 import { defaultFrontendGenerationProjectService } from '../services/generationProjectService';
+import { CATEGORY_LABELS, PRIORITY_BADGES, STATUS_CONFIG } from './requirementConstants';
 
 interface RequirementsDesignerProps {
   project: GenerationProject;
   onProjectUpdated: (updatedProject: GenerationProject) => void;
   onNavigateView: (view: StudioInternalView) => void;
 }
-
-const CATEGORY_LABELS: Record<RequirementCategory, string> = {
-  BUSINESS: 'Business Requirement',
-  FUNCTIONAL: 'Functional Requirement',
-  TECHNICAL: 'Technical / Architecture',
-  NON_FUNCTIONAL: 'Non-Functional (Security/Perf)',
-  DATA_READ: 'Data Read / Query',
-  DATA_CREATE: 'Data Create / Insert',
-  DATA_UPDATE: 'Data Update / Change',
-  DATA_DELETE: 'Data Deletion',
-  BUSINESS_RULE: 'Business Rule',
-  VALIDATION: 'Field & Entity Validation',
-  DETERMINATION: 'Field Determination',
-  ACTION: 'Custom Business Action',
-  UI_INTERACTION: 'UI & Interaction',
-  AUTHORIZATION: 'Authorization & Security',
-  REPORTING: 'Reporting & Analytics',
-  INTEGRATION: 'Integration & API',
-  OTHER: 'General / Other'
-};
-
-const PRIORITY_BADGES: Record<RequirementPriority, { label: string; bg: string; text: string }> = {
-  MUST_HAVE: { label: 'Must Have', bg: '#fee2e2', text: '#991b1b' },
-  SHOULD_HAVE: { label: 'Should Have', bg: '#fef3c7', text: '#92400e' },
-  NICE_TO_HAVE: { label: 'Nice to Have', bg: '#f1f5f9', text: '#475569' }
-};
-
-const STATUS_CONFIG: Record<RequirementStatus, { label: string; bg: string; text: string; icon: any }> = {
-  CONFIRMED: { label: 'Confirmed', bg: '#ecfdf5', text: '#065f46', icon: CheckCircle2 },
-  DRAFT: { label: 'Pending Review', bg: '#f8fafc', text: '#475569', icon: Clock },
-  NEEDS_CLARIFICATION: { label: 'Needs Clarification', bg: '#fffbeb', text: '#b45309', icon: HelpCircle },
-  DEFERRED: { label: 'Deferred', bg: '#f1f5f9', text: '#64748b', icon: AlertCircle },
-  REJECTED: { label: 'Rejected', bg: '#fef2f2', text: '#991b1b', icon: XCircle }
-};
 
 export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   project,
@@ -250,7 +217,7 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   const handleExecuteAction = async () => {
     const { action, reqId, reason } = actionDialog;
     if ((action === 'DEFER' || action === 'REJECT') && !reason.trim()) {
-      alert('A documented reason is mandatory when deferring or rejecting requirements.');
+      setError('A documented reason is mandatory when deferring or rejecting requirements.');
       return;
     }
 
@@ -324,79 +291,107 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
-      {/* Top Lifecycle Gate Banner */}
+      {/* Compact Studio Gate Toolbar */}
       <div
         style={{
-          padding: '16px 20px',
-          background: summary?.allConfirmedOrResolved ? '#f0fdf4' : '#fffbeb',
-          border: `1px solid ${summary?.allConfirmedOrResolved ? '#bbf7d0' : '#fde68a'}`,
+          padding: '12px 18px',
+          background: '#FFFFFF',
+          border: '1px solid #E2E8F0',
           borderRadius: '8px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '12px'
+          gap: '12px',
+          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           {summary?.allConfirmedOrResolved ? (
-            <CheckCircle2 size={24} color="#16a34a" />
+            <CheckCircle2 size={18} color="#10B981" />
           ) : (
-            <Clock size={24} color="#d97706" />
+            <Clock size={18} color="#D97706" />
           )}
           <div>
-            <div style={{ fontWeight: 600, color: '#1e293b' }}>
+            <div style={{ fontWeight: 700, fontSize: '14px', color: '#0F172A' }}>
               {summary?.allConfirmedOrResolved
-                ? 'Requirements Gate Confirmed — Ready for Data Model'
-                : 'Requirements Review In Progress'}
+                ? 'Requirements Confirmed — Ready for Data Model'
+                : `${summary?.pendingCount || 0} Requirement(s) Pending Review`}
             </div>
-            <div style={{ fontSize: '12px', color: '#64748b' }}>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>
               {summary?.allConfirmedOrResolved
-                ? 'All mandatory requirements have been confirmed or deferred with documented rationale. You can now design the CDS data model.'
-                : `${summary?.pendingCount || 0} requirement(s) pending review. Confirm or defer each requirement to satisfy the governance gate.`}
+                ? 'All requirements are confirmed or deferred. Proceed to design the CDS entities.'
+                : 'Review and confirm each requirement below, or bulk-confirm drafts to continue.'}
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button
             type="button"
-            onClick={() => onNavigateView('data-model')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              background: summary?.allConfirmedOrResolved ? '#16a34a' : '#0284c7',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-            title="Proceed to CDS Data Model Designer"
-          >
-            Open Data Model Designer <ArrowRight size={16} />
-          </button>
-
-          <button
             onClick={handleImportAssessment}
             disabled={isLoading}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '8px 14px',
-              background: '#fff',
-              border: '1px solid #cbd5e1',
+              padding: '7px 12px',
+              background: '#F8FAFC',
+              border: '1px solid #CBD5E1',
               borderRadius: '6px',
               color: '#334155',
-              fontSize: '13px',
-              fontWeight: 500,
+              fontSize: '12.5px',
+              fontWeight: 600,
               cursor: 'pointer'
             }}
           >
-            <DownloadCloud size={15} /> Import Discovery Gaps
+            <DownloadCloud size={14} /> Import Gaps
+          </button>
+
+          {requirements.some((r) => r.status === 'DRAFT') ? (
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={handleConfirmAllRequirements}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 14px',
+                background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)',
+                border: 'none',
+                borderRadius: '6px',
+                color: '#FFFFFF',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                cursor: isLoading ? 'wait' : 'pointer'
+              }}
+            >
+              <CheckCircle2 size={14} /> Confirm All ({requirements.filter((r) => r.status === 'DRAFT').length})
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => onNavigateView('data-model')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 14px',
+              background: summary?.allConfirmedOrResolved
+                ? 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)'
+                : '#0F172A',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '12.5px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+            title="Proceed to CDS Data Model Designer"
+          >
+            Next: CDS Data Model <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -464,28 +459,6 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
                 Requirements ({filteredRequirements.length})
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {requirements.some((r) => r.status !== 'CONFIRMED') && (
-                  <button
-                    onClick={handleConfirmAllRequirements}
-                    disabled={isLoading}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '4px 10px',
-                      background: '#10b981',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                    title="Confirm all unconfirmed requirements for code generation"
-                  >
-                    <CheckCircle2 size={13} /> Confirm All ({requirements.filter((r) => r.status !== 'CONFIRMED').length})
-                  </button>
-                )}
                 <button
                   onClick={handleAddNewRequirement}
                   style={{

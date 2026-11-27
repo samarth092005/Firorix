@@ -18,28 +18,38 @@ function shouldLog(level) {
   return targetPriority <= currentPriority;
 }
 
+const SENSITIVE_KEY_PATTERN = /(password|secret|token|authorization|clientsecret|client_secret|apikey|api_key|credential)/i;
+
+function scrubSecrets(value, depth = 0) {
+  if (depth > 5 || value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+  if (value instanceof Error) {
+    return { message: value.message, code: value.code, stack: value.stack };
+  }
+  if (Array.isArray(value)) return value.map((item) => scrubSecrets(item, depth + 1));
+  const out = {};
+  for (const [k, v] of Object.entries(value)) {
+    out[k] = SENSITIVE_KEY_PATTERN.test(k) ? '[REDACTED]' : scrubSecrets(v, depth + 1);
+  }
+  return out;
+}
+
 function formatLog(level, message, meta = {}) {
   const isProd = process.env.NODE_ENV === 'production';
   const timestamp = new Date().toISOString();
+  const safeMeta = scrubSecrets(meta);
 
   if (isProd) {
     const logObj = {
       timestamp,
       level: level.toUpperCase(),
       message,
-      ...meta
+      ...safeMeta
     };
-    if (meta.error && meta.error instanceof Error) {
-      logObj.error = {
-        message: meta.error.message,
-        stack: meta.error.stack,
-        code: meta.error.code
-      };
-    }
     return JSON.stringify(logObj);
   }
 
-  const metaStr = Object.keys(meta).length > 0 ? ` ${JSON.stringify(meta)}` : '';
+  const metaStr = Object.keys(safeMeta || {}).length > 0 ? ` ${JSON.stringify(safeMeta)}` : '';
   return `[${timestamp}] [${level.toUpperCase()}] ${message}${metaStr}`;
 }
 

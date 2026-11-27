@@ -11,7 +11,7 @@
  *  7. Administrative system diagnostics API endpoint
  */
 
-import { describe, it } from 'node:test';
+import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { BtpDestinationProvider, SapConnectivityProvider } from '../src/infrastructure/connectivity/sapConnectivityProvider.js';
 import { SapHttpClient } from '../src/infrastructure/connectivity/sapHttpClient.js';
@@ -25,6 +25,19 @@ import {
 import { BtpDestinationAdapter } from '../src/adapters/btpDestinationAdapter.js';
 
 describe('Fiorify S3 SAP Connectivity — S/4HANA 2023 / S21 Integration', () => {
+  const originalAllowedHosts = process.env.ALLOWED_SAP_HOSTS;
+
+  before(() => {
+    delete process.env.ALLOWED_SAP_HOSTS;
+  });
+
+  after(() => {
+    if (originalAllowedHosts !== undefined) {
+      process.env.ALLOWED_SAP_HOSTS = originalAllowedHosts;
+    } else {
+      delete process.env.ALLOWED_SAP_HOSTS;
+    }
+  });
 
   // 1. Read-Only Boundary Enforcement
   it('1. Rejects write operations (POST, PUT, DELETE, PATCH) with WRITE_OPERATION_BLOCKED error', async () => {

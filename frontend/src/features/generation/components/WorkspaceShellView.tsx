@@ -145,7 +145,7 @@ const VIEW_METADATA: Record<Exclude<StudioInternalView, 'projects'>, ViewMetadat
     purpose: 'View backend health, persistence storage statistics, local mock server status, and connected SAP system configuration.',
     prerequisites: ['Admin or SAP Consultant role'],
     emptyStateTitle: 'Toolchain Configuration Operational',
-    emptyStateDescription: 'Current execution environment: Windows, Node.js 20 Native HTTP Server, Port 4004.'
+    emptyStateDescription: 'Inspect live backend health, database migrations, and SAP landscape connectivity.'
   }
 };
 

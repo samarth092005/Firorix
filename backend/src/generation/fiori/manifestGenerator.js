@@ -6,14 +6,15 @@
  */
 
 import { createFioriArtifact, FIORI_ARTIFACT_TYPES, TARGET_UI5_VERSION_S4HANA2023 } from './fioriArtifactContract.js';
+import { formatCdsViewName } from '../abap/cdsViewEntityGenerator.js';
 
 export function generateFioriManifest(project, architecture, uiConfig = {}) {
   const rootEntity = project.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
   if (!rootEntity) return null;
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-  const appId = uiConfig.appId || `com.Fiorify.custom.${prefix}`;
-  const serviceName = `ZUI_${prefix.toUpperCase()}`;
+  const appId = uiConfig.appId || `com.fiorify.custom.${prefix}`;
+  const serviceName = formatCdsViewName('ZUI_', (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '')).toUpperCase();
   const mainServiceUri = `/sap/opu/odata4/sap/${serviceName.toLowerCase()}/srvd/sap/${serviceName.toLowerCase()}/0001/`;
 
   const childEntities = (project.dataModelSpec?.entities || []).filter((e) => e.entityId !== rootEntity.entityId);
@@ -51,7 +52,24 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
       sourceTemplate: {
         id: 'Fiorify.fe.lrop.v4',
         version: '1.0.0'
+      },
+      crossNavigation: {
+        inbounds: {
+          [`${prefix}-manage`]: {
+            semanticObject: uiConfig.semanticObject || rootEntity.name,
+            action: uiConfig.semanticAction || 'manage',
+            title: '{{appTitle}}',
+            signature: {
+              parameters: {},
+              additionalParameters: 'allowed'
+            }
+          }
+        }
       }
+    },
+    'sap.cloud': {
+      public: true,
+      service: `fiorify.${prefix}`
     },
     'sap.ui': {
       technology: 'UI5',
@@ -114,7 +132,12 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
             pattern: `${rootEntity.name}({${rootEntity.name}Key}):?query:`,
             name: `${rootEntity.name}ObjectPage`,
             target: `${rootEntity.name}ObjectPage`
-          }
+          },
+          ...childEntities.map((c) => ({
+            pattern: `${rootEntity.name}({${rootEntity.name}Key})/_${c.name}({${c.name}Key}):?query:`,
+            name: `${c.name}ObjectPage`,
+            target: `${c.name}ObjectPage`
+          }))
         ],
         targets: {
           [`${rootEntity.name}ListReport`]: {
@@ -154,7 +177,23 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
                 )
               }
             }
-          }
+          },
+          ...Object.fromEntries(
+            childEntities.map((c) => [
+              `${c.name}ObjectPage`,
+              {
+                type: 'Component',
+                id: `${c.name}ObjectPage`,
+                name: 'sap.fe.templates.ObjectPage',
+                options: {
+                  settings: {
+                    entitySet: c.name,
+                    editableHeaderContent: false
+                  }
+                }
+              }
+            ])
+          )
         }
       }
     }

@@ -363,7 +363,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
             a.filePath.endsWith('.asbdef')
         );
 
-        const finalList = abapList.length > 0 ? abapList : (serverArtifacts.length > 0 ? serverArtifacts : getFallbackAbapArtifacts(project));
+        const finalList = abapList.length > 0 ? abapList : serverArtifacts;
         if (isMounted) {
           setArtifacts(finalList);
           if (!selectedArtifactId && finalList.length > 0) {
@@ -372,11 +372,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
         }
       } catch (err) {
         if (isMounted) {
-          const fallback = getFallbackAbapArtifacts(project);
-          setArtifacts(fallback);
-          if (!selectedArtifactId && fallback.length > 0) {
-            setSelectedArtifactId(fallback[0].artifactId);
-          }
+          setArtifacts([]);
         }
       } finally {
         if (isMounted) setLoadingArtifacts(false);
@@ -912,7 +908,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                 </span>
               </div>
               <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
-                Target System: <strong>S21 (Client 200)</strong> • Package: <strong>Z_{prefix.toUpperCase()}</strong> • Generated {artifacts.length} active ABAP Cloud source objects.
+                Target System: <strong>{project?.sourceSystemId || 'S21'} (Client {project?.sourceClient || '200'})</strong> • Package: <strong>{prefix.toUpperCase().startsWith('Z') ? prefix.toUpperCase() : `Z_${prefix.toUpperCase()}`}</strong> • Generated {artifacts.length} active ABAP Cloud source objects.
               </p>
             </div>
 
@@ -964,6 +960,30 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.4px', padding: '4px 8px' }}>
                 Generated ABAP / RAP Objects ({artifacts.length})
               </div>
+
+              {!loadingArtifacts && artifacts.length === 0 && (
+                <div style={{ padding: '16px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', fontSize: '12px', color: '#92400E', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <span>No ABAP artifacts have been generated for this project yet.</span>
+                  {onNavigateView && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigateView('abap-generator')}
+                      style={{
+                        padding: '7px 12px',
+                        backgroundColor: '#0066FF',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Generate ABAP Artifacts &rarr;
+                    </button>
+                  )}
+                </div>
+              )}
 
               {artifacts.map((art) => {
                 const isSelected = art.artifactId === selectedArtifact?.artifactId;
@@ -1043,7 +1063,9 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                     whiteSpace: 'pre-wrap'
                   }}
                 >
-                  {selectedArtifact?.content || '// Loading ABAP Artifact content...'}
+                  {loadingArtifacts
+                    ? '// Loading ABAP Artifact content...'
+                    : selectedArtifact?.content || '// No ABAP artifacts generated yet. Click "Generate ABAP Artifacts" to synthesize RAP & CDS source objects.'}
                 </pre>
               </div>
             </div>
@@ -1068,7 +1090,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                 {odataEndpoint}
               </div>
               <div style={{ marginTop: '8px', fontSize: '11px', color: '#64748B' }}>
-                Binding Type: <strong>OData V4 - UI</strong> • Target: <strong>S21-200</strong>
+                Binding Type: <strong>OData V4 - UI</strong> • Target: <strong>{project?.sourceSystemId || 'S21'}-{project?.sourceClient || '200'}</strong>
               </div>
             </div>
 
@@ -1095,12 +1117,12 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                 <span>Transport Request (CTS)</span>
               </div>
               <div style={{ fontSize: '12px', color: '#334155', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <div>Workbench TR: <strong>S21K900001</strong> (ABAP + BSP)</div>
-                <div>Customizing TR: <strong>S21K900002</strong> (FLP Catalog)</div>
-                <div>Transportability: <strong>100% Automated</strong></div>
+                <div>Workbench TR: <strong>Assigned in Eclipse ADT / CTS</strong> (ABAP + BSP)</div>
+                <div>Customizing TR: <strong>Assigned in FLP / SPRO</strong> (FLP Catalog)</div>
+                <div>Governance: <strong>Zero Direct SAP Writes</strong></div>
               </div>
               <div style={{ marginTop: '8px', fontSize: '11px', color: '#64748B' }}>
-                Direct migration to QAS / PRD via STMS
+                Migrate to QAS / PRD via STMS after developer import
               </div>
             </div>
           </div>

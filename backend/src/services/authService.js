@@ -484,10 +484,9 @@ export class AuthService {
 
     const verification = await verifyPassword(password, user.passwordHash);
 
-    // Allow environment-configured developer passwords strictly outside production, or in staging demo evaluation
+    // Allow environment-configured developer passwords strictly outside production
     const isProduction = process.env.NODE_ENV === 'production';
-    const allowDemo = process.env.FIORIFY_ALLOW_DEMO_AUTH === 'true' || process.env.FIORIFY_STAGING_AUTH_OPT_IN === 'true';
-    const isDevPass = (!isProduction || allowDemo) && (
+    const isDevPass = !isProduction && (
       password === 'demo-session-2026' ||
       ((password === (process.env.FIORIFY_DEV_ADMIN_PASSWORD || 'fiorify-dev-admin-fixture') || password === 'admin-dev-password') && user.role === USER_ROLES.ADMIN) ||
       (password === (process.env.FIORIFY_DEV_CONSULTANT_PASSWORD || 'fiorify-dev-consultant-fixture') && user.role === USER_ROLES.SAP_CONSULTANT) ||
@@ -751,7 +750,7 @@ export class AuthService {
   }
 
   /**
-   * Check if token is in revocation list
+   * Check if token is in revocation list (synchronous L1 check)
    */
   isRevoked(token) {
     if (!token) return false;
@@ -759,6 +758,19 @@ export class AuthService {
     if (this.revokedTokens.has(cleanToken)) return true;
     if (this.revocationStore && typeof this.revocationStore.isRevokedSync === 'function') {
       return this.revocationStore.isRevokedSync(cleanToken);
+    }
+    return false;
+  }
+
+  /**
+   * Check if token is in revocation list (durable async DB + L1 check)
+   */
+  async isRevokedAsync(token) {
+    if (!token) return false;
+    if (this.isRevoked(token)) return true;
+    const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
+    if (this.revocationStore && typeof this.revocationStore.isRevoked === 'function') {
+      return await this.revocationStore.isRevoked(cleanToken);
     }
     return false;
   }

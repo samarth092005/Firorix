@@ -12,7 +12,7 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
   if (!rootEntity) return [];
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-  const appId = uiConfig.appId || `com.Fiorify.custom.${prefix}`;
+  const appId = uiConfig.appId || `com.fiorify.custom.${prefix}`;
   const appTitle = uiConfig.pageTitle || project.projectName || `${rootEntity.businessName || rootEntity.name} Application`;
   const artifacts = [];
 
@@ -133,16 +133,17 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
 
   // 4. package.json
   const packageJson = {
-    name: `Fiorify-${prefix}-ui`,
+    name: `fiorify-${prefix}-ui`,
     version: '1.0.0',
     description: project.description || `SAP Fiori Elements Application for ${project.projectName}`,
     scripts: {
-      start: 'ui5 serve --port 8080 --open index.html',
+      start: 'ui5 serve --port 8080 --open test/flpSandbox.html',
       build: 'ui5 build --clean-dest'
     },
     dependencies: {},
     devDependencies: {
-      '@ui5/cli': '^3.0.0'
+      '@ui5/cli': '^3.0.0',
+      '@sap/ux-ui5-tooling': '^1.15.0'
     },
     ui5: {
       dependencies: ['@sap/ux-ui5-tooling']
@@ -159,10 +160,10 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
     sourceEntityIds: [rootEntity.entityId]
   }));
 
-  // 5. ui5.yaml
+  // 5. ui5.yaml (with fiori-tools-proxy for SAP S/4HANA OData backend)
   const ui5Yaml = `specVersion: "3.0"
 metadata:
-  name: Fiorify-${prefix}-ui
+  name: fiorify-${prefix}-ui
 type: application
 framework:
   name: SAPUI5
@@ -173,7 +174,15 @@ framework:
     - name: sap.fe.templates
     - name: themelib_sap_horizon
 server:
-  customMiddleware: []
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: false
+        backend:
+          - path: /sap
+            url: http://localhost:8000
+            destination: ${project.targetDestination || 'S21_FIORI'}
 `;
 
   artifacts.push(createFioriArtifact({
@@ -183,6 +192,66 @@ server:
     filePath: 'ui5.yaml',
     content: ui5Yaml,
     language: 'YAML',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
+  // 5b. xs-app.json (BTP Managed AppRouter / HTML5 App Repository)
+  const xsAppJson = {
+    welcomeFile: '/index.html',
+    authenticationMethod: 'route',
+    routes: [
+      {
+        source: '^/sap/(.*)$',
+        target: '/sap/$1',
+        destination: project.targetDestination || 'S21_FIORI',
+        authenticationType: 'xsuaa',
+        csrfProtection: true
+      },
+      {
+        source: '^/(.*)$',
+        target: '$1',
+        service: 'html5-apps-repo-rt',
+        authenticationType: 'xsuaa'
+      }
+    ]
+  };
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'xs-app.json',
+    filePath: 'xs-app.json',
+    content: JSON.stringify(xsAppJson, null, 2),
+    language: 'JSON',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
+  // 5c. webapp/test/flpSandbox.html (Local Fiori Launchpad Sandbox)
+  const flpSandboxHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${appTitle} — FLP Sandbox</title>
+  <script id="sap-ui-bootstrap"
+    src="https://ui5.sap.com/${TARGET_UI5_VERSION_S4HANA2023}/resources/sap-ui-core.js"
+    data-sap-ui-theme="sap_horizon"
+    data-sap-ui-resourceroots='{ "${appId}": "../" }'
+    data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
+    data-sap-ui-compatVersion="edge"
+    data-sap-ui-async="true">
+  </script>
+</head>
+<body class="sapUiBody">
+  <div data-sap-ui-component data-name="${appId}" data-id="flpComponent" data-settings='{"id":"${appId}"}'></div>
+</body>
+</html>
+`;
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'flpSandbox.html',
+    filePath: 'webapp/test/flpSandbox.html',
+    content: flpSandboxHtml,
+    language: 'HTML',
     sourceEntityIds: [rootEntity.entityId]
   }));
 

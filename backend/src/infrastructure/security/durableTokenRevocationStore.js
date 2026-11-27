@@ -20,7 +20,7 @@ export class DurableTokenRevocationStore extends TokenRevocationStore {
     this.memoryStore = options.memoryStore || new MemoryTokenRevocationStore(options);
     this.useDatabase = options.useDatabase !== undefined
       ? options.useDatabase
-      : Boolean(process.env.FIORIFY_PERSISTENCE === 'postgres' || process.env.NODE_ENV === 'production');
+      : Boolean(['postgres', 'hana'].includes((process.env.FIORIFY_PERSISTENCE || '').toLowerCase()) || process.env.NODE_ENV === 'production');
     this.defaultTtlSeconds = options.defaultTtlSeconds || 24 * 3600;
   }
 

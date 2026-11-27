@@ -6,6 +6,8 @@
  */
 
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { resolveRepositoryPool } from '../adapters/sqlDialectHelper.js';
 
 export class DeploymentRepository {
   constructor(pool = DatabasePool) {
@@ -16,13 +18,14 @@ export class DeploymentRepository {
   }
 
   async _getClient() {
-    if (!this.pool) return null;
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    if (!activePool) return null;
     try {
-      if (typeof this.pool.getClient === 'function') {
-        return await this.pool.getClient();
+      if (typeof activePool.getClient === 'function') {
+        return await activePool.getClient();
       }
-      if (typeof this.pool.connect === 'function') {
-        return await this.pool.connect();
+      if (typeof activePool.connect === 'function') {
+        return await activePool.connect();
       }
     } catch {
       return null;
@@ -32,7 +35,15 @@ export class DeploymentRepository {
 
   async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
     const client = await this._getClient();
-    if (!client) return null;
+    if (!client) {
+      if (process.env.NODE_ENV === 'production') {
+        const err = new Error('Database persistence unavailable for deployment operation.');
+        err.code = 'DATABASE_UNAVAILABLE';
+        err.statusCode = 503;
+        throw err;
+      }
+      return null;
+    }
     await client.query('BEGIN;');
     await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
     return client;

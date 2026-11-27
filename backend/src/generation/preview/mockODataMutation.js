@@ -128,3 +128,43 @@ export function executeDelete(entity, keyVal, syntheticStore, architecture) {
     status: 204
   };
 }
+
+/**
+ * Handles RAP Draft lifecycle actions (Edit, Activate, Discard) in Mock OData V4.
+ */
+export function executeDraftAction(entity, keyVal, actionName, syntheticStore, architecture) {
+  if (architecture?.selectedProfile === RAP_PROFILES.READ_ONLY_QUERY) {
+    const err = new Error('Draft actions are not permitted for READ_ONLY_QUERY profile.');
+    err.code = 'PROFILE_READ_ONLY';
+    err.statusCode = 405;
+    throw err;
+  }
+
+  const fields = entity.fields || [];
+  const keyField = fields.find((f) => f.isKey) || fields[0];
+  const records = syntheticStore[entity.name] || [];
+  const index = records.findIndex((r) => String(r[keyField.name]) === String(keyVal));
+
+  if (index === -1) {
+    const err = new Error(`Entity "${entity.name}" with key "${keyVal}" not found.`);
+    err.code = 'NOT_FOUND';
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const existing = records[index];
+  const normalized = String(actionName || '').toLowerCase();
+  const isActiveEntity = normalized === 'activate' || normalized === 'discard';
+  const updated = {
+    ...existing,
+    IsActiveEntity: isActiveEntity,
+    HasDraftEntity: normalized === 'edit',
+    LastChangedBy: 'MOCK_ADMIN',
+    LastChangedAt: new Date().toISOString()
+  };
+
+  records[index] = updated;
+  syntheticStore[entity.name] = records;
+
+  return { status: 200, record: updated };
+}

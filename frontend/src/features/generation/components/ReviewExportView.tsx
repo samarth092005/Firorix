@@ -269,10 +269,65 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
             <strong>SHA-256 Archive Digest:</strong> {exportResult.zipSha256}
           </div>
           <div style={{ fontSize: '11px', color: '#166534' }}>
-            ✓ Contains <code>/abap/</code>, <code>/fiori/</code>, <code>/docs/</code>, and <code>Fiorify-export-manifest.json</code>. Strictly zero credentials or connection tokens.
+            ✓ Contains <code>/abap/</code>, <code>/fiori/</code>, <code>/docs/</code>, <code>.abapgit.xml</code>, and <code>Fiorify-export-manifest.json</code>. Strictly zero credentials or connection tokens.
           </div>
         </div>
       )}
+
+      {/* Package File Tree Preview */}
+      {(() => {
+        const rawReg = project.artifactRegistry?.artifacts;
+        const artList: any[] = rawReg ? (Array.isArray(rawReg) ? rawReg : Object.values(rawReg)) : [];
+        if (artList.length === 0) return null;
+        return (
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
+                <Package size={16} color="#0066FF" />
+                <span>ZIP Package Contents Preview ({artList.length + 5} files)</span>
+              </div>
+              <span style={{ fontSize: '11px', color: '#64748B' }}>abapGit + Eclipse ADT Ready</span>
+            </div>
+            <div
+              style={{
+                maxHeight: '160px',
+                overflowY: 'auto',
+                backgroundColor: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                borderRadius: '6px',
+                padding: '10px 14px',
+                fontFamily: 'var(--font-mono, monospace)',
+                fontSize: '11.5px',
+                color: '#334155',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+                gap: '4px 16px'
+              }}
+            >
+              {artList.map((a: any, idx: number) => (
+                <div key={a.artifactId || idx} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  • {a.filePath || a.objectName || a.name}
+                </div>
+              ))}
+              <div>• .abapgit.xml</div>
+              <div>• docs/TRACEABILITY.md</div>
+              <div>• docs/ARCHITECTURE.md</div>
+              <div>• docs/ECLIPSE_ADT_HANDOVER_SOP.md</div>
+              <div>• Fiorify-export-manifest.json</div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Validation Gates Summary */}
       <div

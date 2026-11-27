@@ -46,6 +46,84 @@ export class DialectMigrationRunner {
     return crypto.createHash('sha256').update(content.trim()).digest('hex');
   }
 
+  /**
+   * Splits a multi-statement SQL script into individual statements for drivers
+   * (such as @sap/hana-client) that execute one SQL statement per call.
+   * Respects single-quoted string literals and `--` / `/* * /` comments.
+   */
+  static splitSqlStatements(sql) {
+    if (!sql || typeof sql !== 'string') return [];
+    const statements = [];
+    let current = '';
+    let inSingleQuote = false;
+    let inLineComment = false;
+    let inBlockComment = false;
+
+    for (let i = 0; i < sql.length; i++) {
+      const ch = sql[i];
+      const next = sql[i + 1];
+
+      if (inLineComment) {
+        if (ch === '\n') inLineComment = false;
+        continue;
+      }
+      if (inBlockComment) {
+        if (ch === '*' && next === '/') {
+          inBlockComment = false;
+          i++;
+        }
+        continue;
+      }
+      if (!inSingleQuote && ch === '-' && next === '-') {
+        inLineComment = true;
+        i++;
+        continue;
+      }
+      if (!inSingleQuote && ch === '/' && next === '*') {
+        inBlockComment = true;
+        i++;
+        continue;
+      }
+      if (ch === "'") {
+        current += ch;
+        if (inSingleQuote && next === "'") {
+          current += next;
+          i++;
+        } else {
+          inSingleQuote = !inSingleQuote;
+        }
+        continue;
+      }
+      if (!inSingleQuote && ch === ';') {
+        const trimmed = current.trim();
+        if (trimmed) statements.push(trimmed);
+        current = '';
+        continue;
+      }
+      current += ch;
+    }
+
+    const trailing = current.trim();
+    if (trailing) statements.push(trailing);
+    return statements;
+  }
+
+  async _executeMigrationSql(client, sqlContent, { isUp = true } = {}) {
+    if (this.dialect !== 'hana') {
+      await client.query(sqlContent);
+      return;
+    }
+
+    const statements = DialectMigrationRunner.splitSqlStatements(sqlContent);
+    for (const stmt of statements) {
+      if (isUp && /^\s*CREATE\s+TABLE\s+(?:"?schema_migrations"?)\b/i.test(stmt)) {
+        // ensureMigrationsTable() already created schema_migrations prior to running 001_initial_schema.sql
+        continue;
+      }
+      await client.query(stmt);
+    }
+  }
+
   async ensureMigrationsTable(client) {
     if (this.dialect === 'hana') {
       const checkSql = `
@@ -178,7 +256,7 @@ export class DialectMigrationRunner {
 
         try {
           // Execute migration DDL
-          await client.query(migration.content);
+          await this._executeMigrationSql(client, migration.content, { isUp: true });
 
           const durationMs = Date.now() - startTime;
           const insertSql = this.dialect === 'hana'
@@ -277,7 +355,7 @@ export class DialectMigrationRunner {
         }
 
         try {
-          await client.query(migration.downContent);
+          await this._executeMigrationSql(client, migration.downContent, { isUp: false });
           const deleteSql = this.dialect === 'hana'
             ? 'DELETE FROM schema_migrations WHERE version = ?'
             : 'DELETE FROM schema_migrations WHERE version = $1;';

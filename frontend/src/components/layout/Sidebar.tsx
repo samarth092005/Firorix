@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import './Sidebar.css';
 
 export interface SidebarProps {
   isCollapsed: boolean;
@@ -62,43 +63,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Mobile Backdrop */}
       {isMobileOpen && (
         <div
+          className="fiori-sidebar-backdrop"
           onClick={onCloseMobile}
-          style={{
-            position: 'fixed',
-            top: '48px',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.3)',
-            zIndex: 90
-          }}
         />
       )}
 
       <aside
         className={`fiori-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}
-        style={{
-          width: isCollapsed ? '60px' : '230px',
-          backgroundColor: '#FFFFFF',
-          borderRight: '1px solid var(--fiori-border, #E2E8F0)',
-          height: 'calc(100vh - 48px)',
-          position: 'sticky',
-          top: '48px',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          transition: 'width 0.18s cubic-bezier(0.4, 0, 0.2, 1)',
-          zIndex: 95,
-          flexShrink: 0
-        }}
         aria-label="Application navigation"
       >
-        {/* Navigation List */}
-        <div style={{ padding: '14px 10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+        <div className="fiori-sidebar-nav-wrap">
+          <nav className="fiori-sidebar-nav">
             {FIORIFY_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -114,68 +91,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   to={item.to}
                   onClick={() => onCloseMobile && onCloseMobile()}
                   title={isCollapsed ? item.label : undefined}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: isCollapsed ? '0' : '10px',
-                    justifyContent: isCollapsed ? 'center' : 'flex-start',
-                    padding: isCollapsed ? '9px 0' : '8px 12px',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    fontSize: '13px',
-                    fontWeight: isActive ? 600 : 500,
-                    color: isActive
-                      ? 'var(--fiori-primary, #0066FF)'
-                      : 'var(--fiori-text-secondary, #475569)',
-                    backgroundColor: isActive
-                      ? 'var(--fiori-primary-light, #EFF6FF)'
-                      : 'transparent',
-                    transition: 'all 0.15s ease',
-                    position: 'relative'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = '#F8FAFC';
-                      e.currentTarget.style.color = '#0F172A';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = 'var(--fiori-text-secondary, #475569)';
-                    }
-                  }}
+                  className={`fiori-sidebar-link ${isActive ? 'active' : ''}`}
                 >
-                  <Icon
-                    size={17}
-                    color={isActive ? 'var(--fiori-primary, #0066FF)' : '#64748B'}
-                    style={{ flexShrink: 0 }}
-                  />
+                  <Icon size={17} className="fiori-sidebar-icon" />
 
                   {!isCollapsed && (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, minWidth: 0 }}>
-                      <span
-                        style={{
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis'
-                        }}
-                      >
-                        {item.label}
-                      </span>
+                    <div className="fiori-sidebar-label-wrap">
+                      <span className="fiori-sidebar-label">{item.label}</span>
                       {item.badge && (
-                        <span
-                          style={{
-                            fontSize: '10px',
-                            fontWeight: 600,
-                            padding: '1px 6px',
-                            borderRadius: '10px',
-                            backgroundColor: isActive ? 'rgba(0, 102, 255, 0.12)' : '#F1F5F9',
-                            color: isActive ? 'var(--fiori-primary, #0066FF)' : '#64748B'
-                          }}
-                        >
-                          {item.badge}
-                        </span>
+                        <span className="fiori-sidebar-badge">{item.badge}</span>
                       )}
                     </div>
                   )}
@@ -185,41 +109,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </nav>
         </div>
 
-        {/* Sidebar Footer: Collapse Toggle */}
         {onToggleCollapse && (
-          <div
-            style={{
-              padding: '10px',
-              borderTop: '1px solid var(--fiori-border-light, #F1F5F9)'
-            }}
-          >
+          <div className="fiori-sidebar-footer">
             <button
               type="button"
               onClick={onToggleCollapse}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: isCollapsed ? 'center' : 'flex-start',
-                gap: '8px',
-                width: '100%',
-                padding: '8px 10px',
-                background: 'none',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                color: 'var(--fiori-text-muted, #94A3B8)',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#F8FAFC';
-                e.currentTarget.style.color = '#0F172A';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--fiori-text-muted, #94A3B8)';
-              }}
+              className="fiori-sidebar-collapse-btn"
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
+              {isCollapsed ? <ChevronRight size={16} /> : (
+                <>
+                  <ChevronLeft size={16} />
+                  <span>Collapse</span>
+                </>
+              )}
             </button>
           </div>
         )}

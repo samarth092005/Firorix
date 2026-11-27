@@ -32,6 +32,8 @@ export interface DiscoveryVerificationModalProps {
   targetRelease: string;
   onProceedToAssessment?: (targetTab?: string) => void;
   onResetSearch?: () => void;
+  onLogNotFound?: () => void;
+  isProceeding?: boolean;
 }
 
 export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProps> = ({
@@ -43,7 +45,9 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
   client,
   targetRelease,
   onProceedToAssessment,
-  onResetSearch
+  onResetSearch,
+  onLogNotFound,
+  isProceeding = false
 }) => {
   const navigate = useNavigate();
 
@@ -211,6 +215,25 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                 gap: '10px'
               }}
             >
+              {onLogNotFound && (
+                <button
+                  type="button"
+                  disabled={isProceeding}
+                  onClick={onLogNotFound}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    border: '1px solid #FECACA',
+                    backgroundColor: '#FEF2F2',
+                    color: '#991B1B',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: isProceeding ? 'wait' : 'pointer'
+                  }}
+                >
+                  {isProceeding ? 'Logging...' : 'Log Not-Found Audit'}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -619,7 +642,9 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                   /* Standard App Exists -> Proceed to Assessment (Adopt / Configure) */
                   <button
                     type="button"
+                    disabled={isProceeding}
                     onClick={() => {
+                      if (isProceeding) return;
                       onClose();
                       if (onProceedToAssessment) {
                         onProceedToAssessment('VERDICT');
@@ -634,22 +659,24 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                       padding: '8px 18px',
                       borderRadius: '6px',
                       border: 'none',
-                      backgroundColor: '#16A34A',
+                      backgroundColor: isProceeding ? '#86EFAC' : '#16A34A',
                       color: '#FFFFFF',
                       fontSize: '13px',
                       fontWeight: 700,
-                      cursor: 'pointer',
+                      cursor: isProceeding ? 'wait' : 'pointer',
                       boxShadow: '0 2px 4px rgba(22, 163, 74, 0.25)'
                     }}
                   >
-                    <span>Proceed to Assessment (Adopt / Configure)</span>
+                    <span>{isProceeding ? 'Opening Assessment...' : 'Proceed to Assessment (Adopt / Configure)'}</span>
                     <ArrowRight size={15} />
                   </button>
                 ) : (
                   /* No Standard App -> Proceed to Modernization & Custom Build */
                   <button
                     type="button"
+                    disabled={isProceeding}
                     onClick={() => {
+                      if (isProceeding) return;
                       onClose();
                       if (onProceedToAssessment) {
                         onProceedToAssessment('MODERNIZATION_DECISION');
@@ -664,15 +691,15 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                       padding: '8px 18px',
                       borderRadius: '6px',
                       border: 'none',
-                      backgroundColor: '#0066FF',
+                      backgroundColor: isProceeding ? '#93C5FD' : '#0066FF',
                       color: '#FFFFFF',
                       fontSize: '13px',
                       fontWeight: 700,
-                      cursor: 'pointer',
+                      cursor: isProceeding ? 'wait' : 'pointer',
                       boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
                     }}
                   >
-                    <span>Proceed to Modernization &amp; Build</span>
+                    <span>{isProceeding ? 'Opening Assessment...' : 'Proceed to Modernization & Build'}</span>
                     <ArrowRight size={15} />
                   </button>
                 )}

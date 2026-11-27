@@ -269,24 +269,24 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
             value={approvalComments}
             onChange={(e) => setApprovalComments(e.target.value)}
             rows={2}
-            style={{ width: '100%', padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '4px', marginBottom: '12px' }}
+            style={{ width: '100%', padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '6px', marginBottom: '12px', fontSize: '13px', boxSizing: 'border-box' }}
           />
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
             <button
               onClick={() => handleApproval('APPROVED')}
-              style={{ padding: '8px 16px', backgroundColor: '#10B981', color: '#FFFFFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
+              style={{ padding: '8px 16px', background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)', color: '#FFFFFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
             >
               Approve for Code Generation
             </button>
             <button
               onClick={() => handleApproval('CHANGES_REQUESTED')}
-              style={{ padding: '8px 16px', backgroundColor: '#F59E0B', color: '#FFFFFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
+              style={{ padding: '8px 14px', backgroundColor: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
             >
               Request Changes
             </button>
             <button
               onClick={handleSubmitReview}
-              style={{ padding: '8px 16px', backgroundColor: '#64748B', color: '#FFFFFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
+              style={{ padding: '8px 14px', backgroundColor: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
             >
               Submit for Review
             </button>
@@ -299,10 +299,10 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
                   alignItems: 'center',
                   gap: '6px',
                   padding: '8px 16px',
-                  backgroundColor: '#0066FF',
+                  backgroundColor: '#0F172A',
                   color: '#FFFFFF',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: '6px',
                   cursor: 'pointer',
                   fontWeight: 600
                 }}

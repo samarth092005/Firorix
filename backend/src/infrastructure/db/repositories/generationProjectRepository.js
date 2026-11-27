@@ -1,4 +1,6 @@
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { resolveRepositoryPool } from '../adapters/sqlDialectHelper.js';
 import crypto from 'node:crypto';
 
 export class GenerationProjectRepository {
@@ -7,10 +9,11 @@ export class GenerationProjectRepository {
   }
 
   async _getClient() {
-    if (typeof this.pool.getClient === 'function') {
-      return await this.pool.getClient();
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    if (typeof activePool.getClient === 'function') {
+      return await activePool.getClient();
     }
-    return await this.pool.connect();
+    return await activePool.connect();
   }
 
   async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
@@ -251,15 +254,19 @@ export class GenerationProjectRepository {
 
     for (const art of artifactsRes.rows) {
       const meta = typeof art.metadata === 'string' ? JSON.parse(art.metadata) : (art.metadata || {});
-      const artifactKey = art.artifact_name;
+      const artifactKey = meta.artifactId || art.artifact_name;
       artifactRegistry.artifacts[artifactKey] = {
         id: meta.id || `ART-${art.id}`,
+        artifactId: meta.artifactId || meta.id || art.artifact_name,
         artifactName: art.artifact_name,
+        objectName: meta.objectName || art.artifact_name,
         name: art.artifact_name,
         type: art.artifact_type,
         artifactType: art.artifact_type,
+        language: meta.language || (art.storage_path?.startsWith('webapp/') || art.artifact_type.startsWith('FIORI_') ? 'UI5' : 'ABAP'),
         category: meta.category || (art.artifact_type.includes('ABAP') ? 'BACKEND' : 'FRONTEND'),
         layer: meta.layer || (art.artifact_type.includes('ABAP') ? 'ABAP' : 'UI5'),
+        filePath: meta.filePath || art.storage_path,
         storagePath: art.storage_path,
         path: art.storage_path,
         content: meta.content || '',
@@ -307,6 +314,10 @@ export class GenerationProjectRepository {
       requirementsSpec: specsByType['REQUIREMENTS'] || null,
       dataModelSpec: specsByType['DATA_MODEL'] || null,
       architectureSpec: specsByType['ARCHITECTURE'] || null,
+      validationReport: specsByType['VALIDATION_REPORT'] || null,
+      fioriConfig: specsByType['FIORI_CONFIG'] || null,
+      reviewRecord: specsByType['REVIEW_RECORD'] || null,
+      exportHistory: Array.isArray(specsByType['EXPORT_HISTORY']) ? specsByType['EXPORT_HISTORY'] : [],
       artifactRegistry,
       activityHistory: eventsRes.rows.map(e => ({
         eventId: e.event_id,
@@ -440,6 +451,56 @@ export class GenerationProjectRepository {
             spec_content = EXCLUDED.spec_content,
             updated_at = CURRENT_TIMESTAMP;
         `, [projectId, archVer, JSON.stringify(updates.architectureSpec)]);
+      }
+
+      if (updates.artifactRegistry && updates.artifactRegistry.artifacts) {
+        await client.query('DELETE FROM generation_artifacts WHERE project_id = $1;', [projectId]);
+        const artsToSave = Array.isArray(updates.artifactRegistry.artifacts)
+          ? updates.artifactRegistry.artifacts
+          : Object.values(updates.artifactRegistry.artifacts);
+        for (const art of artsToSave) {
+          const artName = art.objectName || art.artifactName || art.name || art.artifactId || 'unnamed';
+          const artType = art.artifactType || art.type || 'ABAP_ARTIFACT';
+          const storagePath = art.filePath || art.storagePath || art.path || artName;
+          const contentStr = String(art.content || '');
+          const contentHash = art.checksum || art.contentHash || crypto.createHash('sha256').update(contentStr).digest('hex');
+          const sizeBytes = Buffer.byteLength(contentStr, 'utf-8');
+          const metaPayload = {
+            id: art.id || art.artifactId,
+            artifactId: art.artifactId || art.id || artName,
+            objectName: artName,
+            filePath: storagePath,
+            language: art.language,
+            category: art.category,
+            layer: art.layer,
+            manualEdit: Boolean(art.manualEdit),
+            version: art.version || 1,
+            content: contentStr
+          };
+          await client.query(`
+            INSERT INTO generation_artifacts (project_id, artifact_name, artifact_type, storage_driver, storage_path, content_hash, file_size_bytes, metadata)
+            VALUES ($1, $2, $3, 'POSTGRES_JSON', $4, $5, $6, $7);
+          `, [projectId, artName, artType, storagePath, contentHash, sizeBytes, JSON.stringify(metaPayload)]);
+        }
+      }
+
+      const extraSpecs = [
+        ['VALIDATION_REPORT', updates.validationReport],
+        ['FIORI_CONFIG', updates.fioriConfig],
+        ['REVIEW_RECORD', updates.reviewRecord],
+        ['EXPORT_HISTORY', updates.exportHistory]
+      ];
+      for (const [specType, specVal] of extraSpecs) {
+        if (specVal !== undefined) {
+          await client.query(`
+            INSERT INTO generation_specifications (project_id, spec_type, spec_version, spec_content)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (project_id, spec_type) DO UPDATE SET
+              spec_version = EXCLUDED.spec_version,
+              spec_content = EXCLUDED.spec_content,
+              updated_at = CURRENT_TIMESTAMP;
+          `, [projectId, specType, newSpecVer, JSON.stringify(specVal)]);
+        }
       }
 
       // Record activity event

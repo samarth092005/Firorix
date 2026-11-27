@@ -18,40 +18,14 @@
 
 import { officialFioriCatalogueAdapter } from '../adapters/officialFioriCatalogueAdapter.js';
 import { CONFIDENCE_LEVELS } from './technicalEvidenceEngine.js';
-import { STANDARD_TRANSACTION_CATALOG } from '../services/standardTransactionKnowledge.js';
+import { STANDARD_TRANSACTION_CATALOG, getSimplificationItem } from '../services/standardTransactionKnowledge.js';
+import {
+  MATCHING_WEIGHTS,
+  MATCH_CLASSIFICATIONS,
+  RECOMMENDATION_READINESS
+} from './matching/matchingConstants.js';
 
-export const MATCHING_WEIGHTS = {
-  tcodeRelationship: 30,
-  functionalFit: 25,
-  technicalFit: 25,
-  businessContext: 10,
-  releaseCompatibility: 10
-};
-
-export const MATCH_CLASSIFICATIONS = {
-  VERIFIED_SUCCESSOR: 'VERIFIED_SUCCESSOR',
-  VERIFIED_MATCH: 'VERIFIED_SUCCESSOR', // alias for backward compatibility
-  POTENTIAL_ALTERNATIVE: 'POTENTIAL_ALTERNATIVE',
-  STRONG_CANDIDATE: 'POTENTIAL_ALTERNATIVE', // alias
-  PARTIAL_MATCH: 'POTENTIAL_ALTERNATIVE', // alias
-  PARTIAL_FIT: 'POTENTIAL_ALTERNATIVE', // alias
-  ALTERNATIVE_APPROACH: 'POTENTIAL_ALTERNATIVE', // alias
-  WEAK_CANDIDATE: 'WEAK_CANDIDATE',
-  NO_MATCH: 'NO_MATCH_CONFIRMED', // alias for backward compatibility (DISC-003)
-  NO_MATCH_CONFIRMED: 'NO_MATCH_CONFIRMED',
-  NO_MATCH_PENDING: 'NO_MATCH_PENDING',
-  DISCOVERY_BLOCKED: 'DISCOVERY_BLOCKED',
-  INCOMPATIBLE: 'INCOMPATIBLE',
-  INSUFFICIENT_EVIDENCE: 'INSUFFICIENT_EVIDENCE',
-  PENDING_VERIFICATION: 'PENDING_VERIFICATION'
-};
-
-export const RECOMMENDATION_READINESS = {
-  SUFFICIENT_EVIDENCE_FOR_ASSESSMENT: 'SUFFICIENT_EVIDENCE_FOR_ASSESSMENT',
-  PARTIAL_EVIDENCE_REQUIRES_REVIEW: 'PARTIAL_EVIDENCE_REQUIRES_REVIEW',
-  INSUFFICIENT_EVIDENCE: 'INSUFFICIENT_EVIDENCE',
-  NO_SUITABLE_STANDARD_CANDIDATE: 'NO_SUITABLE_STANDARD_CANDIDATE'
-};
+export { MATCHING_WEIGHTS, MATCH_CLASSIFICATIONS, RECOMMENDATION_READINESS };
 
 export class FioriMatchingEngine {
   constructor(options = {}) {
@@ -386,6 +360,7 @@ export class FioriMatchingEngine {
       statusCode: finalCandidates.length > 0 ? 'SUCCESS' : 'NO_CANDIDATES_FOUND',
       transactionCode: tcode,
       transactionDescription: tcodeDesc,
+      simplificationItem: getSimplificationItem(tcode),
       matchClassification: overallMatchClassification,
       canonicalMatchClassification: overallMatchClassification,
       overallScore: bestCandidate ? bestCandidate.overallScore : 0,

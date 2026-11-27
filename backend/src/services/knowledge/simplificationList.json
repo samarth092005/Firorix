@@ -1,0 +1,107 @@
+{
+  "FK01": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2265093",
+    "successorTcode": "BP",
+    "successorAppId": "F3163",
+    "note": "Vendor master FK01 replaced by Business Partner (BP) in SAP S/4HANA."
+  },
+  "FK02": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2265093",
+    "successorTcode": "BP",
+    "successorAppId": "F3163",
+    "note": "Vendor master change FK02 replaced by Business Partner (BP) in SAP S/4HANA."
+  },
+  "FD01": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2265093",
+    "successorTcode": "BP",
+    "successorAppId": "F3163",
+    "note": "Customer master FD01 replaced by Business Partner (BP) in SAP S/4HANA."
+  },
+  "FD02": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2265093",
+    "successorTcode": "BP",
+    "successorAppId": "F3163",
+    "note": "Customer master change FD02 replaced by Business Partner (BP) in SAP S/4HANA."
+  },
+  "XK01": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2265093",
+    "successorTcode": "BP",
+    "successorAppId": "F3163",
+    "note": "Central vendor XK01 replaced by Business Partner (BP) in SAP S/4HANA."
+  },
+  "XD01": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2265093",
+    "successorTcode": "BP",
+    "successorAppId": "F3163",
+    "note": "Central customer XD01 replaced by Business Partner (BP) in SAP S/4HANA."
+  },
+  "MB01": {
+    "status": "OBSOLETE_IN_S4",
+    "sapNote": "2210569",
+    "successorTcode": "MIGO",
+    "successorAppId": "F0843",
+    "note": "MB01 Goods Receipt obsolete in S/4HANA; use MIGO or Post Goods Movement (F0843)."
+  },
+  "MB1A": {
+    "status": "OBSOLETE_IN_S4",
+    "sapNote": "2210569",
+    "successorTcode": "MIGO",
+    "successorAppId": "F0843",
+    "note": "MB1A Goods Withdrawal obsolete in S/4HANA; use MIGO or Fiori Goods Movement."
+  },
+  "MB1B": {
+    "status": "OBSOLETE_IN_S4",
+    "sapNote": "2210569",
+    "successorTcode": "MIGO",
+    "successorAppId": "F0843",
+    "note": "MB1B Transfer Posting obsolete in S/4HANA; use MIGO or F1062."
+  },
+  "MB1C": {
+    "status": "OBSOLETE_IN_S4",
+    "sapNote": "2210569",
+    "successorTcode": "MIGO",
+    "successorAppId": "F0843",
+    "note": "MB1C Other Goods Receipts obsolete in S/4HANA; use MIGO."
+  },
+  "ME21": {
+    "status": "DEPRECATED_IN_S4",
+    "sapNote": "2267308",
+    "successorTcode": "ME21N",
+    "successorAppId": "F0842A",
+    "note": "Enjoy transaction ME21N or Manage Purchase Orders (F0842A) replaces ME21."
+  },
+  "VA01": {
+    "status": "CLASSIC_WITH_FIORI_SUCCESSOR",
+    "sapNote": "2267375",
+    "successorTcode": "VA01",
+    "successorAppId": "F3893",
+    "note": "Manage Sales Orders V2 (F3893) / F1873 recommended in S/4HANA."
+  },
+  "FB60": {
+    "status": "CLASSIC_WITH_FIORI_SUCCESSOR",
+    "sapNote": "2270335",
+    "successorTcode": "FB60",
+    "successorAppId": "F0859",
+    "note": "Create Incoming Invoices (F0859) recommended Fiori successor for FB60."
+  },
+  "FS00": {
+    "status": "CLASSIC_WITH_FIORI_SUCCESSOR",
+    "sapNote": "2270333",
+    "successorTcode": "FS00",
+    "successorAppId": "F0731A",
+    "note": "Manage G/L Account Master Data (F0731A) replaces classic FS00."
+  },
+  "MMBE": {
+    "status": "CLASSIC_WITH_FIORI_SUCCESSOR",
+    "sapNote": "2267452",
+    "successorTcode": "MMBE",
+    "successorAppId": "F1076",
+    "note": "Stock - Single Material (F1076) recommended Fiori successor for MMBE."
+  }
+}

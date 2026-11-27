@@ -32,7 +32,7 @@ function isTokenExpired(token: string): boolean {
   if (!token) return true;
   try {
     const parts = token.split('.');
-    if (parts.length !== 3) return false; // Non-JWT tokens (e.g. dev tokens in local sandbox)
+    if (parts.length !== 3) return !token.startsWith('fiorify_demo_token_'); // Fail closed for non-JWT tokens except explicit demo sandbox tokens
     const base64Url = parts[1];
     let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     while (base64.length % 4) {
@@ -51,7 +51,7 @@ function isTokenExpired(token: string): boolean {
     }
     return false;
   } catch {
-    return false;
+    return true;
   }
 }
 

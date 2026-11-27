@@ -32,92 +32,31 @@ function isAuthorizedAdmin(userContext) {
   );
 }
 
-export const LIFECYCLE_STATES = Object.freeze({
-  DRAFT: 'DRAFT',
-  DISCOVERY_COMPLETED: 'DISCOVERY_COMPLETED',
-  MATCHING_COMPLETED: 'MATCHING_COMPLETED',
-  FITGAP_COMPLETED: 'FITGAP_COMPLETED',
-  RECOMMENDATION_COMPLETED: 'RECOMMENDATION_COMPLETED',
-  PENDING_REVIEW: 'PENDING_REVIEW',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  ARCHIVED: 'ARCHIVED'
-});
+import {
+  LIFECYCLE_STATES,
+  ALLOWED_TRANSITIONS,
+  MODERNIZATION_ACTION_TYPES,
+  CHECKLIST_STATUSES,
+  SERVER_AUTHORITATIVE_FIELDS,
+  computeEventHash,
+  isTestRunnerActive,
+  resolveDefaultStoragePath
+} from './assessment/assessmentConstants.js';
+import {
+  filterAndPaginateAssessments,
+  computeAssessmentSummary
+} from './assessment/assessmentQueryService.js';
 
-// GOV-01: Approval MUST require PENDING_REVIEW; direct transition from RECOMMENDATION_COMPLETED to APPROVED is strictly forbidden
-export const ALLOWED_TRANSITIONS = Object.freeze({
-  DRAFT: ['DISCOVERY_COMPLETED', 'ARCHIVED'],
-  DISCOVERY_COMPLETED: ['MATCHING_COMPLETED', 'DRAFT', 'ARCHIVED'],
-  MATCHING_COMPLETED: ['FITGAP_COMPLETED', 'DISCOVERY_COMPLETED', 'ARCHIVED'],
-  FITGAP_COMPLETED: ['RECOMMENDATION_COMPLETED', 'MATCHING_COMPLETED', 'ARCHIVED'],
-  RECOMMENDATION_COMPLETED: ['PENDING_REVIEW', 'ARCHIVED'],
-  PENDING_REVIEW: ['APPROVED', 'REJECTED', 'ARCHIVED'],
-  APPROVED: ['ARCHIVED'],
-  REJECTED: ['PENDING_REVIEW', 'DRAFT', 'ARCHIVED'],
-  ARCHIVED: ['DRAFT']
-});
-
-export const MODERNIZATION_ACTION_TYPES = Object.freeze({
-  ADD_FOUND: 'ADD_FOUND',
-  CONFIGURE_ADOPT_READINESS: 'CONFIGURE_ADOPT_READINESS',
-  ADD_AND_CONFIGURE: 'ADD_AND_CONFIGURE',
-  BUILD_PROJECT: 'BUILD_PROJECT'
-});
-
-export const CHECKLIST_STATUSES = Object.freeze([
-  'VERIFIED',
-  'PENDING',
-  'BLOCKED',
-  'NOT_APPLICABLE',
-  'NOT_VERIFIED'
-]);
-
-export const SERVER_AUTHORITATIVE_FIELDS = Object.freeze([
-  'id',
-  'createdAt',
-  'createdBy',
-  'creatorRole',
-  'auditEvents',
-  'versionHistory',
-  'fitGapScore',
-  'scoreCoverage',
-  'dimensionResults',
-  'scoringBreakdown',
-  'approvalSignature',
-  'leadArchitectApproval'
-]);
-
-/**
- * Calculates SHA-256 integrity hash for an audit event in the chain.
- */
-export function computeEventHash(event, previousHash = 'GENESIS') {
-  const content = `${previousHash}|${event.eventId}|${event.timestamp}|${event.action}|${event.actorId || event.author}|${event.previousState || ''}|${event.newState || ''}|${event.comment || ''}`;
-  return crypto.createHash('sha256').update(content).digest('hex');
-}
-
-/**
- * Detects whether the current process is running under a test runner.
- */
-export function isTestRunnerActive() {
-  return Boolean(
-    process.env.NODE_ENV === 'test' ||
-    process.env.npm_lifecycle_event === 'test' ||
-    (Array.isArray(process.execArgv) && process.execArgv.some((arg) => typeof arg === 'string' && arg.includes('--test'))) ||
-    (Array.isArray(process.argv) && process.argv.some((arg) => typeof arg === 'string' && (arg.includes('--test') || arg.includes('test/')))) ||
-    process.env.NODE_TEST_CONTEXT
-  );
-}
-
-/**
- * Resolves default storage path for assessment records.
- */
-export function resolveDefaultStoragePath() {
-  const cwd = process.cwd();
-  if (path.basename(cwd) === 'backend') {
-    return path.resolve(cwd, 'data', 'assessments.json');
-  }
-  return path.resolve(cwd, 'backend', 'data', 'assessments.json');
-}
+export {
+  LIFECYCLE_STATES,
+  ALLOWED_TRANSITIONS,
+  MODERNIZATION_ACTION_TYPES,
+  CHECKLIST_STATUSES,
+  SERVER_AUTHORITATIVE_FIELDS,
+  computeEventHash,
+  isTestRunnerActive,
+  resolveDefaultStoragePath
+};
 
 /**
  * Validates assessment record creation payload.
@@ -740,7 +679,7 @@ export class AssessmentStore {
     this._records = new Map();
     this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
     const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || process.env.FIORIX_PERSISTENCE || '').toLowerCase();
-    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres' && !options.storagePath);
+    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (['postgres', 'hana'].includes(persistenceEnv) && !options.storagePath);
     this.repository = options.repository || (this.useDatabase ? new AssessmentRepository() : null);
 
     if (process.env.NODE_ENV === 'production' && !this.useDatabase && !options.allowVolatileStoreInProduction) {
@@ -1463,81 +1402,7 @@ export class AssessmentStore {
       return records;
     }
     await this._ensureLoaded();
-    let records = Array.from(this._records.values());
-
-    const {
-      businessArea,
-      status,
-      lifecycleStatus,
-      systemId,
-      assessmentLevel,
-      search,
-      tenantId: requestedTenantId,
-      includeArchived = false,
-      limit,
-      offset = 0
-    } = filters;
-
-    if (requestedTenantId && typeof requestedTenantId === 'string') {
-      records = records.filter((r) => r.tenantId === requestedTenantId);
-    }
-
-    if (!includeArchived) {
-      records = records.filter((r) => r.lifecycleStatus !== LIFECYCLE_STATES.ARCHIVED && r.status !== 'ARCHIVED');
-    }
-
-    if (businessArea && typeof businessArea === 'string') {
-      const target = businessArea.trim().toLowerCase();
-      records = records.filter((r) => r.businessArea && r.businessArea.toLowerCase().includes(target));
-    }
-
-    if (status && typeof status === 'string') {
-      const target = status.trim().toUpperCase();
-      records = records.filter((r) => String(r.status).toUpperCase() === target || String(r.lifecycleStatus).toUpperCase() === target);
-    }
-
-    if (lifecycleStatus && typeof lifecycleStatus === 'string') {
-      const target = lifecycleStatus.trim().toUpperCase();
-      records = records.filter((r) => String(r.lifecycleStatus).toUpperCase() === target);
-    }
-
-    if (systemId && typeof systemId === 'string') {
-      const target = systemId.trim().toUpperCase();
-      records = records.filter((r) => r.systemId && r.systemId.toUpperCase() === target);
-    }
-
-    if (assessmentLevel && typeof assessmentLevel === 'string') {
-      const target = assessmentLevel.trim().toUpperCase();
-      records = records.filter((r) => r.assessmentLevel && r.assessmentLevel.toUpperCase() === target);
-    }
-
-    if (search && typeof search === 'string') {
-      const q = search.trim().toLowerCase();
-      records = records.filter(
-        (r) =>
-          (r.tcode && r.tcode.toLowerCase().includes(q)) ||
-          (r.id && r.id.toLowerCase().includes(q)) ||
-          (r.description && r.description.toLowerCase().includes(q)) ||
-          (r.businessArea && r.businessArea.toLowerCase().includes(q)) ||
-          (r.matchingFioriApp?.appName && r.matchingFioriApp.appName.toLowerCase().includes(q)) ||
-          (r.matchingFioriApp?.appId && r.matchingFioriApp.appId.toLowerCase().includes(q))
-      );
-    }
-
-    records.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-
-    const totalCount = records.length;
-    const paginated = limit !== undefined
-      ? records.slice(Number(offset), Number(offset) + Number(limit))
-      : records.slice(Number(offset));
-
-    // Return as array with attached metadata for 100% backward compatibility
-    paginated.totalCount = totalCount;
-    paginated.count = paginated.length;
-    paginated.limit = limit !== undefined ? Number(limit) : totalCount;
-    paginated.offset = Number(offset);
-
-    return paginated;
+    return filterAndPaginateAssessments(Array.from(this._records.values()), filters);
   }
 
   /**
@@ -1546,50 +1411,7 @@ export class AssessmentStore {
   async getSummary(filters = {}) {
     await this._ensureLoaded();
     const all = await this.list({ ...filters });
-
-    const totalAssessments = all.length;
-    const completed = all.filter((r) => ['COMPLETED', 'APPROVED', 'RECOMMENDATION_COMPLETED'].includes(r.lifecycleStatus)).length;
-    const pendingReview = all.filter((r) => r.lifecycleStatus === 'PENDING_REVIEW').length;
-    const approved = all.filter((r) => r.lifecycleStatus === 'APPROVED').length;
-    const rejected = all.filter((r) => r.lifecycleStatus === 'REJECTED').length;
-    const inProgress = all.filter((r) => ['DRAFT', 'DISCOVERY_COMPLETED', 'MATCHING_COMPLETED', 'FITGAP_COMPLETED'].includes(r.lifecycleStatus)).length;
-    const verifiedMatchesCount = all.filter(
-      (r) =>
-        ['VERIFIED_FIT', 'PARTIAL_FIT', 'EXPLICIT_SUCCESSOR', 'FUNCTIONAL_ALTERNATIVE'].includes(r.assessmentResult) ||
-        (r.matchingFioriApp && r.matchingFioriApp.appId)
-    ).length;
-
-    const scores = all.map((r) => r.fitGapScore).filter((s) => typeof s === 'number' && !isNaN(s) && s > 0);
-    const averageFitGapScore = scores.length > 0
-      ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10
-      : 0;
-
-    const byOutcome = {};
-    for (const r of all) {
-      const outcome = r.recommendation?.outcome || 'REVIEW';
-      byOutcome[outcome] = (byOutcome[outcome] || 0) + 1;
-    }
-
-    const bySystem = {};
-    for (const r of all) {
-      const sys = r.systemId || 'S21-200';
-      bySystem[sys] = (bySystem[sys] || 0) + 1;
-    }
-
-    return {
-      totalAssessed: totalAssessments,
-      totalAssessments,
-      verifiedMatchesCount,
-      completed,
-      pendingReview,
-      approved,
-      rejected,
-      inProgress,
-      averageFitGapScore,
-      byOutcome,
-      bySystem,
-      timestamp: new Date().toISOString()
-    };
+    return computeAssessmentSummary(all);
   }
 
   /**

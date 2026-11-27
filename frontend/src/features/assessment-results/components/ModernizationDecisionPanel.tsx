@@ -91,17 +91,47 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
     isBuildRecommended ? 'BUILD_STUDIO' : 'ADOPT_CONFIGURE'
   );
 
+  // Keep activeTab synced when assessment/candidates load or change
+  useEffect(() => {
+    if (isBuildRecommended || isNoStandardCandidate) {
+      setActiveTab('BUILD_STUDIO');
+    }
+  }, [isBuildRecommended, isNoStandardCandidate]);
+
   // Dynamic Resolution of Target Artifacts for the Current Transaction
+  const tcodeUpper = (assessment.tcode || '').toUpperCase();
+  const knownRoleFallback: Record<string, string> = {
+    ME21N: 'SAP_BR_PURCHASER',
+    VA01: 'SAP_BR_INTERNAL_SALES_REP',
+    FB03: 'SAP_BR_GL_ACCOUNTANT',
+    FB50: 'SAP_BR_GL_ACCOUNTANT',
+    'F-28': 'SAP_BR_AR_ACCOUNTANT',
+    'F-53': 'SAP_BR_AP_ACCOUNTANT'
+  };
+  const knownODataFallback: Record<string, string> = {
+    ME21N: 'MM_PURCHASE_ORDER_PROCESS_SRV',
+    VA01: 'SD_F1873_SO_MANAGE_SRV',
+    FB03: 'FAR_MANAGE_JOURNAL_ENTRIES_SRV',
+    FB50: 'FAR_MANAGE_JOURNAL_ENTRIES_SRV',
+    'F-28': 'FAP_POST_INCOMING_PAYMENTS_SRV',
+    'F-53': 'FAR_OUTGOING_PAYMENT_SRV'
+  };
+  const knownCatalogFallback: Record<string, string> = {
+    ME21N: 'SAP_MM_BC_PO_PROC_PC',
+    VA01: 'SAP_SD_BC_SO_PROC_PC',
+    FB03: 'SAP_S4FIN_BC_GL_DOC_PC',
+    FB50: 'SAP_S4FIN_BC_GL_DOC_PC',
+    'F-28': 'SAP_S4FIN_BC_AR_PAYMENTS_PC',
+    'F-53': 'SAP_S4FIN_BC_AP_PAYMENTS_PC'
+  };
+
   const resolvedRole =
     roleValidation?.[0]?.roleName ||
     selectedCandidate?.businessRoles?.[0] ||
     assessment.matchingFioriApp?.businessRoles?.[0] ||
-    (assessment.tcode === 'ME21N' ? 'SAP_BR_PURCHASER' :
-     assessment.tcode === 'VA01' ? 'SAP_BR_INTERNAL_SALES_REP' :
-     assessment.tcode === 'FB03' ? 'SAP_BR_GL_ACCOUNTANT' :
-     assessment.tcode === 'FB50' ? 'SAP_BR_GL_ACCOUNTANT' :
-     assessment.tcode === 'F-28' ? 'SAP_BR_AR_ACCOUNTANT' :
-     'SAP_BR_AP_ACCOUNTANT');
+    assessment.applicationRequirements?.relevantBusinessRole ||
+    knownRoleFallback[tcodeUpper] ||
+    'Pending Basis Check (Not resolved from SAP S21)';
 
   const resolvedRoleStatus =
     roleValidation?.[0]?.roleAvailabilityStatus ||
@@ -111,28 +141,25 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
     odataValidation?.[0]?.serviceName ||
     selectedCandidate?.odataServices?.[0] ||
     assessment.matchingFioriApp?.odataServices?.[0] ||
-    (assessment.tcode === 'ME21N' ? 'MM_PURCHASE_ORDER_PROCESS_SRV' :
-     assessment.tcode === 'VA01' ? 'SD_F1873_SO_MANAGE_SRV' :
-     assessment.tcode === 'FB03' ? 'FAR_MANAGE_JOURNAL_ENTRIES_SRV' :
-     assessment.tcode === 'FB50' ? 'FAR_MANAGE_JOURNAL_ENTRIES_SRV' :
-     assessment.tcode === 'F-28' ? 'FAP_POST_INCOMING_PAYMENTS_SRV' :
-     'FAR_OUTGOING_PAYMENT_SRV');
+    (assessment.applicationRequirements?.knownODataService &&
+      assessment.applicationRequirements.knownODataService !== 'ODATA_V4_CORE' &&
+      assessment.applicationRequirements.knownODataService !== 'Service binding determined by FAL'
+      ? assessment.applicationRequirements.knownODataService
+      : '') ||
+    knownODataFallback[tcodeUpper] ||
+    'Pending Basis Check (Not resolved from SAP S21)';
 
   const resolvedODataStatus =
     odataValidation?.[0]?.registrationStatus ||
     (availability?.serviceRegistrationStatus === 'REGISTERED' ? 'REGISTERED_ACTIVE' : 'PENDING_BASIS_CHECK');
 
   const resolvedCatalog =
-    assessment.tcode === 'ME21N' ? 'SAP_MM_BC_PO_PROC_PC' :
-    assessment.tcode === 'VA01' ? 'SAP_SD_BC_SO_PROC_PC' :
-    assessment.tcode === 'FB03' ? 'SAP_S4FIN_BC_GL_DOC_PC' :
-    assessment.tcode === 'FB50' ? 'SAP_S4FIN_BC_GL_DOC_PC' :
-    assessment.tcode === 'F-28' ? 'SAP_S4FIN_BC_AR_PAYMENTS_PC' :
-    'SAP_S4FIN_BC_AP_PAYMENTS_PC';
+    knownCatalogFallback[tcodeUpper] ||
+    (selectedCandidate?.appId ? `Fiori Catalog for ${selectedCandidate.appId} (Verify in FLP Content Manager)` : 'Pending Basis Check (Verify in FLP Content Manager)');
 
   const resolvedIcfPath =
     odataValidation?.[0]?.icfPath ||
-    `/sap/opu/odata/sap/${resolvedODataService}`;
+    (resolvedODataService.startsWith('Pending') ? 'Pending OData Service Resolution' : `/sap/opu/odata/sap/${resolvedODataService}`);
 
   const currentSystemId = assessment.systemId || 'S21';
   const currentClient = assessment.client || '200';
@@ -187,6 +214,19 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
         const decisions = await assessmentService.getModernizationDecisions(assessment.id);
         if (Array.isArray(decisions)) {
           setRecordedDecisions(decisions);
+          // Pre-hydrate Adoption Readiness checklist from latest saved record
+          const latestReadiness = [...decisions]
+            .reverse()
+            .find((d) => d.actionType === 'CONFIGURE_ADOPT_READINESS' && (d as any).details?.checklist);
+          if (latestReadiness) {
+            const c = (latestReadiness as any).details.checklist;
+            setChecklistAck({
+              pfcgRole: c.pfcgRole === 'VERIFIED',
+              flpCatalog: c.flpCatalog === 'VERIFIED',
+              odataMaint: c.odataMaint === 'VERIFIED',
+              sicfNode: c.sicfNode === 'VERIFIED'
+            });
+          }
         }
       } catch (e) {
         console.warn('Could not load modernization decisions history:', e);
@@ -474,13 +514,16 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
         {/* Path 1: Adopt & Configure Standard Fiori App */}
         <button
           type="button"
-          onClick={() => setActiveTab('ADOPT_CONFIGURE')}
+          disabled={isNoStandardCandidate}
+          onClick={() => !isNoStandardCandidate && setActiveTab('ADOPT_CONFIGURE')}
+          title={isNoStandardCandidate ? 'Unavailable: Zero standard Fiori apps found for this transaction' : undefined}
           style={{
-            backgroundColor: activeTab === 'ADOPT_CONFIGURE' ? '#F4F8FE' : '#FFFFFF',
-            border: activeTab === 'ADOPT_CONFIGURE' ? '1.5px solid #0070F2' : '1px solid #DDE2E5',
+            backgroundColor: isNoStandardCandidate ? '#F8FAFC' : activeTab === 'ADOPT_CONFIGURE' ? '#F4F8FE' : '#FFFFFF',
+            border: activeTab === 'ADOPT_CONFIGURE' && !isNoStandardCandidate ? '1.5px solid #0070F2' : '1px solid #DDE2E5',
             borderRadius: '8px',
             padding: '16px 20px',
-            cursor: 'pointer',
+            cursor: isNoStandardCandidate ? 'not-allowed' : 'pointer',
+            opacity: isNoStandardCandidate ? 0.65 : 1,
             display: 'flex',
             flexDirection: 'column',
             gap: '8px',
@@ -711,10 +754,66 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
                 <Sliders size={18} color="#0070F2" />
                 2. Administrative Adoption & Configuration Checklist
               </h4>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#FEF9F1', border: '1px solid #FFDCB0', color: '#A04E00', fontSize: '11px', fontWeight: 600 }}>
-                <ShieldAlert size={13} />
-                No SAP Writes Performed by Fiorify
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const runbook = [
+                      `# Basis & Security Activation Runbook — ${assessment.tcode}`,
+                      ``,
+                      `- **Transaction:** ${assessment.tcode} (${assessment.description || 'N/A'})`,
+                      `- **Target System:** ${currentSystemId} (Client ${currentClient})`,
+                      `- **Recommended Fiori App:** ${activeCandidate?.appId || 'N/A'} — ${activeCandidate?.appName || 'N/A'}`,
+                      `- **UI Technology:** ${activeCandidate?.uiTechnology || 'SAP Fiori elements'}`,
+                      ``,
+                      `## 1. Security PFCG Role Assignment`,
+                      `- **Business Role:** \`${resolvedRole}\``,
+                      `- **Status:** ${resolvedRoleStatus}`,
+                      ``,
+                      `## 2. Fiori Launchpad Business Catalog`,
+                      `- **Catalog ID:** \`${resolvedCatalog}\``,
+                      ``,
+                      `## 3. SAP Gateway OData Service`,
+                      `- **Service Name:** \`${resolvedODataService}\``,
+                      `- **Status:** ${resolvedODataStatus}`,
+                      ``,
+                      `## 4. SICF Node Activation`,
+                      `- **ICF Path:** \`${resolvedIcfPath}\``,
+                      ``,
+                      `> Note: Fiorify enforces zero SAP writes. Execute these activation steps manually in SAP GUI / Basis transport workflow.`
+                    ].join('\n');
+                    const blob = new Blob([runbook], { type: 'text/markdown;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Basis_Runbook_${assessment.tcode}.md`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '4px 10px',
+                    borderRadius: '4px',
+                    backgroundColor: '#EFF6FF',
+                    border: '1px solid #BFDBFE',
+                    color: '#1D4ED8',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <FileCode2 size={13} />
+                  Download Basis Runbook (.md)
+                </button>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '3px 8px', borderRadius: '4px', backgroundColor: '#FEF9F1', border: '1px solid #FFDCB0', color: '#A04E00', fontSize: '11px', fontWeight: 600 }}>
+                  <ShieldAlert size={13} />
+                  No SAP Writes Performed by Fiorify
+                </span>
+              </div>
             </div>
 
             {readinessSaveMsg && (

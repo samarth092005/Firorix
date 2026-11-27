@@ -8,6 +8,7 @@
 import { USER_ROLES, ROLE_PERMISSIONS } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
 import { defaultAuthProviderFactory } from '../infrastructure/security/authProviderFactory.js';
+import { getDevAdminSecret, getFiorifyEnv } from '../infrastructure/config/envHelper.js';
 
 export function normalizeUserRole(role) {
   if (!role || typeof role !== 'string') return USER_ROLES.VIEWER;
@@ -36,16 +37,16 @@ export function createAuthMiddleware(options = {}) {
   const isProduction = options.isProduction !== undefined ? options.isProduction : (process.env.NODE_ENV === 'production');
   const enforceAuth = options.enforceAuth !== undefined
     ? options.enforceAuth
-    : (isProduction || process.env.FIORIFY_ENFORCE_AUTH === 'true' || process.env.Fiorify_ENFORCE_AUTH === 'true');
-  const defaultTenantId = options.defaultTenantId || process.env.FIORIFY_TENANT_ID || 'DEFAULT-TENANT-S21';
+    : (isProduction || getFiorifyEnv('FIORIFY_ENFORCE_AUTH', 'Fiorify_ENFORCE_AUTH') === 'true');
+  const defaultTenantId = options.defaultTenantId || getFiorifyEnv('FIORIFY_TENANT_ID', 'Fiorify_TENANT_ID') || 'DEFAULT-TENANT-S21';
 
   /**
    * Resolves authentication context from request
    */
   async function resolveUserContext(req, url) {
     const authHeader = req.headers.authorization;
-    const customSecret = req.headers['x-fiorify-admin-secret'] || req.headers['x-Fiorify-admin-secret'];
-    const devImpersonationUser = req.headers['x-fiorify-admin-user'] || req.headers['x-Fiorify-admin-user'];
+    const customSecret = req.headers['x-fiorify-admin-secret'];
+    const devImpersonationUser = req.headers['x-fiorify-admin-user'];
     const devRole = req.headers['x-fiorify-dev-role'] || req.headers['x-fiorify-role'];
 
     // In production, impersonation headers and custom dev secrets are strictly forbidden
@@ -58,8 +59,7 @@ export function createAuthMiddleware(options = {}) {
       return { isUnauthenticated: true, authError: 'DEV_IMPERSONATION_REQUIRES_SECRET' };
     }
 
-    const configuredSecret = process.env.FIORIFY_ADMIN_SECRET || process.env.Fiorify_ADMIN_SECRET ||
-      (!isProduction ? 'dev-admin-secret-change-in-production' : undefined);
+    const configuredSecret = getDevAdminSecret(isProduction);
 
     const isAdminSecretValid = (sec) => {
       if (!sec || isProduction) return false;
@@ -69,9 +69,8 @@ export function createAuthMiddleware(options = {}) {
       return false;
     };
 
-    // 1. Authorization Bearer Token (or query token for safe preview iframe embedding)
-    const queryToken = url?.searchParams?.get('token') || url?.searchParams?.get('access_token');
-    const rawToken = (authHeader && authHeader.startsWith('Bearer ')) ? authHeader.slice(7).trim() : queryToken;
+    // 1. Authorization Bearer Token (headers only; query-string tokens rejected to prevent log/history leakage)
+    const rawToken = (authHeader && authHeader.startsWith('Bearer ')) ? authHeader.slice(7).trim() : null;
     if (rawToken) {
       const token = rawToken.trim();
 
@@ -88,8 +87,13 @@ export function createAuthMiddleware(options = {}) {
         };
       }
 
-      // Check token revocation list
-      if (authService && authService.isRevoked(token)) {
+      // Check token revocation list (durable async DB + L1 cache)
+      const tokenRevoked = authService
+        ? (typeof authService.isRevokedAsync === 'function'
+            ? await authService.isRevokedAsync(token)
+            : authService.isRevoked(token))
+        : false;
+      if (tokenRevoked) {
         return { isUnauthenticated: true, authError: 'TOKEN_REVOKED' };
       }
 
@@ -204,10 +208,8 @@ export function createAuthMiddleware(options = {}) {
    */
   async function authenticate(req, res, url) {
     const isStaticOrSpa = (req.method === 'GET' || req.method === 'HEAD') && !url.pathname.startsWith('/api/');
-    const isPreviewContent = (req.method === 'GET' || req.method === 'HEAD') && url.pathname.includes('/preview/content');
     const isPublic = (
       isStaticOrSpa ||
-      isPreviewContent ||
       url.pathname === '/' ||
       url.pathname === '/health' ||
       url.pathname === '/health/liveness' ||

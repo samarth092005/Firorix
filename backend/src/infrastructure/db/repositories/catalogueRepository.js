@@ -1,12 +1,19 @@
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { resolveRepositoryPool } from '../adapters/sqlDialectHelper.js';
 
 export class CatalogueRepository {
   constructor(pool = DatabasePool) {
     this.pool = pool;
   }
 
+  async _getActivePool() {
+    return resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+  }
+
   async recordSourceImport(source) {
-    const res = await this.pool.query(`
+    const activePool = await this._getActivePool();
+    const res = await activePool.query(`
       INSERT INTO fiori_catalog_sources (
         source_name, source_type, source_version, target_release,
         record_count, content_hash, status, summary, imported_at
@@ -30,7 +37,8 @@ export class CatalogueRepository {
     const appId = app.appId || app.fioriId || app.id;
     if (!appId) throw new Error('Cannot upsert catalogue app without valid appId');
 
-    const client = typeof this.pool.getClient === 'function' ? await this.pool.getClient() : await this.pool.connect();
+    const activePool = await this._getActivePool();
+    const client = typeof activePool.getClient === 'function' ? await activePool.getClient() : await activePool.connect();
     try {
       await client.query('BEGIN;');
 
@@ -140,12 +148,13 @@ export class CatalogueRepository {
   }
 
   async getAppById(appId) {
-    const res = await this.pool.query('SELECT * FROM fiori_catalog_apps WHERE app_id = $1;', [appId]);
+    const activePool = await this._getActivePool();
+    const res = await activePool.query('SELECT * FROM fiori_catalog_apps WHERE app_id = $1;', [appId]);
     if (res.rowCount === 0) return null;
 
     const row = res.rows[0];
-    const srvRes = await this.pool.query('SELECT service_name, service_type FROM fiori_catalog_services WHERE app_id = $1;', [appId]);
-    const tcodeRes = await this.pool.query('SELECT tcode, is_leading FROM fiori_catalog_tcode_mappings WHERE app_id = $1;', [appId]);
+    const srvRes = await activePool.query('SELECT service_name, service_type FROM fiori_catalog_services WHERE app_id = $1;', [appId]);
+    const tcodeRes = await activePool.query('SELECT tcode, is_leading FROM fiori_catalog_tcode_mappings WHERE app_id = $1;', [appId]);
 
     const leadingMap = tcodeRes.rows.find(t => t.is_leading);
     const related = tcodeRes.rows.filter(t => !t.is_leading).map(t => t.tcode);
@@ -231,7 +240,8 @@ export class CatalogueRepository {
 
     const whereSql = whereClauses.join(' AND ');
 
-    const countRes = await this.pool.query(`SELECT COUNT(*) as count FROM fiori_catalog_apps a WHERE ${whereSql};`, params);
+    const activePool = await this._getActivePool();
+    const countRes = await activePool.query(`SELECT COUNT(*) as count FROM fiori_catalog_apps a WHERE ${whereSql};`, params);
     const totalCount = parseInt(countRes.rows[0].count, 10);
 
     const page = Math.max(1, parseInt(filter.page, 10) || 1);
@@ -240,7 +250,7 @@ export class CatalogueRepository {
     const limit = pageSize;
 
     const queryParams = [...params, limit, offset];
-    const dataRes = await this.pool.query(`
+    const dataRes = await activePool.query(`
       SELECT 
         a.*,
         COALESCE(
@@ -296,11 +306,12 @@ export class CatalogueRepository {
   }
 
   async getStats() {
-    const totalRes = await this.pool.query('SELECT COUNT(*) FROM fiori_catalog_apps;');
-    const sourceRes = await this.pool.query('SELECT * FROM fiori_catalog_sources ORDER BY imported_at DESC LIMIT 1;');
-    const typesRes = await this.pool.query('SELECT app_type, COUNT(*) as count FROM fiori_catalog_apps GROUP BY app_type;');
-    const semObjRes = await this.pool.query('SELECT COUNT(DISTINCT semantic_object) as count FROM fiori_catalog_apps WHERE semantic_object IS NOT NULL;');
-    const servicesRes = await this.pool.query('SELECT COUNT(DISTINCT service_name) as count FROM fiori_catalog_services;');
+    const activePool = await this._getActivePool();
+    const totalRes = await activePool.query('SELECT COUNT(*) FROM fiori_catalog_apps;');
+    const sourceRes = await activePool.query('SELECT * FROM fiori_catalog_sources ORDER BY imported_at DESC LIMIT 1;');
+    const typesRes = await activePool.query('SELECT app_type, COUNT(*) as count FROM fiori_catalog_apps GROUP BY app_type;');
+    const semObjRes = await activePool.query('SELECT COUNT(DISTINCT semantic_object) as count FROM fiori_catalog_apps WHERE semantic_object IS NOT NULL;');
+    const servicesRes = await activePool.query('SELECT COUNT(DISTINCT service_name) as count FROM fiori_catalog_services;');
 
     const recordsByAppType = {};
     for (const r of typesRes.rows) {
@@ -318,7 +329,8 @@ export class CatalogueRepository {
   }
 
   async getTCodeMappings(tcode) {
-    const res = await this.pool.query(`
+    const activePool = await this._getActivePool();
+    const res = await activePool.query(`
       SELECT m.app_id, m.tcode, m.is_leading, a.app_name, a.app_type, a.ui_technology
       FROM fiori_catalog_tcode_mappings m
       JOIN fiori_catalog_apps a ON m.app_id = a.app_id

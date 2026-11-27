@@ -25,10 +25,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 20 LTS
+      - name: Set up Node.js 22 LTS
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: |
             backend/package-lock.json
@@ -70,10 +70,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 20 LTS
+      - name: Set up Node.js 22 LTS
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -99,10 +99,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 20 LTS
+      - name: Set up Node.js 22 LTS
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -126,18 +126,76 @@ jobs:
           echo "Running dependency vulnerability audit for frontend..."
           npm audit --prefix frontend --audit-level=critical || true
 
+  db-dialect-parity:
+    name: Database Dialect Parity (PostgreSQL + HANA SQL)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: fiorify_ci
+          POSTGRES_PASSWORD: fiorify_ci_password
+          POSTGRES_DB: fiorify_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Backend Dependencies
+        run: npm --prefix backend ci
+
+      - name: Run PostgreSQL & HANA Migration Parity Tests
+        run: node --test backend/test/databaseAdapterAndMigrations.test.js backend/test/s1PersistenceFoundation.test.js
+        env:
+          NODE_ENV: test
+          FIORIFY_PERSISTENCE: postgres
+          DATABASE_URL: postgres://fiorify_ci:fiorify_ci_password@127.0.0.1:5432/fiorify_ci
+
+      - name: Validate All HANA Migration Scripts Parse Cleanly
+        run: |
+          node -e "
+            import { DialectMigrationRunner } from './backend/src/infrastructure/db/migrator/dialectMigrationRunner.js';
+            const runner = new DialectMigrationRunner({ dialect: 'hana', adapter: { getDialect: () => 'hana' } });
+            const migrations = runner.getAvailableMigrations();
+            if (migrations.length < 8) {
+              console.error('Expected >= 8 HANA migrations, found:', migrations.length);
+              process.exit(1);
+            }
+            for (const m of migrations) {
+              const stmts = DialectMigrationRunner.splitSqlStatements(m.content);
+              if (stmts.length === 0) {
+                console.error('Empty HANA migration:', m.file);
+                process.exit(1);
+              }
+            }
+            console.log('Verified', migrations.length, 'HANA migration scripts.');
+          "
+
   release-validation:
     name: Release Gate & Baseline Validation
-    needs: [security-and-static-analysis, backend-verification, frontend-verification]
+    needs: [security-and-static-analysis, backend-verification, frontend-verification, db-dialect-parity]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 20 LTS
+      - name: Set up Node.js 22 LTS
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Verify Server Startup Dry-Run
         run: |

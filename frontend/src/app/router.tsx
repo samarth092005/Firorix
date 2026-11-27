@@ -2,24 +2,13 @@ import React from 'react';
 import { createBrowserRouter, Navigate, useSearchParams } from 'react-router-dom';
 import { AppShell } from '../components/layout/AppShell';
 import { ProtectedRoute } from '../components/common/ProtectedRoute';
-import { localStore } from '../services/mock/localStore';
 
 // Top-level Suspense Fallback for standalone routes (Landing, Login)
 const TopLevelSuspenseFallback: React.FC = () => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw' }}>
-    <div style={{ textAlign: 'center' }}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        border: '3px solid #E5E7EB',
-        borderTop: '3px solid #0070F2',
-        borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite',
-        margin: '0 auto 12px auto'
-      }} />
-      <span style={{ fontSize: '13px', color: '#6B7280', fontFamily: '72, -apple-system, BlinkMacSystemFont, sans-serif' }}>
-        Loading Fiorify...
-      </span>
+  <div className="fiori-app-loader">
+    <div className="fiori-app-loader-inner">
+      <div className="fiori-app-loader-spinner" />
+      <span className="fiori-app-loader-text">Loading Fiorify...</span>
     </div>
   </div>
 );
@@ -40,13 +29,8 @@ const AssessmentHistoryPage = React.lazy(() => import('../features/assessment-hi
 const SystemConfigurationPage = React.lazy(() => import('../features/system-configuration/SystemConfigurationPage').then(m => ({ default: m.SystemConfigurationPage })));
 const McpManagementPage = React.lazy(() => import('../features/mcp/McpManagementPage').then(m => ({ default: m.McpManagementPage })));
 
-// Preserved Legacy Features (Code-split via dynamic import)
-const SystemsPage = React.lazy(() => import('../features/systems/SystemsPage').then(m => ({ default: m.SystemsPage })));
+// Preserved Secondary Features (Code-split via dynamic import)
 const SystemDetailPage = React.lazy(() => import('../features/systems/SystemDetailPage').then(m => ({ default: m.SystemDetailPage })));
-const ExplorerPage = React.lazy(() => import('../features/explorer/ExplorerPage').then(m => ({ default: m.ExplorerPage })));
-const TCodeDetailPage = React.lazy(() => import('../features/explorer/TCodeDetailPage').then(m => ({ default: m.TCodeDetailPage })));
-const JobsPage = React.lazy(() => import('../features/jobs/JobsPage').then(m => ({ default: m.JobsPage })));
-const AssessmentsPage = React.lazy(() => import('../features/assessments/AssessmentsPage').then(m => ({ default: m.AssessmentsPage })));
 const AssessmentWorkspacePage = React.lazy(() => import('../features/assessments/AssessmentWorkspacePage').then(m => ({ default: m.AssessmentWorkspacePage })));
 const CataloguePage = React.lazy(() => import('../features/catalogue/CataloguePage').then(m => ({ default: m.CataloguePage })));
 const AppDetailPage = React.lazy(() => import('../features/catalogue/AppDetailPage').then(m => ({ default: m.AppDetailPage })));
@@ -60,27 +44,19 @@ const NotFoundPage = React.lazy(() => import('../features/notfound/NotFoundPage'
  */
 interface ContextualRedirectProps {
   targetTab: string;
-  preferredAssessmentId?: string;
 }
 
 const ContextualAssessmentRedirect: React.FC<ContextualRedirectProps> = ({
-  targetTab,
-  preferredAssessmentId
+  targetTab
 }) => {
   const [searchParams] = useSearchParams();
-  const assessments = localStore.getAssessments();
   const idFromQuery = searchParams.get('assessmentId') || searchParams.get('id');
 
-  let targetId = idFromQuery;
-  if (!targetId) {
-    if (preferredAssessmentId && assessments.some(a => a.id === preferredAssessmentId)) {
-      targetId = preferredAssessmentId;
-    } else {
-      targetId = assessments[0]?.id || 'ASM-2026-001';
-    }
+  if (!idFromQuery) {
+    return <Navigate to="/assessment-history" replace />;
   }
 
-  return <Navigate to={`/assessment-results/${targetId}?tab=${targetTab}`} replace />;
+  return <Navigate to={`/assessment-results/${idFromQuery}?tab=${targetTab}`} replace />;
 };
 
 export const router = createBrowserRouter([
@@ -164,19 +140,19 @@ export const router = createBrowserRouter([
       },
       {
         path: 'explorer',
-        element: <ExplorerPage />
+        element: <Navigate to="/transaction-discovery" replace />
       },
       {
         path: 'explorer/:tcode',
-        element: <TCodeDetailPage />
+        element: <Navigate to="/transaction-discovery" replace />
       },
       {
         path: 'jobs',
-        element: <JobsPage />
+        element: <Navigate to="/assessment-history" replace />
       },
       {
         path: 'jobs/:id',
-        element: <JobsPage />
+        element: <Navigate to="/assessment-history" replace />
       },
       {
         path: 'assessments',
@@ -200,15 +176,15 @@ export const router = createBrowserRouter([
       },
       {
         path: 'requirements',
-        element: <ContextualAssessmentRedirect targetTab="business_context_requirements" preferredAssessmentId="ASM-2026-001" />
+        element: <ContextualAssessmentRedirect targetTab="business_context_requirements" />
       },
       {
         path: 'fit-gap',
-        element: <ContextualAssessmentRedirect targetTab="fit_gap" preferredAssessmentId="ASM-2026-001" />
+        element: <ContextualAssessmentRedirect targetTab="fit_gap" />
       },
       {
         path: 'recommendations',
-        element: <ContextualAssessmentRedirect targetTab="recommendation" preferredAssessmentId="ASM-2026-001" />
+        element: <ContextualAssessmentRedirect targetTab="recommendation" />
       },
       {
         path: 'generation-studio',

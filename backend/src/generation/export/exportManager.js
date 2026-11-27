@@ -158,8 +158,8 @@ export class ExportManager {
 
     const exportId = `EXP-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
     const timestamp = new Date().toISOString();
-    const targetSystem = 'S21';
-    const targetClient = '200';
+    const targetSystem = project.targetSystem || 'S21';
+    const targetClient = project.targetClient || '200';
     const profile = project.architectureSpec?.profile || 'MANAGED_RAP_WITH_DRAFT';
     const ui5Baseline = project.architectureSpec?.targetBaseline?.sapui5Version || '1.120.0';
 

@@ -348,6 +348,47 @@ export class SapArtifactCompatibilityEngine {
       durationMs: Date.now() - startTime
     };
   }
+
+  /**
+   * Read-only ADT object collision & package visibility check against live SAP S/4HANA (GET only).
+   */
+  async verifyWithLiveAdt(project, connectivityProvider, options = {}) {
+    const baseReport = this.evaluateProjectCompatibility(project, options.systemContext || {});
+    if (!connectivityProvider || typeof connectivityProvider.executeQuery !== 'function') {
+      return { ...baseReport, liveAdtVerification: { executed: false, reason: 'NO_CONNECTIVITY_PROVIDER' } };
+    }
+
+    const artifacts = Object.values(project?.artifactRegistry?.artifacts || {});
+    const collisions = [];
+    let checked = 0;
+
+    for (const art of artifacts.slice(0, 10)) {
+      if (!art.objectName || art.language === 'JSON' || art.language === 'MARKDOWN') continue;
+      checked++;
+      const q = encodeURIComponent(art.objectName);
+      try {
+        const res = await connectivityProvider.executeQuery(
+          `/sap/bc/adt/repository/informationsystem/search?operation=quickSearch&query=${q}&maxResults=5`,
+          { ...options, method: 'GET', headers: { Accept: 'application/xml, application/json' } }
+        );
+        if (res?.success && typeof res.data === 'string' && res.data.toUpperCase().includes(art.objectName.toUpperCase())) {
+          collisions.push({ objectName: art.objectName, artifactType: art.artifactType });
+        }
+      } catch {
+        // Ignore single probe failures; report non-blocking
+      }
+    }
+
+    return {
+      ...baseReport,
+      liveAdtVerification: {
+        executed: true,
+        readOnly: true,
+        objectsChecked: checked,
+        collisionsDetected: collisions
+      }
+    };
+  }
 }
 
 export const defaultSapArtifactCompatibilityEngine = new SapArtifactCompatibilityEngine();

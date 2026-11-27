@@ -33,6 +33,8 @@ import {
   LoadingState,
   EmptyState
 } from '../../components/common';
+import { ReadinessBarChart } from '../../components/ui/ReadinessCharts';
+import './OverviewPage.css';
 
 type StatusFilterType = 'ALL' | 'EXPLICIT_SUCCESSOR' | 'FUNCTIONAL_ALTERNATIVE' | 'RELEASE_INCOMPATIBLE';
 
@@ -423,90 +425,55 @@ export const OverviewPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Modernization Architecture & Capability Landscape Panel */}
-      <div
-        style={{
-          backgroundColor: '#FFFFFF',
-          padding: '20px',
-          borderRadius: '10px',
-          border: '1px solid #E2E8F0',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px'
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Layers size={16} color="#0066FF" />
-              <span>SAP S/4HANA Modernization Architecture &amp; System Capabilities</span>
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
-              Clean Core assessment framework connecting live SAP S21 Data Dictionary (DDIC) to official Fiori successors.
-            </div>
-          </div>
-          <span style={{ fontSize: '11px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', border: '1px solid #BBF7D0', padding: '3px 10px', borderRadius: '12px' }}>
-            ● Target {formatSystemBadge()} Active
-          </span>
-        </div>
+      {/* 3. Portfolio Readiness & Target Landscape (Clean 2-Column Layout) */}
+      <div className="fiorify-overview-analytics">
+        <ReadinessBarChart
+          title="Modernization Readiness Breakdown"
+          segments={[
+            { label: 'Direct Fiori Successor', value: directReplacements, color: '#15803D' },
+            { label: 'Fit with Enhancement', value: partialFits, color: '#0066FF' },
+            { label: 'Custom / Review Required', value: Math.max(0, totalAssessed - directReplacements - partialFits), color: '#C2410C' }
+          ]}
+        />
 
-        {/* 3 Status Pillar Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(250px, 22vw, 340px), 1fr))', gap: '12px' }}>
-          {/* Pillar 1: Target Landscape */}
-          <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Target System</span>
-              <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#DCFCE7', color: '#15803D', padding: '1px 6px', borderRadius: '4px' }}>S/4HANA 2023</span>
+        <section className="fiorify-landscape-card" aria-label="Target SAP Landscape">
+          <div className="fiorify-landscape-header">
+            <h3 className="fiorify-landscape-title">Target SAP Landscape</h3>
+            <StatusBadge
+              status={systemInfo?.connectionState === 'CONNECTED' ? 'CONNECTED' : 'INFO'}
+              variant={systemInfo?.connectionState === 'CONNECTED' ? 'success' : 'info'}
+              customLabel={formatSystemBadge()}
+              size="sm"
+            />
+          </div>
+          <div className="fiorify-landscape-meta">
+            <div>
+              <span>System</span>
+              <strong>{uiConfig.defaultSystem.name} ({uiConfig.defaultSystem.client})</strong>
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>{uiConfig.defaultSystem.name} (Client {uiConfig.defaultSystem.client})</div>
-            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>{uiConfig.defaultSystem.basisRelease} • {uiConfig.defaultSystem.softwareComponent} • Gateway Catalog</div>
-          </div>
-
-          {/* Pillar 2: Official Fiori Catalogue */}
-          <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Catalogue Index</span>
-              <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#DBEAFE', color: '#1D4ED8', padding: '1px 6px', borderRadius: '4px' }}>OFFICIAL SAP</span>
+            <div>
+              <span>Release</span>
+              <strong>{uiConfig.defaultSystem.basisRelease} / {uiConfig.defaultSystem.softwareComponent}</strong>
             </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>18,225+ Fiori Applications</div>
-            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>Synchronized with SAP Fiori Apps Library OData</div>
           </div>
-
-          {/* Pillar 3: Clean Core Assessment */}
-          <div style={{ padding: '14px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fit-Gap Engine</span>
-              <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: '#F3E8FF', color: '#7E22CE', padding: '1px 6px', borderRadius: '4px' }}>CLEAN CORE</span>
-            </div>
-            <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>5-Dimension Deterministic Scoring</div>
-            <div style={{ fontSize: '11px', color: '#64748B', marginTop: '3px' }}>Functional 35%, Technical 25%, Process 15%, Roles 15%, Compat 10%</div>
-          </div>
-        </div>
-
-        {/* Quick Launchpad Strip */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#F0F7FF', border: '1px solid #BAE6FD', borderRadius: '8px', padding: '10px 16px', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ fontSize: '12px', color: '#0369A1' }}>
-            <strong>Modernization Actions:</strong> Inspect any SAP GUI transaction or explore official Fiori successor matches.
-          </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="fiorify-landscape-actions">
             <button
               type="button"
+              className="fiorify-btn-secondary"
               onClick={() => navigate('/catalogue')}
-              style={{ padding: '6px 12px', backgroundColor: '#FFFFFF', border: '1px solid #93C5FD', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#0284C7', cursor: 'pointer' }}
             >
-              Browse Catalogue (18k+ Apps)
+              Browse Fiori Catalogue
             </button>
             <button
               type="button"
+              className="fiorify-btn-primary"
               onClick={() => navigate('/transaction-discovery')}
-              style={{ padding: '6px 14px', backgroundColor: '#0066FF', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 600, color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
             >
               <span>Inspect Transaction</span>
               <ArrowRight size={13} />
             </button>
           </div>
-        </div>
+        </section>
       </div>
 
       {/* 4. Streamlined Assessments Table with Tab Filtering & Export */}

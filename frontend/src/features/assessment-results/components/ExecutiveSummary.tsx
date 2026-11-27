@@ -36,7 +36,13 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
 }) => {
   // Determine overall executive status
   const getOverallStatus = () => {
-    if (assessment.classification === 'CUSTOM') return 'BUILD';
+    if (
+      assessment.classification === 'CUSTOM' ||
+      recommendation.canonicalOutcome === 'BUILD' ||
+      recommendation.outcome === 'BUILD'
+    ) {
+      return 'BUILD';
+    }
     if (assessment.assessmentResult === 'RELEASE_INCOMPATIBLE') return 'INCOMPATIBLE';
     if (assessment.assessmentResult === 'NO_VERIFIED_MATCH') return 'NO_VERIFIED_MATCH';
     if (assessment.assessmentResult === 'PENDING_VERIFICATION') return 'PENDING_VERIFICATION';

@@ -1,4 +1,6 @@
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { resolveRepositoryPool } from '../adapters/sqlDialectHelper.js';
 import crypto from 'node:crypto';
 import { STANDARD_TRANSACTION_CATALOG } from '../../../services/standardTransactionKnowledge.js';
 
@@ -13,20 +15,21 @@ export class AssessmentRepository {
   }
 
   async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {
-    if (this.pool && typeof this.pool.getClient === 'function') {
-      const client = await this.pool.getClient();
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    if (activePool && typeof activePool.getClient === 'function') {
+      const client = await activePool.getClient();
       await client.query('BEGIN;');
       await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
       return client;
     }
-    if (this.pool && typeof this.pool.connect === 'function') {
-      const client = await this.pool.connect();
+    if (activePool && typeof activePool.connect === 'function') {
+      const client = await activePool.connect();
       await client.query('BEGIN;');
       await client.query("SELECT set_config('app.current_tenant', $1, true);", [tenantId]);
       return client;
     }
     return {
-      query: (sql, params) => (this.pool && typeof this.pool.query === 'function') ? this.pool.query(sql, params) : Promise.resolve({ rows: [] }),
+      query: (sql, params) => (activePool && typeof activePool.query === 'function') ? activePool.query(sql, params) : Promise.resolve({ rows: [] }),
       release: () => {}
     };
   }

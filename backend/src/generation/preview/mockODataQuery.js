@@ -19,6 +19,26 @@ export function executeODataQuery(records, queryParams, options = {}) {
   let result = [...records];
   const totalCount = records.length;
 
+  // 0. $apply=groupby((field)) analytical aggregation
+  const applyExpr = queryParams.get('$apply');
+  if (applyExpr) {
+    const groupMatch = applyExpr.match(/^groupby\(\(([^)]+)\)\)$/i);
+    if (groupMatch) {
+      const groupFields = groupMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+      const buckets = new Map();
+      for (const rec of result) {
+        const key = groupFields.map((gf) => String(rec[gf] ?? '')).join('|');
+        if (!buckets.has(key)) {
+          const base = { _count: 0 };
+          for (const gf of groupFields) base[gf] = rec[gf] ?? null;
+          buckets.set(key, base);
+        }
+        buckets.get(key)._count += 1;
+      }
+      result = Array.from(buckets.values());
+    }
+  }
+
   // 1. $filter evaluation
   const filterExpr = queryParams.get('$filter');
   if (filterExpr) {
@@ -43,6 +63,26 @@ export function executeODataQuery(records, queryParams, options = {}) {
   const top = parseInt(queryParams.get('$top') || '', 10);
   if (!isNaN(top) && top >= 0) {
     result = result.slice(0, top);
+  }
+
+  // 4b. $expand child composition join (when options.syntheticStore & options.parentKey provided)
+  const expandExpr = queryParams.get('$expand');
+  if (expandExpr && options.syntheticStore) {
+    const navNames = expandExpr.split(',').map((s) => s.trim()).filter(Boolean);
+    const parentKeyName = options.parentKeyField;
+    result = result.map((rec) => {
+      const enriched = { ...rec };
+      for (const nav of navNames) {
+        const cleanEntity = nav.replace(/^_/, '');
+        const childRows = options.syntheticStore[cleanEntity] || options.syntheticStore[nav] || [];
+        if (parentKeyName && rec[parentKeyName] !== undefined) {
+          enriched[nav] = childRows.filter((c) => String(c[parentKeyName]) === String(rec[parentKeyName]));
+        } else {
+          enriched[nav] = childRows;
+        }
+      }
+      return enriched;
+    });
   }
 
   // 5. $select projection

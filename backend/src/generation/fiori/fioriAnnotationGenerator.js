@@ -6,15 +6,21 @@
  */
 
 import { createFioriArtifact, FIORI_ARTIFACT_TYPES } from './fioriArtifactContract.js';
+import { formatCdsViewName, formatChildCdsViewName } from '../abap/cdsViewEntityGenerator.js';
 
 export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}) {
-  const rootEntity = project.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
+  const entities = project.dataModelSpec?.entities || [];
+  const relationships = project.dataModelSpec?.relationships || [];
+  const requirements = project.requirementsSpec?.items || [];
+  const rootEntity = entities.find((e) => e.entityType === 'ROOT' || e.isRoot) || entities[0];
   if (!rootEntity) return null;
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '');
-  const serviceName = `ZUI_${prefix}`.toUpperCase();
-  const rootProjName = `ZC_${prefix}`;
+  const serviceName = formatCdsViewName('ZUI_', prefix).toUpperCase();
+  const rootProjName = formatCdsViewName('ZC_', prefix);
   const fields = rootEntity.fields || [];
+  const childEntities = entities.filter((e) => e.entityId !== rootEntity.entityId);
+  const confirmedActions = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'ACTION');
 
   let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
   xml += `<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">\n`;
@@ -52,9 +58,17 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   xml += `          </Collection>\n`;
   xml += `        </Annotation>\n\n`;
 
-  // UI.LineItem
+  // UI.LineItem (includes confirmed RAP actions)
   xml += `        <Annotation Term="UI.LineItem">\n`;
   xml += `          <Collection>\n`;
+  for (const act of confirmedActions) {
+    const cleanTitle = String(act.title || 'Action').replace(/^(action|validation|determination)\s*:\s*/i, '').replace(/[^a-zA-Z0-9]/g, '');
+    const actionName = `execute${cleanTitle}`.slice(0, 30);
+    xml += `            <Record Type="UI.DataFieldForAction">\n`;
+    xml += `              <PropertyValue Property="Label" String="${act.title}"/>\n`;
+    xml += `              <PropertyValue Property="Action" String="${serviceName}.${actionName}"/>\n`;
+    xml += `            </Record>\n`;
+  }
   for (const f of fields) {
     xml += `            <Record Type="UI.DataField">\n`;
     xml += `              <PropertyValue Property="Value" Path="${f.name}"/>\n`;
@@ -64,7 +78,18 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   xml += `          </Collection>\n`;
   xml += `        </Annotation>\n\n`;
 
-  // UI.Facets
+  // UI.HeaderFacets
+  xml += `        <Annotation Term="UI.HeaderFacets">\n`;
+  xml += `          <Collection>\n`;
+  xml += `            <Record Type="UI.ReferenceFacet">\n`;
+  xml += `              <PropertyValue Property="ID" String="HeaderSummaryFacet"/>\n`;
+  xml += `              <PropertyValue Property="Label" String="Overview"/>\n`;
+  xml += `              <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#GeneralInformation"/>\n`;
+  xml += `            </Record>\n`;
+  xml += `          </Collection>\n`;
+  xml += `        </Annotation>\n\n`;
+
+  // UI.Facets (General Info + Child Entity Table Facets)
   xml += `        <Annotation Term="UI.Facets">\n`;
   xml += `          <Collection>\n`;
   xml += `            <Record Type="UI.ReferenceFacet">\n`;
@@ -72,6 +97,15 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   xml += `              <PropertyValue Property="Label" String="General Information"/>\n`;
   xml += `              <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#GeneralInformation"/>\n`;
   xml += `            </Record>\n`;
+  for (const child of childEntities) {
+    const compRel = relationships.find((r) => r.sourceEntityId === rootEntity.entityId && r.targetEntityId === child.entityId);
+    const navProp = compRel ? (compRel.name.startsWith('_') ? compRel.name : `_${compRel.name}`) : `_${child.name}`;
+    xml += `            <Record Type="UI.ReferenceFacet">\n`;
+    xml += `              <PropertyValue Property="ID" String="${child.name}Facet"/>\n`;
+    xml += `              <PropertyValue Property="Label" String="${child.businessName || child.name}"/>\n`;
+    xml += `              <PropertyValue Property="Target" AnnotationPath="${navProp}/@UI.LineItem"/>\n`;
+    xml += `            </Record>\n`;
+  }
   xml += `          </Collection>\n`;
   xml += `        </Annotation>\n\n`;
 
@@ -92,6 +126,36 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   xml += `        </Annotation>\n`;
 
   xml += `      </Annotations>\n`;
+
+  // Child Entity Annotations (UI.HeaderInfo + UI.LineItem)
+  for (const child of childEntities) {
+    const childProjName = formatChildCdsViewName('ZC_', prefix, child.name);
+    const childFields = child.fields || [];
+    const childTitle = childFields.find((f) => f.isKey)?.name || childFields[0]?.name || 'ID';
+
+    xml += `      <Annotations Target="${serviceName}.${childProjName}">\n`;
+    xml += `        <Annotation Term="UI.HeaderInfo">\n`;
+    xml += `          <Record Type="UI.HeaderInfoType">\n`;
+    xml += `            <PropertyValue Property="TypeName" String="${child.businessName || child.name}"/>\n`;
+    xml += `            <PropertyValue Property="TypeNamePlural" String="${child.businessName || child.name}s"/>\n`;
+    xml += `            <PropertyValue Property="Title">\n`;
+    xml += `              <Record Type="UI.DataField"><PropertyValue Property="Value" Path="${childTitle}"/></Record>\n`;
+    xml += `            </PropertyValue>\n`;
+    xml += `          </Record>\n`;
+    xml += `        </Annotation>\n`;
+    xml += `        <Annotation Term="UI.LineItem">\n`;
+    xml += `          <Collection>\n`;
+    for (const cf of childFields) {
+      xml += `            <Record Type="UI.DataField">\n`;
+      xml += `              <PropertyValue Property="Value" Path="${cf.name}"/>\n`;
+      xml += `              <PropertyValue Property="Label" String="${cf.label || cf.name}"/>\n`;
+      xml += `            </Record>\n`;
+    }
+    xml += `          </Collection>\n`;
+    xml += `        </Annotation>\n`;
+    xml += `      </Annotations>\n`;
+  }
+
   xml += `    </Schema>\n`;
   xml += `  </edmx:DataServices>\n`;
   xml += `</edmx:Edmx>\n`;
@@ -103,7 +167,7 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
     filePath: 'webapp/annotations/annotations.xml',
     content: xml,
     language: 'XML',
-    sourceEntityIds: [rootEntity.entityId],
+    sourceEntityIds: entities.map((e) => e.entityId),
     dependencies: [serviceName]
   });
 }

@@ -60,9 +60,10 @@ export class EvidenceEngine {
     const isCustom = assessment.classification === 'CUSTOM';
     const isStandard = assessment.classification === 'STANDARD';
     const targetRelease = assessment.release || (assessment as any).targetRelease || 'SAP S/4HANA 2023 Private Edition';
-    const pkgName = assessment.packageName?.trim() || (cleanTcode === 'F-53' || cleanTcode === 'F-28' || cleanTcode === 'FB03' ? 'FBAS' : (cleanTcode.startsWith('Z') ? 'Z_CUSTOM' : 'Standard SAP Core (FBAS)'));
+    const pkgName = assessment.packageName?.trim() || (cleanTcode === 'F-53' || cleanTcode === 'F-28' || cleanTcode === 'FB03' ? 'FBAS' : ((cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y')) ? 'Z_CUSTOM' : 'Unassigned'));
     const origSystem = assessment.originalSystem || 'SAP';
     const softComp = assessment.softwareComponent || 'S4CORE 108';
+    const ddicStatus = assessment.verificationStatus === 'PENDING_VERIFICATION' ? 'PENDING_VERIFICATION' : 'VERIFIED';
 
     evidence.push({
       id: `EVD-${cleanTcode}-03`,
@@ -71,7 +72,7 @@ export class EvidenceEngine {
       finding: `Object R3TR TRAN ${cleanTcode} owned by package ${pkgName}, original system ${origSystem}. Classified as ${assessment.classification || 'STANDARD'}.`,
       sourceSystem: assessment.systemId,
       sourceTableOrService: 'TADIR (Directory of R/3 Repository Objects)',
-      verificationStatus: isStandard || isCustom ? 'VERIFIED' : 'PENDING_VERIFICATION',
+      verificationStatus: (isStandard || isCustom) ? ddicStatus : 'PENDING_VERIFICATION',
       provenance: baseProvenance,
       timestamp: now,
       explanation: isCustom
@@ -87,7 +88,7 @@ export class EvidenceEngine {
       finding: `Package ${pkgName} belongs to software component ${softComp} (Target S/4HANA release: ${targetRelease}).`,
       sourceSystem: assessment.systemId,
       sourceTableOrService: 'TDEVC / CVERS',
-      verificationStatus: 'VERIFIED',
+      verificationStatus: ddicStatus,
       provenance: baseProvenance,
       timestamp: now,
       explanation: `Software component determines simplification item applicability and Fiori release compatibility.`
@@ -247,7 +248,7 @@ export class EvidenceEngine {
     });
 
     const bucketRelease = assessment.release || (assessment as any).targetRelease || 'SAP S/4HANA 2023 Private Edition';
-    const bucketPkg = assessment.packageName?.trim() || (cleanTcode === 'F-53' || cleanTcode === 'F-28' || cleanTcode === 'FB03' ? 'FBAS' : (cleanTcode.startsWith('Z') ? 'Z_CUSTOM' : 'Standard Core Package (FBAS)'));
+    const bucketPkg = assessment.packageName?.trim() || (cleanTcode === 'F-53' || cleanTcode === 'F-28' || cleanTcode === 'FB03' ? 'FBAS' : ((cleanTcode.startsWith('Z') || cleanTcode.startsWith('Y')) ? 'Z_CUSTOM' : 'Unassigned'));
 
     items.push({
       id: `EVD-A-03-${cleanTcode}`,
@@ -400,6 +401,20 @@ export class EvidenceEngine {
     });
 
     // --- BUCKET E: Pending Verification ---
+    const pendingODataSrv =
+      primaryApp?.odataServices?.[0] ||
+      (assessment.applicationRequirements?.knownODataService &&
+        assessment.applicationRequirements.knownODataService !== 'ODATA_V4_CORE' &&
+        assessment.applicationRequirements.knownODataService !== 'Service binding determined by FAL'
+        ? assessment.applicationRequirements.knownODataService
+        : '') ||
+      (cleanTcode === 'F-53' ? 'FAR_OUTGOING_PAYMENT_SRV' : 'PENDING_ODATA_RESOLUTION');
+
+    const pendingRoleName =
+      primaryApp?.businessRoles?.[0] ||
+      assessment.applicationRequirements?.relevantBusinessRole ||
+      (cleanTcode === 'F-53' ? 'SAP_BR_AP_ACCOUNTANT' : 'PENDING_ROLE_RESOLUTION');
+
     items.push({
       id: `EVD-E-01-${cleanTcode}`,
       bucket: 'E_PENDING_VERIFICATION',
@@ -412,7 +427,7 @@ export class EvidenceEngine {
       provenance: 'PENDING_VERIFICATION',
       timestamp: now,
       systemClient: sysClient,
-      reference: '/IWFND/MAINT_SERVICE-SRV_NAME=FAR_OUTGOING_PAYMENT_SRV',
+      reference: `/IWFND/MAINT_SERVICE-SRV_NAME=${pendingODataSrv}`,
       limitation: 'Cannot be verified without active SAP RFC connection or ADT Gateway catalog authorization.',
       explanation: 'Basis team must confirm service active state and system alias routing in client 200.'
     });
@@ -422,14 +437,14 @@ export class EvidenceEngine {
       bucket: 'E_PENDING_VERIFICATION',
       category: 'S21_AVAILABILITY',
       title: 'S21 ICF Node Activation Status',
-      finding: `SICF node /sap/opu/odata/sap/FAR_OUTGOING_PAYMENT_SRV activation in S21 is PENDING_BASIS_CHECK.`,
+      finding: `SICF node /sap/opu/odata/sap/${pendingODataSrv} activation in S21 is PENDING_BASIS_CHECK.`,
       source: `Internet Communication Framework (${sysClient})`,
       sourceTableOrService: 'SICF',
       verificationStatus: 'PENDING_VERIFICATION',
       provenance: 'PENDING_VERIFICATION',
       timestamp: now,
       systemClient: sysClient,
-      reference: 'SICF-PATH=/sap/opu/odata/sap/FAR_OUTGOING_PAYMENT_SRV',
+      reference: `SICF-PATH=/sap/opu/odata/sap/${pendingODataSrv}`,
       limitation: 'Requires Basis administrator confirmation via transaction SICF.',
       explanation: 'Inactive ICF node returns HTTP 403 or 404 at runtime even if catalogue metadata is valid.'
     });
@@ -439,14 +454,14 @@ export class EvidenceEngine {
       bucket: 'E_PENDING_VERIFICATION',
       category: 'BUSINESS_ROLE',
       title: 'S21 Live PFCG User Role Assignment Status',
-      finding: `Role SAP_BR_AP_ACCOUNTANT assignment to end-users in S21 client 200 is REQUIRES_PFCG_ROLE_ASSIGNMENT.`,
+      finding: `Role ${pendingRoleName} assignment to end-users in S21 client 200 is REQUIRES_PFCG_ROLE_ASSIGNMENT.`,
       source: `SAP User Master Records (${sysClient})`,
       sourceTableOrService: 'PFCG / AGR_USERS / SU01',
       verificationStatus: 'PENDING_VERIFICATION',
       provenance: 'PENDING_VERIFICATION',
       timestamp: now,
       systemClient: sysClient,
-      reference: 'AGR_USERS-AGR_NAME=SAP_BR_AP_ACCOUNTANT',
+      reference: `AGR_USERS-AGR_NAME=${pendingRoleName}`,
       limitation: 'Cannot be verified without live user master authorization check.',
       explanation: 'End users cannot view Launchpad space or tiles without active PFCG role assignment.'
     });

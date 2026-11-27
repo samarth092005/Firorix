@@ -45,17 +45,20 @@ function makeRequest(url, options = {}) {
 
 describe('GEN-07: Local Preview & Mock OData V4 Runtime', () => {
   const adminUser = { id: 'USR-LOCAL', role: 'ADMIN', name: 'Lead Architect' };
-  const testProjectId = 'PRJ-PREVIEW-TEST';
+  const testProjectId = `PRJ-PREVIEW-TEST-${Date.now()}`;
 
   let testProject;
   let previewUrl;
   let servicePrefix;
 
   before(async () => {
-    // Ensure clean state if previously created
+    // Ensure clean state if previously created (both filesystem and DB)
     const projectDir = path.resolve(defaultGenerationProjectStore.storageDir, testProjectId);
     if (fs.existsSync(projectDir)) {
       fs.rmSync(projectDir, { recursive: true, force: true });
+    }
+    if (typeof defaultGenerationProjectStore.deleteProject === 'function') {
+      await defaultGenerationProjectStore.deleteProject(testProjectId, adminUser).catch(() => {});
     }
 
     // 1. Create a full project

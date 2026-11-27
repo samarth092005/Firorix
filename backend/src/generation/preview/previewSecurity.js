@@ -24,15 +24,10 @@ export function verifyAdminAccess(userContext) {
     throw err;
   }
 
-  // Support local development single-admin, SAP consultant, and role-based checks
   const isAdmin = userContext.role === 'ADMIN' ||
     userContext.role === 'Fiorify_ADMIN' ||
-    userContext.role === 'SAP_CONSULTANT' ||
-    userContext.role === 'APPROVER' ||
+    userContext.role === 'LEAD_ARCHITECT' ||
     userContext.isAdmin === true ||
-    userContext.id === 'USR-LOCAL' ||
-    userContext.id === 'USR-ADMIN-01' ||
-    userContext.username === 'admin' ||
     (Array.isArray(userContext.scopes) && (
       userContext.scopes.includes('Fiorify.generation.manage') ||
       userContext.scopes.includes('Fiorify.admin.access')

@@ -99,9 +99,29 @@ export class ArchitectureService {
     }
 
     const current = project.architectureSpec || {};
+    const overrides = {
+      rapProfile: patch.selectedProfile || current.selectedProfile,
+      draftEnabled: patch.draftDecision?.enabled !== undefined ? patch.draftDecision.enabled : current.draftDecision?.enabled,
+      rootPersistenceTable: patch.rootEntity?.tableName || undefined,
+      draftPersistenceTable: patch.rootEntity?.draftTableName || undefined,
+      serviceProtocol: patch.serviceProtocol || current.serviceProtocol,
+      legacyDelegate: patch.legacyDelegate !== undefined ? patch.legacyDelegate : current.legacyDelegate
+    };
+
+    const evaluated = this.engine.evaluate(project, overrides);
     const updatedArchitecture = {
-      ...current,
+      ...evaluated,
       ...patch,
+      // Keep engine-derived runtime & governance strategies synchronized with selectedProfile
+      rationale: patch.rationale || evaluated.rationale,
+      lockStrategy: evaluated.lockStrategy,
+      etagStrategy: evaluated.etagStrategy,
+      authorizationStrategy: evaluated.authorizationStrategy,
+      cleanCoreImplications: evaluated.cleanCoreImplications,
+      namingBlueprint: evaluated.namingBlueprint,
+      draftDecision: evaluated.draftDecision,
+      rootEntity: evaluated.rootEntity,
+      childEntities: patch.childEntities || evaluated.childEntities,
       updatedAt: new Date().toISOString()
     };
 

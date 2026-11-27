@@ -11,7 +11,7 @@
  */
 
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
-import { formatCdsViewName } from './cdsViewEntityGenerator.js';
+import { formatCdsViewName, formatChildCdsViewName } from './cdsViewEntityGenerator.js';
 
 export function generateServiceBindingProposal(project, architecture) {
   const entities = project.dataModelSpec?.entities || [];
@@ -49,13 +49,20 @@ export function generateServiceBindingProposal(project, architecture) {
     entitySets: [
       {
         entitySetName: rootEntity.name,
-        cdsView: `ZC_${prefix}`
+        cdsView: formatCdsViewName('ZC_', prefix)
       },
       ...entities.filter((e) => e.entityId !== rootEntity.entityId).map((c) => ({
         entitySetName: c.name,
-        cdsView: `ZC_${prefix}_${c.name}`
+        cdsView: formatChildCdsViewName('ZC_', prefix, c.name)
       }))
     ],
+    odataV2Fallback: {
+      bindingName: `${serviceDefinitionName}_O2`.toUpperCase(),
+      bindingType: 'ODATA_V2_UI',
+      serviceDefinitionName,
+      expectedServiceUrlPattern: `/sap/opu/odata/sap/${serviceDefinitionName.toLowerCase()}_o2/`,
+      note: 'Use OData V2 UI binding only when targeting S/4HANA releases prior to 2021 or legacy SAPUI5 libraries.'
+    },
     manualActivationGuide: {
       adtMethod: [
         `1. Open Eclipse with ABAP Development Tools (ADT) connected to SAP system (e.g. S21).`,

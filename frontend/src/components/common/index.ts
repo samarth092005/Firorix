@@ -10,5 +10,5 @@ export * from './ErrorState';
 export * from './SearchInput';
 export * from './FilterControls';
 export * from './InformationPanel';
-export * from './ConfirmationDialog';
+export { ConfirmDialog, type ConfirmDialogProps } from '../dialogs/ConfirmDialog';
 export * from './DataTable';

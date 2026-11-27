@@ -50,7 +50,7 @@ export class GenerationProjectStore {
     this._globalLock = Promise.resolve();
     this.tenantId = options.tenantId || 'DEFAULT-TENANT-S21';
     const persistenceMode = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || '').toLowerCase();
-    this.useDatabase = options.useDatabase || (persistenceMode === 'postgres' && storageDir === DEFAULT_PROJECTS_DIR);
+    this.useDatabase = options.useDatabase || (['postgres', 'hana'].includes(persistenceMode) && storageDir === DEFAULT_PROJECTS_DIR);
     this.repository = options.repository || (this.useDatabase ? new GenerationProjectRepository() : null);
   }
 

@@ -1,7 +1,10 @@
 import pg from 'pg';
 import path from 'node:path';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { loadLocalEnv } from '../../adapters/btpDestinationAdapter.js';
+
+const BACKEND_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 // Auto-load environment configuration
 loadLocalEnv();
@@ -22,7 +25,7 @@ export class DatabasePool {
         ...customConfig
       };
       if (customConfig.connectionString.includes('sslmode=') || process.env.PGSSL === 'true') {
-        config.ssl = config.ssl || { rejectUnauthorized: false };
+        config.ssl = config.ssl || { rejectUnauthorized: true };
       }
       return new Pool(config);
     }
@@ -67,7 +70,7 @@ export class DatabasePool {
       config.host = customConfig.host || process.env.PGHOST || '127.0.0.1';
       config.port = customConfig.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : ((process.env.Fiorify_ALLOW_EMBEDDED_PG === 'true' || process.env.FIORIFY_ALLOW_EMBEDDED_PG === 'true') ? 54334 : 5432));
       config.user = customConfig.user || process.env.PGUSER || 'postgres';
-      config.password = customConfig.password || process.env.PGPASSWORD || 'password';
+      config.password = customConfig.password || process.env.PGPASSWORD || (process.env.NODE_ENV === 'production' ? undefined : 'password');
       const defaultDb = process.env.NODE_ENV === 'test' ? 'fiorify_test' : 'fiorify';
       config.database = customConfig.database || process.env.PGDATABASE || defaultDb;
     }
@@ -97,7 +100,7 @@ export class DatabasePool {
     try {
       const { default: EmbeddedPostgres } = await import('embedded-postgres');
       const port = options.port || (process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : 54334);
-      const dataDir = path.resolve(process.cwd(), 'data', 'db');
+      const dataDir = path.resolve(BACKEND_ROOT, 'data', 'db');
       
       embeddedInstance = new EmbeddedPostgres({
         port,

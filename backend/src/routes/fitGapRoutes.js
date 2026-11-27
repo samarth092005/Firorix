@@ -1,7 +1,6 @@
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { validateFitGapAssessRequest, normalizeFitGapInput } from '../validators/fitGapValidator.js';
-
-const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
+import { readJsonBody } from '../api/index.js';
 
 /**
  * Fit-Gap Assessment & Governed Modernization Recommendation Routes
@@ -23,46 +22,19 @@ export async function handleFitGapRoutes(req, res, url, context = {}) {
 
   // 1. POST /api/v1/fitgap/assess
   if (req.method === 'POST' && url.pathname === '/api/v1/fitgap/assess') {
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            error: 'Payload Too Large',
-            errorMessage: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`,
-            message: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`
-          })
-        );
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload;
     try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
           success: false,
-          statusCode: 'BAD_REQUEST',
-          error: 'Bad Request',
-          errorMessage: 'Malformed JSON payload.',
-          message: 'Malformed JSON payload.'
+          statusCode: err.code || 'BAD_REQUEST',
+          error: status === 413 ? 'Payload Too Large' : 'Bad Request',
+          errorMessage: err.message,
+          message: err.message
         })
       );
       return true;
@@ -129,44 +101,18 @@ export async function handleFitGapRoutes(req, res, url, context = {}) {
 
   // 2. POST /api/v1/recommendations/generate or POST /api/v1/fitgap/recommend
   if (req.method === 'POST' && (url.pathname === '/api/v1/recommendations/generate' || url.pathname === '/api/v1/fitgap/recommend')) {
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            error: 'Payload Too Large',
-            errorMessage: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`
-          })
-        );
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload;
     try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
           success: false,
-          statusCode: 'BAD_REQUEST',
-          error: 'Bad Request',
-          errorMessage: 'Malformed JSON payload.'
+          statusCode: err.code || 'BAD_REQUEST',
+          error: status === 413 ? 'Payload Too Large' : 'Bad Request',
+          errorMessage: err.message
         })
       );
       return true;

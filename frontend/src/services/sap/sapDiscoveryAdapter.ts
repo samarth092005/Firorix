@@ -80,10 +80,8 @@ class SapDiscoveryAdapter implements ISapDiscoveryAdapter {
     let isLiveSystem = request.systemId === 'S21-200' && searchResponse.mode === 'LIVE_SAP' && Boolean(searchResponse.transaction);
     let tx = searchResponse.transaction;
 
-    // If live lookup failed (e.g. S21 live Gateway endpoint is not reachable in local/demo environment),
-    // provide honest fallback to curated S21 demo snapshot while maintaining full DDIC metadata
-    // and explicitly marking provenance as CURATED_DEMO_FIXTURE.
-    if (!tx) {
+    const allowDemoFallback = !import.meta.env?.PROD || import.meta.env?.VITE_DEMO_MODE === 'true';
+    if (!tx && allowDemoFallback) {
       const fallbackLookup = mockSapAdapter.queryTransaction('S21-200-DEMO', cleanTcode);
       if (fallbackLookup.success && fallbackLookup.transaction) {
         tx = fallbackLookup.transaction;

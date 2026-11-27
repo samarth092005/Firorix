@@ -2,8 +2,9 @@ import { mockSapAdapter } from '../adapters/mockSapAdapter.js';
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { defaultTransactionDiscoveryService } from '../services/transactionDiscoveryService.js';
 import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from '../services/standardTransactionKnowledge.js';
-
-const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
+import { defaultUsagePrioritizationEngine } from '../engine/usagePrioritizationEngine.js';
+import { defaultPfcgRoleMappingEngine } from '../engine/pfcgRoleMappingEngine.js';
+import { readJsonBody } from '../api/index.js';
 
 /**
  * SAP Transaction Discovery, T-Code Search & Fiori Matching Routes
@@ -32,17 +33,14 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
   // A. Trigger Discovery Execution (POST /api/v1/discovery/executions)
   if (req.method === 'POST' && url.pathname === '/api/v1/discovery/executions') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    await new Promise(resolve => req.on('end', resolve));
-
     let payload = {};
-    if (body.trim()) {
-      try { payload = JSON.parse(body); } catch {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
-        return true;
-      }
+    try {
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
+      return true;
     }
 
     try {
@@ -220,37 +218,13 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
   // 2. Evidence-based T-Code Search & Discovery (POST /api/v1/tcode-search)
   if (req.method === 'POST' && url.pathname === '/api/v1/tcode-search') {
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            error: 'Payload Too Large',
-            message: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`
-          })
-        );
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload;
     try {
-      payload = JSON.parse(body || '{}');
-    } catch (parseErr) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Bad Request', message: 'Malformed JSON payload.' }));
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: status === 413 ? 'Payload Too Large' : 'Bad Request', message: err.message }));
       return true;
     }
 
@@ -320,11 +294,11 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
           effectiveDiscovery = {
             ...fallbackResult,
             systemId,
-            mode: 'LIVE_SAP',
+            mode: 'OFFLINE_SNAPSHOT',
             liveConnectionState: 'OFFLINE_FALLBACK',
             warnings: [
               ...(fallbackResult.warnings || []),
-              `Live SAP S21 host unreachable (${discoveryResult.errorMessage || 'Connection failed'}). Evaluated using authoritative S21 DDIC repository snapshot.`
+              `Live SAP host unreachable (${discoveryResult.errorMessage || 'Connection failed'}). Evaluated using offline repository snapshot.`
             ]
           };
         } else {
@@ -497,42 +471,17 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
   // 3. POST /api/v1/discovery/transaction
   if (req.method === 'POST' && url.pathname === '/api/v1/discovery/transaction') {
-    let bodyStr = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            errorMessage: 'Payload exceeds maximum limit of 100KB'
-          })
-        );
-        req.destroy();
-        return;
-      }
-      bodyStr += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload;
     try {
-      payload = bodyStr.trim() ? JSON.parse(bodyStr) : {};
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
           success: false,
-          statusCode: 'INVALID_JSON',
-          errorMessage: 'Request body must be valid JSON'
+          statusCode: status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_JSON',
+          errorMessage: status === 413 ? 'Payload exceeds maximum limit of 100KB' : 'Request body must be valid JSON'
         })
       );
       return true;
@@ -595,42 +544,17 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
   // 4. POST /api/v1/matching/fiori-apps
   if (req.method === 'POST' && url.pathname === '/api/v1/matching/fiori-apps') {
-    let bodyStr = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            errorMessage: 'Payload exceeds maximum limit of 100KB'
-          })
-        );
-        req.destroy();
-        return;
-      }
-      bodyStr += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload;
     try {
-      payload = bodyStr.trim() ? JSON.parse(bodyStr) : {};
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
           success: false,
-          statusCode: 'INVALID_JSON',
-          errorMessage: 'Request body must be valid JSON'
+          statusCode: status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_JSON',
+          errorMessage: status === 413 ? 'Payload exceeds maximum limit of 100KB' : 'Request body must be valid JSON'
         })
       );
       return true;
@@ -692,42 +616,17 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
 
   // 5. POST /api/v1/discovery/match & /api/v1/discovery/mcp-assisted
   if (req.method === 'POST' && (url.pathname === '/api/v1/discovery/match' || url.pathname === '/api/v1/discovery/mcp-assisted')) {
-    let bodyStr = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            errorMessage: 'Payload exceeds maximum limit of 100KB'
-          })
-        );
-        req.destroy();
-        return;
-      }
-      bodyStr += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload;
     try {
-      payload = bodyStr.trim() ? JSON.parse(bodyStr) : {};
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify({
           success: false,
-          statusCode: 'INVALID_JSON',
-          errorMessage: 'Request body must be valid JSON'
+          statusCode: status === 413 ? 'PAYLOAD_TOO_LARGE' : 'INVALID_JSON',
+          errorMessage: status === 413 ? 'Payload exceeds maximum limit of 100KB' : 'Request body must be valid JSON'
         })
       );
       return true;
@@ -891,6 +790,56 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
           errorMessage: sanitized
         })
       );
+    }
+    return true;
+  }
+
+  // POST /api/v1/discovery/usage-priority (ST03N / STAD workload prioritization)
+  if (req.method === 'POST' && url.pathname === '/api/v1/discovery/usage-priority') {
+    try {
+      const bodyChunks = [];
+      let totalSize = 0;
+      for await (const chunk of req) {
+        totalSize += chunk.length;
+        if (totalSize > MAX_BODY_SIZE) {
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, statusCode: 'PAYLOAD_TOO_LARGE', errorMessage: 'Payload exceeds 100KB limit' }));
+          return true;
+        }
+        bodyChunks.push(chunk);
+      }
+      const payload = JSON.parse(Buffer.concat(bodyChunks).toString('utf8') || '{}');
+      const result = defaultUsagePrioritizationEngine.prioritize(payload.transactions || []);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...result }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: sanitizeErrorMessage(err.message) }));
+    }
+    return true;
+  }
+
+  // POST /api/v1/matching/pfcg-map (PFCG Role -> Fiori Space/Page/Catalog mapping)
+  if (req.method === 'POST' && url.pathname === '/api/v1/matching/pfcg-map') {
+    try {
+      const bodyChunks = [];
+      let totalSize = 0;
+      for await (const chunk of req) {
+        totalSize += chunk.length;
+        if (totalSize > MAX_BODY_SIZE) {
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, statusCode: 'PAYLOAD_TOO_LARGE', errorMessage: 'Payload exceeds 100KB limit' }));
+          return true;
+        }
+        bodyChunks.push(chunk);
+      }
+      const payload = JSON.parse(Buffer.concat(bodyChunks).toString('utf8') || '{}');
+      const result = await defaultPfcgRoleMappingEngine.mapRoles(payload.roles || [], officialCatalogueAdapter);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, ...result }));
+    } catch (err) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: sanitizeErrorMessage(err.message) }));
     }
     return true;
   }

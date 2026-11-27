@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll, vi } from 'vitest';
-import { transactionSearchService } from '../services/transactionSearchService';
-import { mockSapAdapter } from '../adapters/mockSapAdapter';
+import { transactionSearchService } from '../../../services/sap/transactionSearchService';
+import { mockSapAdapter } from '../../../services/sap/mockSapAdapter';
 import { liveSapAdapter } from '../adapters/liveSapAdapter';
 import { mockCatalogueAdapter } from '../adapters/mockCatalogueAdapter';
 import { matchingEngine } from '../engine/matchingEngine';
-import { searchHistoryStore } from '../services/searchHistoryStore';
+import { searchHistoryStore } from '../../../services/sap/searchHistoryStore';
 import { SYNTHETIC_TRANSACTIONS } from '../fixtures/syntheticTransactions';
-import { EvidenceClassifier } from '../engine/evidenceClassifier';
+import { EvidenceClassifier } from '../../../services/sap/engine/evidenceClassifier';
 
 describe('Fiorify Phase 1 - Transaction Checker Engine & Services', () => {
   const SYSTEM_DEV = 'S4H-DEV-200';

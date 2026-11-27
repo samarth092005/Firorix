@@ -65,7 +65,7 @@ export const DEFAULT_SAP_SYSTEMS = Object.freeze([
     adtDiscoveryEndpoint: '/sap/bc/adt/discovery',
     connectivityStatus: CONNECTIVITY_STATUSES.UNKNOWN,
     lastSuccessfulCheck: null,
-    evidenceProvenance: EVIDENCE_PROVENANCE.LIVE_SAP_VERIFIED,
+    evidenceProvenance: EVIDENCE_PROVENANCE.PENDING_VERIFICATION,
     configurationStatus: 'CONFIGURED',
     components: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
     softwareComponents: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
@@ -89,7 +89,7 @@ export const DEFAULT_SAP_SYSTEMS = Object.freeze([
     adtDiscoveryEndpoint: '/sap/bc/adt/discovery',
     connectivityStatus: CONNECTIVITY_STATUSES.UNKNOWN,
     lastSuccessfulCheck: null,
-    evidenceProvenance: EVIDENCE_PROVENANCE.LIVE_SAP_VERIFIED,
+    evidenceProvenance: EVIDENCE_PROVENANCE.PENDING_VERIFICATION,
     configurationStatus: 'CONFIGURED',
     components: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
     softwareComponents: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
@@ -175,7 +175,7 @@ export class SystemRegistry {
     this.healthService = options.healthService || defaultSapConnectionHealthService;
 
     const persistenceEnv = (process.env.FIORIFY_PERSISTENCE || process.env.Fiorify_PERSISTENCE || '').toLowerCase();
-    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (persistenceEnv === 'postgres');
+    this.useDatabase = options.useDatabase !== undefined ? options.useDatabase : (['postgres', 'hana'].includes(persistenceEnv));
     this.repository = options.repository || (this.useDatabase ? new SapSystemRepository() : null);
     this.defaultTenantId = options.tenantId || 'DEFAULT-TENANT-S21';
 

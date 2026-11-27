@@ -15,6 +15,7 @@ import { generateServiceBindingProposal } from './serviceBindingProposalGenerato
 import { generateDclAccessControl } from './dclAccessControlGenerator.js';
 import { generateAbapDocumentation } from './abapDocumentationGenerator.js';
 import { ArtifactRegistry } from '../artifacts/artifactRegistry.js';
+import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
 import { defaultGenerationProjectStore } from '../projects/generationProjectStore.js';
 import { defaultArchitectureDecisionEngine } from '../architecture/architectureDecisionEngine.js';
 import { LIFECYCLE_STATUSES } from '../contracts/generationProjectContract.js';
@@ -90,6 +91,63 @@ export class AbapGeneratorEngine {
     // 8. ABAP Documentation
     const docs = generateAbapDocumentation(project, architecture, generatedArtifacts);
     generatedArtifacts.push(...docs);
+
+    // 9. abapGit Repository & Package Descriptors
+    const targetPackage = (project.targetPackage || 'ZCUSTOM_CORE').toUpperCase();
+    generatedArtifacts.push(
+      createAbapArtifact({
+        projectId: project.projectId,
+        artifactType: ABAP_ARTIFACT_TYPES.ABAP_DOCUMENTATION,
+        objectName: 'ABAPGIT_CONFIG',
+        filePath: '.abapgit.xml',
+        language: 'XML',
+        content: `<?xml version="1.0" encoding="utf-8"?>\n<asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">\n  <asx:values>\n    <DATA>\n      <MASTER_LANGUAGE>E</MASTER_LANGUAGE>\n      <STARTING_FOLDER>/src/</STARTING_FOLDER>\n      <FOLDER_LOGIC>PREFIX</FOLDER_LOGIC>\n    </DATA>\n  </asx:values>\n</asx:abap>\n`
+      }),
+      createAbapArtifact({
+        projectId: project.projectId,
+        artifactType: ABAP_ARTIFACT_TYPES.ABAP_DOCUMENTATION,
+        objectName: `${targetPackage}_DEVC`,
+        filePath: `src/package.devc.xml`,
+        language: 'XML',
+        content: `<?xml version="1.0" encoding="utf-8"?>\n<abapGit version="v1.0.0" serializer="LCL_OBJECT_DEVC" serializer_version="v1.0.0">\n  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">\n    <asx:values>\n      <DEVC>\n        <CTEXT>${project.projectName || 'Fiorify Generated Clean Core Package'}</CTEXT>\n      </DEVC>\n    </asx:values>\n  </asx:values>\n</abapGit>\n`
+      })
+    );
+
+    const rootEntity = project.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
+    const rootKey = (rootEntity?.fields || []).find((f) => f.isKey);
+    const cleanRoot = (rootEntity?.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toUpperCase();
+    generatedArtifacts.push(
+      createAbapArtifact({
+        projectId: project.projectId,
+        artifactType: ABAP_ARTIFACT_TYPES.ABAP_DOCUMENTATION,
+        objectName: `ZUI_${cleanRoot}_O4_SRVB`,
+        filePath: `src/srvb/zui_${cleanRoot.toLowerCase()}_o4.srvb.xml`,
+        language: 'XML',
+        content: `<?xml version="1.0" encoding="utf-8"?>\n<abapGit version="v1.0.0" serializer="LCL_OBJECT_SRVB" serializer_version="v1.0.0">\n  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">\n    <asx:values>\n      <SRVB>\n        <METADATA><NAME>ZUI_${cleanRoot}_O4</NAME><TYPE>SRVB/SVB</TYPE></METADATA>\n        <CONTENT><BIND_TYPE_IMPL><NAME>ODATA_V4_UI</NAME></BIND_TYPE_IMPL><SERVICES><item><NAME>ZUI_${cleanRoot}</NAME></item></SERVICES></CONTENT>\n      </SRVB>\n    </asx:values>\n  </asx:abap>\n</abapGit>\n`
+      })
+    );
+    if (rootKey && rootKey.type !== 'sysuuid_x16') {
+      const nrobName = `Z${cleanRoot.slice(0, 9)}`.toUpperCase();
+      const enquName = `EZ_${cleanRoot.slice(0, 13)}`.toUpperCase();
+      generatedArtifacts.push(
+        createAbapArtifact({
+          projectId: project.projectId,
+          artifactType: ABAP_ARTIFACT_TYPES.ABAP_DOCUMENTATION,
+          objectName: nrobName,
+          filePath: `src/objects/${nrobName.toLowerCase()}.nrob.xml`,
+          language: 'XML',
+          content: `<?xml version="1.0" encoding="utf-8"?>\n<abapGit version="v1.0.0" serializer="LCL_OBJECT_NROB" serializer_version="v1.0.0">\n  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">\n    <asx:values><ATTRIBUTES><OBJECT>${nrobName}</OBJECT><DOMLEN>CHAR10</DOMLEN></ATTRIBUTES></asx:values>\n  </asx:abap>\n</abapGit>\n`
+        }),
+        createAbapArtifact({
+          projectId: project.projectId,
+          artifactType: ABAP_ARTIFACT_TYPES.ABAP_DOCUMENTATION,
+          objectName: enquName,
+          filePath: `src/objects/${enquName.toLowerCase()}.enqu.xml`,
+          language: 'XML',
+          content: `<?xml version="1.0" encoding="utf-8"?>\n<abapGit version="v1.0.0" serializer="LCL_OBJECT_ENQU" serializer_version="v1.0.0">\n  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">\n    <asx:values><DD25V><VIEWNAME>${enquName}</VIEWNAME><DDTEXT>Lock Object for ${cleanRoot}</DDTEXT></DD25V></asx:values>\n  </asx:abap>\n</abapGit>\n`
+        })
+      );
+    }
 
     // Filter to selective target artifact if requested
     let artifactsToCommit = generatedArtifacts;

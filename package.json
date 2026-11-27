@@ -29,6 +29,7 @@
     "@sap-cloud-sdk/connectivity": "^3.26.4",
     "@sap-cloud-sdk/http-client": "^3.26.4",
     "@sap-ux/fiori-mcp-server": "1.15.24",
+    "@sap/hana-client": "^2.21.32",
     "pg": "^8.23.1",
     "xlsx": "^0.18.5"
   }

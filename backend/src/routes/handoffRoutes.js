@@ -1,8 +1,7 @@
 import { sanitizeProtectedFields } from '../middleware/securityFieldSanitizer.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
 import { USER_ROLES } from '../services/authService.js';
-
-const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
+import { readJsonBody } from '../api/index.js';
 
 /**
  * Generation Studio Handoff HTTP Routes
@@ -18,32 +17,13 @@ export async function handleHandoffRoutes(req, res, url, context = {}) {
 
   // 1. Create Handoff (POST /api/v1/generation/handoff)
   if (req.method === 'POST' && url.pathname === '/api/v1/generation/handoff') {
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, statusCode: 'PAYLOAD_TOO_LARGE', errorMessage: 'Payload exceeds maximum limit' }));
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
     let payload = {};
     try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
       return true;
     }
 

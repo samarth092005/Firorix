@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, beforeAll, afterAll } from 'vitest';
 import { ApiClient, ApiError, apiClient } from '../apiClient';
-import { TransactionSearchService } from '../../../features/transaction-checker/services/transactionSearchService';
-import { searchHistoryStore } from '../../../features/transaction-checker/services/searchHistoryStore';
+import { TransactionSearchService } from '../../../services/sap/transactionSearchService';
+import { searchHistoryStore } from '../../../services/sap/searchHistoryStore';
 
 describe('Fiorify FX-002 — End-to-End API Integration & Offline Resilience', { timeout: 15000 }, () => {
   let ephemeralServer: any = null;

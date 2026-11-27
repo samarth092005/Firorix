@@ -209,23 +209,41 @@ export class StaticValidationEngine {
         });
       }
 
-      // Verify that property paths referenced in annotations exist on entity
+      // Verify that property paths referenced in annotations exist on their target entity (root or child)
       if (rootEntity && annotArtifact.content) {
-        const entityFields = new Set((rootEntity.fields || []).map((f) => f.name));
-        const pathMatches = [...annotArtifact.content.matchAll(/Path="([^"#@]+)"/g)].map((m) => m[1]);
-        for (const p of pathMatches) {
-          if (!entityFields.has(p) && p !== 'ID') {
-            findings.push({
-              ruleId: 'RULE_GEN06_ANNOTATION_FIELD_NOT_FOUND',
-              severity: 'ERROR',
-              category: 'FIORI_ANNOTATION',
-              artifactId: annotArtifact.artifactId,
-              location: annotArtifact.filePath,
-              message: `Annotation references property "${p}" which does not exist on entity "${rootEntity.name}".`,
-              explanation: 'Fiori Elements XML annotations must bind to valid properties exposed by the underlying entity.',
-              suggestedCorrection: `Update or regenerate annotations.xml to align with current entity fields: [${Array.from(entityFields).join(', ')}].`,
-              evidenceBasis: 'OData V4 Annotation Model'
+        const allEntityFields = new Set(entities.flatMap((e) => (e.fields || []).map((f) => f.name)));
+        const annotationBlocks = [...annotArtifact.content.matchAll(/<Annotations\s+Target="([^"]+)"[^>]*>([\s\S]*?)<\/Annotations>/g)];
+
+        if (annotationBlocks.length > 0) {
+          const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '');
+          for (const block of annotationBlocks) {
+            const target = block[1];
+            const blockBody = block[2];
+            const matchedEntity = entities.find((e) => {
+              const eClean = (e.name || '').replace(/[^a-zA-Z0-9_]/g, '');
+              return target.endsWith(`.${eClean}`) || target.endsWith(`_${eClean}`) || (e.entityId === rootEntity.entityId && target.endsWith(`ZC_${prefix.slice(0, 27)}`));
             });
+            const allowedFields = matchedEntity
+              ? new Set((matchedEntity.fields || []).map((f) => f.name))
+              : allEntityFields;
+            const entityLabel = matchedEntity ? matchedEntity.name : rootEntity.name;
+
+            const pathMatches = [...blockBody.matchAll(/Path="([^"#@]+)"/g)].map((m) => m[1]);
+            for (const p of pathMatches) {
+              if (!allowedFields.has(p) && p !== 'ID') {
+                findings.push({
+                  ruleId: 'RULE_GEN06_ANNOTATION_FIELD_NOT_FOUND',
+                  severity: 'ERROR',
+                  category: 'FIORI_ANNOTATION',
+                  artifactId: annotArtifact.artifactId,
+                  location: annotArtifact.filePath,
+                  message: `Annotation references property "${p}" which does not exist on entity "${entityLabel}".`,
+                  explanation: 'Fiori Elements XML annotations must bind to valid properties exposed by the underlying entity.',
+                  suggestedCorrection: `Update or regenerate annotations.xml to align with current entity fields: [${Array.from(allowedFields).join(', ')}].`,
+                  evidenceBasis: 'OData V4 Annotation Model'
+                });
+              }
+            }
           }
         }
       }

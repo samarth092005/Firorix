@@ -7,6 +7,22 @@
 
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
 import { RAP_PROFILES } from '../architecture/architectureContract.js';
+import { formatCdsViewName, formatChildCdsViewName } from './cdsViewEntityGenerator.js';
+import { toDdicFieldName } from './persistenceTableGenerator.js';
+
+function buildMappingBlock(entity, tableName) {
+  let block = `\n  mapping for ${tableName.toLowerCase()}\n  {\n`;
+  for (const f of entity.fields || []) {
+    block += `    ${f.name.padEnd(20)} = ${toDdicFieldName(f.name)};\n`;
+  }
+  block += `    CreatedBy            = created_by;\n`;
+  block += `    CreatedAt            = created_at;\n`;
+  block += `    LastChangedBy        = last_changed_by;\n`;
+  block += `    LastChangedAt        = last_changed_at;\n`;
+  block += `    LocalLastChangedAt   = local_last_changed_at;\n`;
+  block += `  }\n`;
+  return block;
+}
 
 function toAbapMethodName(prefix, title) {
   let clean = (title || 'Action')
@@ -27,9 +43,9 @@ export function generateBehaviorDefinition(project, architecture) {
   if (!rootEntity) return artifacts;
 
   const prefix = (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '');
-  const rootInterfaceName = `ZI_${prefix}`;
-  const rootProjectionName = `ZC_${prefix}`;
-  const rootImplClass = `BP_I_${prefix}`.toUpperCase();
+  const rootInterfaceName = formatCdsViewName('ZI_', prefix);
+  const rootProjectionName = formatCdsViewName('ZC_', prefix);
+  const rootImplClass = `BP_I_${prefix}`.slice(0, 30).toUpperCase();
 
   const draftEnabled = architecture.draftDecision?.enabled === true;
   const isReadOnly = architecture.selectedProfile === RAP_PROFILES.READ_ONLY_QUERY;
@@ -75,7 +91,11 @@ export function generateBehaviorDefinition(project, architecture) {
   // Read-only / Mandatory fields
   const keyField = (rootEntity.fields || []).find((f) => f.isKey);
   if (keyField) {
-    bdef += `  field ( readonly, numbering : managed ) ${keyField.name};\n`;
+    if (keyField.type === 'sysuuid_x16') {
+      bdef += `  field ( readonly, numbering : managed ) ${keyField.name};\n`;
+    } else {
+      bdef += `  field ( mandatory : create, readonly : update ) ${keyField.name};\n`;
+    }
   }
   bdef += `  field ( readonly ) CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;\n\n`;
 
@@ -134,13 +154,30 @@ export function generateBehaviorDefinition(project, architecture) {
     bdef += ` }\n`;
   }
 
+  // Side effects for Fiori Elements UI auto-refresh
+  if (confirmedActions.length > 0 || confirmedDetReqs.length > 0) {
+    bdef += `\n  side effects {\n`;
+    for (const a of confirmedActions) {
+      const actMethod = toAbapMethodName('execute', a.title);
+      bdef += `    action ${actMethod} affects $self;\n`;
+    }
+    if (confirmedDetReqs.length > 0 && keyField) {
+      bdef += `    field ${keyField.name} affects $self;\n`;
+    }
+    bdef += `  }\n`;
+  }
+
+  if (!isUnmanaged) {
+    bdef += buildMappingBlock(rootEntity, rootTable);
+  }
+
   bdef += `}\n\n`;
 
   // 2. Child Entity Behavior Definitions
   const childEntities = entities.filter((e) => e.entityId !== rootEntity.entityId);
   for (const child of childEntities) {
     const childNames = architecture.childEntities?.find((c) => c.entityId === child.entityId);
-    const childViewName = `ZI_${prefix}_${child.name}`;
+    const childViewName = formatChildCdsViewName('ZI_', prefix, child.name);
     const childTable = childNames?.tableName || child.tableName || `Z${child.name.toUpperCase()}`;
     const childDraftTable = childNames?.draftTableName;
 
@@ -160,7 +197,11 @@ export function generateBehaviorDefinition(project, architecture) {
 
     const childKey = (child.fields || []).find((f) => f.isKey);
     if (childKey) {
-      bdef += `  field ( readonly, numbering : managed ) ${childKey.name};\n`;
+      if (childKey.type === 'sysuuid_x16') {
+        bdef += `  field ( readonly, numbering : managed ) ${childKey.name};\n`;
+      } else {
+        bdef += `  field ( mandatory : create, readonly : update ) ${childKey.name};\n`;
+      }
     }
     bdef += `  field ( readonly ) CreatedBy, CreatedAt, LastChangedBy, LastChangedAt, LocalLastChangedAt;\n`;
     bdef += `  association _${rootEntity.name}`;
@@ -168,6 +209,9 @@ export function generateBehaviorDefinition(project, architecture) {
       bdef += ` { with draft; }`;
     }
     bdef += `;\n`;
+    if (!isUnmanaged) {
+      bdef += buildMappingBlock(child, childTable);
+    }
     bdef += `}\n\n`;
   }
 
@@ -184,11 +228,13 @@ export function generateBehaviorDefinition(project, architecture) {
 
   // 3. Projection Behavior Definition (ZC_*)
   let projBdef = `projection;\n`;
+  projBdef += `strict ( 2 );\n`;
   if (draftEnabled) {
-    projBdef += `strict ( 2 );\n`;
-    projBdef += `use draft;\n\n`;
+    projBdef += `use draft;\n`;
   }
+  projBdef += `\n`;
   projBdef += `define behavior for ${rootProjectionName} alias ${rootEntity.name}\n`;
+  projBdef += `use etag\n`;
   projBdef += `{\n`;
   projBdef += `  use create;\n`;
   projBdef += `  use update;\n`;
@@ -216,8 +262,9 @@ export function generateBehaviorDefinition(project, architecture) {
   projBdef += `}\n\n`;
 
   for (const child of childEntities) {
-    const childProjName = `ZC_${prefix}_${child.name}`;
+    const childProjName = formatChildCdsViewName('ZC_', prefix, child.name);
     projBdef += `define behavior for ${childProjName} alias ${child.name}\n`;
+    projBdef += `use etag\n`;
     projBdef += `{\n`;
     projBdef += `  use update;\n`;
     projBdef += `  use delete;\n\n`;

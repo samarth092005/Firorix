@@ -2,8 +2,29 @@ import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { USER_ROLES, authService, PERMISSIONS } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
 import { sanitizeProtectedFields } from '../middleware/securityFieldSanitizer.js';
+import { readJsonBody } from '../api/index.js';
 
-const MAX_BODY_SIZE = 100 * 1024; // 100KB body limit
+async function parseJsonOrRespond(req, res, { optional = false } = {}) {
+  try {
+    return { ok: true, payload: await readJsonBody(req) };
+  } catch (err) {
+    if (optional && err.code === 'BAD_REQUEST') {
+      return { ok: true, payload: {} };
+    }
+    const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+    res.writeHead(status, { 'Content-Type': 'application/json' });
+    res.end(
+      JSON.stringify({
+        success: false,
+        statusCode: err.code || 'BAD_REQUEST',
+        error: status === 413 ? 'Payload Too Large' : 'Bad Request',
+        errorMessage: err.message,
+        message: err.message
+      })
+    );
+    return { ok: false, payload: {} };
+  }
+}
 
 /**
  * Assessment Store, Lifecycle & Governance HTTP Routes
@@ -63,51 +84,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
 
   // 1. POST /api/v1/assessments (Create Assessment)
   if (req.method === 'POST' && url.pathname === '/api/v1/assessments') {
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.pause();
-        res.writeHead(413, { 'Content-Type': 'application/json', 'Connection': 'close' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            error: 'Payload Too Large',
-            errorMessage: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`,
-            message: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`
-          })
-        );
-        req.destroy();
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
-    let payload;
-    try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          success: false,
-          statusCode: 'BAD_REQUEST',
-          error: 'Bad Request',
-          errorMessage: 'Malformed JSON payload.',
-          message: 'Malformed JSON payload.'
-        })
-      );
-      return true;
-    }
+    const parsed = await parseJsonOrRespond(req, res);
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
 
     const correlationId = req.headers['x-correlation-id'] || req.headers['x-request-id'];
     const requestId = correlationId || `REQ-ASM-${String(requestCounter++).padStart(6, '0')}`;
@@ -250,37 +229,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/archive'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            error: 'Payload Too Large',
-            errorMessage: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`
-          })
-        );
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
-    let payload = {};
-    if (body.trim().length > 0) {
-      try { payload = JSON.parse(body); } catch { /* ignore */ }
-    }
+    const parsed = await parseJsonOrRespond(req, res, { optional: true });
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
 
     try {
       const archived = await assessmentStore.archive(
@@ -333,48 +284,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(
-          JSON.stringify({
-            success: false,
-            statusCode: 'PAYLOAD_TOO_LARGE',
-            error: 'Payload Too Large',
-            errorMessage: `Request body exceeds maximum size of ${MAX_BODY_SIZE / 1024}KB.`
-          })
-        );
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
-    let payload;
-    try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(
-        JSON.stringify({
-          success: false,
-          statusCode: 'BAD_REQUEST',
-          error: 'Bad Request',
-          errorMessage: 'Malformed JSON payload.'
-        })
-      );
-      return true;
-    }
+    const parsed = await parseJsonOrRespond(req, res);
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
 
     try {
       const requestedLifecycle = payload.lifecycleStatus || payload.status;
@@ -455,14 +367,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/submit-review'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    if (body.trim().length > 0) {
-      try { payload = JSON.parse(body); } catch { /* ignore */ }
-    }
+    const parsed = await parseJsonOrRespond(req, res, { optional: true });
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
     try {
       const updated = await assessmentStore.submitForReview(assessmentId, currentUser, payload.comment || 'Submitted for governance review.');
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -480,14 +387,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/approve'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    if (body.trim().length > 0) {
-      try { payload = JSON.parse(body); } catch { /* ignore */ }
-    }
+    const parsed = await parseJsonOrRespond(req, res, { optional: true });
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
     try {
       const isOverride = payload.isOverride === true;
       if (isOverride) {
@@ -525,14 +427,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/reject'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    if (body.trim().length > 0) {
-      try { payload = JSON.parse(body); } catch { /* ignore */ }
-    }
+    const parsed = await parseJsonOrRespond(req, res, { optional: true });
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
     try {
       const updated = await assessmentStore.reject(assessmentId, currentUser, payload.reason || payload.comment);
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -568,14 +465,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
       return true;
     }
 
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    if (body.trim().length > 0) {
-      try { payload = JSON.parse(body); } catch { /* ignore */ }
-    }
+    const parsed = await parseJsonOrRespond(req, res, { optional: true });
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
 
     const validScopes = ['BUILD', 'ADD_AND_CONFIGURE'];
     const overrideScope = payload.scope || 'BUILD';
@@ -666,16 +558,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/deployment-readiness'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    try { payload = JSON.parse(body || '{}'); } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
-      return true;
-    }
+    const parsed = await parseJsonOrRespond(req, res);
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
     try {
       const updated = await enterpriseService.updateDeploymentReadiness(assessmentId, payload, currentUser);
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -718,16 +603,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
   // 15. POST /api/v1/enterprise/assessments/process
   if (req.method === 'POST' && url.pathname === '/api/v1/enterprise/assessments/process') {
     if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN])) return true;
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    try { payload = JSON.parse(body || '{}'); } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
-      return true;
-    }
+    const parsed = await parseJsonOrRespond(req, res);
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
     try {
       const result = await enterpriseService.createProcessAssessment(payload, currentUser);
       res.writeHead(201, { 'Content-Type': 'application/json' });
@@ -766,32 +644,9 @@ export async function handleAssessmentRoutes(req, res, url, context = {}) {
     const assessmentId = decodeURIComponent(url.pathname.slice('/api/v1/assessments/'.length, -'/modernization-action'.length));
     const tenantCheck = await checkAssessmentTenant(assessmentId, url.pathname);
     if (!tenantCheck.allowed) return true;
-    let body = '';
-    let bodyLength = 0;
-    let isAborted = false;
-
-    req.on('data', (chunk) => {
-      if (isAborted) return;
-      bodyLength += chunk.length;
-      if (bodyLength > MAX_BODY_SIZE) {
-        isAborted = true;
-        req.destroy();
-        res.writeHead(413, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, statusCode: 'PAYLOAD_TOO_LARGE', errorMessage: 'Payload exceeds maximum limit' }));
-        return;
-      }
-      body += chunk;
-    });
-
-    await new Promise((resolve) => req.on('end', resolve));
-    if (isAborted) return true;
-
-    let payload = {};
-    try { payload = JSON.parse(body || '{}'); } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
-      return true;
-    }
+    const parsed = await parseJsonOrRespond(req, res);
+    if (!parsed.ok) return true;
+    const payload = parsed.payload;
 
     try {
       const result = await assessmentStore.recordModernizationAction(assessmentId, payload, currentUser);

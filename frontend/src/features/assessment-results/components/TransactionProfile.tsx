@@ -12,10 +12,16 @@ export const TransactionProfile: React.FC<TransactionProfileProps> = ({ assessme
     const tc = (assessment.tcode || '').toUpperCase();
     if (tc === 'F-53' || pkg === 'FBAS' || pkg.includes('AP')) return 'FI-AP (Accounts Payable)';
     if (tc === 'F-28' || pkg.includes('AR')) return 'FI-AR (Accounts Receivable)';
-    if (tc === 'FS00' || tc === 'OB08' || tc === 'FB03' || tc === 'FB01' || pkg.includes('GL') || pkg.includes('FIN')) return 'FI-GL (General Ledger)';
-    if (tc === 'ME21N' || pkg === 'ME') return 'MM-PUR (Purchasing)';
+    if (tc === 'FS00' || tc === 'OB08' || tc === 'FB03' || tc === 'FB01' || tc === 'FB50' || pkg.includes('GL') || pkg.includes('FIN')) return 'FI-GL (General Ledger)';
+    if (tc.startsWith('ME') || pkg === 'ME' || pkg.includes('PUR')) return 'MM-PUR (Purchasing)';
+    if (tc === 'MIGO' || pkg === 'MB') return 'MM-IM (Inventory Management)';
+    if (tc === 'MIRO' || pkg === 'MRM') return 'MM-IV (Invoice Verification)';
+    if (tc.startsWith('VA') || pkg === 'VA' || pkg.includes('SD')) return 'SD-SLS (Sales & Distribution)';
+    if (tc === 'ST22' || pkg === 'SABP') return 'BC-ABA (SAP Basis & Diagnostics)';
+    if (tc === 'BP' || pkg === 'BUPA') return 'CA-BP (Business Partner)';
+    if (tc.startsWith('IW') || pkg.startsWith('PM')) return 'PM-WOC (Plant Maintenance)';
     if (assessment.classification === 'CUSTOM') return 'CUSTOMER-CUSTOM (Proprietary)';
-    return 'FI (Financial Accounting)';
+    return assessment.businessArea || 'SAP Core Module';
   };
 
   const fields = [

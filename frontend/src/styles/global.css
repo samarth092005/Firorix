@@ -72,3 +72,32 @@ code, pre {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--fiori-text-muted);
 }
+
+/* Top-level App Loader & Error Boundary */
+.fiori-app-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+.fiori-app-loader-inner {
+  text-align: center;
+}
+
+.fiori-app-loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--fiori-shell-border);
+  border-top: 3px solid var(--fiori-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px auto;
+}
+
+.fiori-app-loader-text {
+  font-size: 13px;
+  color: var(--fiori-text-secondary);
+  font-family: var(--font-sans);
+}

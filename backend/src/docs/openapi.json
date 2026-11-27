@@ -1,0 +1,56 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Fiorify SAP Modernization & Clean Core Studio API",
+    "version": "1.2.0",
+    "description": "Enterprise SAP S/4HANA Fiori discovery, fit-gap assessment, and ABAP Cloud / Fiori Elements generation API."
+  },
+  "servers": [
+    { "url": "/api/v1", "description": "Fiorify REST API v1" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/health/liveness": { "get": { "summary": "Liveness probe", "security": [], "responses": { "200": { "description": "Service alive" } } } },
+    "/health/readiness": { "get": { "summary": "Readiness probe (DB & SAP connectivity)", "responses": { "200": { "description": "Ready" }, "503": { "description": "Degraded" } } } },
+    "/auth/login": { "post": { "summary": "Authenticate user and issue JWT", "security": [], "responses": { "200": { "description": "Authenticated" }, "401": { "description": "Invalid credentials" } } } },
+    "/auth/me": { "get": { "summary": "Get current authenticated user profile", "responses": { "200": { "description": "Current user" } } } },
+    "/systems": { "get": { "summary": "List configured SAP landscapes", "responses": { "200": { "description": "SAP systems" } } } },
+    "/discovery/transactions/{tcode}": { "get": { "summary": "Discover SAP transaction metadata & Fiori candidates", "responses": { "200": { "description": "Discovery result" } } } },
+    "/discovery/usage-priority": { "post": { "summary": "Rank transactions by ST03N/STAD usage metrics", "responses": { "200": { "description": "Ranked priority list" } } } },
+    "/matching/pfcg-map": { "post": { "summary": "Map PFCG roles & T-Codes to Fiori Spaces, Pages, and Catalogs", "responses": { "200": { "description": "Role migration mapping" } } } },
+    "/fiori-catalogue/search": { "get": { "summary": "Search SAP Fiori Apps Reference Library", "responses": { "200": { "description": "Matching Fiori apps" } } } },
+    "/assessments": {
+      "get": { "summary": "List tenant-scoped fit-gap assessments", "responses": { "200": { "description": "Assessments list" } } },
+      "post": { "summary": "Create a new fit-gap assessment", "responses": { "201": { "description": "Created" } } }
+    },
+    "/generation/projects": {
+      "get": { "summary": "List Generation Studio projects", "responses": { "200": { "description": "Projects list" } } },
+      "post": { "summary": "Create Generation Studio project", "responses": { "201": { "description": "Created" } } }
+    },
+    "/generation/projects/{projectId}/architecture/evaluate": {
+      "post": { "summary": "Evaluate RAP Architecture Profile", "responses": { "200": { "description": "Architecture specification" } } }
+    },
+    "/generation/projects/{projectId}/abap/generate": {
+      "post": { "summary": "Generate ABAP Cloud artifacts", "responses": { "200": { "description": "Generated ABAP artifacts" } } }
+    },
+    "/generation/projects/{projectId}/fiori/generate": {
+      "post": { "summary": "Generate Fiori Elements / Freestyle UI5 artifacts", "responses": { "200": { "description": "Generated Fiori artifacts" } } }
+    },
+    "/generation/projects/{projectId}/preview/start": {
+      "post": { "summary": "Start isolated Mock OData V4 preview runtime", "responses": { "200": { "description": "Preview session started" } } }
+    },
+    "/generation/projects/{projectId}/export/zip": {
+      "get": { "summary": "Export ABAP + Fiori Elements ZIP package", "responses": { "200": { "description": "ZIP archive" } } }
+    },
+    "/tcode-search": { "post": { "summary": "Evidence-based T-Code search and Fiori discovery", "responses": { "200": { "description": "Search results" } } } },
+    "/fitgap/assess": { "post": { "summary": "Execute evidence-backed Fit-Gap assessment", "responses": { "200": { "description": "Fit-Gap result" } } } },
+    "/recommendations/generate": { "post": { "summary": "Generate governed modernization recommendation", "responses": { "200": { "description": "Recommendation" } } } },
+    "/mcp/status": { "get": { "summary": "Get @sap-ux/fiori-mcp-server connection status", "responses": { "200": { "description": "MCP status" } } } },
+    "/mcp/tools": { "get": { "summary": "List discovered MCP tools", "responses": { "200": { "description": "MCP tools" } } } }
+  }
+}

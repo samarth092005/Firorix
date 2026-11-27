@@ -1,4 +1,6 @@
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { resolveRepositoryPool } from '../adapters/sqlDialectHelper.js';
 
 export class GenerationHandoffRepository {
   constructor(pool = DatabasePool) {
@@ -6,10 +8,11 @@ export class GenerationHandoffRepository {
   }
 
   async _getClient() {
-    if (typeof this.pool.getClient === 'function') {
-      return await this.pool.getClient();
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    if (typeof activePool.getClient === 'function') {
+      return await activePool.getClient();
     }
-    return await this.pool.connect();
+    return await activePool.connect();
   }
 
   async _getTenantClient(tenantId = 'DEFAULT-TENANT-S21') {

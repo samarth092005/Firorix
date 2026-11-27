@@ -31,44 +31,13 @@ import {
   StudioInternalView
 } from '../types';
 import { defaultFrontendGenerationProjectService, authFetch } from '../services/generationProjectService';
+import { ABAP_TYPES, SEMANTIC_ROLES } from './dataModelConstants';
 
 interface DataModelDesignerProps {
   project: GenerationProject;
   onProjectUpdated: (updatedProject: GenerationProject) => void;
   onNavigateView: (view: StudioInternalView) => void;
 }
-
-const ABAP_TYPES = [
-  'abap.char',
-  'abap.numc',
-  'abap.int4',
-  'abap.int8',
-  'abap.dec',
-  'abap.curr',
-  'abap.quan',
-  'abap.cuky',
-  'abap.unit',
-  'abap.dats',
-  'abap.tims',
-  'abap.utclong',
-  'abap.boolean',
-  'sysuuid_x16'
-];
-
-const SEMANTIC_ROLES = [
-  'GENERAL',
-  'KEY',
-  'PARENT_KEY',
-  'DOCUMENT_NUMBER',
-  'ITEM_NUMBER',
-  'CODE',
-  'AMOUNT',
-  'QUANTITY',
-  'CURRENCY_CODE',
-  'UNIT_CODE',
-  'STATUS',
-  'DESCRIPTION'
-];
 
 export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
   project,
@@ -1005,7 +974,7 @@ export const DataModelDesigner: React.FC<DataModelDesignerProps> = ({
                       </div>
                       <div style={{ color: '#1e293b', fontWeight: 500 }}>{f.message}</div>
                       <div style={{ color: '#64748b' }}>{f.explanation}</div>
-                      <div style={{ color: '#0284c7', fontWeight: 500 }}>💡 {f.remediation}</div>
+                      <div style={{ color: '#0284c7', fontWeight: 500 }}>Recommendation: {f.remediation}</div>
                     </div>
                   ))
                 )}

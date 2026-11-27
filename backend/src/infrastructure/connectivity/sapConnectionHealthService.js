@@ -335,7 +335,7 @@ export class SapConnectionHealthService {
     // 4. Cloud Connector Tunnel & 5. SAP ICM Reachability
     let icmReachability = { status: 'UNTESTED', latencyMs: 0, endpoint: '/sap/bc/echo' };
     let cloudConnectorTunnel = { status: 'PENDING_VERIFICATION', virtualHost: 'kbl_fiori:8000' };
-    let authentication = { status: 'UNTESTED', authType: 'BasicAuthentication', user: process.env.SAP_USER || 'int_samarth', password: '[REDACTED]' };
+    let authentication = { status: 'UNTESTED', authType: 'BasicAuthentication', user: process.env.SAP_USER || 'UNCONFIGURED', password: '[REDACTED]' };
     let gatewayCatalog = { status: 'UNTESTED', endpoint: '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/', requiredAuthorizations: ['S_SERVICE', 'S_RFC'] };
 
     if (!destResolution.success && !options.forceProbe && !process.env.SAP_URL_OVERRIDE) {

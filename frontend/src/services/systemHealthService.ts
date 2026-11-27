@@ -153,25 +153,42 @@ class SystemHealthService implements ISystemHealthService {
         }
       };
 
-      // Fallback baseline for components while preserving demo fallback compatibility
-      const demoFallback = demoDataProvider.getSystemHealth();
+      const allowDemoFallback = !import.meta.env?.PROD || import.meta.env?.VITE_DEMO_MODE === 'true';
+      if (allowDemoFallback) {
+        const demoFallback = demoDataProvider.getSystemHealth();
+        return {
+          ...demoFallback,
+          systemId: 'S21',
+          client: '200',
+          platform: 'SAP S/4HANA 2023 Private Edition',
+          connectionState: demoFallback.connectionState || 'DEMO_MODE',
+          isLiveConnection: false,
+          lastSyncTimestamp: timestamp,
+          connectivityStatus: {
+            status: 'OFFLINE',
+            destinationName: 'S21',
+            cloudConnectorSubaccount: 'subacc-eur-s21-private',
+            message: `Backend service is offline: ${offlineMsg}`
+          },
+          indicators
+        };
+      }
 
       return {
-        ...demoFallback,
-        systemId: 'S21',
-        client: '200',
-        platform: 'SAP S/4HANA 2023 Private Edition',
-        connectionState: demoFallback.connectionState || 'DEMO_MODE',
+        systemId: _systemId || 'UNCONFIGURED',
+        client: '---',
+        platform: 'SAP S/4HANA',
+        connectionState: 'BACKEND_OFFLINE',
         isLiveConnection: false,
         lastSyncTimestamp: timestamp,
+        components: [],
         connectivityStatus: {
           status: 'OFFLINE',
-          destinationName: 'S21',
-          cloudConnectorSubaccount: 'subacc-eur-s21-private',
+          destinationName: 'UNCONFIGURED',
           message: `Backend service is offline: ${offlineMsg}`
         },
         indicators
-      };
+      } as unknown as SystemHealthResponse;
     }
 
     // Backend is UP! Derive separated indicators honestly per Step 4

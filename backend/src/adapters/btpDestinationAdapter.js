@@ -746,7 +746,10 @@ export class BtpDestinationAdapter {
     const networkErrorCodes = ['ECONNREFUSED', 'ENOTFOUND', 'EHOSTUNREACH', 'EAI_AGAIN'];
     if (networkErrorCodes.includes(err?.code) || cleanMessage.includes('ENOTFOUND') || cleanMessage.includes('ECONNREFUSED')) {
       this.lastFailureTime = Date.now();
-      const isVirtualHost = this.destinationName === 'S21';
+      const isVirtualHost = Boolean(
+        this.destinationName === (process.env.SAP_DESTINATION_NAME || 'S21') ||
+        destinationUrl.includes('virtual')
+      );
       const remediation = isVirtualHost
         ? 'Target URL (http://kbl_fiori:8000) is an OnPremise virtual host mapped in SAP Cloud Connector. For local developer execution, an active tunnel to the BTP Connectivity proxy (e.g., port 20003) or corporate VPN line-of-sight is required.'
         : 'Verify host name resolution and network line-of-sight.';

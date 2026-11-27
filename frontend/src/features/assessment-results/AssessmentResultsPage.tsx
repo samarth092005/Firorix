@@ -22,13 +22,7 @@ import {
 } from '../../components/common';
 import { AssessmentHeader } from './components/AssessmentHeader';
 import { ExecutiveSummary } from './components/ExecutiveSummary';
-import { TransactionProfile } from './components/TransactionProfile';
-import { BusinessContextPanel } from './components/BusinessContextPanel';
-import { FioriCandidateCard } from './components/FioriCandidateCard';
 import { CandidateComparison } from './components/CandidateComparison';
-import { TechnicalImplementationPanel } from './components/TechnicalImplementationPanel';
-import { RoleValidationPanel } from './components/RoleValidationPanel';
-import { ODataValidationPanel } from './components/ODataValidationPanel';
 import { RecommendationPanel } from './components/RecommendationPanel';
 import { AssessmentExportModal } from './components/AssessmentExportModal';
 import { DiscoveryDetailsModal } from './components/DiscoveryDetailsModal';
@@ -39,19 +33,11 @@ import {
 } from '../../services/contracts/types';
 import {
   LayoutDashboard,
-  Code2,
   GitCompare,
-  CheckCircle2,
   ArrowRight,
   ArrowLeft,
-  ChevronDown,
-  ChevronRight,
-
   ShieldCheck,
-  Zap,
   Sparkles,
-  Layers,
-  Server,
   FileCheck,
   AlertCircle,
   Cpu,

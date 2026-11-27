@@ -8,6 +8,7 @@
 
 import { createAbapArtifact, ABAP_ARTIFACT_TYPES } from './abapArtifactContract.js';
 import { RAP_PROFILES } from '../architecture/architectureContract.js';
+import { toDdicFieldName } from './persistenceTableGenerator.js';
 
 export function formatCdsViewName(prefixTag, rawName) {
   const clean = String(rawName || 'ENTITY')
@@ -68,13 +69,17 @@ export function generateCdsEntities(project, architecture) {
     const incomingCompositions = relationships.filter((r) => r.targetEntityId === ent.entityId && r.relationshipType === 'COMPOSITION');
     const parentRel = incomingCompositions[0] || null;
 
+    const sizeCategory = (ent.fields?.length || 0) > 25 ? '#L' : ((ent.fields?.length || 0) > 10 ? '#M' : '#S');
+    const dataClass = architecture.selectedProfile === RAP_PROFILES.READ_ONLY_QUERY ? '#MASTER' : '#TRANSACTIONAL';
+    const serviceQuality = isRoot ? '#X' : '#A';
+
     let cds = `@AccessControl.authorizationCheck: #CHECK\n`;
     cds += `@EndUserText.label: '${ent.businessName || ent.name} Interface View'\n`;
     cds += `@Metadata.ignorePropagatedAnnotations: true\n`;
     cds += `@ObjectModel.usageType: {\n`;
-    cds += `  serviceQuality: #X,\n`;
-    cds += `  sizeCategory: #S,\n`;
-    cds += `  dataClass: #TRANSACTIONAL\n`;
+    cds += `  serviceQuality: ${serviceQuality},\n`;
+    cds += `  sizeCategory: ${sizeCategory},\n`;
+    cds += `  dataClass: ${dataClass}\n`;
     cds += `}\n`;
 
     if (isRoot) {
@@ -119,7 +124,7 @@ export function generateCdsEntities(project, architecture) {
       const isKey = f.isKey;
       const keyPrefix = isKey ? 'key ' : '    ';
       const alias = f.name;
-      const colName = f.name.toLowerCase();
+      const colName = toDdicFieldName(f.name);
 
       // Check semantic currency / unit annotations
       if (f.semanticRole === 'AMOUNT' && (f.cukyField || f.currencyRef)) {
@@ -215,6 +220,23 @@ export function generateCdsEntities(project, architecture) {
       if (f.semanticRole === 'AMOUNT' && (f.cukyField || f.currencyRef)) {
         const ref = f.cukyField || f.currencyRef;
         projCds += `  @Semantics.amount.currencyCode: '${ref}'\n`;
+      } else if (f.semanticRole === 'QUANTITY' && (f.unitField || f.unitRef)) {
+        const ref = f.unitField || f.unitRef;
+        projCds += `  @Semantics.quantity.unitOfMeasure: '${ref}'\n`;
+      }
+
+      if (f.valueHelpEntity) {
+        projCds += `  @Consumption.valueHelpDefinition: [{ entity: { name: '${f.valueHelpEntity}', element: '${f.valueHelpElement || f.name}' } }]\n`;
+      } else if (f.type === 'abap.cuky' || f.semanticRole === 'CURRENCY_CODE') {
+        projCds += `  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_CurrencyStdVH', element: 'Currency' } }]\n`;
+      } else if (f.type === 'abap.unit' || f.semanticRole === 'UNIT_CODE') {
+        projCds += `  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_UnitOfMeasureStdVH', element: 'UnitOfMeasure' } }]\n`;
+      } else if (/companycode|bukrs/i.test(f.name)) {
+        projCds += `  @Consumption.valueHelpDefinition: [{ entity: { name: 'I_CompanyCodeStdVH', element: 'CompanyCode' } }]\n`;
+      }
+
+      if (f.textElement) {
+        projCds += `  @ObjectModel.text.element: ['${f.textElement}']\n`;
       }
 
       projCds += `  ${keyPrefix}${alias},\n`;

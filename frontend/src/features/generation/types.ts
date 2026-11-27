@@ -328,6 +328,16 @@ export interface ArchitectureSpec {
   specVersion: number;
   selectedProfile: 'MANAGED_RAP_DRAFT' | 'MANAGED_RAP_NON_DRAFT' | 'UNMANAGED_RAP' | 'READ_ONLY_QUERY' | 'ARCHITECTURE_REVIEW_REQUIRED';
   rationale: string;
+  legacyDelegate?: string | null;
+  namingBlueprint?: {
+    interfaceView: string;
+    projectionView: string;
+    behaviorPool?: string | null;
+    serviceDefinition: string;
+    serviceBinding: string;
+    persistenceTable?: string | null;
+    draftTable?: string | null;
+  };
   rootEntity?: {
     entityId: string;
     name: string;

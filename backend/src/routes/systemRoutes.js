@@ -1,36 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 import { mockSapAdapter } from '../adapters/mockSapAdapter.js';
 import { sanitizeErrorMessage } from '../adapters/btpDestinationAdapter.js';
 import { USER_ROLES } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
-import { defaultDatabaseAdapter } from '../infrastructure/db/adapters/databaseAdapterFactory.js';
-import { DialectMigrationRunner } from '../infrastructure/db/migrator/dialectMigrationRunner.js';
-
-// IP Rate Limiter for Login Endpoint
-const loginRateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_LOGIN_ATTEMPTS = 15;
-
-function checkLoginRateLimit(ip) {
-  if (process.env.NODE_ENV === 'test') {
-    return { allowed: true };
-  }
-  const now = Date.now();
-  const record = loginRateLimitMap.get(ip);
-  if (!record || now > record.resetTime) {
-    loginRateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
-    return { allowed: true };
-  }
-  if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    return { allowed: false, retryAfterSeconds: Math.ceil((record.resetTime - now) / 1000) };
-  }
-  record.count++;
-  return { allowed: true };
-}
+import { readJsonBody } from '../api/index.js';
 
 /**
- * System, Health, Auth, and SAP Gateway HTTP Routes
+ * System, Admin, and SAP Gateway HTTP Routes (Health & Auth extracted to healthRoutes.js / authRoutes.js)
  *
  * @param {import('node:http').IncomingMessage} req
  * @param {import('node:http').ServerResponse} res
@@ -51,100 +31,11 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     gatewayAdapter
   } = context;
 
-  // 1. Health Check
-  if (req.method === 'GET' && (url.pathname === '/api/v1/health' || url.pathname === '/health')) {
-    const btpConfig = adapter.validateConfiguration();
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        status: 'UP',
-        timestamp: new Date().toISOString(),
-        targetLandscape: {
-          sid: 'S21',
-          client: '200',
-          release: 'SAP S/4HANA 2023 Private Edition',
-          components: ['S4CORE 108', 'SAP_BASIS 758', 'SAP_UI 758', 'SAP_GWFND 758'],
-          targetODataService: '/sap/opu/odata/sap/Z_Fiorify_DISCOVERY_SRV',
-          gatewayCatalogService: '/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/ServiceCollection'
-        },
-        btpDestinationStatus: {
-          configured: btpConfig.isValid,
-          destinationName: btpConfig.configuration.destinationName,
-          sapClient: btpConfig.configuration.sapClient,
-          destinationBindingPresent: btpConfig.destinationBinding.present,
-          connectivityBindingPresent: btpConfig.connectivityBinding.present
-        }
-      }, null, 2)
-    );
-    return true;
-  }
-
-  // 1a. Liveness Probe (DB-007)
-  if (req.method === 'GET' && (url.pathname === '/api/v1/health/liveness' || url.pathname === '/health/liveness')) {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'UP', timestamp: new Date().toISOString() }, null, 2));
-    return true;
-  }
-
-  // 1b. Readiness Probe (DB-007)
-  if (req.method === 'GET' && (url.pathname === '/api/v1/health/readiness' || url.pathname === '/health/readiness')) {
-    const isProduction = process.env.NODE_ENV === 'production';
-    const dbAdapter = context.databaseAdapter || defaultDatabaseAdapter;
-    const dbCheck = await dbAdapter.healthCheck().catch((err) => ({ healthy: false, error: err.message, dialect: dbAdapter.getDialect() }));
-
-    let migrationsOk = true;
-    let migrationStatus = null;
-    try {
-      const runner = new DialectMigrationRunner({ adapter: dbAdapter });
-      migrationStatus = await runner.getStatus();
-      migrationsOk = migrationStatus.isFullyMigrated;
-    } catch (migErr) {
-      migrationsOk = false;
-      migrationStatus = { error: migErr.message };
-    }
-
-    const btpConfig = adapter ? adapter.validateConfiguration() : { isValid: true };
-    const isReady = dbCheck.healthy && (isProduction ? migrationsOk : true);
-    const statusCode = isReady ? 200 : 503;
-
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify(
-        {
-          status: isReady ? 'READY' : 'NOT_READY',
-          statusCode: isReady ? 'OK' : 'SERVICE_UNAVAILABLE',
-          timestamp: new Date().toISOString(),
-          environment: isProduction ? 'production' : 'development',
-          components: {
-            database: {
-              status: dbCheck.healthy ? 'UP' : 'DOWN',
-              dialect: dbCheck.dialect || dbAdapter.getDialect(),
-              latencyMs: dbCheck.latencyMs,
-              version: dbCheck.version,
-              error: dbCheck.error
-            },
-            migrations: {
-              status: migrationsOk ? 'UP_TO_DATE' : 'PENDING_MIGRATIONS',
-              appliedCount: migrationStatus?.totalApplied,
-              availableCount: migrationStatus?.totalAvailable
-            },
-            btpConnectivity: {
-              status: btpConfig.isValid ? 'CONFIGURED' : 'UNCONFIGURED'
-            }
-          }
-        },
-        null,
-        2
-      )
-    );
-    return true;
-  }
-
   // 1c. Demo Environment Reset (Cleans generation projects, handoffs, test assessments, and artifacts)
   if (req.method === 'POST' && url.pathname === '/api/v1/system/reset-demo') {
     if (process.env.NODE_ENV === 'production') {
       res.writeHead(403, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'FORBIDDEN', errorMessage: 'Demo environment reset is disabled in production.' }));
+      res.end(JSON.stringify({ success: false, statusCode: 'FORBIDDEN', error: 'Demo environment reset is disabled in production.', errorMessage: 'Demo environment reset is disabled in production.' }));
       return true;
     }
     if (!requireRole([USER_ROLES.ADMIN])) return true;
@@ -169,7 +60,7 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
       }
 
       // 4. Clear generated artifacts directory
-      const artifactsDir = path.resolve(process.cwd(), 'backend', 'data', 'artifacts');
+      const artifactsDir = path.resolve(REPO_ROOT, 'backend', 'data', 'artifacts');
       if (fs.existsSync(artifactsDir)) {
         try {
           const artifactEntries = await fs.promises.readdir(artifactsDir, { withFileTypes: true });
@@ -222,105 +113,6 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     }
   }
 
-  // 2. Authentication Routes (SEC-01)
-  if (req.method === 'POST' && url.pathname === '/api/v1/auth/login') {
-    const clientIp = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1').split(',')[0].trim();
-    const rateLimit = checkLoginRateLimit(clientIp);
-    if (!rateLimit.allowed) {
-      res.writeHead(429, {
-        'Content-Type': 'application/json',
-        'Retry-After': String(rateLimit.retryAfterSeconds)
-      });
-      res.end(
-        JSON.stringify({
-          success: false,
-          statusCode: 'RATE_LIMIT_EXCEEDED',
-          errorMessage: `Too many login attempts. Please try again in ${rateLimit.retryAfterSeconds} seconds.`
-        })
-      );
-      return true;
-    }
-
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
-    let payload = {};
-    try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
-      return true;
-    }
-
-    const authResult = await authService.login(payload.email || payload.username, payload.password);
-    if (!authResult.success) {
-      if (securityAuditLogger) {
-        securityAuditLogger.logEvent({
-          actor: payload.email || payload.username || 'unknown',
-          tenantId: 'AUTHENTICATION_GATE',
-          action: SECURITY_ACTIONS.LOGIN_FAILURE,
-          resource: '/api/v1/auth/login',
-          outcome: 'FAILED',
-          details: { error: authResult.error, reason: authResult.errorMessage, clientIp }
-        }).catch(() => {});
-      }
-      res.writeHead(401, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'UNAUTHORIZED', error: authResult.error, errorMessage: authResult.errorMessage }));
-      return true;
-    }
-
-    if (securityAuditLogger) {
-      securityAuditLogger.logEvent({
-        actor: authResult.user?.id || 'authenticated_user',
-        tenantId: authResult.user?.tenantId || 'DEFAULT-TENANT-S21',
-        action: SECURITY_ACTIONS.LOGIN_SUCCESS,
-        resource: '/api/v1/auth/login',
-        outcome: 'SUCCESS',
-        details: { role: authResult.user?.role, email: authResult.user?.email, clientIp }
-      }).catch(() => {});
-    }
-
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(authResult, null, 2));
-    return true;
-  }
-
-  if (req.method === 'POST' && url.pathname === '/api/v1/auth/logout') {
-    const authHeader = req.headers.authorization;
-    if (authHeader) {
-      authService.logout(authHeader);
-    }
-    if (securityAuditLogger) {
-      securityAuditLogger.logEvent({
-        actor: currentUser?.id || 'session_user',
-        tenantId: currentUser?.tenantId || 'DEFAULT-TENANT-S21',
-        action: 'LOGOUT',
-        resource: '/api/v1/auth/logout',
-        outcome: 'SUCCESS',
-        details: { tokenRevoked: Boolean(authHeader) }
-      }).catch(() => {});
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, message: 'Session successfully revoked.' }));
-    return true;
-  }
-
-  if (req.method === 'GET' && url.pathname === '/api/v1/auth/provider-info') {
-    const providerFactory = context.authProviderFactory;
-    const info = providerFactory ? providerFactory.getStatus() : { activeProvider: 'LOCAL_AUTH' };
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, ...info }, null, 2));
-    return true;
-  }
-
-  if (req.method === 'GET' && url.pathname === '/api/v1/auth/me') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ success: true, authenticated: Boolean(currentUser), user: currentUser }));
-    return true;
-  }
-
   // 2b. Admin User Management Routes (UI-003)
   if (req.method === 'GET' && url.pathname === '/api/v1/admin/users') {
     if (!requireRole(['ADMIN'])) return true;
@@ -332,11 +124,8 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
 
   if (req.method === 'POST' && url.pathname === '/api/v1/admin/users') {
     if (!requireRole(['ADMIN'])) return true;
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
     try {
-      const payload = JSON.parse(body || '{}');
+      const payload = await readJsonBody(req);
       if (!payload.email || !payload.name) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Name and email are required.' }));
@@ -367,11 +156,8 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
     if (!requireRole(['ADMIN'])) return true;
     const parts = url.pathname.split('/');
     const targetUserId = parts[parts.length - 2];
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
     try {
-      const payload = JSON.parse(body || '{}');
+      const payload = await readJsonBody(req);
       if (!payload.role) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Target role is required.' }));
@@ -444,16 +230,13 @@ export async function handleSystemRoutes(req, res, url, context = {}) {
   if (req.method === 'POST' && url.pathname === '/api/v1/systems') {
     if (!requireRole([USER_ROLES.SAP_CONSULTANT, USER_ROLES.ADMIN, USER_ROLES.LEAD_ARCHITECT])) return true;
 
-    let body = '';
-    req.on('data', (c) => (body += c));
-    await new Promise((resolve) => req.on('end', resolve));
-
     let payload = {};
     try {
-      payload = JSON.parse(body || '{}');
-    } catch {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, statusCode: 'BAD_REQUEST', errorMessage: 'Malformed JSON payload.' }));
+      payload = await readJsonBody(req);
+    } catch (err) {
+      const status = err.statusCode || (err.code === 'PAYLOAD_TOO_LARGE' ? 413 : 400);
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, statusCode: err.code || 'BAD_REQUEST', errorMessage: err.message }));
       return true;
     }
 

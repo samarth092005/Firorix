@@ -6,8 +6,8 @@ import {
   TadirEvidence,
   ClassificationEvidenceDetails
 } from '../types';
-import { EvidenceClassifier } from '../engine/evidenceClassifier';
-import { SapLookupResult, SapLookupSuccess, SapLookupFault } from './mockSapAdapter';
+import { EvidenceClassifier } from '../../../services/sap/engine/evidenceClassifier';
+import { SapLookupResult, SapLookupSuccess, SapLookupFault } from '../../../services/sap/mockSapAdapter';
 
 export interface LiveSapODataResponse {
   d?: {

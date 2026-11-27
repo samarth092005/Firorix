@@ -1197,7 +1197,17 @@ export function buildInteractiveFioriPreviewHtml(project, serviceBasePath = '') 
           return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
         } catch { return val; }
       }
-      return String(val);
+      return escapeHtml(String(val));
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     // Build Table Header
@@ -1206,7 +1216,7 @@ export function buildInteractiveFioriPreviewHtml(project, serviceBasePath = '') 
       row.innerHTML = '<th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)" /></th>';
       FIELDS.forEach(f => {
         const th = document.createElement('th');
-        th.innerHTML = (f.label || f.name) + ' <span style="font-size:10px;opacity:0.4;">↕</span>';
+        th.innerHTML = escapeHtml(f.label || f.name) + ' <span style="font-size:10px;opacity:0.4;">↕</span>';
         th.onclick = () => sortTableBy(f.name);
         row.appendChild(th);
       });
@@ -1298,7 +1308,7 @@ export function buildInteractiveFioriPreviewHtml(project, serviceBasePath = '') 
           const rawVal = item[f.name];
           if (idx === 0) {
             // Object Identifier (Title + Subtitle)
-            td.innerHTML = '<div class="fiori-obj-title">' + (rawVal || '--') + '</div><div class="fiori-obj-desc">' + (item.description || item.Description || item.document_id || '') + '</div>';
+            td.innerHTML = '<div class="fiori-obj-title">' + escapeHtml(rawVal || '--') + '</div><div class="fiori-obj-desc">' + escapeHtml(item.description || item.Description || item.document_id || '') + '</div>';
           } else {
             if (typeof rawVal === 'number') td.classList.add('fiori-number-cell');
             td.innerHTML = formatCellValue(f, rawVal);

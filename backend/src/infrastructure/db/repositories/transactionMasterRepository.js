@@ -1,4 +1,6 @@
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { resolveRepositoryPool } from '../adapters/sqlDialectHelper.js';
 
 export class TransactionMasterRepository {
   constructor(pool = DatabasePool) {
@@ -7,7 +9,8 @@ export class TransactionMasterRepository {
 
   async saveSnapshot(snapshotData, tenantId = 'DEFAULT-TENANT-S21', systemProfileId = null) {
     const effectiveProfileId = systemProfileId || `${tenantId}-S21-200`;
-    const client = await this.pool.getClient();
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    const client = await activePool.getClient();
     try {
       await client.query('BEGIN;');
 
@@ -92,7 +95,8 @@ export class TransactionMasterRepository {
 
   async getRecordByTCode(tcode, tenantId = 'DEFAULT-TENANT-S21', systemProfileId = null) {
     const effectiveProfileId = systemProfileId || `${tenantId}-S21-200`;
-    const res = await this.pool.query(`
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    const res = await activePool.query(`
       SELECT * FROM transaction_master_records
       WHERE tcode ILIKE $1 AND tenant_id = $2 AND system_profile_id = $3;
     `, [tcode, tenantId, effectiveProfileId]);
@@ -120,7 +124,8 @@ export class TransactionMasterRepository {
 
   async search(query, tenantId = 'DEFAULT-TENANT-S21', systemProfileId = null) {
     const effectiveProfileId = systemProfileId || `${tenantId}-S21-200`;
-    const res = await this.pool.query(`
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    const res = await activePool.query(`
       SELECT * FROM transaction_master_records
       WHERE tenant_id = $1 AND system_profile_id = $2
         AND (tcode ILIKE $3 OR description ILIKE $3)
@@ -139,7 +144,8 @@ export class TransactionMasterRepository {
 
   async listRecords(tenantId = 'DEFAULT-TENANT-S21', systemProfileId = null) {
     const effectiveProfileId = systemProfileId || `${tenantId}-S21-200`;
-    const res = await this.pool.query(`
+    const activePool = await resolveRepositoryPool(this.pool, defaultDatabaseAdapter);
+    const res = await activePool.query(`
       SELECT * FROM transaction_master_records
       WHERE tenant_id = $1 AND system_profile_id = $2
       ORDER BY tcode ASC;

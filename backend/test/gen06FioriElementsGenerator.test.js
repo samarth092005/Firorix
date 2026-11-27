@@ -140,7 +140,7 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
       appId: 'com.Fiorify.vendor.invoices'
     });
 
-    assert.equal(scaffolding.length, 6);
+    assert.equal(scaffolding.length, 8);
 
     const comp = scaffolding.find((s) => s.objectName === 'Component.js');
     assert.ok(comp.content.includes('AppComponent.extend("com.Fiorify.vendor.invoices.Component"'));
@@ -155,7 +155,7 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
 
     const pkg = scaffolding.find((s) => s.objectName === 'package.json');
     const pkgJson = JSON.parse(pkg.content);
-    assert.equal(pkgJson.name, 'Fiorify-zvendorinvoice-ui');
+    assert.equal(pkgJson.name, 'fiorify-zvendorinvoice-ui');
 
     const yaml = scaffolding.find((s) => s.objectName === 'ui5.yaml');
     assert.ok(yaml.content.includes('version: "1.120.0"'));

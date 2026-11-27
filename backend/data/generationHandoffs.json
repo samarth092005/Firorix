@@ -1,7 +1,7 @@
 [
   {
-    "handoffId": "HND-1794938852779-A0D151",
-    "sourceAssessmentId": "ASM-1794938852768-FB01-84D8",
+    "handoffId": "HND-1795711387309-0DD859",
+    "sourceAssessmentId": "ASM-1795711387290-FB01-XBAU",
     "tcode": "FB01",
     "transactionDescription": "Post Document",
     "targetRelease": "SAP S/4HANA 2023",
@@ -17,12 +17,26 @@
       "approved": true,
       "approver": "USR-ARCH",
       "approverId": "USR-ARCH",
-      "approvedAt": "2026-11-17T18:07:32.779Z",
-      "timestamp": "2026-11-17T18:07:32.779Z",
+      "approvedAt": "2026-11-26T16:43:07.309Z",
+      "timestamp": "2026-11-26T16:43:07.309Z",
       "scope": "BUILD",
-      "assessmentId": "ASM-1794938852768-FB01-84D8",
+      "assessmentId": "ASM-1795711387290-FB01-XBAU",
       "assessmentVersion": 1,
-      "justification": "Approved for RAP development"
+      "justification": "Approved for RAP development",
+      "signature": "sig:v1:3d2f215d4b21f6a5ab9ca82d735560f6f19016a6ddcecded404276d8c82cd5e1",
+      "signatureAlgorithm": "HMAC-SHA256",
+      "canonicalPayload": {
+        "assessmentId": "ASM-1795711387290-FB01-XBAU",
+        "tenantId": "TENANT-GAMMA",
+        "specificationVersion": "1.0.0",
+        "artifactManifestHash": "ae1edee8efde2d44ef53f7f4a0fd0fad449820ec752d43ba9077874111ce4ba4",
+        "targetSystem": "S21-200",
+        "sapClient": "200",
+        "approverId": "USR-ARCH",
+        "approvalScope": "BUILD",
+        "assessmentVersion": 1,
+        "expiresAt": "2027-02-24T16:43:07.310Z"
+      }
     },
     "cleanCoreJustification": "Approved for RAP development",
     "businessRequirements": {
@@ -47,10 +61,81 @@
       "packageName": "FBAS",
       "softwareComponent": "S4CORE 108"
     },
-    "createdAt": "2026-11-17T18:07:32.779Z",
-    "updatedAt": "2026-11-17T18:07:32.779Z",
+    "createdAt": "2026-11-26T16:43:07.309Z",
+    "updatedAt": "2026-11-26T16:43:07.309Z",
     "createdBy": "USR-ARCH",
     "creatorName": "USR-ARCH",
     "tenantId": "TENANT-GAMMA"
+  },
+  {
+    "handoffId": "HND-1795793691588-4F3570",
+    "sourceAssessmentId": "ASM-SEC-ARCH-1795793691564",
+    "tcode": "ZPAY_CUSTOM",
+    "transactionDescription": "Custom Payment Engine",
+    "targetRelease": "SAP S/4HANA 2023 Private Edition",
+    "systemId": "S21",
+    "client": "200",
+    "programName": "SAPMF05A",
+    "packageName": "FBAS",
+    "classification": "STANDARD",
+    "currentStage": "DRAFT",
+    "proposedAppType": "RAP_MANAGED",
+    "approvalStatus": "APPROVED",
+    "leadArchitectApproval": {
+      "approved": true,
+      "approver": "Lead Enterprise Architect",
+      "approverId": "USR-ARCH-01",
+      "approvedAt": "2026-11-27T15:34:51.588Z",
+      "timestamp": "2026-11-27T15:34:51.588Z",
+      "scope": "BUILD",
+      "assessmentId": "ASM-SEC-ARCH-1795793691564",
+      "assessmentVersion": 1,
+      "justification": "Clean Core custom build strictly approved by lead architect.",
+      "signature": "sig:v1:0ac1ac3b1de9c49fc72ecc58227f84e8ceaba68da45c9e2231daabb7c406e093",
+      "signatureAlgorithm": "HMAC-SHA256",
+      "canonicalPayload": {
+        "assessmentId": "ASM-SEC-ARCH-1795793691564",
+        "tenantId": "DEFAULT-TENANT-S21",
+        "specificationVersion": "1.0.0",
+        "artifactManifestHash": "e12920c9528a43d5b4c698ee7e6f7d1980474aa0a70fac63aba5af0abbc1fc85",
+        "targetSystem": "S21-200",
+        "sapClient": "200",
+        "approverId": "USR-ARCH-01",
+        "approvalScope": "BUILD",
+        "assessmentVersion": 1,
+        "expiresAt": "2027-02-25T15:34:51.589Z"
+      }
+    },
+    "cleanCoreJustification": "Clean Core custom build strictly approved by lead architect.",
+    "businessRequirements": {
+      "process": "Core Business Process",
+      "scenario": "Standard Workflow",
+      "requiredCapabilities": [
+        "Data Processing",
+        "Standard Posting"
+      ]
+    },
+    "identifiedGaps": [
+      "No standard SAP Fiori application exists or matches proprietary customer requirements.",
+      "Custom RAP Managed Business Object required for Clean Core compliance."
+    ],
+    "architectureBaseline": {
+      "backendModel": "RAP_MANAGED",
+      "cdsViewType": "VIEW_ENTITY",
+      "odataVersion": "ODATA_V4",
+      "uiPattern": "FIORI_ELEMENTS_LIST_REPORT_OBJECT_PAGE",
+      "cleanCoreTier": "TIER_2_CLOUD_DEVELOPER"
+    },
+    "verifiedMetadata": {
+      "programName": "SAPMF05A",
+      "screenNumber": "0100",
+      "packageName": "FBAS",
+      "softwareComponent": "S4CORE 108 SP0003"
+    },
+    "createdAt": "2026-11-27T15:34:51.588Z",
+    "updatedAt": "2026-11-27T15:34:51.588Z",
+    "createdBy": "USR-ARCH-01",
+    "creatorName": "Lead Enterprise Architect",
+    "tenantId": "DEFAULT-TENANT-S21"
   }
 ]

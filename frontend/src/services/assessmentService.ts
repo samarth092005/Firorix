@@ -30,6 +30,8 @@ export interface IAssessmentService {
   getGenerationHandoff(handoffId: string): Promise<any>;
 }
 
+const allowDemoFallback = !import.meta.env?.PROD || import.meta.env?.VITE_DEMO_MODE === 'true';
+
 class AssessmentService implements IAssessmentService {
   async getAssessments(params?: AssessmentFilterParams): Promise<AssessmentRecord[]> {
     if (import.meta.env?.MODE === 'test') {
@@ -37,16 +39,16 @@ class AssessmentService implements IAssessmentService {
     }
     try {
       const res = await apiClient.getAssessments(params);
-      if (res && Array.isArray(res.assessments) && res.assessments.length > 0) {
+      if (res && Array.isArray(res.assessments)) {
         return res.assessments;
       }
     } catch (err: any) {
-      if (err?.isNetworkError || err?.statusCode === 0) {
+      if (allowDemoFallback && (err?.isNetworkError || err?.statusCode === 0)) {
         return demoDataProvider.getAssessments(params);
       }
       throw err;
     }
-    return demoDataProvider.getAssessments(params);
+    return [];
   }
 
   async getAssessmentById(id: string): Promise<AssessmentRecord | null> {
@@ -58,13 +60,16 @@ class AssessmentService implements IAssessmentService {
       if (res && res.assessment) {
         return res.assessment;
       }
+      return null;
     } catch (err: any) {
-      if (err?.isNetworkError || err?.statusCode === 0 || err?.statusCode === 404) {
+      if (err?.statusCode === 404) {
+        return null;
+      }
+      if (err?.isNetworkError || err?.statusCode === 0) {
         return demoDataProvider.getAssessmentById(id);
       }
       throw err;
     }
-    return demoDataProvider.getAssessmentById(id);
   }
 
   async getAssessmentByTCode(tcode: string): Promise<AssessmentRecord | null> {

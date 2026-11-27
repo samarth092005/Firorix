@@ -48,7 +48,7 @@ export const AssessmentExportModal: React.FC<AssessmentExportModalProps> = ({
   if (!isOpen) return null;
 
   const effectiveRelease = assessment.release || (assessment as any).targetRelease || 'SAP S/4HANA 2023 Private Edition';
-  const effectivePackage = assessment.packageName || (assessment.tcode === 'F-53' || assessment.tcode === 'F-28' || assessment.tcode === 'FB03' ? 'FBAS' : 'Standard Core Package (FBAS)');
+  const effectivePackage = assessment.packageName || (assessment.tcode === 'F-53' || assessment.tcode === 'F-28' || assessment.tcode === 'FB03' ? 'FBAS' : (assessment.classification === 'CUSTOM' ? 'Z_CUSTOM' : 'Unassigned'));
 
   const exportData: FullAssessmentExportData = assessmentExportService.generateFullExportData(
     {

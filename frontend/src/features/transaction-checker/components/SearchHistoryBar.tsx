@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { History, Trash2, ArrowUpRight } from 'lucide-react';
 import { SearchHistoryItem } from '../types';
-import { searchHistoryStore } from '../services/searchHistoryStore';
+import { searchHistoryStore } from '../../../services/sap/searchHistoryStore';
 
 export interface SearchHistoryBarProps {
   onSelectSearch: (tcode: string, systemId: string) => void;

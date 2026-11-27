@@ -26,11 +26,13 @@ export const GenerationStudioPage: React.FC = () => {
   const [handoffStatusMessage, setHandoffStatusMessage] = useState<string>('Resolving approved Clean Core modernization handoff...');
   const [error, setError] = useState<string | null>(null);
 
-  // Modal states - only open for raw assessmentId when NO handoffId exists
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(Boolean(incomingAssessmentId && !incomingHandoffId && !urlProjectId));
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  // Sync state to URL search parameters
-  const updateUrlParams = useCallback((projectId: string | null, view: StudioInternalView) => {
+  // Modal states - never auto-open when auto-provisioning from assessmentId/handoffId
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+
+  // Sync state to URL search parameters (and clear one-time handoff/assessment triggers)
+  const updateUrlParams = useCallback((projectId: string | null, view: StudioInternalView, clearIncoming = false) => {
     setSearchParams((prev) => {
       const updated = new URLSearchParams(prev);
       if (projectId) {
@@ -42,6 +44,12 @@ export const GenerationStudioPage: React.FC = () => {
         updated.set('view', view);
       } else {
         updated.delete('view');
+      }
+      if (clearIncoming) {
+        updated.delete('assessmentId');
+        updated.delete('sourceAssessmentId');
+        updated.delete('id');
+        updated.delete('handoffId');
       }
       return updated;
     }, { replace: true });
@@ -92,17 +100,28 @@ export const GenerationStudioPage: React.FC = () => {
       setHandoffStatusMessage('Initializing Modernization Workspace for assessed transaction...');
 
       frontendGenerationProjectService
-        .createProject({
-          sourceAssessmentId: incomingAssessmentId,
-          projectName: `Modernization Project (${incomingAssessmentId})`,
-          description: `Clean Core RAP Modernization synthesized from Assessment ${incomingAssessmentId}`
-        })
-        .then(async (res) => {
+        .listProjects()
+        .then(async (listRes) => {
+          if (isCancelled) return;
+          const existing = (listRes.projects || []).find(
+            (p: GenerationProject) => p.sourceAssessmentId === incomingAssessmentId
+          );
+          if (existing) {
+            setActiveProject(existing);
+            setActiveView('requirements');
+            updateUrlParams(existing.projectId, 'requirements', true);
+            return;
+          }
+          const res = await frontendGenerationProjectService.createProject({
+            sourceAssessmentId: incomingAssessmentId,
+            projectName: `Modernization (${incomingAssessmentId})`,
+            description: `Clean Core RAP Modernization synthesized from Assessment ${incomingAssessmentId}`
+          });
           if (isCancelled) return;
           await loadProjects();
           setActiveProject(res.project);
           setActiveView('requirements');
-          updateUrlParams(res.project.projectId, 'requirements');
+          updateUrlParams(res.project.projectId, 'requirements', true);
         })
         .catch((err: any) => {
           if (isCancelled) return;
@@ -133,7 +152,7 @@ export const GenerationStudioPage: React.FC = () => {
           await loadProjects();
           setActiveProject(res.project);
           setActiveView('requirements');
-          updateUrlParams(res.project.projectId, 'requirements');
+          updateUrlParams(res.project.projectId, 'requirements', true);
         })
         .catch((err: any) => {
           if (isCancelled) return;
@@ -159,15 +178,26 @@ export const GenerationStudioPage: React.FC = () => {
     updateUrlParams(activeProject?.projectId || null, view);
   };
 
+  const resolveResumeView = (project: GenerationProject): StudioInternalView => {
+    const status = project.lifecycleStatus || '';
+    if (status === 'EXPORTED') return 'review-export';
+    if (status === 'GENERATED' || status === 'VALIDATION_COMPLETED') return 'preview-validation';
+    if (status === 'READY_FOR_GENERATION') return 'abap-generator';
+    if (status === 'DATA_MODEL_VALIDATED' || status === 'READY_FOR_ARCHITECTURE') return 'architecture';
+    return 'requirements';
+  };
+
   const handleOpenProject = (project: GenerationProject) => {
+    const targetView = resolveResumeView(project);
     setActiveProject(project);
-    setActiveView('requirements'); // Default landing inside opened project
-    updateUrlParams(project.projectId, 'requirements');
+    setActiveView(targetView);
+    updateUrlParams(project.projectId, targetView);
   };
 
   const handleBackToDashboard = () => {
+    setActiveProject(null);
     setActiveView('projects');
-    updateUrlParams(activeProject?.projectId || null, 'projects');
+    updateUrlParams(null, 'projects', true);
   };
 
   // CRUD actions
@@ -221,18 +251,21 @@ export const GenerationStudioPage: React.FC = () => {
     }
   };
 
-  const handleDeleteProject = async (projectId: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete project "${projectId}"? This action cannot be undone.`)) {
-      return;
-    }
+  const handleDeleteProject = (projectId: string) => {
+    setDeleteTargetId(projectId);
+  };
 
+  const confirmDeleteProject = async () => {
+    if (!deleteTargetId) return;
+    const projectId = deleteTargetId;
+    setDeleteTargetId(null);
     try {
       setIsLoading(true);
       await frontendGenerationProjectService.deleteProject(projectId, true);
       if (activeProject?.projectId === projectId) {
         setActiveProject(null);
         setActiveView('projects');
-        updateUrlParams(null, 'projects');
+        updateUrlParams(null, 'projects', true);
       }
       await loadProjects();
     } catch (err: any) {
@@ -248,6 +281,7 @@ export const GenerationStudioPage: React.FC = () => {
         project={activeProject}
         onBackToDashboard={handleBackToDashboard}
         onRefresh={loadProjects}
+        onOpenToolchain={() => handleSelectView('environment')}
         isLoading={isLoading}
       />
 
@@ -339,10 +373,45 @@ export const GenerationStudioPage: React.FC = () => {
       {/* Project Creation Modal */}
       <CreateProjectModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          if (incomingAssessmentId || incomingHandoffId) {
+            updateUrlParams(activeProject?.projectId || null, activeView, true);
+          }
+        }}
         onSubmit={handleCreateProject}
         initialAssessmentId={incomingAssessmentId}
       />
+
+      {/* In-App Delete Confirmation Modal */}
+      {deleteTargetId && (
+        <div className="studio-confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="delete-project-title">
+          <div className="studio-confirm-dialog">
+            <h3 id="delete-project-title" style={{ margin: '0 0 8px', fontSize: '16px', fontWeight: 700, color: '#0F172A' }}>
+              Delete Generation Project?
+            </h3>
+            <p style={{ margin: '0 0 18px', fontSize: '13px', color: '#475569', lineHeight: 1.5 }}>
+              Are you sure you want to permanently delete project <code>{deleteTargetId}</code>? All generated artifacts and specifications for this project will be removed.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button
+                type="button"
+                className="studio-btn-secondary"
+                onClick={() => setDeleteTargetId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="studio-btn-danger"
+                onClick={confirmDeleteProject}
+              >
+                Delete Project
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

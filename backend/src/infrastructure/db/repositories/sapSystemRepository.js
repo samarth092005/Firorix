@@ -6,6 +6,8 @@
  */
 
 import DatabasePool from '../pool.js';
+import { defaultDatabaseAdapter } from '../adapters/databaseAdapterFactory.js';
+import { getActiveDialect, buildUpsertSql } from '../adapters/sqlDialectHelper.js';
 
 export class SapSystemRepository {
   constructor(pool = null) {
@@ -13,7 +15,11 @@ export class SapSystemRepository {
   }
 
   async _getPool() {
-    return this.pool || (await DatabasePool.getPool());
+    if (this.pool) return this.pool;
+    if (getActiveDialect() === 'hana') {
+      return defaultDatabaseAdapter;
+    }
+    return await DatabasePool.getPool();
   }
 
   /**
@@ -93,6 +99,37 @@ export class SapSystemRepository {
     const connectionState = profile.connection_state || profile.connectivityStatus || 'CONFIGURED';
     const diagnostics = profile.diagnostics || {};
 
+    const dialect = getActiveDialect(pool);
+    const params = [
+      id, tenantId, systemId, client, release, description,
+      destinationName, isActive, deploymentType, connectionMode,
+      baseUrl, gatewayCatalogPath, adtDiscoveryPath, authType,
+      authSecretRef, JSON.stringify(tlsConfig), isReadOnly,
+      connectionState, JSON.stringify(diagnostics)
+    ];
+
+    if (dialect === 'hana') {
+      const cols = [
+        'id', 'tenant_id', 'system_id', 'client', 'release', 'description',
+        'destination_name', 'is_active', 'deployment_type', 'connection_mode',
+        'base_url', 'gateway_catalog_path', 'adt_discovery_path', 'auth_type',
+        'auth_secret_ref', 'tls_config', 'is_read_only', 'connection_state', 'diagnostics'
+      ];
+      const upsertSql = buildUpsertSql({
+        table: 'sap_system_profiles',
+        conflictCols: ['tenant_id', 'system_id', 'client'],
+        columns: cols,
+        updateCols: [
+          'release', 'description', 'destination_name', 'is_active', 'deployment_type',
+          'connection_mode', 'gateway_catalog_path', 'adt_discovery_path', 'auth_type',
+          'tls_config', 'is_read_only', 'connection_state', 'diagnostics'
+        ],
+        dialect: 'hana'
+      });
+      await pool.query(upsertSql, params);
+      return this.getById(id, tenantId);
+    }
+
     const query = `
       INSERT INTO sap_system_profiles (
         id, tenant_id, system_id, client, release, description,
@@ -125,13 +162,7 @@ export class SapSystemRepository {
       RETURNING *;
     `;
 
-    const res = await pool.query(query, [
-      id, tenantId, systemId, client, release, description,
-      destinationName, isActive, deploymentType, connectionMode,
-      baseUrl, gatewayCatalogPath, adtDiscoveryPath, authType,
-      authSecretRef, JSON.stringify(tlsConfig), isReadOnly,
-      connectionState, JSON.stringify(diagnostics)
-    ]);
+    const res = await pool.query(query, params);
 
     return this._mapRow(res.rows[0]);
   }

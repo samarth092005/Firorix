@@ -1,0 +1,45 @@
+.fiorify-chart-card {
+  background: var(--fiori-surface, #ffffff);
+  border: 1px solid var(--fiori-border, #e2e8f0);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.fiorify-chart-title {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fiori-text-primary, #0f172a);
+}
+
+.fiorify-bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fiorify-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fiorify-bar-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--fiori-text-secondary, #475569);
+}
+
+.fiorify-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fiori-neutral-bg, #f1f5f9);
+  overflow: hidden;
+}
+
+.fiorify-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}

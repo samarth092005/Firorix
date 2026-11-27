@@ -301,6 +301,38 @@ export function generateBehaviorImplementationClass(project, architecture) {
 
   code += `ENDCLASS.\n`;
 
+  // Local ABAP Unit Test Class (FOR TESTING)
+  code += `\n/* ===================================================================== */\n`;
+  code += `/* Local ABAP Unit Test Class for ${rootInterfaceName}                   */\n`;
+  code += `/* ===================================================================== */\n`;
+  code += `CLASS ltc_${rootEntity.name.toLowerCase()} DEFINITION FINAL FOR TESTING\n`;
+  code += `  DURATION SHORT\n`;
+  code += `  RISK LEVEL HARMLESS.\n`;
+  code += `  PRIVATE SECTION.\n`;
+  code += `    CLASS-DATA go_cds_env TYPE REF TO if_cds_test_environment.\n`;
+  code += `    CLASS-METHODS class_setup.\n`;
+  code += `    CLASS-METHODS class_teardown.\n`;
+  code += `    METHODS test_create_and_read FOR TESTING.\n`;
+  code += `ENDCLASS.\n\n`;
+  code += `CLASS ltc_${rootEntity.name.toLowerCase()} IMPLEMENTATION.\n`;
+  code += `  METHOD class_setup.\n`;
+  code += `    go_cds_env = cl_cds_test_environment=>create_for_multiple_cds(\n`;
+  code += `      i_for_entities = VALUE #( ( i_name = '${rootInterfaceName}' ) ) ).\n`;
+  code += `  ENDMETHOD.\n\n`;
+  code += `  METHOD class_teardown.\n`;
+  code += `    go_cds_env->destroy( ).\n`;
+  code += `  ENDMETHOD.\n\n`;
+  code += `  METHOD test_create_and_read.\n`;
+  code += `    " Verify RAP EML Create & Read cycle against CDS test double\n`;
+  code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()}\n`;
+  code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+  code += `      ALL FIELDS WITH VALUE #( )\n`;
+  code += `      RESULT DATA(lt_result)\n`;
+  code += `      FAILED DATA(lt_failed).\n`;
+  code += `    cl_abap_unit_assert=>assert_initial( act = lt_failed ).\n`;
+  code += `  ENDMETHOD.\n`;
+  code += `ENDCLASS.\n`;
+
   if (isUnmanaged) {
     code += `\n/* ===================================================================== */\n`;
     code += `/* Local Saver Definition for Unmanaged RAP                              */\n`;
@@ -335,6 +367,38 @@ export function generateBehaviorImplementationClass(project, architecture) {
     code += `    " HANDOVER STATUS: SCAFFOLD GENERATED - DOMAIN LOGIC EXTENSION REQUIRED\n`;
     code += `  ENDMETHOD.\n`;
     code += `ENDCLASS.\n`;
+
+  // Local ABAP Unit Test Class (FOR TESTING)
+  code += `\n/* ===================================================================== */\n`;
+  code += `/* Local ABAP Unit Test Class for ${rootInterfaceName}                   */\n`;
+  code += `/* ===================================================================== */\n`;
+  code += `CLASS ltc_${rootEntity.name.toLowerCase()} DEFINITION FINAL FOR TESTING\n`;
+  code += `  DURATION SHORT\n`;
+  code += `  RISK LEVEL HARMLESS.\n`;
+  code += `  PRIVATE SECTION.\n`;
+  code += `    CLASS-DATA go_cds_env TYPE REF TO if_cds_test_environment.\n`;
+  code += `    CLASS-METHODS class_setup.\n`;
+  code += `    CLASS-METHODS class_teardown.\n`;
+  code += `    METHODS test_create_and_read FOR TESTING.\n`;
+  code += `ENDCLASS.\n\n`;
+  code += `CLASS ltc_${rootEntity.name.toLowerCase()} IMPLEMENTATION.\n`;
+  code += `  METHOD class_setup.\n`;
+  code += `    go_cds_env = cl_cds_test_environment=>create_for_multiple_cds(\n`;
+  code += `      i_for_entities = VALUE #( ( i_name = '${rootInterfaceName}' ) ) ).\n`;
+  code += `  ENDMETHOD.\n\n`;
+  code += `  METHOD class_teardown.\n`;
+  code += `    go_cds_env->destroy( ).\n`;
+  code += `  ENDMETHOD.\n\n`;
+  code += `  METHOD test_create_and_read.\n`;
+  code += `    " Verify RAP EML Create & Read cycle against CDS test double\n`;
+  code += `    READ ENTITIES OF ${rootInterfaceName.toLowerCase()}\n`;
+  code += `      ENTITY ${rootEntity.name.toLowerCase()}\n`;
+  code += `      ALL FIELDS WITH VALUE #( )\n`;
+  code += `      RESULT DATA(lt_result)\n`;
+  code += `      FAILED DATA(lt_failed).\n`;
+  code += `    cl_abap_unit_assert=>assert_initial( act = lt_failed ).\n`;
+  code += `  ENDMETHOD.\n`;
+  code += `ENDCLASS.\n`;
   }
 
   const limitations = [

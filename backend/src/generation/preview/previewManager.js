@@ -355,14 +355,41 @@ export class PreviewManager {
       project.architectureSpec = architecture;
     }
 
-    // Allocate safe port (4050-4099)
-    const port = this.sessionStore.allocatePort();
-
     // Initialize or load synthetic data
     const syntheticStore = this.generateSyntheticRecords(project);
 
+    // Allocate safe port (4050-4099), retrying on EADDRINUSE so concurrent processes never collide
+    const attemptedPorts = [];
+    let port = null;
+    let server = null;
+    let lastErr = null;
+
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const candidatePort = this.sessionStore.allocatePort();
+      try {
+        server = await startMockODataServer(project, architecture, candidatePort, syntheticStore);
+        port = candidatePort;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (err && err.code === 'EADDRINUSE') {
+          attemptedPorts.push(candidatePort);
+          continue;
+        }
+        this.sessionStore.releasePort(candidatePort);
+        attemptedPorts.forEach((p) => this.sessionStore.releasePort(p));
+        throw err;
+      }
+    }
+
+    // Release ports that were occupied by external processes only after binding succeeded
+    attemptedPorts.forEach((p) => this.sessionStore.releasePort(p));
+
+    if (!server || port === null) {
+      throw lastErr || new Error('Failed to bind any available preview port in 4050-4099.');
+    }
+
     try {
-      const server = await startMockODataServer(project, architecture, port, syntheticStore);
       const session = this.sessionStore.setSession(cleanId, {
         port,
         server,
