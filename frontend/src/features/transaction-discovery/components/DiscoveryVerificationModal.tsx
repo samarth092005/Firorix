@@ -457,6 +457,11 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                         <Sparkles size={12} />
                         <span>STANDARD APP MATCH FOUND</span>
                       </>
+                    ) : existingGeneratedApps.length > 0 ? (
+                      <>
+                        <CheckCircle2 size={12} />
+                        <span>CUSTOM APP ALREADY BUILT</span>
+                      </>
                     ) : (
                       <>
                         <AlertCircle size={12} />
@@ -545,7 +550,40 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                 )}
 
                 {/* Sub-scenario B: No Standard Fiori App exists (Gap!) */}
-                {!hasStandardApp && (
+                {!hasStandardApp && existingGeneratedApps.length > 0 && (
+                  <div
+                    style={{
+                      backgroundColor: '#F0FDF4',
+                      border: '1px solid #BBF7D0',
+                      borderRadius: '6px',
+                      padding: '14px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>
+                      Custom Fiori App Already Built in Fiorify:
+                    </div>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#14532D', lineHeight: 1.5 }}>
+                      Transaction <strong>{tcode}</strong> has no standard SAP Fiori app in FAL, and a custom Clean Core RAP + Fiori Elements application has already been created in Generation Studio.
+                    </p>
+                    <div
+                      style={{
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #86EFAC',
+                        borderRadius: '4px',
+                        padding: '10px 12px',
+                        fontSize: '12px',
+                        color: '#0F172A'
+                      }}
+                    >
+                      <strong>{existingGeneratedApps[0].projectName}</strong> ({existingGeneratedApps[0].status}) &bull; OData: <code>{existingGeneratedApps[0].odataService}</code> &bull; Artifacts: <strong>{existingGeneratedApps[0].artifactCount}</strong>
+                    </div>
+                  </div>
+                )}
+
+                {!hasStandardApp && existingGeneratedApps.length === 0 && (
                   <div
                     style={{
                       backgroundColor: '#FFFBEB',
