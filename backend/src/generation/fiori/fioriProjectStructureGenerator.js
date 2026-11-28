@@ -593,7 +593,7 @@ Open **http://127.0.0.1:8080/index.html**.
 ## 2. Host on SAP BTP Cloud Foundry (\`cf push\`)
 A pre-configured \`manifest.yml\` is included in \`fiori/\`:
 \`\`\`bash
-cf login -a https://api.cf.eu10-005.hana.ondemand.com
+cf login -a <YOUR_CF_API_ENDPOINT>
 cd fiori
 cf push
 \`\`\`

@@ -173,7 +173,7 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
           cf: {
             title: 'Host on SAP BTP Cloud Foundry (Turnkey manifest.yml included)',
             desc: 'A pre-configured manifest.yml is packaged inside fiori/ — push directly to Cloud Foundry in 3 commands.',
-            cmd: 'cf login -a https://api.cf.eu10-005.hana.ondemand.com\ncd fiori\ncf push'
+            cmd: 'cf login -a <YOUR_CF_API_ENDPOINT>\ncd fiori\ncf push'
           },
           sap: {
             title: 'Full UI5 CLI Build & Live SAP Integration (< 4–5 Minutes)',

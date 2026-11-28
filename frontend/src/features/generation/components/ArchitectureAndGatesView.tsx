@@ -236,7 +236,7 @@ export const ArchitectureAndGatesView: React.FC<ArchitectureAndGatesViewProps> =
             flexDirection: 'column',
             justifyContent: 'space-between',
             gap: '16px',
-            minHeight: '190px'
+            minHeight: '280px'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -283,7 +283,7 @@ export const ArchitectureAndGatesView: React.FC<ArchitectureAndGatesViewProps> =
             flexDirection: 'column',
             justifyContent: 'space-between',
             gap: '16px',
-            minHeight: '190px'
+            minHeight: '280px'
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

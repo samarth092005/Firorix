@@ -188,6 +188,10 @@ export interface RequirementsUiPreferences {
   bulkActions?: boolean;
   kpiHeader?: boolean;
   statusBadge?: boolean;
+  visibleColumns?: string[];
+  pageTitle?: string;
+  uiDensity?: 'COMPACT' | 'COZY';
+  customUiNotes?: string;
   renamedLabels?: Record<string, string>;
   customActions?: Array<{ label: string }>;
 }

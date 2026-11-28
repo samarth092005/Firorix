@@ -58,6 +58,7 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   const [activeReqCard, setActiveReqCard] = useState<'functional' | 'ui' | null>(null);
   const [functionalApproved, setFunctionalApproved] = useState<boolean>(false);
   const [uiApproved, setUiApproved] = useState<boolean>(false);
+  const [customActionInput, setCustomActionInput] = useState<string>('');
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -300,62 +301,29 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: '16px' }}>
-      {/* Compact Studio Gate Toolbar */}
-      <div
-        style={{
-          padding: '12px 18px',
-          background: '#FFFFFF',
-          border: '1px solid #E2E8F0',
-          borderRadius: '8px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '12px',
-          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {summary?.allConfirmedOrResolved ? (
-            <CheckCircle2 size={18} color="#10B981" />
-          ) : (
-            <Clock size={18} color="#D97706" />
-          )}
+      {/* Clean Overview Header (shown on 2-card overview, matching Architecture & Build) */}
+      {activeReqCard === null && (
+        <div
+          style={{
+            padding: '16px 20px',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            borderRadius: '10px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px'
+          }}
+        >
           <div>
-            <div style={{ fontWeight: 700, fontSize: '14px', color: '#0F172A' }}>
-              {summary?.allConfirmedOrResolved
-                ? 'Requirements Confirmed — Ready for Data Model'
-                : `${summary?.pendingCount || 0} Requirement(s) Pending Review`}
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B' }}>
-              {summary?.allConfirmedOrResolved
-                ? 'All requirements are confirmed or deferred. Proceed to design the CDS entities.'
-                : 'Review and confirm each requirement below, or bulk-confirm drafts to continue.'}
-            </div>
+            <h2 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#0F172A' }}>
+              Requirements &amp; UI Design
+            </h2>
+            <p style={{ margin: '3px 0 0', fontSize: '13px', color: '#64748B' }}>
+              Click a card to review functional scope or design your Fiori UI layout, columns, and actions.
+            </p>
           </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={handleImportAssessment}
-            disabled={isLoading}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '7px 12px',
-              background: '#F8FAFC',
-              border: '1px solid #CBD5E1',
-              borderRadius: '6px',
-              color: '#334155',
-              fontSize: '12.5px',
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <DownloadCloud size={14} /> Import Gaps
-          </button>
 
           <button
             type="button"
@@ -370,23 +338,22 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 14px',
-              background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)',
+              padding: '9px 16px',
+              background: summary?.allConfirmedOrResolved
+                ? 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)'
+                : '#0F172A',
               color: '#FFFFFF',
               border: 'none',
-              borderRadius: '6px',
-              fontSize: '12.5px',
+              borderRadius: '8px',
+              fontSize: '13px',
               fontWeight: 600,
               cursor: isLoading ? 'wait' : 'pointer'
             }}
-            title="Confirm requirements and proceed to CDS Data Model Designer"
           >
-            {requirements.some((r) => r.status === 'DRAFT')
-              ? `Confirm All (${requirements.filter((r) => r.status === 'DRAFT').length}) & Next: CDS Model`
-              : 'Next: CDS Data Model'} <ArrowRight size={14} />
+            <span>Next: CDS Model</span> <ArrowRight size={14} />
           </button>
         </div>
-      </div>
+      )}
 
       {/* Error & Success Alerts */}
       {error && (
@@ -452,7 +419,7 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
               flexDirection: 'column',
               justifyContent: 'space-between',
               gap: '16px',
-              minHeight: '190px'
+              minHeight: '280px'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -497,7 +464,7 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
               flexDirection: 'column',
               justifyContent: 'space-between',
               gap: '16px',
-              minHeight: '190px'
+              minHeight: '280px'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -560,6 +527,27 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={handleImportAssessment}
+              disabled={isLoading}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 11px',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                backgroundColor: '#FFFFFF',
+                color: '#334155',
+                fontSize: '12px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <DownloadCloud size={13} />
+              <span>Import Gaps</span>
+            </button>
             <button
               type="button"
               onClick={async () => {
@@ -1380,6 +1368,168 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
                 KPI Summary Header
               </label>
             </div>
+
+            {/* Extended UI Customization Controls */}
+            {(() => {
+              const prefs: RequirementsUiPreferences = project.requirementsSpec?.uiPreferences || {};
+              const rootEntity = project.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
+              const entityFields = rootEntity?.fields || [];
+              const selectedCols = Array.isArray(prefs.visibleColumns) && prefs.visibleColumns.length > 0
+                ? prefs.visibleColumns
+                : entityFields.slice(0, 6).map((f) => f.name);
+              const customActions = Array.isArray(prefs.customActions) ? prefs.customActions : [];
+
+              const savePrefs = async (patch: Partial<RequirementsUiPreferences>) => {
+                const nextPrefs: RequirementsUiPreferences = { ...prefs, ...patch };
+                try {
+                  const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                    requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                  });
+                  onProjectUpdated(updated);
+                } catch (err: any) {
+                  setError(err?.message || 'Failed to update UI preferences');
+                }
+              };
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
+                  {/* Row 1: App Title & Density */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        App Page Title
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue={prefs.pageTitle || project.projectName}
+                        onBlur={(e) => savePrefs({ pageTitle: e.target.value })}
+                        placeholder="e.g. Purchase Order Release Cockpit"
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                        UI Density
+                      </label>
+                      <select
+                        value={prefs.uiDensity || 'COMPACT'}
+                        onChange={(e) => savePrefs({ uiDensity: e.target.value as 'COMPACT' | 'COZY' })}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', backgroundColor: '#F8FAFC' }}
+                      >
+                        <option value="COMPACT">Compact (Desktop Enterprise)</option>
+                        <option value="COZY">Cozy (Touch / Tablet Friendly)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Visible Columns Picker */}
+                  {entityFields.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                        Visible Table / Card Columns ({selectedCols.length} selected)
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {entityFields.map((f) => {
+                          const active = selectedCols.includes(f.name);
+                          return (
+                            <button
+                              key={f.name}
+                              type="button"
+                              onClick={() => {
+                                const nextCols = active
+                                  ? selectedCols.filter((c) => c !== f.name)
+                                  : [...selectedCols, f.name];
+                                if (nextCols.length > 0) savePrefs({ visibleColumns: nextCols });
+                              }}
+                              style={{
+                                padding: '4px 10px',
+                                borderRadius: '999px',
+                                border: active ? '1px solid #0066FF' : '1px solid #CBD5E1',
+                                backgroundColor: active ? '#EFF6FF' : '#F8FAFC',
+                                color: active ? '#0066FF' : '#475569',
+                                fontSize: '11.5px',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              {active ? '✓ ' : '+ '}{f.label || f.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Row 3: Custom Toolbar / Row Actions */}
+                  <div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                      Custom UI Action Buttons
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {customActions.map((act, idx) => (
+                        <span
+                          key={`${act.label}-${idx}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 10px',
+                            borderRadius: '999px',
+                            backgroundColor: '#ECFDF5',
+                            border: '1px solid #A7F3D0',
+                            color: '#065F46',
+                            fontSize: '12px',
+                            fontWeight: 600
+                          }}
+                        >
+                          {act.label}
+                          <button
+                            type="button"
+                            onClick={() => savePrefs({ customActions: customActions.filter((_, i) => i !== idx) })}
+                            style={{ border: 'none', background: 'transparent', color: '#065F46', cursor: 'pointer', padding: 0, fontWeight: 700 }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                      <input
+                        type="text"
+                        value={customActionInput}
+                        onChange={(e) => setCustomActionInput(e.target.value)}
+                        placeholder="Add button (e.g. Release PO)"
+                        style={{ padding: '5px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', width: '200px' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const label = customActionInput.trim();
+                          if (!label) return;
+                          savePrefs({ customActions: [...customActions, { label }] });
+                          setCustomActionInput('');
+                        }}
+                        style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', backgroundColor: '#0066FF', color: '#FFFFFF', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                      >
+                        + Add Action
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Row 4: Custom UI Instructions */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>
+                      Additional UI / Layout Instructions
+                    </label>
+                    <textarea
+                      rows={2}
+                      defaultValue={prefs.customUiNotes || ''}
+                      onBlur={(e) => savePrefs({ customUiNotes: e.target.value })}
+                      placeholder="e.g. Highlight overdue items in red, group line items by vendor..."
+                      style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
           </div>
       </div>
       )}
