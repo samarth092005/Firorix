@@ -140,9 +140,11 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
       appId: 'com.Fiorify.vendor.invoices'
     });
 
-    assert.ok(scaffolding.length >= 10, 'Expected scaffolding + localService mock artifacts');
+    assert.ok(scaffolding.length >= 12, 'Expected scaffolding + localService + mockserver/start artifacts');
     assert.ok(scaffolding.some((s) => s.filePath === 'ui5-mock.yaml'), 'Expected ui5-mock.yaml');
     assert.ok(scaffolding.some((s) => s.filePath === 'webapp/localService/metadata.xml'), 'Expected localService/metadata.xml');
+    assert.ok(scaffolding.some((s) => s.filePath === 'mockserver.js'), 'Expected mockserver.js');
+    assert.ok(scaffolding.some((s) => s.filePath === 'start.js'), 'Expected start.js');
 
     const comp = scaffolding.find((s) => s.objectName === 'Component.js');
     assert.ok(comp.content.includes('AppComponent.extend("com.Fiorify.vendor.invoices.Component"'));
@@ -150,6 +152,8 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
     const html = scaffolding.find((s) => s.objectName === 'index.html');
     assert.ok(html.content.includes('data-sap-ui-theme="sap_horizon"'));
     assert.ok(html.content.includes('data-name="com.Fiorify.vendor.invoices"'));
+    assert.ok(html.content.includes('height: 100% !important'), 'Expected explicit height: 100%');
+    assert.ok(html.content.includes('src="resources/sap-ui-core.js"'), 'Expected local resources/sap-ui-core.js bootstrap');
 
     const i18n = scaffolding.find((s) => s.objectName === 'i18n.properties');
     assert.ok(i18n.content.includes('entity.ZVendorInvoice=Vendor Invoice'));

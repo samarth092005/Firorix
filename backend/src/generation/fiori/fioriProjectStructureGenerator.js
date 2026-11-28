@@ -80,9 +80,17 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${appTitle}</title>
+  <style>
+    html, body, #content, [data-sap-ui-component] {
+      height: 100% !important;
+      width: 100% !important;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
   <script
     id="sap-ui-bootstrap"
-    src="https://ui5.sap.com/${TARGET_UI5_VERSION_S4HANA2023}/resources/sap-ui-core.js"
+    src="resources/sap-ui-core.js"
     data-sap-ui-theme="sap_horizon"
     data-sap-ui-resourceroots='{ "${appId}": "./" }'
     data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
@@ -104,16 +112,10 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
       var c = document.getElementById('content');
       if (c && !document.getElementById('Fiorify-fallback-banner')) {
         c.innerHTML = '<div id="Fiorify-fallback-banner" style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:32px 24px;max-width:750px;margin:40px auto;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.05);">' +
-          '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">' +
-          '<span style="font-size:24px;">🌐</span>' +
-          '<h2 style="font-size:18px;font-weight:700;color:#0f172a;margin:0;">Interactive Fiori Elements Preview</h2>' +
-          '</div>' +
+          '<h2 style="font-size:18px;font-weight:700;color:#0f172a;margin:0 0 12px 0;">Interactive Fiori Elements Preview</h2>' +
           '<div style="padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;color:#166534;font-size:13px;margin-bottom:16px;">' +
-          '✅ <strong>Local Mock OData V4 Service Active</strong> — Synthetic mock data is running and responding on this preview session.' +
+          '<strong>Local Mock OData V4 Service Active</strong> — Run <code>npm install &amp;&amp; npm start</code> to serve UI5 resources locally.' +
           '</div>' +
-          '<p style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:16px;">' +
-          'SAPUI5 CDN scripts (ui5.sap.com) are initializing or require external network access. While the UI5 runtime resolves in your browser, you can inspect the live OData V4 service endpoints, test mutations, and review the generated manifest.json and annotations.xml directly in the Preview Manager.' +
-          '</p>' +
           '<div style="font-size:12px;color:#64748b;background:#f8fafc;padding:12px;border-radius:6px;font-family:monospace;">' +
           'Target App ID: ${appId}<br/>' +
           'Root Entity: ${rootEntity.name}' +
@@ -172,7 +174,8 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
     version: '1.0.0',
     description: project.description || `SAP Fiori Elements Application for ${project.projectName}`,
     scripts: {
-      start: 'ui5 serve --config ui5-mock.yaml --port 8080 --open index.html',
+      start: 'node start.js',
+      'start:mock': 'ui5 serve --config ui5-mock.yaml --port 8080 --open index.html',
       'start:sap': 'ui5 serve --port 8080 --open test/flpSandbox.html',
       build: 'ui5 build --clean-dest'
     },
@@ -331,8 +334,16 @@ server:
 <head>
   <meta charset="utf-8">
   <title>${appTitle} — FLP Sandbox</title>
+  <style>
+    html, body, [data-sap-ui-component] {
+      height: 100% !important;
+      width: 100% !important;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
   <script id="sap-ui-bootstrap"
-    src="https://ui5.sap.com/${TARGET_UI5_VERSION_S4HANA2023}/resources/sap-ui-core.js"
+    src="../resources/sap-ui-core.js"
     data-sap-ui-theme="sap_horizon"
     data-sap-ui-resourceroots='{ "${appId}": "../" }'
     data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
@@ -345,6 +356,133 @@ server:
 </body>
 </html>
 `;
+
+  // 5d. Zero-dependency Local OData V4 Mock Server (mockserver.js) + Integrated Runner (start.js)
+  const entityNames = (project.dataModelSpec?.entities || []).map((e) => e.name);
+  const mockServerJs = `const http = require('node:http');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const PORT = Number(process.env.MOCK_PORT || 8000);
+const SERVICE_URI = '${mainServiceUri}';
+const METADATA_PATH = path.join(__dirname, 'webapp', 'localService', 'metadata.xml');
+const MOCKDATA_DIR = path.join(__dirname, 'webapp', 'localService', 'mockdata');
+const ENTITIES = ${JSON.stringify(entityNames)};
+
+function readMockRows(entityName) {
+  const file = path.join(MOCKDATA_DIR, entityName + '.json');
+  if (!fs.existsSync(file)) return [];
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return []; }
+}
+
+function handleSubRequest(method, rawUrl) {
+  const cleanUrl = rawUrl.split('?')[0];
+  const rel = cleanUrl.startsWith(SERVICE_URI) ? cleanUrl.slice(SERVICE_URI.length) : cleanUrl.replace(/^\\/+/, '');
+  if (rel === '$metadata') {
+    const xml = fs.existsSync(METADATA_PATH) ? fs.readFileSync(METADATA_PATH, 'utf8') : '';
+    return { status: 200, headers: { 'Content-Type': 'application/xml; charset=utf-8' }, body: xml };
+  }
+  if (rel === '' || rel === '/') {
+    const doc = { '@odata.context': '$metadata', value: ENTITIES.map((n) => ({ name: n, kind: 'EntitySet', url: n })) };
+    return { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify(doc) };
+  }
+  const entityName = ENTITIES.find((n) => rel === n || rel.startsWith(n + '('));
+  if (entityName) {
+    const rows = readMockRows(entityName);
+    if (rel.includes('(')) {
+      const payload = { '@odata.context': '../$metadata#' + entityName + '/$entity', ...(rows[0] || {}) };
+      return { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify(payload) };
+    }
+    const payload = { '@odata.context': '$metadata#' + entityName, '@odata.count': rows.length, value: rows };
+    return { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: JSON.stringify(payload) };
+  }
+  return { status: 404, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: { code: 'NOT_FOUND', message: 'Unknown OData resource: ' + rel } }) };
+}
+
+const server = http.createServer((req, res) => {
+  const urlPath = (req.url || '/').split('?')[0];
+  res.setHeader('OData-Version', '4.0');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
+
+  if (urlPath.startsWith('/sap/bc/lrep/')) {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ changes: [], contexts: [], variantSection: {} }));
+    return;
+  }
+
+  if (req.method === 'POST' && urlPath.endsWith('/$batch')) {
+    let body = '';
+    req.on('data', (c) => (body += c));
+    req.on('end', () => {
+      const ct = req.headers['content-type'] || '';
+      const m = ct.match(/boundary=([^;\\s]+)/i);
+      const boundary = m ? m[1].replace(/^"|"$/g, '') : 'batch_mock';
+      const parts = body.split('--' + boundary).filter((p) => p.includes('HTTP/1.1'));
+      const out = parts.map((part) => {
+        const lineMatch = part.match(/(GET|POST|PATCH|DELETE)\\s+([^\\s]+)\\s+HTTP\\/1\\.1/);
+        const subMethod = lineMatch ? lineMatch[1] : 'GET';
+        const subUrl = lineMatch ? lineMatch[2] : SERVICE_URI;
+        const r = handleSubRequest(subMethod, subUrl);
+        return '--' + boundary + '\\r\\nContent-Type: application/http\\r\\nContent-Transfer-Encoding: binary\\r\\n\\r\\nHTTP/1.1 ' + r.status + ' OK\\r\\nContent-Type: ' + r.headers['Content-Type'] + '\\r\\nOData-Version: 4.0\\r\\n\\r\\n' + r.body + '\\r\\n';
+      }).join('') + '--' + boundary + '--\\r\\n';
+      res.writeHead(200, { 'Content-Type': 'multipart/mixed; boundary=' + boundary });
+      res.end(out);
+    });
+    return;
+  }
+
+  if (urlPath.startsWith(SERVICE_URI)) {
+    const r = handleSubRequest(req.method, req.url);
+    res.writeHead(r.status, r.headers);
+    res.end(r.body);
+    return;
+  }
+
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'Not Found' }));
+});
+
+server.listen(PORT, '127.0.0.1', () => {
+  console.log('[Fiorify Mock OData V4] Listening on http://127.0.0.1:' + PORT + SERVICE_URI);
+});
+`;
+
+  const startJs = `const { spawn } = require('node:child_process');
+const path = require('node:path');
+
+const mock = spawn(process.execPath, [path.join(__dirname, 'mockserver.js')], { stdio: 'inherit' });
+setTimeout(() => {
+  const cmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  const ui5 = spawn(cmd, ['ui5', 'serve', '--port', '8080', '--open', 'index.html'], { stdio: 'inherit' });
+  const cleanup = () => { try { mock.kill(); } catch {} try { ui5.kill(); } catch {} process.exit(0); };
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
+  ui5.on('exit', (code) => { try { mock.kill(); } catch {} process.exit(code || 0); });
+}, 500);
+`;
+
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'mockserver.js',
+    filePath: 'mockserver.js',
+    content: mockServerJs,
+    language: 'JAVASCRIPT',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'start.js',
+    filePath: 'start.js',
+    content: startJs,
+    language: 'JAVASCRIPT',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
   artifacts.push(createFioriArtifact({
     projectId: project.projectId,
     artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,

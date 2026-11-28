@@ -50,12 +50,21 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [originFilter, setOriginFilter] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'updatedAt' | 'projectName'>('updatedAt');
+  const [showTestFixtures, setShowTestFixtures] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const { resetDemoData } = useApp();
+
+  const isTestFixtureProject = (p: GenerationProject) =>
+    /^(PRJ-PREVIEW-TEST-|PRJ-EXPORT-TEST|GEN-API-|GEN-CONCURRENT-TEST-|GEN-PERSIST-TEST-|GEN-ME21N-HANDOFF-S1)/i.test(p.projectId) ||
+    /^(Preview Test PO System|Export Test PO System|API Generation Test Project|Concurrency Test|Cold Persistence Test)$/i.test(p.projectName || '');
 
   // Filter & Sort Projects
   const filteredProjects = useMemo(() => {
     let result = [...projects];
+
+    if (!showTestFixtures) {
+      result = result.filter((p) => !isTestFixtureProject(p));
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -86,7 +95,7 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
     });
 
     return result;
-  }, [projects, searchQuery, statusFilter, originFilter, sortBy]);
+  }, [projects, searchQuery, statusFilter, originFilter, sortBy, showTestFixtures]);
 
   // Compute real completed phase count for a card
   const getPhaseProgress = (project: GenerationProject) => {
@@ -228,6 +237,15 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
             <option value="updatedAt">Recently Updated</option>
             <option value="projectName">Project Name</option>
           </select>
+
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#475569', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <input
+              type="checkbox"
+              checked={showTestFixtures}
+              onChange={(e) => setShowTestFixtures(e.target.checked)}
+            />
+            Show Test Fixtures
+          </label>
 
           <button
             type="button"
