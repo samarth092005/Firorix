@@ -4,6 +4,7 @@
 
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
 import { readJsonBody } from '../api/index.js';
+import { setSessionCookie, clearSessionCookie } from '../infrastructure/security/sessionCookie.js';
 
 const loginRateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -88,6 +89,7 @@ export async function handleAuthRoutes(req, res, url, context = {}) {
       }).catch(() => {});
     }
 
+    setSessionCookie(req, res, authResult.token);
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(authResult, null, 2));
     return true;
@@ -98,6 +100,7 @@ export async function handleAuthRoutes(req, res, url, context = {}) {
     if (authHeader) {
       authService.logout(authHeader);
     }
+    clearSessionCookie(req, res);
     if (securityAuditLogger) {
       securityAuditLogger.logEvent({
         actor: currentUser?.id || 'session_user',

@@ -9,6 +9,7 @@ import { USER_ROLES, ROLE_PERMISSIONS } from '../services/authService.js';
 import { SECURITY_ACTIONS } from '../infrastructure/security/securityAuditLogger.js';
 import { defaultAuthProviderFactory } from '../infrastructure/security/authProviderFactory.js';
 import { getDevAdminSecret, getFiorifyEnv } from '../infrastructure/config/envHelper.js';
+import { parseCookieHeader, SESSION_COOKIE_NAME } from '../infrastructure/security/sessionCookie.js';
 
 export function normalizeUserRole(role) {
   if (!role || typeof role !== 'string') return USER_ROLES.VIEWER;
@@ -69,8 +70,14 @@ export function createAuthMiddleware(options = {}) {
       return false;
     };
 
-    // 1. Authorization Bearer Token (headers only; query-string tokens rejected to prevent log/history leakage)
-    const rawToken = (authHeader && authHeader.startsWith('Bearer ')) ? authHeader.slice(7).trim() : null;
+    // 1. Authorization Bearer Token (or HttpOnly session cookie for same-origin GET / preview iframe requests)
+    const bearerToken = (authHeader && authHeader.startsWith('Bearer ')) ? authHeader.slice(7).trim() : null;
+    const isPreviewContentRequest = Boolean(url?.pathname?.includes('/preview/content'));
+    const isSafeMethod = req.method === 'GET' || req.method === 'HEAD';
+    const cookieToken = (!bearerToken && (isSafeMethod || isPreviewContentRequest))
+      ? (parseCookieHeader(req.headers.cookie)[SESSION_COOKIE_NAME] || null)
+      : null;
+    const rawToken = bearerToken || cookieToken;
     if (rawToken) {
       const token = rawToken.trim();
 

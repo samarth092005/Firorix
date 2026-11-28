@@ -27,6 +27,7 @@ import { defaultSapPreflightService } from '../../infrastructure/connectivity/sa
 import { defaultSapArtifactCompatibilityEngine } from '../validation/sapArtifactCompatibilityEngine.js';
 import { defaultSapPostDeploymentVerifier } from '../deployment/sapPostDeploymentVerifier.js';
 import { readJsonBody } from '../../api/index.js';
+import { setSessionCookie } from '../../infrastructure/security/sessionCookie.js';
 
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
@@ -918,6 +919,9 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
     try {
       const payload = await readJsonBody(req);
       const result = await previewManager.startPreview(projectId, payload, currentUser);
+      if (req.headers.authorization?.startsWith('Bearer ')) {
+        setSessionCookie(req, res, req.headers.authorization.slice(7).trim());
+      }
       sendJson(res, 200, { success: true, session: result.session || result });
     } catch (err) {
       sendError(res, err);
@@ -947,6 +951,9 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
     try {
       const payload = await readJsonBody(req);
       const result = await previewManager.restartPreview(projectId, payload, currentUser);
+      if (req.headers.authorization?.startsWith('Bearer ')) {
+        setSessionCookie(req, res, req.headers.authorization.slice(7).trim());
+      }
       sendJson(res, 200, { success: true, session: result.session || result });
     } catch (err) {
       sendError(res, err);
