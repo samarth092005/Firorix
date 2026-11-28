@@ -109,7 +109,7 @@ test('PreviewCopilotService proposes unified diff and applies changes cleanly', 
 
     assert.ok(proposal.proposalId.startsWith('COP-'));
     assert.ok(proposal.diffs.length >= 1);
-    assert.ok(proposal.diffs.some((d) => d.unifiedDiff.includes('Fiorify.fe.worklist.v4')));
+    assert.ok(proposal.diffs.some((d) => d.unifiedDiff.includes('Action Worklist')));
     assert.ok(proposal.diffs.some((d) => d.unifiedDiff.includes('Priority')));
 
     const applyResult = await copilot.applyChanges(seeded.projectId, {

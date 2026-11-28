@@ -40,6 +40,8 @@ export class FioriGeneratorEngine {
     const effectiveFloorplan = String(uiPrefs.floorplan || '').toUpperCase();
     const isFreestylePattern =
       String(uiConfig.uiType || '').toUpperCase() === 'FREESTYLE' ||
+      effectiveFloorplan === 'WORKLIST' ||
+      effectiveFloorplan === 'ANALYTICAL_LIST_PAGE' ||
       effectiveFloorplan === 'OVERVIEW_PAGE' ||
       effectiveFloorplan === 'FREESTYLE_WIZARD';
 
@@ -120,7 +122,7 @@ export class FioriGeneratorEngine {
       success: true,
       projectId,
       totalGenerated: fioriArtifacts.length,
-      artifacts: Object.values(registry.artifacts).filter((a) => a.filePath.startsWith('webapp/') || a.filePath.includes('ui5.yaml') || a.filePath.includes('ui5-mock.yaml') || a.filePath === 'mockserver.js' || a.filePath === 'start.js' || a.filePath === 'LOCAL_SETUP.md' || a.objectName === 'README_FIORI' || a.filePath === 'package.json'),
+      artifacts: Object.values(registry.artifacts).filter((a) => a.filePath.startsWith('webapp/') || a.filePath.includes('ui5.yaml') || a.filePath.includes('ui5-mock.yaml') || a.filePath === 'mockserver.js' || a.filePath === 'start.js' || a.filePath === 'LOCAL_SETUP.md' || a.filePath === 'RUNBOOK.md' || a.filePath === 'manifest.yml' || a.objectName === 'README_FIORI' || a.filePath === 'package.json'),
       runRecord
     };
   }

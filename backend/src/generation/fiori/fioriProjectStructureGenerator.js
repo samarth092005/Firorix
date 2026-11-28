@@ -562,6 +562,79 @@ npm run start:ui5
     sourceEntityIds: [rootEntity.entityId]
   }));
 
+  const cfManifestYml = `---
+applications:
+  - name: fiorify-${prefix}-ui
+    memory: 256M
+    disk_quota: 512M
+    buildpacks:
+      - nodejs_buildpack
+    command: node start.js
+    random-route: true
+    env:
+      NODE_ENV: production
+`;
+
+  const runbookMd = `# Fiorify Deployment & Hosting Runbook — ${appTitle}
+
+This package is self-contained and ready for **Local Testing (< 5s)**, **UI5 CLI Build**, **Cloud Foundry (\`cf push\`)**, or **Live SAP S/4HANA Integration**.
+
+---
+
+## 1. Local Laptop Testing (< 5 Seconds — Zero Install)
+\`\`\`bash
+cd fiori
+node start.js
+\`\`\`
+Open **http://127.0.0.1:8080/index.html**.
+
+---
+
+## 2. Host on SAP BTP Cloud Foundry (\`cf push\`)
+A pre-configured \`manifest.yml\` is included in \`fiori/\`:
+\`\`\`bash
+cf login -a https://api.cf.eu10-005.hana.ondemand.com
+cd fiori
+cf push
+\`\`\`
+
+---
+
+## 3. Full Offline UI5 CLI Build (< 4–5 Minutes)
+\`\`\`bash
+cd fiori
+npm install
+npm run build
+\`\`\`
+
+---
+
+## 4. Connect to Live SAP S/4HANA (${project.sourceSystemId || 'S21'} Client ${project.sourceClient || '200'})
+- **BTP Destination:** \`${project.targetDestination || 'S21_FIORI'}\`
+- **OData V4 Service:** \`ZUI_${prefix.toUpperCase()}\` (\`/sap/opu/odata4/sap/zui_${prefix}/srvd/sap/zui_${prefix}/0001/\`)
+- **Proxy Files:** \`ui5.yaml\` (local proxy) & \`xs-app.json\` (BTP AppRouter)
+`;
+
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'manifest.yml',
+    filePath: 'manifest.yml',
+    content: cfManifestYml,
+    language: 'YAML',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'RUNBOOK.md',
+    filePath: 'RUNBOOK.md',
+    content: runbookMd,
+    language: 'MARKDOWN',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
   artifacts.push(createFioriArtifact({
     projectId: project.projectId,
     artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,

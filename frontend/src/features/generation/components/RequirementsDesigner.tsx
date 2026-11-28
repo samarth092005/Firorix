@@ -18,7 +18,8 @@ import {
   Tag,
   ArrowRight,
   RefreshCw,
-  LayoutTemplate
+  LayoutTemplate,
+  ChevronDown
 } from 'lucide-react';
 import {
   GenerationProject,
@@ -52,6 +53,8 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [openReqBox, setOpenReqBox] = useState<'functional' | 'ui'>('functional');
+  const [functionalApproved, setFunctionalApproved] = useState<boolean>(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -425,131 +428,90 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
         </div>
       )}
 
-      {/* Compact UI & Floorplan Requirements Bar */}
+      {/* BOX 1: Functional & Business Requirements (Hover/Click Expandable) */}
       <div
+        onMouseEnter={() => {
+          if (!functionalApproved) setOpenReqBox('functional');
+        }}
         style={{
-          padding: '12px 16px',
           backgroundColor: '#FFFFFF',
-          border: '1px solid #E2E8F0',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px'
+          border: openReqBox === 'functional' ? '1.5px solid #0066FF' : '1px solid #E2E8F0',
+          borderRadius: '10px',
+          overflow: 'hidden'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-          <LayoutTemplate size={16} color="#0066FF" />
-          <label htmlFor="fiori-floorplan-select" style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-            UI Floorplan:
-          </label>
-          <select
-            id="fiori-floorplan-select"
-            value={project.requirementsSpec?.uiPreferences?.floorplan || 'LIST_REPORT_OBJECT_PAGE'}
-            onChange={async (e) => {
-              const fp = e.target.value as FioriFloorplanType;
-              const nextPrefs: RequirementsUiPreferences = {
-                ...(project.requirementsSpec?.uiPreferences || {}),
-                floorplan: fp
-              };
-              try {
-                const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
-                  requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
-                });
-                onProjectUpdated(updated);
-                setActionSuccess(`UI Floorplan updated to ${fp}`);
-              } catch (err: any) {
-                setError(err?.message || 'Failed to update floorplan');
-              }
-            }}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '6px',
-              border: '1px solid #CBD5E1',
-              backgroundColor: '#F8FAFC',
-              color: '#0F172A',
-              fontSize: '12.5px',
-              fontWeight: 600
-            }}
-          >
-            <option value="LIST_REPORT_OBJECT_PAGE">List Report &amp; Object Page (Filter + Table + Detail Tabs)</option>
-            <option value="WORKLIST">Action Worklist (Operational Queue + Bulk Actions)</option>
-            <option value="ANALYTICAL_LIST_PAGE">Analytical List Page (KPI Cards + Chart + Table)</option>
-            <option value="OVERVIEW_PAGE">Overview Cockpit (Executive KPI Tiles + Queue)</option>
-            <option value="FREESTYLE_WIZARD">Guided Wizard (Step-by-Step Entry Flow)</option>
-          </select>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setOpenReqBox('functional')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') setOpenReqBox('functional');
+          }}
+          style={{
+            padding: '14px 18px',
+            backgroundColor: openReqBox === 'functional' ? '#F8FAFC' : '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {openReqBox === 'functional' ? <ChevronDown size={16} color="#0066FF" /> : <ChevronRight size={16} color="#64748B" />}
+            <FileText size={17} color="#0066FF" />
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
+                1. Functional &amp; Business Requirements
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748B' }}>
+                {requirements.length} requirement(s) · {requirements.filter((r) => r.status === 'CONFIRMED').length} confirmed
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {(functionalApproved || summary?.allConfirmedOrResolved) && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', padding: '3px 9px', borderRadius: '999px', border: '1px solid #BBF7D0' }}>
+                <CheckCircle2 size={13} /> Approved
+              </span>
+            )}
+            {openReqBox === 'functional' && (
+              <button
+                type="button"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (requirements.some((r) => r.status === 'DRAFT')) {
+                    await handleConfirmAllRequirements();
+                  }
+                  setFunctionalApproved(true);
+                  setOpenReqBox('ui');
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  backgroundColor: '#0066FF',
+                  color: '#FFFFFF',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                <span>Approve Functional &amp; Open UI Design</span>
+                <ArrowRight size={13} />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', fontSize: '12.5px', color: '#334155', flexWrap: 'wrap' }}>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={Boolean(project.requirementsSpec?.uiPreferences?.bulkActions)}
-              onChange={async (e) => {
-                const nextPrefs: RequirementsUiPreferences = {
-                  ...(project.requirementsSpec?.uiPreferences || {}),
-                  bulkActions: e.target.checked
-                };
-                try {
-                  const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
-                    requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
-                  });
-                  onProjectUpdated(updated);
-                } catch (err: any) {
-                  setError(err?.message || 'Failed to update UI preference');
-                }
-              }}
-            />
-            Bulk Actions
-          </label>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={Boolean(project.requirementsSpec?.uiPreferences?.statusBadge)}
-              onChange={async (e) => {
-                const nextPrefs: RequirementsUiPreferences = {
-                  ...(project.requirementsSpec?.uiPreferences || {}),
-                  statusBadge: e.target.checked
-                };
-                try {
-                  const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
-                    requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
-                  });
-                  onProjectUpdated(updated);
-                } catch (err: any) {
-                  setError(err?.message || 'Failed to update UI preference');
-                }
-              }}
-            />
-            Status Badges
-          </label>
-          <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={Boolean(project.requirementsSpec?.uiPreferences?.kpiHeader)}
-              onChange={async (e) => {
-                const nextPrefs: RequirementsUiPreferences = {
-                  ...(project.requirementsSpec?.uiPreferences || {}),
-                  kpiHeader: e.target.checked
-                };
-                try {
-                  const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
-                    requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
-                  });
-                  onProjectUpdated(updated);
-                } catch (err: any) {
-                  setError(err?.message || 'Failed to update UI preference');
-                }
-              }}
-            />
-            KPI Header
-          </label>
-        </div>
-      </div>
-
-      {/* Main Two-Column Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '16px', flex: 1, minHeight: '520px' }}>
+        {openReqBox === 'functional' && (
+          <div style={{ padding: '14px 16px', borderTop: '1px solid #E2E8F0' }}>
+            {/* Main Two-Column Layout */}
+            <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '16px', flex: 1, minHeight: '480px' }}>
         {/* Left Column: Requirements Backlog */}
         <div
           style={{
@@ -1037,6 +999,279 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
             </div>
           )}
         </div>
+      </div>
+          </div>
+        )}
+      </div>
+
+      {/* BOX 2: Visual UI & Screen Design Requirements (Hover/Click Expandable) */}
+      <div
+        onMouseEnter={() => {
+          if (functionalApproved) setOpenReqBox('ui');
+        }}
+        style={{
+          backgroundColor: '#FFFFFF',
+          border: openReqBox === 'ui' ? '1.5px solid #0066FF' : '1px solid #E2E8F0',
+          borderRadius: '10px',
+          overflow: 'hidden'
+        }}
+      >
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setOpenReqBox('ui')}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') setOpenReqBox('ui');
+          }}
+          style={{
+            padding: '14px 18px',
+            backgroundColor: openReqBox === 'ui' ? '#F8FAFC' : '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {openReqBox === 'ui' ? <ChevronDown size={16} color="#0066FF" /> : <ChevronRight size={16} color="#64748B" />}
+            <LayoutTemplate size={17} color="#0066FF" />
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
+                2. UI &amp; Screen Design Requirements
+              </div>
+              <div style={{ fontSize: '12px', color: '#64748B' }}>
+                Floorplan: {project.requirementsSpec?.uiPreferences?.floorplan || 'LIST_REPORT_OBJECT_PAGE'} · Customize layout, actions &amp; badges
+              </div>
+            </div>
+          </div>
+
+          {openReqBox === 'ui' && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNavigateView('data-model');
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '7px 14px',
+                borderRadius: '6px',
+                border: 'none',
+                background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)',
+                color: '#FFFFFF',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <span>Approve UI Design &amp; Next: CDS Model</span>
+              <ArrowRight size={13} />
+            </button>
+          )}
+        </div>
+
+        {openReqBox === 'ui' && (
+          <div style={{ padding: '18px', borderTop: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))', gap: '12px' }}>
+              {([
+                {
+                  id: 'LIST_REPORT_OBJECT_PAGE',
+                  label: 'List Report & Object Page',
+                  desc: 'Filter bar + table + detail tabs',
+                  sketch: (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '6px', backgroundColor: '#F1F5F9', borderRadius: '4px', height: '48px' }}>
+                      <div style={{ height: '8px', backgroundColor: '#CBD5E1', borderRadius: '2px', width: '100%' }} />
+                      <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px', display: 'flex', flexDirection: 'column', justifyContent: 'space-around', padding: '2px 4px' }}>
+                        <div style={{ height: '3px', backgroundColor: '#94A3B8', width: '85%' }} />
+                        <div style={{ height: '3px', backgroundColor: '#CBD5E1', width: '70%' }} />
+                      </div>
+                    </div>
+                  )
+                },
+                {
+                  id: 'WORKLIST',
+                  label: 'Action Worklist Queue',
+                  desc: 'Status tabs + row Approve/Reject',
+                  sketch: (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '6px', backgroundColor: '#F1F5F9', borderRadius: '4px', height: '48px' }}>
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <div style={{ height: '6px', width: '26%', backgroundColor: '#0066FF', borderRadius: '2px' }} />
+                        <div style={{ height: '6px', width: '26%', backgroundColor: '#CBD5E1', borderRadius: '2px' }} />
+                      </div>
+                      <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 6px' }}>
+                        <div style={{ height: '4px', width: '55%', backgroundColor: '#94A3B8' }} />
+                        <div style={{ height: '8px', width: '18px', backgroundColor: '#16A34A', borderRadius: '2px' }} />
+                      </div>
+                    </div>
+                  )
+                },
+                {
+                  id: 'ANALYTICAL_LIST_PAGE',
+                  label: 'KPI & Analytics Cockpit',
+                  desc: 'KPI tiles + distribution bars + table',
+                  sketch: (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '6px', backgroundColor: '#F1F5F9', borderRadius: '4px', height: '48px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '3px' }}>
+                        <div style={{ height: '12px', backgroundColor: '#DBEAFE', borderRadius: '2px' }} />
+                        <div style={{ height: '12px', backgroundColor: '#DCFCE7', borderRadius: '2px' }} />
+                        <div style={{ height: '12px', backgroundColor: '#FEF3C7', borderRadius: '2px' }} />
+                      </div>
+                      <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px', display: 'flex', alignItems: 'flex-end', gap: '3px', padding: '3px 6px' }}>
+                        <div style={{ height: '10px', width: '20%', backgroundColor: '#0066FF' }} />
+                        <div style={{ height: '16px', width: '20%', backgroundColor: '#10B981' }} />
+                        <div style={{ height: '7px', width: '20%', backgroundColor: '#F59E0B' }} />
+                      </div>
+                    </div>
+                  )
+                },
+                {
+                  id: 'OVERVIEW_PAGE',
+                  label: 'Executive Overview Cards',
+                  desc: 'Multi-card cockpit + quick queue',
+                  sketch: (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', padding: '6px', backgroundColor: '#F1F5F9', borderRadius: '4px', height: '48px' }}>
+                      <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px' }} />
+                      <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px' }} />
+                      <div style={{ gridColumn: 'span 2', backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px' }} />
+                    </div>
+                  )
+                },
+                {
+                  id: 'FREESTYLE_WIZARD',
+                  label: 'Step-by-Step Guided Wizard',
+                  desc: 'Wizard form + review summary',
+                  sketch: (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '6px', backgroundColor: '#F1F5F9', borderRadius: '4px', height: '48px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0066FF' }} />
+                        <div style={{ height: '2px', width: '16px', backgroundColor: '#94A3B8' }} />
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#CBD5E1' }} />
+                      </div>
+                      <div style={{ flex: 1, backgroundColor: '#FFFFFF', border: '1px solid #CBD5E1', borderRadius: '2px', padding: '3px 6px' }}>
+                        <div style={{ height: '4px', width: '60%', backgroundColor: '#CBD5E1', marginBottom: '3px' }} />
+                        <div style={{ height: '6px', width: '90%', backgroundColor: '#E2E8F0' }} />
+                      </div>
+                    </div>
+                  )
+                }
+              ] as Array<{ id: FioriFloorplanType; label: string; desc: string; sketch: React.ReactNode }>).map((fp) => {
+                const currentFloorplan = project.requirementsSpec?.uiPreferences?.floorplan || 'LIST_REPORT_OBJECT_PAGE';
+                const isSelected = currentFloorplan === fp.id;
+                return (
+                  <button
+                    key={fp.id}
+                    type="button"
+                    onClick={async () => {
+                      const nextPrefs: RequirementsUiPreferences = {
+                        ...(project.requirementsSpec?.uiPreferences || {}),
+                        floorplan: fp.id
+                      };
+                      try {
+                        const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                          requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                        });
+                        onProjectUpdated(updated);
+                        setActionSuccess(`UI Floorplan updated to ${fp.label}`);
+                      } catch (err: any) {
+                        setError(err?.message || 'Failed to update floorplan');
+                      }
+                    }}
+                    style={{
+                      textAlign: 'left',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: isSelected ? '2px solid #0066FF' : '1px solid #E2E8F0',
+                      backgroundColor: isSelected ? '#EFF6FF' : '#FFFFFF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    {fp.sketch}
+                    <div>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: isSelected ? '#0066FF' : '#0F172A' }}>
+                        {fp.label}
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                        {fp.desc}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', paddingTop: '8px', borderTop: '1px solid #F1F5F9', fontSize: '12.5px', color: '#334155' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600 }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(project.requirementsSpec?.uiPreferences?.bulkActions)}
+                  onChange={async (e) => {
+                    const nextPrefs: RequirementsUiPreferences = {
+                      ...(project.requirementsSpec?.uiPreferences || {}),
+                      bulkActions: e.target.checked
+                    };
+                    try {
+                      const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                        requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                      });
+                      onProjectUpdated(updated);
+                    } catch (err: any) {
+                      setError(err?.message || 'Failed to update UI preference');
+                    }
+                  }}
+                />
+                Enable Bulk Actions
+              </label>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600 }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(project.requirementsSpec?.uiPreferences?.statusBadge)}
+                  onChange={async (e) => {
+                    const nextPrefs: RequirementsUiPreferences = {
+                      ...(project.requirementsSpec?.uiPreferences || {}),
+                      statusBadge: e.target.checked
+                    };
+                    try {
+                      const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                        requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                      });
+                      onProjectUpdated(updated);
+                    } catch (err: any) {
+                      setError(err?.message || 'Failed to update UI preference');
+                    }
+                  }}
+                />
+                Semantic Status Badges
+              </label>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer', fontWeight: 600 }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(project.requirementsSpec?.uiPreferences?.kpiHeader)}
+                  onChange={async (e) => {
+                    const nextPrefs: RequirementsUiPreferences = {
+                      ...(project.requirementsSpec?.uiPreferences || {}),
+                      kpiHeader: e.target.checked
+                    };
+                    try {
+                      const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                        requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                      });
+                      onProjectUpdated(updated);
+                    } catch (err: any) {
+                      setError(err?.message || 'Failed to update UI preference');
+                    }
+                  }}
+                />
+                KPI Summary Header
+              </label>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action Dialog (Confirm with comment / Defer with reason / Reject with reason) */}

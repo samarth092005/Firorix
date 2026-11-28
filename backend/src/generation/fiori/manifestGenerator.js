@@ -232,6 +232,10 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
     }
   };
 
+  const confirmedReqIds = (project.requirementsSpec?.items || [])
+    .filter((r) => r.status === 'CONFIRMED')
+    .map((r) => r.requirementId);
+
   return createFioriArtifact({
     projectId: project.projectId,
     artifactType: FIORI_ARTIFACT_TYPES.FIORI_MANIFEST,
@@ -240,6 +244,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
     content: JSON.stringify(manifest, null, 2),
     language: 'JSON',
     sourceEntityIds: [rootEntity.entityId],
+    sourceRequirementIds: confirmedReqIds,
     dependencies: [serviceName]
   });
 }

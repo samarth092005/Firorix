@@ -169,7 +169,8 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
           <button
             type="button"
             onClick={handleRunValidation}
-            disabled={isValidating}
+            disabled={isValidating || artifacts.length === 0}
+            title={artifacts.length === 0 ? 'Generate Fiori UI artifacts first' : 'Run static validation across generated artifacts'}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -181,7 +182,8 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
               fontSize: '13px',
               fontWeight: 600,
               color: '#334155',
-              cursor: 'pointer'
+              opacity: artifacts.length === 0 ? 0.55 : 1,
+              cursor: isValidating || artifacts.length === 0 ? 'not-allowed' : 'pointer'
             }}
           >
             <CheckCircle2 size={14} color="#059669" />

@@ -28,6 +28,7 @@ import { ToolchainView } from './ToolchainView';
 import { SpecificationLifecycleView } from './SpecificationLifecycleView';
 import { DeploymentWorkspaceView } from './DeploymentWorkspaceView';
 import { LaunchpadView } from './LaunchpadView';
+import { BuildWorkspaceView } from './BuildWorkspaceView';
 
 interface WorkspaceShellViewProps {
   viewId: StudioInternalView;
@@ -232,27 +233,15 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
     );
   }
 
-  // If viewing abap-generator and project is active, render AbapGenerator (GEN-05)
-  if (viewId === 'abap-generator' && project) {
+  // Stage 4 Build: Interactive 2-Box ABAP RAP Core + Fiori UI5 App
+  if ((viewId === 'abap-generator' || viewId === 'ui-generator') && project) {
     return (
       <div className="workspace-canvas">
-        <AbapGenerator
+        <BuildWorkspaceView
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
           onNavigateView={onNavigateView}
-        />
-      </div>
-    );
-  }
-
-  // If viewing ui-generator and project is active, render FioriUiGenerator (GEN-06)
-  if (viewId === 'ui-generator' && project) {
-    return (
-      <div className="workspace-canvas">
-        <FioriUiGenerator
-          project={project}
-          onProjectUpdated={onProjectUpdated || (() => {})}
-          onNavigateView={onNavigateView}
+          initialBox={viewId === 'ui-generator' ? 'fiori' : 'abap'}
         />
       </div>
     );

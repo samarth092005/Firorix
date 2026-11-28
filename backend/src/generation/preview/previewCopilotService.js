@@ -202,7 +202,11 @@ function renderPreviewArtifactMap(project, archEngine) {
   const architecture = project.architectureSpec || archEngine.evaluate(project);
   const prefs = project.requirementsSpec?.uiPreferences || {};
   const floorplan = String(prefs.floorplan || '').toUpperCase();
-  const isFreestyle = floorplan === 'OVERVIEW_PAGE' || floorplan === 'FREESTYLE_WIZARD';
+  const isFreestyle =
+    floorplan === 'WORKLIST' ||
+    floorplan === 'ANALYTICAL_LIST_PAGE' ||
+    floorplan === 'OVERVIEW_PAGE' ||
+    floorplan === 'FREESTYLE_WIZARD';
 
   const map = new Map();
   if (isFreestyle) {

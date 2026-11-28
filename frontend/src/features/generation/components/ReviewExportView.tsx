@@ -39,6 +39,8 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
   const [exporting, setExporting] = useState(false);
   const [exportResult, setExportResult] = useState<ExportPackageResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [runbookTab, setRunbookTab] = useState<'local' | 'cf' | 'sap'>('local');
+  const [copiedCmd, setCopiedCmd] = useState<boolean>(false);
 
   // Load readiness and traceability on mount
   useEffect(() => {
@@ -136,7 +138,7 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
             </span>
           </div>
           <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748B' }}>
-            Multi-tier validation gate, complete Traceability Matrix, and zero-dependency PKZIP bundling with SHA-256 integrity verification.
+            Final readiness verification, SAP connectivity setup, and standalone Customer ZIP packaging.
           </p>
         </div>
 
@@ -160,32 +162,100 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
         </button>
       </div>
 
-      {/* Fast Local Run & Dependency Manifest Card */}
-      <div
-        style={{
-          padding: '14px 18px',
-          backgroundColor: '#F8FAFC',
-          border: '1px solid #E2E8F0',
-          borderRadius: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '12px'
-        }}
-      >
-        <div>
-          <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
-            Local Laptop Testing — Ready in &lt; 5 Seconds
+      {/* Turnkey Hosting & Setup Rulebook (Local < 5s / Cloud Foundry cf push / Live SAP) */}
+      {(() => {
+        const commands: Record<'local' | 'cf' | 'sap', { title: string; desc: string; cmd: string }> = {
+          local: {
+            title: 'Local Laptop Testing — Ready in < 5 Seconds',
+            desc: 'Unzip and run directly with Node.js (zero heavy @sap/ux-ui5-tooling install required). Full details in RUNBOOK.md & LOCAL_SETUP.md.',
+            cmd: 'cd fiori && node start.js'
+          },
+          cf: {
+            title: 'Host on SAP BTP Cloud Foundry (Turnkey manifest.yml included)',
+            desc: 'A pre-configured manifest.yml is packaged inside fiori/ — push directly to Cloud Foundry in 3 commands.',
+            cmd: 'cf login -a https://api.cf.eu10-005.hana.ondemand.com\ncd fiori\ncf push'
+          },
+          sap: {
+            title: 'Full UI5 CLI Build & Live SAP Integration (< 4–5 Minutes)',
+            desc: 'Install @ui5/cli to bundle dist/ or proxy /sap/* to your BTP Destination via ui5.yaml / xs-app.json.',
+            cmd: 'cd fiori && npm install && npm run build'
+          }
+        };
+        const active = commands[runbookTab];
+        return (
+          <div
+            style={{
+              padding: '16px 18px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
+                Deployment &amp; Hosting Rulebook (Included in ZIP as <code>RUNBOOK.md</code>)
+              </div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                {([
+                  { id: 'local', label: 'Local (< 5s)' },
+                  { id: 'cf', label: 'Cloud Foundry (cf push)' },
+                  { id: 'sap', label: 'UI5 Build / SAP' }
+                ] as const).map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setRunbookTab(t.id)}
+                    style={{
+                      padding: '5px 11px',
+                      borderRadius: '6px',
+                      border: runbookTab === t.id ? '1px solid #0066FF' : '1px solid #CBD5E1',
+                      backgroundColor: runbookTab === t.id ? '#EFF6FF' : '#F8FAFC',
+                      color: runbookTab === t.id ? '#0066FF' : '#334155',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ fontSize: '12.5px', color: '#475569' }}>
+              <strong style={{ color: '#0F172A' }}>{active.title}:</strong> {active.desc}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', backgroundColor: '#0F172A', color: '#E2E8F0', padding: '10px 14px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '12px' }}>
+              <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{active.cmd}</pre>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard?.writeText(active.cmd);
+                  setCopiedCmd(true);
+                  setTimeout(() => setCopiedCmd(false), 1800);
+                }}
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '5px',
+                  border: '1px solid #334155',
+                  backgroundColor: '#1E293B',
+                  color: '#F8FAFC',
+                  fontSize: '11.5px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                {copiedCmd ? 'Copied ✓' : 'Copy'}
+              </button>
+            </div>
           </div>
-          <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
-            Unzip into <code>fiori/</code> and run <code>node start.js</code> (zero heavy <code>@sap/ux-ui5-tooling</code> install required; see <code>LOCAL_SETUP.md</code> for full offline prerequisites).
-          </div>
-        </div>
-        <div style={{ fontSize: '12px', fontFamily: 'monospace', backgroundColor: '#0F172A', color: '#E2E8F0', padding: '6px 12px', borderRadius: '6px' }}>
-          cd fiori &amp;&amp; node start.js
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Top Prominent Warning Acknowledgment Banner */}
       {hasWarnings && !hasBlockingErrors && (
@@ -451,137 +521,67 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
         )}
       </div>
 
-      {/* Traceability Metrics Cards */}
-      {traceability && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
-          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
-              Requirement Coverage
+      {/* SAP Connectivity & Integration Setup */}
+      {(() => {
+        const rootEnt = project.dataModelSpec?.entities?.find((e: any) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
+        const stem = (rootEnt?.name || project.sourceTransactionCode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toUpperCase();
+        const srvName = stem.startsWith('ZUI_') ? stem : `ZUI_${stem.replace(/^Z_?[IC]_?/i, '')}`;
+        const odataPath = `/sap/opu/odata4/sap/${srvName.toLowerCase()}/srvd/sap/${srvName.toLowerCase()}/0001/`;
+        return (
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              padding: '18px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#0F172A' }}>
+                SAP Connectivity &amp; Integration Setup
+              </div>
+              <span style={{ fontSize: '11.5px', fontWeight: 600, padding: '3px 9px', borderRadius: '999px', backgroundColor: '#EFF6FF', color: '#1D4ED8' }}>
+                Local Mock + Live SAP Ready
+              </span>
             </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
-              {traceability.metrics.requirementCoveragePct}%
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
-              {traceability.metrics.fullyMappedRequirements} of {traceability.metrics.totalRequirements} fully mapped
-            </div>
-          </div>
 
-          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
-              Data Model Coverage
-            </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
-              {traceability.metrics.entityCoveragePct}%
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
-              {traceability.metrics.fullyMappedEntities} of {traceability.metrics.totalEntities} entities in CDS/DDIC
-            </div>
-          </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', fontSize: '12.5px' }}>
+              <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Target SAP System</div>
+                <div style={{ fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>
+                  {project.sourceSystemId || 'S21'} (Client {project.sourceClient || '200'})
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '2px' }}>
+                  BTP Destination: <code>{(project as any).targetDestination || 'S21_FIORI'}</code>
+                </div>
+              </div>
 
-          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '16px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
-              UI Annotation Coverage
-            </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#0F172A', marginTop: '4px' }}>
-              {traceability.metrics.uiCoveragePct}%
-            </div>
-            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
-              {traceability.metrics.annotatedCdsViews} UI annotation definitions
-            </div>
-          </div>
+              <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>OData V4 Service Binding</div>
+                <div style={{ fontWeight: 700, color: '#0F172A', marginTop: '4px', fontFamily: 'monospace' }}>
+                  {srvName}
+                </div>
+                <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                  {odataPath}
+                </div>
+              </div>
 
-          <div style={{ backgroundColor: '#F0F7FF', border: '1px solid #0066FF', borderRadius: '8px', padding: '16px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#0066FF', textTransform: 'uppercase' }}>
-              Composite Traceability Index
-            </div>
-            <div style={{ fontSize: '26px', fontWeight: 800, color: '#0066FF', marginTop: '4px' }}>
-              {traceability.metrics.traceabilityIndex}%
-            </div>
-            <div style={{ fontSize: '12px', color: '#0066FF', marginTop: '4px' }}>
-              Mathematical Clean Core Score
+              <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Routing &amp; Proxy Config</div>
+                <div style={{ fontWeight: 600, color: '#0F172A', marginTop: '4px' }}>
+                  <code>ui5.yaml</code> &amp; <code>xs-app.json</code>
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '2px' }}>
+                  Pre-configured for <code>/sap/*</code> proxy to SAP S/4HANA or local <code>mockserver.js</code>.
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Interactive Traceability Matrix Table */}
-      {traceability && (
-        <div
-          style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E2E8F0',
-            borderRadius: '8px',
-            padding: '18px 20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px', fontWeight: 700, color: '#0F172A' }}>
-              <FileText size={18} color="#0066FF" />
-              End-to-End Requirement-to-Artifact Traceability Matrix
-            </div>
-            <span style={{ fontSize: '12px', color: '#64748B' }}>
-              {traceability.requirementMappings.length} Requirements Mapped
-            </span>
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', color: '#475569', textAlign: 'left' }}>
-                  <th style={{ padding: '8px 10px' }}>Req ID</th>
-                  <th style={{ padding: '8px 10px' }}>Title</th>
-                  <th style={{ padding: '8px 10px' }}>Target Entity</th>
-                  <th style={{ padding: '8px 10px' }}>CDS View Entities</th>
-                  <th style={{ padding: '8px 10px' }}>RAP Behavior</th>
-                  <th style={{ padding: '8px 10px' }}>Service Def</th>
-                  <th style={{ padding: '8px 10px' }}>UI Annotations</th>
-                  <th style={{ padding: '8px 10px' }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {traceability.requirementMappings.map((m, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                    <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: '#0066FF' }}>
-                      {m.requirementId}
-                    </td>
-                    <td style={{ padding: '8px 10px', fontWeight: 600, color: '#1E293B' }}>{m.title}</td>
-                    <td style={{ padding: '8px 10px', color: '#475569' }}>{m.mappedEntity}</td>
-                    <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#334155' }}>
-                      {m.cdsViews.length > 0 ? m.cdsViews.join(', ') : '-'}
-                    </td>
-                    <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#334155' }}>
-                      {m.behaviorDefinition}
-                    </td>
-                    <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#334155' }}>
-                      {m.serviceDefinition}
-                    </td>
-                    <td style={{ padding: '8px 10px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#334155' }}>
-                      {m.uiAnnotations.length > 0 ? m.uiAnnotations.join(', ') : '-'}
-                    </td>
-                    <td style={{ padding: '8px 10px' }}>
-                      <span
-                        style={{
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          fontSize: '10px',
-                          fontWeight: 700,
-                          backgroundColor: m.coverage === 'FULL' ? '#DEF7EC' : m.coverage === 'PARTIAL' ? '#FEF3C7' : '#FEE2E2',
-                          color: m.coverage === 'FULL' ? '#03543F' : m.coverage === 'PARTIAL' ? '#92400E' : '#991B1B'
-                        }}
-                      >
-                        {m.coverage}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Past Export History */}
       {(project.activityHistory || []).some((a) => a.action?.includes('EXPORT')) || (project as any).exportHistory?.length > 0 ? (

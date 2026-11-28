@@ -138,35 +138,38 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
         </div>
       )}
 
-      {/* Header telemetry card */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-        <div style={{ padding: '20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-          <div style={{ fontSize: '13px', color: '#64748B', fontWeight: 600 }}>13-GATE READINESS</div>
-          <div style={{ fontSize: '32px', fontWeight: 700, color: readiness?.readinessPercentage === 100 ? '#10B981' : '#F59E0B', margin: '8px 0' }}>
+      {/* Compact 1-Line Readiness Summary Strip */}
+      <div
+        style={{
+          padding: '14px 20px',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span
+            style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: readiness?.readinessPercentage === 100 ? '#10B981' : '#F59E0B'
+            }}
+          >
             {readiness?.readinessPercentage || 0}%
-          </div>
-          <div style={{ fontSize: '12px', color: '#475569' }}>
-            Status: <strong>{readiness?.status || 'UNKNOWN'}</strong> ({readiness?.passedChecksCount || 0}/13 gates passed)
-          </div>
-        </div>
-
-        <div style={{ padding: '20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-          <div style={{ fontSize: '13px', color: '#64748B', fontWeight: 600 }}>CURRENT SPECIFICATION VERSION</div>
-          <div style={{ fontSize: '32px', fontWeight: 700, color: '#1E293B', margin: '8px 0' }}>
-            v{project.specificationVersion || 1}.0
-          </div>
-          <div style={{ fontSize: '12px', color: '#475569' }}>
-            Modernization: <strong>{project.modernizationOutcome || 'BUILD'}</strong> | Target: {project.targetRelease || 'S/4HANA 2023'}
-          </div>
-        </div>
-
-        <div style={{ padding: '20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-          <div style={{ fontSize: '13px', color: '#64748B', fontWeight: 600 }}>GOVERNED LIFECYCLE STATUS</div>
-          <div style={{ fontSize: '24px', fontWeight: 700, color: '#0070F2', margin: '8px 0' }}>
-            {project.lifecycleStatus}
-          </div>
-          <div style={{ fontSize: '12px', color: '#475569' }}>
-            Approved by: {project.approvedBy ? <strong>{project.approvedBy}</strong> : 'Pending Lead Approval'}
+          </span>
+          <div>
+            <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F172A' }}>
+              13-Gate Build Readiness ({readiness?.passedChecksCount || 0}/13 passed)
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>
+              Target: {project.targetRelease || 'S/4HANA 2023'} · Status: {project.lifecycleStatus}
+              {project.approvedBy ? ` · Approved by ${project.approvedBy}` : ''}
+            </div>
           </div>
         </div>
       </div>

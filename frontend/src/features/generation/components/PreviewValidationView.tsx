@@ -460,92 +460,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '4px 0' }}>
-      {/* 3 Pillars Master Architecture Switcher Bar */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '8px',
-          backgroundColor: '#FFFFFF',
-          padding: '6px',
-          borderRadius: '8px',
-          border: '1px solid #E2E8F0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setActivePillarTab('PREVIEW')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 14px',
-            borderRadius: '6px',
-            border: activePillarTab === 'PREVIEW' ? '1px solid #0066FF' : '1px solid transparent',
-            backgroundColor: activePillarTab === 'PREVIEW' ? '#EFF6FF' : 'transparent',
-            color: activePillarTab === 'PREVIEW' ? '#0066FF' : '#475569',
-            fontWeight: activePillarTab === 'PREVIEW' ? 700 : 500,
-            fontSize: '13.5px',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <LayoutTemplate size={16} />
-          <span>1. Live Fiori Preview (Frontend UI)</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActivePillarTab('BACKEND_RAP')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 14px',
-            borderRadius: '6px',
-            border: activePillarTab === 'BACKEND_RAP' ? '1px solid #0066FF' : '1px solid transparent',
-            backgroundColor: activePillarTab === 'BACKEND_RAP' ? '#EFF6FF' : 'transparent',
-            color: activePillarTab === 'BACKEND_RAP' ? '#0066FF' : '#475569',
-            fontWeight: activePillarTab === 'BACKEND_RAP' ? 700 : 500,
-            fontSize: '13.5px',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <Code2 size={16} />
-          <span>2. S/4HANA Backend (ABAP RAP Core)</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActivePillarTab('CONNECTIVITY_SOP')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '10px 14px',
-            borderRadius: '6px',
-            border: activePillarTab === 'CONNECTIVITY_SOP' ? '1px solid #0066FF' : '1px solid transparent',
-            backgroundColor: activePillarTab === 'CONNECTIVITY_SOP' ? '#EFF6FF' : 'transparent',
-            color: activePillarTab === 'CONNECTIVITY_SOP' ? '#0066FF' : '#475569',
-            fontWeight: activePillarTab === 'CONNECTIVITY_SOP' ? 700 : 500,
-            fontSize: '13.5px',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <Layers size={16} />
-          <span>3. Connectivity, FLP Tile &amp; Deployment SOP</span>
-        </button>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* TAB 1: LIVE FIORI PREVIEW (FRONTEND)                                      */}
-      {/* ========================================================================= */}
+      {/* Live Fiori Preview + Copilot Workspace (No Nested Tabs) */}
       {activePillarTab === 'PREVIEW' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Top Banner: Local Preview Status & Controls */}
@@ -669,7 +584,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                     title="Proceed to export packaging and governance certificate"
                     style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
                   >
-                    <span style={{ whiteSpace: 'nowrap' }}>Next: Review &amp; Export</span>
+                    <span style={{ whiteSpace: 'nowrap' }}>Next: Export &amp; Connectivity</span>
                     <ArrowRight size={14} />
                   </button>
                 </>

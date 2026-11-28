@@ -91,6 +91,7 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
   const [serviceProtocol, setServiceProtocol] = useState<string>('ODATA_V4_UI');
   const [legacyDelegate, setLegacyDelegate] = useState<string>('');
   const [isDirty, setIsDirty] = useState<boolean>(false);
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   const syncFromArchitecture = (arch: ArchitectureSpec) => {
     setArchitecture(arch);
@@ -279,7 +280,7 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <button
             type="button"
             onClick={handleReevaluate}
@@ -287,57 +288,43 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              backgroundColor: '#F1F5F9',
+              gap: '5px',
+              padding: '7px 12px',
+              backgroundColor: 'transparent',
               border: '1px solid #CBD5E1',
               borderRadius: '6px',
-              fontSize: '13px',
+              fontSize: '12.5px',
               fontWeight: 600,
-              color: '#334155',
+              color: '#475569',
               cursor: 'pointer'
             }}
           >
-            <RefreshCw size={14} /> Auto-Detect from Rules
+            <RefreshCw size={13} /> Reset to Auto
           </button>
           <button
             type="button"
-            onClick={handleSave}
             disabled={isSaving}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              backgroundColor: isDirty ? '#D97706' : '#0066FF',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#FFFFFF',
-              cursor: 'pointer'
+            onClick={async () => {
+              if (isDirty) {
+                await handleSave();
+              }
+              onNavigateView('spec-lifecycle');
             }}
-          >
-            <Save size={14} /> {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Save Architecture')}
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigateView('spec-lifecycle')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
               padding: '8px 16px',
-              backgroundColor: '#0F172A',
+              background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)',
               border: 'none',
               borderRadius: '6px',
               fontSize: '13px',
               fontWeight: 600,
               color: '#FFFFFF',
-              cursor: 'pointer'
+              cursor: isSaving ? 'wait' : 'pointer'
             }}
           >
-            Proceed to Readiness & Governance <ArrowRight size={14} />
+            <span>{isSaving ? 'Saving...' : 'Next: 13-Gate Check'}</span> <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -678,56 +665,79 @@ export const ArchitectureDesigner: React.FC<ArchitectureDesignerProps> = ({
             </div>
           </div>
 
-          {/* Runtime & Service Settings */}
-          <div style={{ backgroundColor: '#FFFFFF', padding: '18px 20px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-            <h3 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0F172A', margin: '0 0 10px' }}>
-              Runtime & Service Settings
-            </h3>
+          {/* Collapsible Advanced Runtime & Clean Core Details */}
+          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((v) => !v)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                backgroundColor: '#F8FAFC',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#334155',
+                cursor: 'pointer'
+              }}
+            >
+              <span>{showAdvanced ? 'Hide' : 'Show'} Advanced Runtime &amp; Clean Core Details</span>
+              <span>{showAdvanced ? '▲' : '▼'}</span>
+            </button>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', color: '#475569' }}>
-              <div>
-                <label style={{ display: 'block', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
-                  OData Service Protocol
-                </label>
-                <select
-                  value={serviceProtocol}
-                  onChange={(e) => {
-                    setServiceProtocol(e.target.value);
-                    setIsDirty(true);
-                  }}
-                  style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', backgroundColor: '#F8FAFC' }}
-                >
-                  <option value="ODATA_V4_UI">OData V4 UI (Recommended for S/4HANA 2023)</option>
-                  <option value="ODATA_V2_UI">OData V2 UI (Legacy Fiori compatibility)</option>
-                  <option value="ODATA_V4_WEB_API">OData V4 Web API (Headless / Integration)</option>
-                </select>
+            {showAdvanced && (
+              <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '16px', borderTop: '1px solid #E2E8F0' }}>
+                <div>
+                  <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F172A', margin: '0 0 8px' }}>
+                    Runtime &amp; Service Settings
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px', color: '#475569' }}>
+                    <div>
+                      <label style={{ display: 'block', fontWeight: 600, color: '#334155', marginBottom: '4px' }}>
+                        OData Service Protocol
+                      </label>
+                      <select
+                        value={serviceProtocol}
+                        onChange={(e) => {
+                          setServiceProtocol(e.target.value);
+                          setIsDirty(true);
+                        }}
+                        style={{ width: '100%', padding: '7px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12.5px', backgroundColor: '#F8FAFC' }}
+                      >
+                        <option value="ODATA_V4_UI">OData V4 UI (Recommended for S/4HANA 2023)</option>
+                        <option value="ODATA_V2_UI">OData V2 UI (Legacy Fiori compatibility)</option>
+                        <option value="ODATA_V4_WEB_API">OData V4 Web API (Headless / Integration)</option>
+                      </select>
+                    </div>
+                    <div><strong>Locking:</strong> {lockInfo.label} <code style={{ fontSize: '11px', color: '#64748B' }}>({lockInfo.detail})</code></div>
+                    <div><strong>Concurrency:</strong> {etagInfo.label} <code style={{ fontSize: '11px', color: '#64748B' }}>({etagInfo.detail})</code></div>
+                    <div><strong>Authorization:</strong> {authInfo.label}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                    <ShieldCheck size={15} color="#059669" />
+                    <h4 style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
+                      Clean Core Governance
+                    </h4>
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#475569', lineHeight: 1.55 }}>
+                    <div style={{ fontWeight: 700, color: '#065F46', marginBottom: '4px' }}>
+                      Tier 2 — On-Stack ABAP Cloud ({architecture?.cleanCoreImplications?.tier || 'TIER_2_DEV_EXT'})
+                    </div>
+                    <ul style={{ margin: '4px 0 0', paddingLeft: '18px' }}>
+                      {(architecture?.cleanCoreImplications?.notes || []).map((n, i) => (
+                        <li key={i}>{n}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
-
-              <div><strong>Locking:</strong> {lockInfo.label} <code style={{ fontSize: '11px', color: '#64748B' }}>({lockInfo.detail})</code></div>
-              <div><strong>Concurrency:</strong> {etagInfo.label} <code style={{ fontSize: '11px', color: '#64748B' }}>({etagInfo.detail})</code></div>
-              <div><strong>Authorization:</strong> {authInfo.label}</div>
-            </div>
-          </div>
-
-          {/* Clean Core Governance */}
-          <div style={{ backgroundColor: '#FFFFFF', padding: '18px 20px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-              <ShieldCheck size={16} color="#059669" />
-              <h3 style={{ fontSize: '14.5px', fontWeight: 700, color: '#0F172A', margin: 0 }}>
-                Clean Core Governance
-              </h3>
-            </div>
-
-            <div style={{ fontSize: '12px', color: '#475569', lineHeight: 1.55 }}>
-              <div style={{ fontWeight: 700, color: '#065F46', marginBottom: '4px' }}>
-                Tier 2 — On-Stack ABAP Cloud ({architecture?.cleanCoreImplications?.tier || 'TIER_2_DEV_EXT'})
-              </div>
-              <ul style={{ margin: '4px 0 0', paddingLeft: '18px' }}>
-                {(architecture?.cleanCoreImplications?.notes || []).map((n, i) => (
-                  <li key={i}>{n}</li>
-                ))}
-              </ul>
-            </div>
+            )}
           </div>
         </div>
       </div>

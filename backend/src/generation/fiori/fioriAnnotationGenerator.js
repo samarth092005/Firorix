@@ -227,6 +227,10 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   xml += `  </edmx:DataServices>\n`;
   xml += `</edmx:Edmx>\n`;
 
+  const confirmedReqIds = requirements
+    .filter((r) => r.status === 'CONFIRMED')
+    .map((r) => r.requirementId);
+
   return createFioriArtifact({
     projectId: project.projectId,
     artifactType: FIORI_ARTIFACT_TYPES.FIORI_ANNOTATIONS_XML,
@@ -235,6 +239,7 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
     content: xml,
     language: 'XML',
     sourceEntityIds: entities.map((e) => e.entityId),
+    sourceRequirementIds: confirmedReqIds,
     dependencies: [serviceName]
   });
 }

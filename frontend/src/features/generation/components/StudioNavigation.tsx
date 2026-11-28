@@ -41,47 +41,56 @@ interface StageDefinition {
 const STAGES: StageDefinition[] = [
   {
     id: 1,
-    title: 'Scope & Model',
-    subtitle: 'Requirements & CDS Entities',
-    views: ['requirements', 'data-model'],
+    title: 'Requirements',
+    subtitle: 'Functional & UI Design',
+    views: ['requirements'],
     defaultView: 'requirements',
-    subItems: [
-      { id: 'requirements', label: 'Requirements', icon: FileText },
-      { id: 'data-model', label: 'CDS Data Model', icon: Database }
-    ]
+    subItems: []
   },
   {
     id: 2,
-    title: 'Architecture & Review',
-    subtitle: 'RAP Pattern & 13-Gate Check',
+    title: 'CDS Model',
+    subtitle: 'Entities & Types',
+    views: ['data-model'],
+    defaultView: 'data-model',
+    subItems: []
+  },
+  {
+    id: 3,
+    title: 'Architecture & Gates',
+    subtitle: 'RAP & 13-Gate Check',
     views: ['architecture', 'spec-lifecycle'],
     defaultView: 'architecture',
     subItems: [
       { id: 'architecture', label: 'RAP Architecture', icon: Cpu },
-      { id: 'spec-lifecycle', label: 'Readiness & Governance', icon: ShieldCheck }
-    ]
-  },
-  {
-    id: 3,
-    title: 'Build & Preview',
-    subtitle: 'ABAP, Fiori & Live Sandbox',
-    views: ['abap-generator', 'ui-generator', 'preview-validation'],
-    defaultView: 'abap-generator',
-    subItems: [
-      { id: 'abap-generator', label: 'ABAP Cloud Code', icon: Code2 },
-      { id: 'ui-generator', label: 'Fiori Elements UI', icon: LayoutTemplate },
-      { id: 'preview-validation', label: 'Live Fiori Sandbox', icon: CheckCircle2 }
+      { id: 'spec-lifecycle', label: '13-Gate Check', icon: ShieldCheck }
     ]
   },
   {
     id: 4,
-    title: 'Package & Deploy',
-    subtitle: 'ZIP Export & SAP DEV Staging',
+    title: 'Build',
+    subtitle: 'ABAP RAP & Fiori UI5',
+    views: ['abap-generator', 'ui-generator'],
+    defaultView: 'abap-generator',
+    subItems: []
+  },
+  {
+    id: 5,
+    title: 'Live Preview',
+    subtitle: 'Sandbox & Diff Copilot',
+    views: ['preview-validation'],
+    defaultView: 'preview-validation',
+    subItems: []
+  },
+  {
+    id: 6,
+    title: 'Export & Connect',
+    subtitle: 'ZIP & CF Runbook',
     views: ['review-export', 'deployment'],
     defaultView: 'review-export',
     subItems: [
-      { id: 'review-export', label: 'Review & ZIP Export', icon: PackageCheck },
-      { id: 'deployment', label: 'SAP DEV Deployment (Coming Soon)', icon: Send }
+      { id: 'review-export', label: 'Export & Connectivity', icon: PackageCheck },
+      { id: 'deployment', label: 'SAP Deploy (Coming Soon)', icon: Send }
     ]
   }
 ];
@@ -115,12 +124,16 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
 
     switch (stageId) {
       case 1:
-        return (hasEntities && hasConfirmedReqs && !hasPendingReqs) || hasArtifacts;
+        return (hasConfirmedReqs && !hasPendingReqs) || hasArtifacts;
       case 2:
-        return Boolean(project.approvedBy) || lifecycle === 'READY_FOR_GENERATION' || lifecycle === 'GENERATED' || lifecycle === 'VALIDATION_COMPLETED' || lifecycle === 'EXPORTED';
+        return hasEntities || hasArtifacts;
       case 3:
-        return lifecycle === 'GENERATED' || lifecycle === 'VALIDATION_COMPLETED' || lifecycle === 'EXPORTED' || hasArtifacts;
+        return Boolean(project.approvedBy) || lifecycle === 'READY_FOR_GENERATION' || lifecycle === 'GENERATED' || lifecycle === 'VALIDATION_COMPLETED' || lifecycle === 'EXPORTED';
       case 4:
+        return lifecycle === 'GENERATED' || lifecycle === 'VALIDATION_COMPLETED' || lifecycle === 'EXPORTED' || hasArtifacts;
+      case 5:
+        return lifecycle === 'VALIDATION_COMPLETED' || lifecycle === 'EXPORTED';
+      case 6:
         return lifecycle === 'EXPORTED' || Boolean(project.reviewRecord);
       default:
         return false;
@@ -156,8 +169,8 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
     }
   };
 
-  // Dashboard already has its own clean header & action bar
-  if (isDashboard) {
+  // Dashboard & Launchpad already have their own clean canvas
+  if (isDashboard || activeView === 'launchpad') {
     return null;
   }
 
@@ -192,7 +205,6 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
               </div>
               <div className="studio-step-text">
                 <span className="studio-step-title">{stage.title}</span>
-                <span className="studio-step-sub">{stage.subtitle}</span>
               </div>
             </button>
           );
@@ -202,7 +214,7 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
       {/* ========================================================================= */}
       {/* TIER 2: FOCUSED SUB-VIEW PILL SWITCHER                                     */}
       {/* ========================================================================= */}
-      {!isEnvironment && (
+      {!isEnvironment && currentStage.subItems.length > 0 && (
         <div className="studio-pill-bar">
           <div className="studio-pills-group" role="tablist" aria-label="Stage Workspace Views">
             {currentStage.subItems.map((sub) => {

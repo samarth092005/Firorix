@@ -1184,3 +1184,45 @@
     padding: 8px 16px;
   }
 }
+
+/* Sleek Compact Horizontal 4-Stage Stepper Override */
+.studio-stage-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  overflow-x: auto;
+}
+
+.studio-stage-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  border-right: 1px solid transparent;
+  border-radius: 999px;
+}
+
+.studio-stage-step:hover:not(:disabled) {
+  background-color: #F8FAFC;
+  border-color: #E2E8F0;
+}
+
+.studio-stage-step.active {
+  background-color: #EFF6FF;
+  border-color: #BFDBFE;
+  border-bottom-color: #BFDBFE;
+}
+
+.studio-stage-step.completed:not(.active) {
+  background-color: #F0FDF4;
+  border-color: #DCFCE7;
+}
+
+.studio-step-indicator {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+}
