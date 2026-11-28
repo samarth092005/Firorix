@@ -14,7 +14,7 @@ export const GenerationStudioPage: React.FC = () => {
 
   // URL-driven internal navigation state
   const urlProjectId = searchParams.get('projectId') || null;
-  const urlView = (searchParams.get('view') as StudioInternalView) || 'projects';
+  const urlView = (searchParams.get('view') as StudioInternalView) || (urlProjectId ? 'workspace' : 'projects');
   const incomingHandoffId = searchParams.get('handoffId') || null;
   const incomingAssessmentId = searchParams.get('assessmentId') || searchParams.get('sourceAssessmentId') || searchParams.get('id') || null;
 

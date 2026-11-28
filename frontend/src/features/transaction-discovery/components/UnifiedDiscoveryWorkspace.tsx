@@ -1608,7 +1608,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                             <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
                               <button
                                 type="button"
-                                onClick={() => navigate(`/generation-studio?projectId=${encodeURIComponent(app.projectId)}`)}
+                                onClick={() => navigate(`/generation-studio?projectId=${encodeURIComponent(app.projectId)}&view=${app.hasFiori ? 'preview-validation' : 'workspace'}`)}
                                 style={{
                                   padding: '8px 14px',
                                   borderRadius: '6px',
