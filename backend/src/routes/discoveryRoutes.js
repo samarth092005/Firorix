@@ -5,6 +5,39 @@ import { STANDARD_TRANSACTION_CATALOG, synthesizeTransactionTitle } from '../ser
 import { defaultUsagePrioritizationEngine } from '../engine/usagePrioritizationEngine.js';
 import { defaultPfcgRoleMappingEngine } from '../engine/pfcgRoleMappingEngine.js';
 import { readJsonBody } from '../api/index.js';
+import { defaultGenerationProjectStore } from '../generation/projects/generationProjectStore.js';
+
+async function findExistingGeneratedApps(projectStore, tcode, userContext) {
+  if (!projectStore || typeof projectStore.listProjects !== 'function' || !tcode) return [];
+  try {
+    const cleanTcode = String(tcode).trim().toUpperCase();
+    const res = await projectStore.listProjects({}, userContext);
+    const items = Array.isArray(res) ? res : (res?.items || res?.projects || []);
+    return items
+      .filter((p) => String(p.sourceTransactionCode || '').trim().toUpperCase() === cleanTcode)
+      .map((p) => {
+        const artifacts = Object.values(p.artifactRegistry?.artifacts || {});
+        const rootEnt = p.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || p.dataModelSpec?.entities?.[0];
+        const prefix = (rootEnt?.name || cleanTcode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toUpperCase();
+        const hasFiori = artifacts.some((a) => String(a.filePath || '').startsWith('webapp/'));
+        const hasAbap = artifacts.some((a) => String(a.filePath || '').endsWith('.abap') || String(a.filePath || '').endsWith('.cds') || String(a.filePath || '').endsWith('.bdef'));
+        return {
+          projectId: p.projectId,
+          projectName: p.projectName,
+          sourceTransactionCode: p.sourceTransactionCode,
+          status: p.status || 'DRAFT',
+          lifecyclePhase: p.lifecyclePhase || 'SPECIFICATION',
+          odataService: `ZUI_${prefix}`,
+          artifactCount: artifacts.length,
+          hasFiori,
+          hasAbap,
+          updatedAt: p.updatedAt || p.createdAt
+        };
+      });
+  } catch {
+    return [];
+  }
+}
 
 /**
  * SAP Transaction Discovery, T-Code Search & Fiori Matching Routes
@@ -24,6 +57,7 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
     matchingEngineInstance,
     catalogueAdapter: officialCatalogueAdapter,
     mcpDiscoveryOrchestrator,
+    generationProjectStore = defaultGenerationProjectStore,
     defaultTenantId = 'DEFAULT-TENANT-S21'
   } = context;
 
@@ -440,6 +474,8 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
         decisionExplanation: matchResult.readinessReason || `Evaluated ${candidates.length} standard Fiori candidates for ${discoveryResult.tcode}.`
       };
 
+      const existingGeneratedApps = await findExistingGeneratedApps(generationProjectStore, discoveryResult.tcode, req.user);
+
       const response = {
         success: true,
         requestId,
@@ -456,7 +492,8 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
         bestMatch: matchResult.bestCandidate,
         candidateComparison: matchResult.candidateComparison,
         assessmentHandoff: matchResult.assessmentHandoff,
-        recommendationReadiness: matchResult.recommendationReadiness
+        recommendationReadiness: matchResult.recommendationReadiness,
+        existingGeneratedApps
       };
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -757,6 +794,8 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
         candidatePool
       });
 
+      const existingGeneratedApps = await findExistingGeneratedApps(generationProjectStore, discoveryResult.tcode, req.user);
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(
         JSON.stringify(
@@ -773,7 +812,8 @@ export async function handleDiscoveryRoutes(req, res, url, context = {}) {
             assessmentHandoff: matchResult.assessmentHandoff,
             candidateComparison: matchResult.candidateComparison,
             candidates: matchResult.rankedCandidates,
-            bestMatch: matchResult.bestCandidate
+            bestMatch: matchResult.bestCandidate,
+            existingGeneratedApps
           },
           null,
           2

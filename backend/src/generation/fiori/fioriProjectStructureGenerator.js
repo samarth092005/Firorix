@@ -6,6 +6,41 @@
  */
 
 import { createFioriArtifact, FIORI_ARTIFACT_TYPES, TARGET_UI5_VERSION_S4HANA2023 } from './fioriArtifactContract.js';
+import { buildODataMetadataXml } from '../preview/mockODataMetadata.js';
+import { formatCdsViewName } from '../abap/cdsViewEntityGenerator.js';
+
+function buildSampleMockRows(entity, count = 5) {
+  const rows = [];
+  const fields = entity.fields || [];
+  for (let i = 1; i <= count; i++) {
+    const row = {};
+    for (const f of fields) {
+      const name = f.name;
+      const t = String(f.type || '').toLowerCase();
+      if (t === 'sysuuid_x16') {
+        row[name] = `00000000-0000-0000-0000-${String(i).padStart(12, '0')}`;
+      } else if (t === 'abap.boolean') {
+        row[name] = i % 2 === 1;
+      } else if (t === 'abap.int4' || t === 'abap.int8') {
+        row[name] = i * 10;
+      } else if (t === 'abap.dec' || t === 'abap.curr' || t === 'abap.quan') {
+        row[name] = Number((i * 1250.5).toFixed(2));
+      } else if (t === 'abap.dats') {
+        row[name] = `2026-11-${String(10 + i).padStart(2, '0')}`;
+      } else if (t === 'abap.cuky') {
+        row[name] = 'USD';
+      } else if (t === 'abap.unit') {
+        row[name] = 'EA';
+      } else if (f.isKey) {
+        row[name] = `${String(entity.name || 'REC').slice(0, 4).toUpperCase()}-${String(1000 + i)}`;
+      } else {
+        row[name] = `${f.label || name} ${i}`;
+      }
+    }
+    rows.push(row);
+  }
+  return rows;
+}
 
 export function generateFioriProjectScaffolding(project, architecture, uiConfig = {}) {
   const rootEntity = project.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
@@ -137,16 +172,18 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
     version: '1.0.0',
     description: project.description || `SAP Fiori Elements Application for ${project.projectName}`,
     scripts: {
-      start: 'ui5 serve --port 8080 --open test/flpSandbox.html',
+      start: 'ui5 serve --config ui5-mock.yaml --port 8080 --open index.html',
+      'start:sap': 'ui5 serve --port 8080 --open test/flpSandbox.html',
       build: 'ui5 build --clean-dest'
     },
     dependencies: {},
     devDependencies: {
       '@ui5/cli': '^3.0.0',
-      '@sap/ux-ui5-tooling': '^1.15.0'
+      '@sap/ux-ui5-tooling': '^1.15.0',
+      '@sap-ux/ui5-middleware-fe-mockserver': '^2.2.0'
     },
     ui5: {
-      dependencies: ['@sap/ux-ui5-tooling']
+      dependencies: ['@sap/ux-ui5-tooling', '@sap-ux/ui5-middleware-fe-mockserver']
     }
   };
 
@@ -194,6 +231,69 @@ server:
     language: 'YAML',
     sourceEntityIds: [rootEntity.entityId]
   }));
+
+  // 5a-mock. ui5-mock.yaml & webapp/localService/* (Enables zero-backend local `npm start` without blank screen)
+  const serviceName = formatCdsViewName('ZUI_', (rootEntity.name || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '')).toUpperCase();
+  const mainServiceUri = `/sap/opu/odata4/sap/${serviceName.toLowerCase()}/srvd/sap/${serviceName.toLowerCase()}/0001/`;
+  const ui5MockYaml = `specVersion: "3.0"
+metadata:
+  name: fiorify-${prefix}-ui
+type: application
+framework:
+  name: SAPUI5
+  version: "${TARGET_UI5_VERSION_S4HANA2023}"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.fe.templates
+    - name: themelib_sap_horizon
+server:
+  customMiddleware:
+    - name: sap-fe-mockserver
+      beforeMiddleware: csp
+      configuration:
+        mountPath: /
+        services:
+          - urlPath: ${mainServiceUri}
+            metadataPath: ./webapp/localService/metadata.xml
+            mockdataPath: ./webapp/localService/mockdata
+            generateMockData: true
+        annotations: []
+`;
+
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'ui5-mock.yaml',
+    filePath: 'ui5-mock.yaml',
+    content: ui5MockYaml,
+    language: 'YAML',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
+  const metadataXml = buildODataMetadataXml(project, architecture);
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'metadata.xml',
+    filePath: 'webapp/localService/metadata.xml',
+    content: metadataXml,
+    language: 'XML',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
+
+  for (const ent of project.dataModelSpec?.entities || []) {
+    const mockRows = buildSampleMockRows(ent, 5);
+    artifacts.push(createFioriArtifact({
+      projectId: project.projectId,
+      artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+      objectName: `${ent.name}.json`,
+      filePath: `webapp/localService/mockdata/${ent.name}.json`,
+      content: JSON.stringify(mockRows, null, 2),
+      language: 'JSON',
+      sourceEntityIds: [ent.entityId]
+    }));
+  }
 
   // 5b. xs-app.json (BTP Managed AppRouter / HTML5 App Repository)
   const xsAppJson = {

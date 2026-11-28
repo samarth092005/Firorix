@@ -1558,50 +1558,140 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '12px', backgroundColor: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}>
-                        NO STANDARD APP &bull; CUSTOM RAP BUILD
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          padding: '3px 10px',
+                          borderRadius: '12px',
+                          backgroundColor: (mcpPipelineResult?.existingGeneratedApps?.length ?? 0) > 0 ? '#DCFCE7' : '#FEF3C7',
+                          color: (mcpPipelineResult?.existingGeneratedApps?.length ?? 0) > 0 ? '#166534' : '#92400E',
+                          border: (mcpPipelineResult?.existingGeneratedApps?.length ?? 0) > 0 ? '1px solid #86EFAC' : '1px solid #FDE68A'
+                        }}
+                      >
+                        {(mcpPipelineResult?.existingGeneratedApps?.length ?? 0) > 0
+                          ? 'CUSTOM APP ALREADY BUILT IN FIORIFY'
+                          : 'NO STANDARD APP • CUSTOM RAP BUILD'}
                       </span>
                       <span style={{ fontSize: '11px', color: '#64748B' }}>
                         Target: <strong>{systemId} ({client})</strong>
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ padding: '10px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px', lineHeight: 1.5, color: '#334155' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#0066FF', display: 'block', textTransform: 'uppercase', marginBottom: '3px' }}>Target Clean Core Architecture</span>
-                        Zero certified SAP Fiori apps match <strong>{metadata.tcode}</strong> in the official Fiori Apps Reference Library. Replace legacy Dynpro screen <code>{metadata.screenNumber || '0100'}</code> with a <strong>Clean Core Managed RAP &amp; Fiori Elements (List Report + Object Page)</strong> application.
+                    {(mcpPipelineResult?.existingGeneratedApps?.length ?? 0) > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {mcpPipelineResult!.existingGeneratedApps!.map((app) => (
+                          <div
+                            key={app.projectId}
+                            style={{
+                              padding: '12px',
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '6px',
+                              border: '1px solid #BBF7D0',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '6px',
+                              fontSize: '12px',
+                              color: '#334155'
+                            }}
+                          >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                              <strong style={{ color: '#0F172A', fontSize: '13px' }}>{app.projectName}</strong>
+                              <span style={{ fontSize: '10px', fontWeight: 700, padding: '2px 8px', borderRadius: '10px', backgroundColor: '#F0FDF4', color: '#15803D', border: '1px solid #BBF7D0' }}>
+                                {app.status} &bull; {app.lifecyclePhase}
+                              </span>
+                            </div>
+                            <div style={{ fontSize: '11.5px', color: '#475569' }}>
+                              OData Service: <code>{app.odataService}</code> &bull; Artifacts: <strong>{app.artifactCount}</strong>
+                              {app.hasFiori ? ' (Fiori UI5 Ready)' : ''}{app.hasAbap ? ' (ABAP RAP Ready)' : ''}
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/generation-studio?projectId=${encodeURIComponent(app.projectId)}`)}
+                                style={{
+                                  padding: '8px 14px',
+                                  borderRadius: '6px',
+                                  border: 'none',
+                                  backgroundColor: '#15803D',
+                                  color: '#FFFFFF',
+                                  fontSize: '12.5px',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '6px'
+                                }}
+                              >
+                                <span>Open Existing App in Generation Studio</span>
+                                <ArrowRight size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          disabled={isProceeding}
+                          onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
+                          style={{
+                            padding: '8px 14px',
+                            borderRadius: '6px',
+                            border: '1px solid #CBD5E1',
+                            backgroundColor: '#FFFFFF',
+                            color: '#334155',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            cursor: isProceeding ? 'wait' : 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>{isProceeding ? 'Opening Generation Studio...' : 'Create Another Assessment / New Build'}</span>
+                          <ArrowRight size={13} />
+                        </button>
                       </div>
+                    ) : (
+                      <>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ padding: '10px 12px', backgroundColor: '#FFFFFF', borderRadius: '4px', border: '1px solid #E2E8F0', fontSize: '12px', lineHeight: 1.5, color: '#334155' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#0066FF', display: 'block', textTransform: 'uppercase', marginBottom: '3px' }}>Target Clean Core Architecture</span>
+                            Zero certified SAP Fiori apps match <strong>{metadata.tcode}</strong> in the official Fiori Apps Reference Library. Replace legacy Dynpro screen <code>{metadata.screenNumber || '0100'}</code> with a <strong>Clean Core Managed RAP &amp; Fiori Elements (List Report + Object Page)</strong> application.
+                          </div>
 
-                      <div style={{ padding: '10px 12px', backgroundColor: '#EFF6FF', borderRadius: '4px', border: '1px solid #BFDBFE', fontSize: '12px', lineHeight: 1.5, color: '#1E3A8A' }}>
-                        <span style={{ fontSize: '10px', fontWeight: 700, color: '#1E40AF', display: 'block', textTransform: 'uppercase', marginBottom: '3px' }}>Deliverables in Generation Studio</span>
-                        CDS Interface &amp; Projection Views (<code>I_</code> / <code>C_</code> with <code>@UI</code> annotations), Managed RAP BDEF with Draft, OData V4 Service Binding, and interactive Fiori Elements preview.
-                      </div>
-                    </div>
+                          <div style={{ padding: '10px 12px', backgroundColor: '#EFF6FF', borderRadius: '4px', border: '1px solid #BFDBFE', fontSize: '12px', lineHeight: 1.5, color: '#1E3A8A' }}>
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#1E40AF', display: 'block', textTransform: 'uppercase', marginBottom: '3px' }}>Deliverables in Generation Studio</span>
+                            CDS Interface &amp; Projection Views (<code>I_</code> / <code>C_</code> with <code>@UI</code> annotations), Managed RAP BDEF with Draft, OData V4 Service Binding, and interactive Fiori Elements preview.
+                          </div>
+                        </div>
 
-                    <button
-                      type="button"
-                      disabled={isProceeding}
-                      onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
-                      style={{
-                        marginTop: '4px',
-                        padding: '10px 16px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        backgroundColor: isProceeding ? '#94A3B8' : '#0066FF',
-                        color: '#FFFFFF',
-                        fontSize: '13px',
-                        fontWeight: 700,
-                        cursor: isProceeding ? 'wait' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                        boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
-                      }}
-                    >
-                      <span>{isProceeding ? 'Opening Generation Studio...' : 'Proceed to Generation Studio (Build Custom App)'}</span>
-                      <ArrowRight size={14} />
-                    </button>
+                        <button
+                          type="button"
+                          disabled={isProceeding}
+                          onClick={() => handleOpenAssessmentWorkbench('MODERNIZATION_DECISION')}
+                          style={{
+                            marginTop: '4px',
+                            padding: '10px 16px',
+                            borderRadius: '6px',
+                            border: 'none',
+                            backgroundColor: isProceeding ? '#94A3B8' : '#0066FF',
+                            color: '#FFFFFF',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            cursor: isProceeding ? 'wait' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '8px',
+                            boxShadow: '0 2px 4px rgba(0, 102, 255, 0.25)'
+                          }}
+                        >
+                          <span>{isProceeding ? 'Opening Generation Studio...' : 'Proceed to Generation Studio (Build Custom App)'}</span>
+                          <ArrowRight size={14} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               )}

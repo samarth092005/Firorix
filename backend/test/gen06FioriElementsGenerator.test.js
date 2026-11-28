@@ -140,7 +140,9 @@ describe('GEN-06: SAP Fiori Elements Generator & Cross-Artifact Validation', () 
       appId: 'com.Fiorify.vendor.invoices'
     });
 
-    assert.equal(scaffolding.length, 8);
+    assert.ok(scaffolding.length >= 10, 'Expected scaffolding + localService mock artifacts');
+    assert.ok(scaffolding.some((s) => s.filePath === 'ui5-mock.yaml'), 'Expected ui5-mock.yaml');
+    assert.ok(scaffolding.some((s) => s.filePath === 'webapp/localService/metadata.xml'), 'Expected localService/metadata.xml');
 
     const comp = scaffolding.find((s) => s.objectName === 'Component.js');
     assert.ok(comp.content.includes('AppComponent.extend("com.Fiorify.vendor.invoices.Component"'));

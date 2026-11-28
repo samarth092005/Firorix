@@ -377,6 +377,19 @@ export interface FioriMatchResult {
   } | null;
 }
 
+export interface ExistingGeneratedAppSummary {
+  projectId: string;
+  projectName: string;
+  sourceTransactionCode: string;
+  status: string;
+  lifecyclePhase: string;
+  odataService: string;
+  artifactCount: number;
+  hasFiori: boolean;
+  hasAbap: boolean;
+  updatedAt?: string;
+}
+
 export interface UnifiedDiscoveryMatchResult {
   success: boolean;
   requestId: string;
@@ -412,6 +425,7 @@ export interface UnifiedDiscoveryMatchResult {
   candidateComparison: CandidateComparisonRow[];
   candidates: FioriCandidate[];
   bestMatch: FioriCandidate | null;
+  existingGeneratedApps?: ExistingGeneratedAppSummary[];
 }
 
 export function sanitizeClientErrorMessage(msg: string): string {

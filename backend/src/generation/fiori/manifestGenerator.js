@@ -38,6 +38,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
           type: 'OData',
           settings: {
             annotations: ['annotation'],
+            localUri: 'localService/metadata.xml',
             odataVersion: '4.0'
           }
         },
