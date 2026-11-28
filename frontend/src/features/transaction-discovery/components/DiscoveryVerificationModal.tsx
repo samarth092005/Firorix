@@ -21,12 +21,14 @@ import {
   TransactionDiscoveryResponse,
   CatalogueReference
 } from '../../../services/contracts/types';
+import type { ExistingGeneratedAppSummary } from '../../../services/api/apiClient';
 
 export interface DiscoveryVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
   metadata: TransactionDiscoveryResponse | null;
   candidates: CatalogueReference[];
+  existingGeneratedApps?: ExistingGeneratedAppSummary[];
   systemId: string;
   client: string;
   targetRelease: string;
@@ -41,6 +43,7 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
   onClose,
   metadata,
   candidates,
+  existingGeneratedApps = [],
   systemId,
   client,
   targetRelease,
@@ -668,6 +671,32 @@ export const DiscoveryVerificationModal: React.FC<DiscoveryVerificationModalProp
                     }}
                   >
                     <span>{isProceeding ? 'Opening Assessment...' : 'Proceed to Assessment (Adopt / Configure)'}</span>
+                    <ArrowRight size={15} />
+                  </button>
+                ) : existingGeneratedApps.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const app = existingGeneratedApps[0];
+                      onClose();
+                      navigate(`/generation-studio?projectId=${encodeURIComponent(app.projectId)}&view=${app.hasFiori ? 'preview-validation' : 'workspace'}`);
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 18px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      backgroundColor: '#15803D',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 4px rgba(21, 128, 61, 0.25)'
+                    }}
+                  >
+                    <span>Open Existing App in Generation Studio</span>
                     <ArrowRight size={15} />
                   </button>
                 ) : (

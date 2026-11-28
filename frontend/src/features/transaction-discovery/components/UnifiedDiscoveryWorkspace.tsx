@@ -1814,6 +1814,7 @@ export const UnifiedDiscoveryWorkspace: React.FC<UnifiedDiscoveryWorkspaceProps>
         onClose={() => setIsVerificationModalOpen(false)}
         metadata={metadata}
         candidates={candidates}
+        existingGeneratedApps={mcpPipelineResult?.existingGeneratedApps || []}
         systemId={systemId}
         client={client}
         targetRelease={targetRelease}

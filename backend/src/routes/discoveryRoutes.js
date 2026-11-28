@@ -21,12 +21,14 @@ async function findExistingGeneratedApps(projectStore, tcode, userContext) {
         const prefix = (rootEnt?.name || cleanTcode || 'CUSTOM').replace(/[^a-zA-Z0-9_]/g, '').toUpperCase();
         const hasFiori = artifacts.some((a) => String(a.filePath || '').startsWith('webapp/'));
         const hasAbap = artifacts.some((a) => String(a.filePath || '').endsWith('.abap') || String(a.filePath || '').endsWith('.cds') || String(a.filePath || '').endsWith('.bdef'));
+        const resolvedStatus = p.lifecycleStatus || p.status || 'DRAFT';
+        const resolvedPhase = p.lifecyclePhase || (resolvedStatus === 'EXPORTED' ? 'EXPORTED (8/8)' : resolvedStatus);
         return {
           projectId: p.projectId,
           projectName: p.projectName,
           sourceTransactionCode: p.sourceTransactionCode,
-          status: p.status || 'DRAFT',
-          lifecyclePhase: p.lifecyclePhase || 'SPECIFICATION',
+          status: resolvedStatus,
+          lifecyclePhase: resolvedPhase,
           odataService: `ZUI_${prefix}`,
           artifactCount: artifacts.length,
           hasFiori,
