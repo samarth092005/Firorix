@@ -33,11 +33,6 @@ export const EvidenceDetailDialog: React.FC<EvidenceDetailDialogProps> = ({
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '8px', fontSize: '13px' }}>
-          <span style={{ color: 'var(--fiori-text-secondary)', fontWeight: 500 }}>Confidence:</span>
-          <div>
-            <StatusBadge status={evidence.confidence} />
-          </div>
-
           <span style={{ color: 'var(--fiori-text-secondary)', fontWeight: 500 }}>Source Interface:</span>
           <code>{evidence.sourceInterface}</code>
 

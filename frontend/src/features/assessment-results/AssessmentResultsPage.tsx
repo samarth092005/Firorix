@@ -671,20 +671,6 @@ export const AssessmentResultsPage: React.FC = () => {
             Status: {assessment.status || 'IN_PROGRESS'}
           </span>
 
-          <span
-            style={{
-              fontSize: '11px',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              backgroundColor: '#F1F5F9',
-              color: '#475569',
-              fontWeight: 500,
-              border: '1px solid #CBD5E1'
-            }}
-          >
-            Confidence: {evidenceScore?.completenessLabel || 'SUBSTANTIAL'} ({evidenceScore?.totalScore || 70}/100)
-          </span>
-
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
             <button
               type="button"
@@ -861,21 +847,6 @@ export const AssessmentResultsPage: React.FC = () => {
                   </div>
                   <p style={{ margin: 0, fontSize: '11px', color: '#64748B', lineHeight: 1.3 }}>
                     Verified DDIC (25%), FAL (25%), Release (20%), Services (15%).
-                  </p>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderLeft: '1px solid #F1F5F9', paddingLeft: '12px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
-                    2. Recommendation Confidence
-                  </span>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                    <span style={{ fontSize: '20px', fontWeight: 800, color: 'var(--fiori-navy, #102A43)' }}>
-                      {independentMetrics?.recommendationConfidence || 80}%
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#16A34A', fontWeight: 600 }}>HIGH</span>
-                  </div>
-                  <p style={{ margin: 0, fontSize: '11px', color: '#64748B', lineHeight: 1.3 }}>
-                    FAL catalog successor corroborated against S21 landscape baseline.
                   </p>
                 </div>
 

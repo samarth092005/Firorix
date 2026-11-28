@@ -87,9 +87,7 @@ export const DiscoveryDetailsModal: React.FC<DiscoveryDetailsModalProps> = ({
               <div>T-Code: <strong>{assessment.tcode}</strong></div>
               <div>Description: <strong>{assessment.description || 'SAP Transaction'}</strong></div>
               <div>Program: <code>{assessment.programName || (assessment as any).discoveryMetadata?.programName || 'SAPMF05A'}</code></div>
-              <div>Screen: <code>{assessment.screenNumber || (assessment as any).discoveryMetadata?.screenNumber || '0100'}</code></div>
               <div>Package: <code>{assessment.packageName || (assessment as any).discoveryMetadata?.packageName || 'FBAS'}</code></div>
-              <div>Original System: <code>{assessment.originalSystem || (assessment as any).discoveryMetadata?.originalSystem || 'SAP S/4HANA'}</code></div>
               <div>Software Component: <code>{assessment.softwareComponent || (assessment as any).discoveryMetadata?.softwareComponent || 'S4CORE 108'}</code></div>
               <div>Classification: <strong>{
                 assessment.classification && (assessment.classification as string) !== 'UNKNOWN'
@@ -100,7 +98,7 @@ export const DiscoveryDetailsModal: React.FC<DiscoveryDetailsModalProps> = ({
           </div>
 
           {/* Step 3 Business Context */}
-          {ctx ? (
+          {ctx && (
             <div style={{ padding: '14px', backgroundColor: 'var(--fiori-surface-subtle, #F8FAFC)', borderRadius: '4px', border: '1px solid #E2E8F0' }}>
               <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: 'var(--fiori-navy, #102A43)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Briefcase size={14} color="var(--fiori-primary, #0A6ED1)" />
@@ -122,10 +120,6 @@ export const DiscoveryDetailsModal: React.FC<DiscoveryDetailsModalProps> = ({
                   </div>
                 )}
               </div>
-            </div>
-          ) : (
-            <div style={{ padding: '10px 14px', backgroundColor: '#F8FAFC', borderRadius: '4px', border: '1px solid #E2E8F0', fontStyle: 'italic', color: '#64748B' }}>
-              No custom business context was recorded for this baseline record.
             </div>
           )}
 

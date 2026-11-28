@@ -497,10 +497,6 @@ export const ModernizationDecisionPanel: React.FC<ModernizationDecisionPanelProp
             <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0F172A' }}>{evidenceCompleteness}%</span>
           </div>
           <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            <span style={{ fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', color: '#64748B' }}>Confidence Score</span>
-            <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0F172A' }}>{recommendationConfidence}%</span>
-          </div>
-          <div style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '8px 12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <span style={{ fontSize: '10.5px', fontWeight: 600, textTransform: 'uppercase', color: '#64748B' }}>Lifecycle Status</span>
             <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0070F2' }}>
               {assessment.lifecycleStatus || assessment.status || 'IN_PROGRESS'}

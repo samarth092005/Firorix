@@ -425,58 +425,7 @@ export const OverviewPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Portfolio Readiness & Target Landscape (Clean 2-Column Layout) */}
-      <div className="fiorify-overview-analytics">
-        <ReadinessBarChart
-          title="Modernization Readiness Breakdown"
-          segments={[
-            { label: 'Direct Fiori Successor', value: directReplacements, color: '#15803D' },
-            { label: 'Fit with Enhancement', value: partialFits, color: '#0066FF' },
-            { label: 'Custom / Review Required', value: Math.max(0, totalAssessed - directReplacements - partialFits), color: '#C2410C' }
-          ]}
-        />
-
-        <section className="fiorify-landscape-card" aria-label="Target SAP Landscape">
-          <div className="fiorify-landscape-header">
-            <h3 className="fiorify-landscape-title">Target SAP Landscape</h3>
-            <StatusBadge
-              status={systemInfo?.connectionState === 'CONNECTED' ? 'CONNECTED' : 'INFO'}
-              variant={systemInfo?.connectionState === 'CONNECTED' ? 'success' : 'info'}
-              customLabel={formatSystemBadge()}
-              size="sm"
-            />
-          </div>
-          <div className="fiorify-landscape-meta">
-            <div>
-              <span>System</span>
-              <strong>{uiConfig.defaultSystem.name} ({uiConfig.defaultSystem.client})</strong>
-            </div>
-            <div>
-              <span>Release</span>
-              <strong>{uiConfig.defaultSystem.basisRelease} / {uiConfig.defaultSystem.softwareComponent}</strong>
-            </div>
-          </div>
-          <div className="fiorify-landscape-actions">
-            <button
-              type="button"
-              className="fiorify-btn-secondary"
-              onClick={() => navigate('/catalogue')}
-            >
-              Browse Fiori Catalogue
-            </button>
-            <button
-              type="button"
-              className="fiorify-btn-primary"
-              onClick={() => navigate('/transaction-discovery')}
-            >
-              <span>Inspect Transaction</span>
-              <ArrowRight size={13} />
-            </button>
-          </div>
-        </section>
-      </div>
-
-      {/* 4. Streamlined Assessments Table with Tab Filtering & Export */}
+      {/* 3. Streamlined Assessments Table with Tab Filtering & Export */}
       <div
         style={{
           backgroundColor: '#FFFFFF',
