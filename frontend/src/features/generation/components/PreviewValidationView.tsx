@@ -281,6 +281,7 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
   const [showTelemetry, setShowTelemetry] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [copilotNotice, setCopilotNotice] = useState<string | null>(null);
+  const [deviceMode, setDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Backend Artifacts State
@@ -560,6 +561,28 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                 </button>
               )}
 
+              <div style={{ display: 'inline-flex', border: '1px solid #CBD5E1', borderRadius: '6px', overflow: 'hidden' }}>
+                {(['desktop', 'tablet', 'mobile'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setDeviceMode(mode)}
+                    style={{
+                      padding: '5px 10px',
+                      border: 'none',
+                      backgroundColor: deviceMode === mode ? '#0F172A' : '#FFFFFF',
+                      color: deviceMode === mode ? '#FFFFFF' : '#475569',
+                      fontSize: '11.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+
               <button
                 type="button"
                 className="preview-action-btn"
@@ -649,7 +672,9 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                   style={{
                     flex: 1,
                     minWidth: 0,
-                    backgroundColor: '#FFFFFF',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    backgroundColor: deviceMode === 'desktop' ? '#FFFFFF' : '#F1F5F9',
                     border: '1px solid #CBD5E1',
                     borderRadius: '8px',
                     overflow: 'hidden',
@@ -662,11 +687,13 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                     src={session.previewUrl}
                     title="Fiori Elements App Preview"
                     style={{
-                      width: '100%',
+                      width: deviceMode === 'mobile' ? '390px' : deviceMode === 'tablet' ? '768px' : '100%',
+                      maxWidth: '100%',
                       height: '720px',
-                      border: 'none',
+                      border: deviceMode === 'desktop' ? 'none' : '1px solid #CBD5E1',
                       display: 'block',
-                      backgroundColor: '#FAFAFA'
+                      backgroundColor: '#FAFAFA',
+                      transition: 'width 0.2s ease'
                     }}
                   />
                 </div>
@@ -934,7 +961,29 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
               {!loadingArtifacts && artifacts.length === 0 && (
                 <div style={{ padding: '16px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', fontSize: '12px', color: '#92400E', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <span>No ABAP artifacts have been generated for this project yet.</span>
+                  <div style={{ display: 'inline-flex', border: '1px solid #CBD5E1', borderRadius: '6px', overflow: 'hidden' }}>
+                {(['desktop', 'tablet', 'mobile'] as const).map((mode) => (
                   <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setDeviceMode(mode)}
+                    style={{
+                      padding: '5px 10px',
+                      border: 'none',
+                      backgroundColor: deviceMode === mode ? '#0F172A' : '#FFFFFF',
+                      color: deviceMode === mode ? '#FFFFFF' : '#475569',
+                      fontSize: '11.5px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      textTransform: 'capitalize'
+                    }}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+
+              <button
                 type="button"
                 className="preview-action-btn"
                 onClick={() => setIsCopilotOpen((prev) => !prev)}

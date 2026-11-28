@@ -549,14 +549,50 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', fontSize: '12.5px' }}>
-              <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Target SAP System</div>
-                <div style={{ fontWeight: 700, color: '#0F172A', marginTop: '4px' }}>
-                  {project.sourceSystemId || 'S21'} (Client {project.sourceClient || '200'})
+              <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>Target SAP System &amp; Destination</div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="text"
+                    aria-label="Target SAP System ID"
+                    defaultValue={project.sourceSystemId || 'S21'}
+                    onBlur={async (e) => {
+                      const val = e.target.value.trim();
+                      if (val && val !== project.sourceSystemId) {
+                        const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, { sourceSystemId: val } as any);
+                        onProjectUpdated?.(updated);
+                      }
+                    }}
+                    style={{ width: '50%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', fontSize: '12px', fontWeight: 700 }}
+                  />
+                  <input
+                    type="text"
+                    aria-label="Target SAP Client"
+                    defaultValue={project.sourceClient || '200'}
+                    onBlur={async (e) => {
+                      const val = e.target.value.trim();
+                      if (val && val !== project.sourceClient) {
+                        const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, { sourceClient: val } as any);
+                        onProjectUpdated?.(updated);
+                      }
+                    }}
+                    style={{ width: '50%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', fontSize: '12px' }}
+                  />
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#475569', marginTop: '2px' }}>
-                  BTP Destination: <code>{(project as any).targetDestination || 'S21_FIORI'}</code>
-                </div>
+                <input
+                  type="text"
+                  aria-label="BTP Destination"
+                  defaultValue={(project as any).targetDestination || 'S21_FIORI'}
+                  onBlur={async (e) => {
+                    const val = e.target.value.trim();
+                    if (val) {
+                      const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, { targetDestination: val } as any);
+                      onProjectUpdated?.(updated);
+                    }
+                  }}
+                  placeholder="BTP Destination (e.g. S21_FIORI)"
+                  style={{ width: '100%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #CBD5E1', fontSize: '11.5px', fontFamily: 'monospace', boxSizing: 'border-box' }}
+                />
               </div>
 
               <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>

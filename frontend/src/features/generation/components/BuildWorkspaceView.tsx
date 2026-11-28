@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   CheckCircle2,
   Code2,
@@ -26,6 +26,15 @@ export const BuildWorkspaceView: React.FC<BuildWorkspaceViewProps> = ({
   const [activeCard, setActiveCard] = useState<'abap' | 'fiori' | null>(null);
   const [abapApproved, setAbapApproved] = useState<boolean>(false);
   const [fioriApproved, setFioriApproved] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!activeCard) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveCard(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeCard]);
 
   const rawRegistry = project.artifactRegistry?.artifacts;
   const artifacts: any[] = rawRegistry

@@ -60,6 +60,21 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   const [uiApproved, setUiApproved] = useState<boolean>(false);
   const [customActionInput, setCustomActionInput] = useState<string>('');
 
+  useEffect(() => {
+    if (!activeReqCard) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveReqCard(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeReqCard]);
+
+  useEffect(() => {
+    if (!actionSuccess) return;
+    const t = setTimeout(() => setActionSuccess(null), 3200);
+    return () => clearTimeout(t);
+  }, [actionSuccess]);
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -378,23 +393,9 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
       )}
 
       {actionSuccess && (
-        <div
-          style={{
-            padding: '12px 16px',
-            background: '#ecfdf5',
-            border: '1px solid #a7f3d0',
-            color: '#065f46',
-            borderRadius: '6px',
-            fontSize: '13px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
+        <div className="studio-toast" role="status" aria-live="polite">
+          <CheckCircle2 size={15} color="#4ADE80" />
           <span>{actionSuccess}</span>
-          <button onClick={() => setActionSuccess(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-            ✕
-          </button>
         </div>
       )}
 
@@ -599,7 +600,7 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
 
         <div style={{ padding: '14px 16px', borderTop: '1px solid #E2E8F0' }}>
           {/* Main Two-Column Layout */}
-          <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '16px', flex: 1, minHeight: '480px' }}>
+          <div className="studio-req-two-col">
         {/* Left Column: Requirements Backlog */}
         <div
           style={{
@@ -1173,6 +1174,56 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
         </div>
 
         <div style={{ padding: '18px', borderTop: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Live Mini UI Preview Mockup */}
+            {(() => {
+              const p = project.requirementsSpec?.uiPreferences || {};
+              const fp = p.floorplan || 'LIST_REPORT_OBJECT_PAGE';
+              const rootEnt = project.dataModelSpec?.entities?.find((e) => e.entityType === 'ROOT' || e.isRoot) || project.dataModelSpec?.entities?.[0];
+              const cols = Array.isArray(p.visibleColumns) && p.visibleColumns.length > 0
+                ? p.visibleColumns.slice(0, 5)
+                : (rootEnt?.fields || []).slice(0, 5).map((f) => f.label || f.name);
+              const acts = Array.isArray(p.customActions) ? p.customActions : [];
+              return (
+                <div style={{ padding: '12px 14px', borderRadius: '8px', backgroundColor: '#F8FAFC', border: '1px solid #CBD5E1' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
+                      Live Layout Preview: {p.pageTitle || project.projectName}
+                    </span>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: '#0066FF', backgroundColor: '#EFF6FF', padding: '2px 8px', borderRadius: '999px' }}>
+                      {fp.replace(/_/g, ' ')} · {p.uiDensity || 'COMPACT'}
+                    </span>
+                  </div>
+                  <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '6px', padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {(p.kpiHeader || fp === 'ANALYTICAL_LIST_PAGE' || fp === 'OVERVIEW_PAGE') && (
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                        {['Total Items: 4', 'Pending: 2', 'Compliance: 96%'].map((kpi) => (
+                          <div key={kpi} style={{ padding: '6px 8px', borderRadius: '4px', backgroundColor: '#F0F9FF', border: '1px solid #BAE6FD', fontSize: '11px', fontWeight: 700, color: '#0369A1' }}>
+                            {kpi}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', borderBottom: '1px solid #F1F5F9', paddingBottom: '6px' }}>
+                      <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#334155' }}>
+                        {fp === 'WORKLIST' ? 'All (4) · Pending (2) · Processed (2)' : fp === 'FREESTYLE_WIZARD' ? 'Step 1: Details → Step 2: Review' : 'Filter Bar + Results'}
+                      </span>
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                        {p.bulkActions && <span style={{ fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#EFF6FF', color: '#0066FF', fontWeight: 600 }}>Bulk Select</span>}
+                        {acts.map((a, i) => (
+                          <span key={i} style={{ fontSize: '10.5px', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#DCFCE7', color: '#15803D', fontWeight: 600 }}>{a.label}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '11px', color: '#475569' }}>
+                      {(cols.length > 0 ? cols : ['ID', 'Status', 'Amount']).map((c) => (
+                        <span key={c} style={{ padding: '3px 8px', backgroundColor: '#F1F5F9', borderRadius: '4px', fontWeight: 600 }}>{c}</span>
+                      ))}
+                      {p.statusBadge && <span style={{ padding: '3px 8px', backgroundColor: '#DCFCE7', color: '#166534', borderRadius: '999px', fontWeight: 700 }}>● Released</span>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))', gap: '12px' }}>
               {([
                 {

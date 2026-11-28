@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import {
   FileText,
   Database,
@@ -17,19 +17,23 @@ import {
   LucideIcon
 } from 'lucide-react';
 import { GenerationProject, StudioInternalView } from '../types';
-import { RequirementsDesigner } from './RequirementsDesigner';
-import { DataModelDesigner } from './DataModelDesigner';
-import { ArchitectureDesigner } from './ArchitectureDesigner';
-import { AbapGenerator } from './AbapGenerator';
-import { FioriUiGenerator } from './FioriUiGenerator';
-import { PreviewValidationView } from './PreviewValidationView';
-import { ReviewExportView } from './ReviewExportView';
-import { ToolchainView } from './ToolchainView';
-import { SpecificationLifecycleView } from './SpecificationLifecycleView';
-import { DeploymentWorkspaceView } from './DeploymentWorkspaceView';
 import { LaunchpadView } from './LaunchpadView';
-import { BuildWorkspaceView } from './BuildWorkspaceView';
-import { ArchitectureAndGatesView } from './ArchitectureAndGatesView';
+
+const RequirementsDesigner = lazy(() => import('./RequirementsDesigner').then((m) => ({ default: m.RequirementsDesigner })));
+const DataModelDesigner = lazy(() => import('./DataModelDesigner').then((m) => ({ default: m.DataModelDesigner })));
+const PreviewValidationView = lazy(() => import('./PreviewValidationView').then((m) => ({ default: m.PreviewValidationView })));
+const ReviewExportView = lazy(() => import('./ReviewExportView').then((m) => ({ default: m.ReviewExportView })));
+const ToolchainView = lazy(() => import('./ToolchainView').then((m) => ({ default: m.ToolchainView })));
+const DeploymentWorkspaceView = lazy(() => import('./DeploymentWorkspaceView').then((m) => ({ default: m.DeploymentWorkspaceView })));
+const BuildWorkspaceView = lazy(() => import('./BuildWorkspaceView').then((m) => ({ default: m.BuildWorkspaceView })));
+const ArchitectureAndGatesView = lazy(() => import('./ArchitectureAndGatesView').then((m) => ({ default: m.ArchitectureAndGatesView })));
+
+const StageFallback: React.FC = () => (
+  <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div className="studio-skeleton" style={{ height: '56px', width: '100%' }} />
+    <div className="studio-skeleton" style={{ height: '240px', width: '100%' }} />
+  </div>
+);
 
 interface WorkspaceShellViewProps {
   viewId: StudioInternalView;
@@ -182,93 +186,61 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
     );
   }
 
-  // If viewing requirements and project is active, render RequirementsDesigner
-  if (viewId === 'requirements' && project) {
+  // Lazy-loaded stage views wrapped cleanly in Suspense
+  if (project && (viewId === 'requirements' || viewId === 'data-model' || viewId === 'architecture' || viewId === 'spec-lifecycle' || viewId === 'abap-generator' || viewId === 'ui-generator' || viewId === 'preview-validation' || viewId === 'review-export' || viewId === 'deployment')) {
     return (
       <div className="workspace-canvas">
-        <RequirementsDesigner
-          project={project}
-          onProjectUpdated={onProjectUpdated || (() => {})}
-          onNavigateView={onNavigateView}
-        />
-      </div>
-    );
-  }
-
-  // If viewing data-model and project is active, render DataModelDesigner
-  if (viewId === 'data-model' && project) {
-    return (
-      <div className="workspace-canvas">
-        <DataModelDesigner
-          project={project}
-          onProjectUpdated={onProjectUpdated || (() => {})}
-          onNavigateView={onNavigateView}
-        />
-      </div>
-    );
-  }
-
-  // Stage 3 Architecture & 13-Gate Readiness (2 Zoom-Out / Zoom-In Cards)
-  if ((viewId === 'architecture' || viewId === 'spec-lifecycle') && project) {
-    return (
-      <div className="workspace-canvas">
-        <ArchitectureAndGatesView
-          project={project}
-          onProjectUpdated={onProjectUpdated || (() => {})}
-          onNavigateView={onNavigateView}
-          initialCard={viewId === 'spec-lifecycle' ? 'gates' : null}
-        />
-      </div>
-    );
-  }
-
-  // Stage 4 Build: Interactive 2-Box ABAP RAP Core + Fiori UI5 App
-  if ((viewId === 'abap-generator' || viewId === 'ui-generator') && project) {
-    return (
-      <div className="workspace-canvas">
-        <BuildWorkspaceView
-          project={project}
-          onProjectUpdated={onProjectUpdated || (() => {})}
-          onNavigateView={onNavigateView}
-          initialBox={viewId === 'ui-generator' ? 'fiori' : 'abap'}
-        />
-      </div>
-    );
-  }
-
-  // If viewing preview-validation and project is active, render PreviewValidationView (GEN-07)
-  if (viewId === 'preview-validation' && project) {
-    return (
-      <div className="workspace-canvas">
-        <PreviewValidationView
-          project={project}
-          onProjectUpdated={onProjectUpdated}
-          onNavigateView={onNavigateView}
-        />
-      </div>
-    );
-  }
-
-  // If viewing review-export and project is active, render ReviewExportView (GEN-08)
-  if (viewId === 'review-export' && project) {
-    return (
-      <div className="workspace-canvas">
-        <ReviewExportView
-          project={project}
-          onProjectUpdated={onProjectUpdated}
-        />
-      </div>
-    );
-  }
-
-  // If viewing deployment and project is active, render DeploymentWorkspaceView (Sprint 11)
-  if (viewId === 'deployment' && project) {
-    return (
-      <div className="workspace-canvas">
-        <DeploymentWorkspaceView
-          project={project}
-          onNavigateView={onNavigateView}
-        />
+        <Suspense fallback={<StageFallback />}>
+          {viewId === 'requirements' && (
+            <RequirementsDesigner
+              project={project}
+              onProjectUpdated={onProjectUpdated || (() => {})}
+              onNavigateView={onNavigateView}
+            />
+          )}
+          {viewId === 'data-model' && (
+            <DataModelDesigner
+              project={project}
+              onProjectUpdated={onProjectUpdated || (() => {})}
+              onNavigateView={onNavigateView}
+            />
+          )}
+          {(viewId === 'architecture' || viewId === 'spec-lifecycle') && (
+            <ArchitectureAndGatesView
+              project={project}
+              onProjectUpdated={onProjectUpdated || (() => {})}
+              onNavigateView={onNavigateView}
+              initialCard={viewId === 'spec-lifecycle' ? 'gates' : null}
+            />
+          )}
+          {(viewId === 'abap-generator' || viewId === 'ui-generator') && (
+            <BuildWorkspaceView
+              project={project}
+              onProjectUpdated={onProjectUpdated || (() => {})}
+              onNavigateView={onNavigateView}
+              initialBox={viewId === 'ui-generator' ? 'fiori' : 'abap'}
+            />
+          )}
+          {viewId === 'preview-validation' && (
+            <PreviewValidationView
+              project={project}
+              onProjectUpdated={onProjectUpdated}
+              onNavigateView={onNavigateView}
+            />
+          )}
+          {viewId === 'review-export' && (
+            <ReviewExportView
+              project={project}
+              onProjectUpdated={onProjectUpdated}
+            />
+          )}
+          {viewId === 'deployment' && (
+            <DeploymentWorkspaceView
+              project={project}
+              onNavigateView={onNavigateView}
+            />
+          )}
+        </Suspense>
       </div>
     );
   }
@@ -277,7 +249,9 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   if (viewId === 'environment') {
     return (
       <div className="workspace-canvas">
-        <ToolchainView project={project} />
+        <Suspense fallback={<StageFallback />}>
+          <ToolchainView project={project} />
+        </Suspense>
       </div>
     );
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Cpu,
   ShieldCheck,
@@ -26,6 +26,15 @@ export const ArchitectureAndGatesView: React.FC<ArchitectureAndGatesViewProps> =
 }) => {
   const [activeCard, setActiveCard] = useState<'architecture' | 'gates' | null>(initialCard);
   const [archApproved, setArchApproved] = useState<boolean>(Boolean(project.architectureSpec?.selectedProfile));
+
+  useEffect(() => {
+    if (!activeCard) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveCard(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeCard]);
 
   const lifecycle = project.lifecycleStatus || '';
   const gatesApproved =

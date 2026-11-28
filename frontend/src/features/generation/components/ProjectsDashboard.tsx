@@ -298,14 +298,28 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
         </div>
       )}
 
-      {/* Loading Skeleton */}
+      {/* Loading Skeleton Cards */}
       {isLoading && (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#64748B' }}>
-          <RefreshCw size={32} className="spin" style={{ margin: '0 auto 12px auto', color: '#0066FF' }} />
-          <div style={{ fontSize: '14px', fontWeight: 600 }}>Loading Generation Projects...</div>
-          <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '4px' }}>
-            Reading canonical project stores from local backend persistence.
-          </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '16px' }}>
+          {[1, 2, 3].map((idx) => (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: '10px',
+                padding: '20px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
+              }}
+            >
+              <div className="studio-skeleton" style={{ height: '18px', width: '65%' }} />
+              <div className="studio-skeleton" style={{ height: '12px', width: '90%' }} />
+              <div className="studio-skeleton" style={{ height: '12px', width: '45%' }} />
+              <div className="studio-skeleton" style={{ height: '32px', width: '100%', marginTop: '6px' }} />
+            </div>
+          ))}
         </div>
       )}
 
@@ -412,6 +426,12 @@ export const ProjectsDashboard: React.FC<ProjectsDashboardProps> = ({
                     {project.sourceTransactionCode && (
                       <span className="studio-chip" style={{ backgroundColor: 'var(--studio-warning-bg)', color: 'var(--studio-warning)', borderColor: '#FDE68A' }}>
                         T-Code: {project.sourceTransactionCode}
+                      </span>
+                    )}
+
+                    {project.requirementsSpec?.uiPreferences?.floorplan && (
+                      <span className="studio-chip primary">
+                        {project.requirementsSpec.uiPreferences.floorplan.replace(/_/g, ' ')}
                       </span>
                     )}
                   </div>

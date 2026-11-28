@@ -35,6 +35,7 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
   const [selectedV1, setSelectedV1] = useState<number>(1);
   const [selectedV2, setSelectedV2] = useState<number>(2);
   const [diffResult, setDiffResult] = useState<any>(null);
+  const [showPassingGates, setShowPassingGates] = useState<boolean>(false);
 
   const fetchReadinessAndVersions = async () => {
     setIsLoading(true);
@@ -174,13 +175,44 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
         </div>
       </div>
 
-      {/* 13 Gates Checklist */}
-      <div style={{ padding: '24px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: '#1E293B' }}>
-          Generation-Readiness Verification Gates
-        </h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
-          {readiness?.checks?.map((gate: any) => (
+      {/* 13 Gates Checklist (Failing Gates Prioritized, Passing Gates Collapsible) */}
+      <div style={{ padding: '20px 24px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+        {(() => {
+          const allChecks: any[] = readiness?.checks || [];
+          const failingGates = allChecks.filter((g) => !g.passed);
+          const passingGates = allChecks.filter((g) => g.passed);
+          const visibleGates = showPassingGates || failingGates.length === 0 ? [...failingGates, ...passingGates] : failingGates;
+
+          return (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 700, color: '#1E293B' }}>
+                  {failingGates.length > 0
+                    ? `${failingGates.length} Gate(s) Need Attention`
+                    : 'All 13 Verification Gates Passed'}
+                </h3>
+                {passingGates.length > 0 && failingGates.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassingGates((v) => !v)}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #BBF7D0',
+                      backgroundColor: '#F0FDF4',
+                      color: '#166534',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {showPassingGates ? 'Hide' : 'Show'} {passingGates.length} Passing Gate(s)
+                  </button>
+                )}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px' }}>
+                {visibleGates.map((gate: any) => (
             <div
               key={gate.id}
               style={{
@@ -243,7 +275,10 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
               </div>
             </div>
           ))}
-        </div>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Clean Readiness Approval Bar (Hard-blocked until all 13 gates pass) */}

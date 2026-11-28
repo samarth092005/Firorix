@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { TopNavigation } from './TopNavigation';
 import { Sidebar } from './Sidebar';
 import { systemHealthService } from '../../services/systemHealthService';
 import { SystemConnectionState } from '../../services/contracts/types';
 
 export const AppShell: React.FC = () => {
+  const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [systemConnectionState, setSystemConnectionState] = useState<SystemConnectionState>('DEMO_MODE');
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/generation-studio')) {
+      setIsSidebarCollapsed(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     let active = true;
