@@ -81,7 +81,7 @@ const STAGES: StageDefinition[] = [
     defaultView: 'review-export',
     subItems: [
       { id: 'review-export', label: 'Review & ZIP Export', icon: PackageCheck },
-      { id: 'deployment', label: 'SAP DEV Deployment', icon: Send }
+      { id: 'deployment', label: 'SAP DEV Deployment (Coming Soon)', icon: Send }
     ]
   }
 ];
@@ -209,6 +209,7 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
               const SubIcon = sub.icon;
               const isSubActive = activeView === sub.id;
               const subDone = isSubCompleted(sub.id);
+              const isDisabled = sub.id === 'deployment';
 
               return (
                 <button
@@ -216,13 +217,17 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
                   type="button"
                   role="tab"
                   aria-selected={isSubActive}
-                  onClick={() => onSelectView(sub.id)}
+                  disabled={isDisabled}
+                  onClick={() => {
+                    if (!isDisabled) onSelectView(sub.id);
+                  }}
                   className={`studio-pill-btn ${isSubActive ? 'active' : ''}`}
-                  title={`Open ${sub.label}`}
+                  title={isDisabled ? 'SAP DEV Deployment is currently On Hold / Coming Soon' : `Open ${sub.label}`}
+                  style={isDisabled ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
                 >
                   <SubIcon size={14} />
                   <span>{sub.label}</span>
-                  {subDone && !isSubActive && (
+                  {subDone && !isSubActive && !isDisabled && (
                     <Check size={12} strokeWidth={2.5} color="#16A34A" />
                   )}
                 </button>

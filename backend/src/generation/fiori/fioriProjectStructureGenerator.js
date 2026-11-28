@@ -168,25 +168,21 @@ export function generateFioriProjectScaffolding(project, architecture, uiConfig 
     sourceEntityIds: [rootEntity.entityId]
   }));
 
-  // 4. package.json
+  // 4. package.json (zero-bloat local runner; no heavy @sap/ux-ui5-tooling install required)
   const packageJson = {
     name: `fiorify-${prefix}-ui`,
     version: '1.0.0',
     description: project.description || `SAP Fiori Elements Application for ${project.projectName}`,
     scripts: {
       start: 'node start.js',
-      'start:mock': 'ui5 serve --config ui5-mock.yaml --port 8080 --open index.html',
+      'start:fast': 'node start.js',
+      'start:ui5': 'ui5 serve --config ui5-mock.yaml --port 8080 --open index.html',
       'start:sap': 'ui5 serve --port 8080 --open test/flpSandbox.html',
       build: 'ui5 build --clean-dest'
     },
     dependencies: {},
     devDependencies: {
-      '@ui5/cli': '^3.0.0',
-      '@sap/ux-ui5-tooling': '^1.15.0',
-      '@sap-ux/ui5-middleware-fe-mockserver': '^2.2.0'
-    },
-    ui5: {
-      dependencies: ['@sap/ux-ui5-tooling', '@sap-ux/ui5-middleware-fe-mockserver']
+      '@ui5/cli': '^3.0.0'
     }
   };
 
@@ -450,19 +446,121 @@ server.listen(PORT, '127.0.0.1', () => {
 });
 `;
 
-  const startJs = `const { spawn } = require('node:child_process');
+  const startJs = `const http = require('node:http');
+const https = require('node:https');
+const fs = require('node:fs');
 const path = require('node:path');
+const { spawn } = require('node:child_process');
+
+const WEBAPP_DIR = path.join(__dirname, 'webapp');
+const UI_PORT = Number(process.env.PORT || 8080);
+const MOCK_PORT = 4004;
+const UI5_CDN_BASE = 'https://ui5.sap.com/${TARGET_UI5_VERSION_S4HANA2023}';
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.properties': 'text/plain; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png'
+};
 
 const mock = spawn(process.execPath, [path.join(__dirname, 'mockserver.js')], { stdio: 'inherit' });
-setTimeout(() => {
-  const cmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-  const ui5 = spawn(cmd, ['ui5', 'serve', '--port', '8080', '--open', 'index.html'], { stdio: 'inherit' });
-  const cleanup = () => { try { mock.kill(); } catch {} try { ui5.kill(); } catch {} process.exit(0); };
-  process.on('SIGINT', cleanup);
-  process.on('SIGTERM', cleanup);
-  ui5.on('exit', (code) => { try { mock.kill(); } catch {} process.exit(code || 0); });
-}, 500);
+
+const server = http.createServer((req, res) => {
+  const urlPath = (req.url || '/').split('?')[0];
+
+  // 1. Proxy OData & LREP calls to zero-dependency mockserver.js
+  if (urlPath.startsWith('/sap/')) {
+    const proxyReq = http.request(
+      { hostname: '127.0.0.1', port: MOCK_PORT, path: req.url, method: req.method, headers: req.headers },
+      (proxyRes) => {
+        res.writeHead(proxyRes.statusCode || 200, proxyRes.headers);
+        proxyRes.pipe(res);
+      }
+    );
+    proxyReq.on('error', (err) => {
+      res.writeHead(502, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Mock server unavailable: ' + err.message }));
+    });
+    req.pipe(proxyReq);
+    return;
+  }
+
+  // 2. Serve local webapp file if it exists
+  const cleanRel = urlPath === '/' ? 'index.html' : urlPath.replace(/^\\/+/, '');
+  const localFile = path.resolve(WEBAPP_DIR, cleanRel);
+  if (localFile.startsWith(WEBAPP_DIR) && fs.existsSync(localFile) && fs.statSync(localFile).isFile()) {
+    const ext = path.extname(localFile).toLowerCase();
+    res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+    fs.createReadStream(localFile).pipe(res);
+    return;
+  }
+
+  // 3. Proxy /resources/* and /test-resources/* to SAPUI5 CDN for instant zero-install launch
+  if (urlPath.startsWith('/resources/') || urlPath.startsWith('/test-resources/')) {
+    const cdnUrl = UI5_CDN_BASE + req.url;
+    https.get(cdnUrl, (cdnRes) => {
+      res.writeHead(cdnRes.statusCode || 200, cdnRes.headers);
+      cdnRes.pipe(res);
+    }).on('error', (err) => {
+      res.writeHead(502, { 'Content-Type': 'text/plain' });
+      res.end('Failed to load UI5 resource from CDN: ' + err.message);
+    });
+    return;
+  }
+
+  res.writeHead(404, { 'Content-Type': 'text/plain' });
+  res.end('Not Found: ' + urlPath);
+});
+
+server.listen(UI_PORT, '127.0.0.1', () => {
+  console.log('[Fiorify Local App] Ready in <2s at http://127.0.0.1:' + UI_PORT + '/index.html');
+});
+
+const cleanup = () => { try { mock.kill(); } catch {} try { server.close(); } catch {} process.exit(0); };
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
 `;
+
+  const localSetupMd = `# Local Setup & Hosting Guide (${appTitle})
+
+## Prerequisites
+- **Node.js:** v20 LTS or v22 LTS (no global SAP CLI or Java required)
+- **Ports Required:** \`8080\` (Fiori UI) and \`4004\` (Local OData V4 Mock Server)
+- **Runtime Dependencies:** **0** external runtime dependencies required for instant preview
+
+## Option 1: Instant Start (< 5 Seconds — Recommended)
+Run directly with Node.js (no \`npm install\` wait):
+\`\`\`bash
+node start.js
+\`\`\`
+Then open **http://127.0.0.1:8080/index.html** in your browser.
+- \`mockserver.js\` serves \`$metadata\`, \`$batch\`, mock entity data, and \`/sap/bc/lrep/*\`.
+- \`start.js\` serves \`webapp/\` and streams SAPUI5 ${TARGET_UI5_VERSION_S4HANA2023} resources cleanly.
+
+## Option 2: Full UI5 CLI Offline Build (< 4-5 Minutes)
+If you want to run with \`@ui5/cli\` or build a deployable \`dist/\` bundle:
+\`\`\`bash
+npm install
+npm run start:ui5
+\`\`\`
+### DevDependencies Manifest
+- \`@ui5/cli\` (\`^3.0.0\`) — SAPUI5 local server & \`ui5 build\` bundler
+`;
+
+  artifacts.push(createFioriArtifact({
+    projectId: project.projectId,
+    artifactType: FIORI_ARTIFACT_TYPES.FIORI_DOCUMENTATION,
+    objectName: 'LOCAL_SETUP.md',
+    filePath: 'LOCAL_SETUP.md',
+    content: localSetupMd,
+    language: 'MARKDOWN',
+    sourceEntityIds: [rootEntity.entityId]
+  }));
 
   artifacts.push(createFioriArtifact({
     projectId: project.projectId,

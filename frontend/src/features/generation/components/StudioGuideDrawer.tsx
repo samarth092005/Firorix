@@ -28,6 +28,17 @@ interface ViewGuidance {
 }
 
 const VIEW_GUIDANCE: Record<StudioInternalView, ViewGuidance> = {
+  launchpad: {
+    stageLabel: 'Overview',
+    title: 'Modernization Launchpad',
+    goal: 'Review your target T-Code context and 4-stage modernization progress before starting.',
+    steps: [
+      'Click "Start App Modernization" (or "Continue") to jump into your active step.',
+      'Open "4-Step Guide" anytime to review the end-to-end pipeline.'
+    ],
+    nextView: 'requirements',
+    nextLabel: 'Go to Requirements'
+  },
   projects: {
     stageLabel: 'Workspace',
     title: 'Modernization Projects',

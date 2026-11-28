@@ -37,6 +37,76 @@ export const DeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = (
   project,
   onNavigateView
 }) => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '36px 16px' }}>
+      <div
+        style={{
+          maxWidth: '580px',
+          width: '100%',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '12px',
+          padding: '28px',
+          textAlign: 'center',
+          boxShadow: '0 6px 20px rgba(15, 23, 42, 0.05)'
+        }}
+      >
+        <div
+          style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            backgroundColor: '#FEF3C7',
+            color: '#B45309',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '14px'
+          }}
+        >
+          <Lock size={22} />
+        </div>
+        <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
+          On Hold · Coming Soon
+        </div>
+        <h2 style={{ margin: '0 0 8px', fontSize: '18px', fontWeight: 700, color: '#0F172A' }}>
+          Direct SAP DEV Deployment is Currently On Hold
+        </h2>
+        <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#475569', lineHeight: 1.55 }}>
+          To protect live SAP landscapes, direct repository deployment for <strong>{project.projectName}</strong> is disabled in this release. Download the standalone Customer ZIP from <strong>Review &amp; ZIP Export</strong> to test locally or import offline.
+        </p>
+        {onNavigateView && (
+          <button
+            type="button"
+            onClick={() => onNavigateView('review-export')}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '9px 18px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: '#0066FF',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 600,
+              cursor: 'pointer'
+            }}
+          >
+            <span>Back to Review &amp; ZIP Export</span>
+            <ArrowRight size={14} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Legacy DeploymentWorkspaceView retained below for future activation
+export const _LegacyDeploymentWorkspaceView: React.FC<DeploymentWorkspaceViewProps> = ({
+  project,
+  onNavigateView
+}) => {
   const [activeTab, setActiveTab] = useState<'PREFLIGHT' | 'COMPATIBILITY' | 'PLAN' | 'EXECUTION' | 'VERIFICATION'>('PREFLIGHT');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

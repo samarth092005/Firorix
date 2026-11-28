@@ -243,61 +243,68 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
         </div>
       </div>
 
-      {/* Actions: Snapshot & Submit Review */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-        <div style={{ padding: '20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-          <h4 style={{ margin: '0 0 12px', fontSize: '15px', color: '#1E293B' }}>Create Version Snapshot</h4>
-          <input
-            type="text"
-            placeholder="Changelog summary (e.g. Added CDS annotations and draft tables)"
-            value={changelogInput}
-            onChange={(e) => setChangelogInput(e.target.value)}
-            style={{ width: '100%', padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '4px', marginBottom: '12px' }}
-          />
-          <button
-            onClick={handleSnapshot}
-            style={{ padding: '8px 16px', backgroundColor: '#0070F2', color: '#FFFFFF', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}
-          >
-            Snapshot Current Specification
-          </button>
-        </div>
+      {/* Clean Readiness Approval Bar (Hard-blocked until all 13 gates pass) */}
+      {(() => {
+        const allPassed = (readiness?.passedChecksCount || 0) >= 13 || readiness?.readinessPercentage === 100;
+        const isAlreadyApproved =
+          Boolean(project.approvedBy) ||
+          project.lifecycleStatus === 'READY_FOR_GENERATION' ||
+          project.lifecycleStatus === 'GENERATED' ||
+          project.lifecycleStatus === 'EXPORTED';
+        const rawRegistry = project.artifactRegistry?.artifacts;
+        const hasArtifacts = Array.isArray(rawRegistry)
+          ? rawRegistry.length > 0
+          : Boolean(rawRegistry && Object.keys(rawRegistry).length > 0);
+        const nextTarget = hasArtifacts ? 'preview-validation' : 'abap-generator';
 
-        <div style={{ padding: '20px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-          <h4 style={{ margin: '0 0 12px', fontSize: '15px', color: '#1E293B' }}>Architectural Governance</h4>
-          <textarea
-            placeholder="Reviewer justification or change requests..."
-            value={approvalComments}
-            onChange={(e) => setApprovalComments(e.target.value)}
-            rows={2}
-            style={{ width: '100%', padding: '8px 12px', border: '1px solid #CBD5E1', borderRadius: '6px', marginBottom: '12px', fontSize: '13px', boxSizing: 'border-box' }}
-          />
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <button
-              onClick={() => handleApproval('APPROVED')}
-              style={{ padding: '8px 16px', background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)', color: '#FFFFFF', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
-            >
-              Approve for Code Generation
-            </button>
-            <button
-              onClick={() => handleApproval('CHANGES_REQUESTED')}
-              style={{ padding: '8px 14px', backgroundColor: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
-            >
-              Request Changes
-            </button>
-            <button
-              onClick={handleSubmitReview}
-              style={{ padding: '8px 14px', backgroundColor: '#F1F5F9', color: '#334155', border: '1px solid #CBD5E1', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
-            >
-              Submit for Review
-            </button>
-            {onNavigateView && (Boolean(project.approvedBy) || project.lifecycleStatus === 'READY_FOR_GENERATION' || project.lifecycleStatus === 'GENERATED') && (() => {
-              const rawRegistry = project.artifactRegistry?.artifacts;
-              const hasArtifacts = Array.isArray(rawRegistry)
-                ? rawRegistry.length > 0
-                : Boolean(rawRegistry && Object.keys(rawRegistry).length > 0);
-              const nextTarget = hasArtifacts ? 'preview-validation' : 'abap-generator';
-              const nextText = hasArtifacts ? 'Open Live Fiori Sandbox' : 'Proceed to ABAP & Fiori Build';
-              return (
+        return (
+          <div
+            style={{
+              padding: '18px 24px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '14px'
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
+                {isAlreadyApproved
+                  ? 'Specification Approved for Code Generation'
+                  : allPassed
+                    ? 'All 13 Readiness Gates Passed'
+                    : 'Approval Blocked — Resolve Failing Gates Above'}
+              </div>
+              <div style={{ fontSize: '12.5px', color: '#64748B', marginTop: '2px' }}>
+                {allPassed
+                  ? 'Proceed to generate ABAP Cloud RAP and Fiori UI5 artifacts.'
+                  : 'Use the "Fix in ..." buttons on any red gate above before approving.'}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => handleApproval('CHANGES_REQUESTED')}
+                style={{
+                  padding: '8px 14px',
+                  backgroundColor: '#FFFBEB',
+                  color: '#92400E',
+                  border: '1px solid #FDE68A',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 600
+                }}
+              >
+                Request Changes
+              </button>
+
+              {isAlreadyApproved && onNavigateView ? (
                 <button
                   type="button"
                   onClick={() => onNavigateView(nextTarget)}
@@ -305,73 +312,50 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '8px 16px',
-                    backgroundColor: '#0F172A',
+                    padding: '9px 18px',
+                    background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)',
                     color: '#FFFFFF',
                     border: 'none',
                     borderRadius: '6px',
                     cursor: 'pointer',
+                    fontSize: '13px',
                     fontWeight: 600
                   }}
                 >
-                  <span>{nextText}</span>
+                  <span>{hasArtifacts ? 'Open Live Fiori Sandbox' : 'Proceed to ABAP & Fiori Build'}</span>
                   <ArrowRight size={14} />
                 </button>
-              );
-            })()}
-          </div>
-        </div>
-      </div>
-
-      {/* Version History & Diff Viewer */}
-      <div style={{ padding: '24px', backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
-        <h3 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: '#1E293B' }}>
-          Immutable Version History & Semantic Diff
-        </h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #E2E8F0', textAlign: 'left', color: '#475569' }}>
-              <th style={{ padding: '8px' }}>Version</th>
-              <th style={{ padding: '8px' }}>Status</th>
-              <th style={{ padding: '8px' }}>Changelog</th>
-              <th style={{ padding: '8px' }}>Created By</th>
-              <th style={{ padding: '8px' }}>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {versions.map((v) => (
-              <tr key={v.versionNumber} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                <td style={{ padding: '8px', fontWeight: 600 }}>v{v.versionNumber}.0</td>
-                <td style={{ padding: '8px' }}>{v.status}</td>
-                <td style={{ padding: '8px' }}>{v.changelog}</td>
-                <td style={{ padding: '8px' }}>{v.createdBy}</td>
-                <td style={{ padding: '8px', color: '#64748B' }}>{new Date(v.createdAt).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Diff Controls */}
-        {versions.length >= 2 && (
-          <div style={{ marginTop: '20px', padding: '16px', backgroundColor: '#F8FAFC', borderRadius: '6px' }}>
-            <h4 style={{ margin: '0 0 10px', fontSize: '14px', color: '#1E293B' }}>Compare Versions</h4>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <label>Base v: </label>
-              <input type="number" min="1" value={selectedV1} onChange={(e) => setSelectedV1(Number(e.target.value))} style={{ width: '60px', padding: '4px 8px' }} />
-              <label>Target v: </label>
-              <input type="number" min="1" value={selectedV2} onChange={(e) => setSelectedV2(Number(e.target.value))} style={{ width: '60px', padding: '4px 8px' }} />
-              <button onClick={handleCompare} style={{ padding: '6px 14px', backgroundColor: '#0070F2', color: '#FFF', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                Diff
-              </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!allPassed}
+                  onClick={async () => {
+                    await handleApproval('APPROVED');
+                    if (onNavigateView) onNavigateView(nextTarget);
+                  }}
+                  title={allPassed ? 'Approve specification and proceed to build' : 'Pass all 13 readiness gates to unlock approval'}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 18px',
+                    background: allPassed ? 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)' : '#94A3B8',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: allPassed ? 'pointer' : 'not-allowed',
+                    fontSize: '13px',
+                    fontWeight: 600
+                  }}
+                >
+                  <span>Approve &amp; Proceed to Build</span>
+                  <ArrowRight size={14} />
+                </button>
+              )}
             </div>
-            {diffResult && (
-              <div style={{ marginTop: '12px', fontSize: '12px', color: '#334155' }}>
-                <strong>Diff Output:</strong> Requirements: {diffResult.requirements.v1Count} → {diffResult.requirements.v2Count} (Added: {diffResult.requirements.added.length}, Removed: {diffResult.requirements.removed.length}). Entities: {diffResult.entities.v1Count} → {diffResult.entities.v2Count}.
-              </div>
-            )}
           </div>
-        )}
-      </div>
+        );
+      })()}
     </div>
   );
 };

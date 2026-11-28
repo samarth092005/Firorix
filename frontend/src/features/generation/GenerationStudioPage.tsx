@@ -16,7 +16,7 @@ export const GenerationStudioPage: React.FC = () => {
 
   // URL-driven internal navigation state
   const urlProjectId = searchParams.get('projectId') || null;
-  const urlView = (searchParams.get('view') as StudioInternalView) || (urlProjectId ? 'workspace' : 'projects');
+  const urlView = (searchParams.get('view') as StudioInternalView) || (urlProjectId ? 'launchpad' : 'projects');
   const incomingHandoffId = searchParams.get('handoffId') || null;
   const incomingAssessmentId = searchParams.get('assessmentId') || searchParams.get('sourceAssessmentId') || searchParams.get('id') || null;
 
@@ -36,7 +36,7 @@ export const GenerationStudioPage: React.FC = () => {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!activeProject || activeView === 'projects') return;
+    if (!activeProject || activeView === 'projects' || activeView === 'launchpad') return;
     try {
       const seen = window.localStorage.getItem('fiorify_studio_onboarding_seen');
       if (seen !== '1') {
@@ -45,7 +45,7 @@ export const GenerationStudioPage: React.FC = () => {
     } catch {
       // ignore storage access issues
     }
-  }, [activeProject?.projectId]);
+  }, [activeProject?.projectId, activeView]);
 
   const handleCloseOnboarding = (dontShowAgain: boolean) => {
     setIsOnboardingOpen(false);
@@ -135,8 +135,8 @@ export const GenerationStudioPage: React.FC = () => {
           );
           if (existing) {
             setActiveProject(existing);
-            setActiveView('requirements');
-            updateUrlParams(existing.projectId, 'requirements', true);
+            setActiveView('launchpad');
+            updateUrlParams(existing.projectId, 'launchpad', true);
             return;
           }
           const res = await frontendGenerationProjectService.createProject({
@@ -147,8 +147,8 @@ export const GenerationStudioPage: React.FC = () => {
           if (isCancelled) return;
           await loadProjects();
           setActiveProject(res.project);
-          setActiveView('requirements');
-          updateUrlParams(res.project.projectId, 'requirements', true);
+          setActiveView('launchpad');
+          updateUrlParams(res.project.projectId, 'launchpad', true);
         })
         .catch((err: any) => {
           if (isCancelled) return;
@@ -178,8 +178,8 @@ export const GenerationStudioPage: React.FC = () => {
           setHandoffStatusMessage('Workspace provisioned. Initializing engineering context...');
           await loadProjects();
           setActiveProject(res.project);
-          setActiveView('requirements');
-          updateUrlParams(res.project.projectId, 'requirements', true);
+          setActiveView('launchpad');
+          updateUrlParams(res.project.projectId, 'launchpad', true);
         })
         .catch((err: any) => {
           if (isCancelled) return;
@@ -215,10 +215,9 @@ export const GenerationStudioPage: React.FC = () => {
   };
 
   const handleOpenProject = (project: GenerationProject) => {
-    const targetView = resolveResumeView(project);
     setActiveProject(project);
-    setActiveView(targetView);
-    updateUrlParams(project.projectId, targetView);
+    setActiveView('launchpad');
+    updateUrlParams(project.projectId, 'launchpad');
   };
 
   const handleBackToDashboard = () => {
@@ -232,8 +231,8 @@ export const GenerationStudioPage: React.FC = () => {
     const res = await frontendGenerationProjectService.createProject(payload);
     await loadProjects();
     setActiveProject(res.project);
-    setActiveView('requirements');
-    updateUrlParams(res.project.projectId, 'requirements');
+    setActiveView('launchpad');
+    updateUrlParams(res.project.projectId, 'launchpad');
   };
 
   const handleDuplicateProject = async (projectId: string) => {
@@ -390,6 +389,7 @@ export const GenerationStudioPage: React.FC = () => {
             viewId={activeView}
             project={activeProject}
             onNavigateView={handleSelectView}
+            onOpenGuide={() => setIsOnboardingOpen(true)}
             onProjectUpdated={(p) => {
               setActiveProject(p);
               loadProjects();

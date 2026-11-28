@@ -120,7 +120,7 @@ export class FioriGeneratorEngine {
       success: true,
       projectId,
       totalGenerated: fioriArtifacts.length,
-      artifacts: Object.values(registry.artifacts).filter((a) => a.filePath.startsWith('webapp/') || a.filePath.includes('ui5.yaml') || a.filePath.includes('ui5-mock.yaml') || a.filePath === 'mockserver.js' || a.filePath === 'start.js' || a.objectName === 'README_FIORI' || a.filePath === 'package.json'),
+      artifacts: Object.values(registry.artifacts).filter((a) => a.filePath.startsWith('webapp/') || a.filePath.includes('ui5.yaml') || a.filePath.includes('ui5-mock.yaml') || a.filePath === 'mockserver.js' || a.filePath === 'start.js' || a.filePath === 'LOCAL_SETUP.md' || a.objectName === 'README_FIORI' || a.filePath === 'package.json'),
       runRecord
     };
   }

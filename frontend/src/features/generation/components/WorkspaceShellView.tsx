@@ -27,12 +27,14 @@ import { ReviewExportView } from './ReviewExportView';
 import { ToolchainView } from './ToolchainView';
 import { SpecificationLifecycleView } from './SpecificationLifecycleView';
 import { DeploymentWorkspaceView } from './DeploymentWorkspaceView';
+import { LaunchpadView } from './LaunchpadView';
 
 interface WorkspaceShellViewProps {
   viewId: StudioInternalView;
   project: GenerationProject | null;
   onNavigateView: (view: StudioInternalView) => void;
   onProjectUpdated?: (updatedProject: GenerationProject) => void;
+  onOpenGuide?: () => void;
 }
 
 interface ViewMetadata {
@@ -47,6 +49,16 @@ interface ViewMetadata {
 }
 
 const VIEW_METADATA: Record<Exclude<StudioInternalView, 'projects'>, ViewMetadata> = {
+  launchpad: {
+    title: 'Modernization Launchpad',
+    icon: Layers,
+    phaseName: 'Overview: 4-Stage Modernization Hub',
+    phaseNumber: 1,
+    purpose: 'Review target T-Code context, 4-stage pipeline progress, and start modernization.',
+    prerequisites: ['Active Project Workspace'],
+    emptyStateTitle: 'Modernization Launchpad',
+    emptyStateDescription: 'Overview of your modernization pipeline.'
+  },
   requirements: {
     title: 'Requirements Designer',
     icon: FileText,
@@ -153,8 +165,21 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
   viewId,
   project,
   onNavigateView,
-  onProjectUpdated
+  onProjectUpdated,
+  onOpenGuide
 }) => {
+  if (viewId === 'launchpad' && project) {
+    return (
+      <div className="workspace-canvas">
+        <LaunchpadView
+          project={project}
+          onStartStep={onNavigateView}
+          onOpenGuide={onOpenGuide || (() => {})}
+        />
+      </div>
+    );
+  }
+
   // If viewing requirements and project is active, render RequirementsDesigner
   if (viewId === 'requirements' && project) {
     return (

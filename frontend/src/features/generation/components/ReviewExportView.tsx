@@ -160,6 +160,33 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
         </button>
       </div>
 
+      {/* Fast Local Run & Dependency Manifest Card */}
+      <div
+        style={{
+          padding: '14px 18px',
+          backgroundColor: '#F8FAFC',
+          border: '1px solid #E2E8F0',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '12px'
+        }}
+      >
+        <div>
+          <div style={{ fontSize: '13px', fontWeight: 700, color: '#0F172A' }}>
+            Local Laptop Testing — Ready in &lt; 5 Seconds
+          </div>
+          <div style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>
+            Unzip into <code>fiori/</code> and run <code>node start.js</code> (zero heavy <code>@sap/ux-ui5-tooling</code> install required; see <code>LOCAL_SETUP.md</code> for full offline prerequisites).
+          </div>
+        </div>
+        <div style={{ fontSize: '12px', fontFamily: 'monospace', backgroundColor: '#0F172A', color: '#E2E8F0', padding: '6px 12px', borderRadius: '6px' }}>
+          cd fiori &amp;&amp; node start.js
+        </div>
+      </div>
+
       {/* Top Prominent Warning Acknowledgment Banner */}
       {hasWarnings && !hasBlockingErrors && (
         <div

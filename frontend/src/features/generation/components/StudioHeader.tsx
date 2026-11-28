@@ -97,39 +97,16 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             </div>
           )}
 
-          {onOpenGuide && (
-            <button
-              type="button"
-              className="studio-btn-icon"
-              onClick={onOpenGuide}
-              title="Open Context-Aware Workflow Guide"
-            >
-              <HelpCircle size={13} />
-              <span>Workflow Guide</span>
-            </button>
-          )}
-
-          {onOpenToolchain && (
-            <button
-              type="button"
-              className="studio-btn-icon"
-              onClick={onOpenToolchain}
-              title="System & Toolchain Diagnostics"
-            >
-              <Wrench size={13} />
-              <span>Toolchain</span>
-            </button>
-          )}
-
           <button
             type="button"
             className="studio-btn-icon"
             onClick={onRefresh}
             disabled={isLoading}
             title="Refresh workspace"
+            aria-label="Refresh workspace"
+            style={{ padding: '6px 8px' }}
           >
-            <RefreshCw size={13} className={isLoading ? 'spin' : ''} />
-            <span>Refresh</span>
+            <RefreshCw size={14} className={isLoading ? 'spin' : ''} />
           </button>
         </div>
       </div>

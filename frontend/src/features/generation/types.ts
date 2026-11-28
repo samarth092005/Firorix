@@ -26,6 +26,7 @@ export type TargetDeploymentModel = 'ON_PREMISE' | 'BTP_PRIVATE_CLOUD' | 'BTP_PU
 
 export type StudioInternalView =
   | 'projects'
+  | 'launchpad'
   | 'requirements'
   | 'data-model'
   | 'architecture'
