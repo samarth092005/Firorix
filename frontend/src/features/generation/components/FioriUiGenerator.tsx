@@ -20,12 +20,14 @@ interface FioriUiGeneratorProps {
   project: GenerationProject;
   onProjectUpdated: (updated: GenerationProject) => void;
   onNavigateView: (view: StudioInternalView) => void;
+  hideNextButton?: boolean;
 }
 
 export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
   project,
   onProjectUpdated,
-  onNavigateView
+  onNavigateView,
+  hideNextButton = false
 }) => {
   const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>([]);
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
@@ -210,7 +212,7 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
             <RefreshCw size={14} className={isGenerating ? 'animate-spin' : ''} />
             {isGenerating ? 'Synthesizing...' : 'Generate Fiori Application'}
           </button>
-          {artifacts.length > 0 && (
+          {!hideNextButton && artifacts.length > 0 && (
             <button
               type="button"
               onClick={() => onNavigateView('preview-validation')}
@@ -227,9 +229,9 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
                 color: '#FFFFFF',
                 cursor: 'pointer'
               }}
-              title="Proceed to local mock server and preview"
+              title="Proceed to Live Preview"
             >
-              <span>Next: Preview &amp; Validation</span>
+              <span>Next: Live Preview</span>
               <ArrowRight size={14} />
             </button>
           )}

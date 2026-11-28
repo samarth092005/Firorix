@@ -19,7 +19,9 @@ import {
   ArrowRight,
   RefreshCw,
   LayoutTemplate,
-  ChevronDown
+  ChevronDown,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import {
   GenerationProject,
@@ -53,8 +55,9 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
-  const [openReqBox, setOpenReqBox] = useState<'functional' | 'ui'>('functional');
+  const [activeReqCard, setActiveReqCard] = useState<'functional' | 'ui' | null>(null);
   const [functionalApproved, setFunctionalApproved] = useState<boolean>(false);
+  const [uiApproved, setUiApproved] = useState<boolean>(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -428,37 +431,123 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
         </div>
       )}
 
-      {/* BOX 1: Functional & Business Requirements (Hover/Click Expandable) */}
+      {/* 2-Card Overview Grid (when no card is zoomed out) */}
+      {activeReqCard === null && (
+        <div className="studio-zoom-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+          <div
+            role="button"
+            tabIndex={0}
+            className="studio-zoom-card"
+            onClick={() => setActiveReqCard('functional')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setActiveReqCard('functional');
+            }}
+            style={{
+              padding: '22px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: '16px',
+              minHeight: '190px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#EFF6FF', color: '#0066FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FileText size={20} />
+              </div>
+              {(functionalApproved || summary?.allConfirmedOrResolved) && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', padding: '3px 9px', borderRadius: '999px', border: '1px solid #BBF7D0' }}>
+                  <CheckCircle2 size={13} /> Approved
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700, color: '#0F172A' }}>
+                1. Functional &amp; Business Requirements
+              </h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748B', lineHeight: 1.5 }}>
+                {requirements.length} requirement(s) · {requirements.filter((r) => r.status === 'CONFIRMED').length} confirmed. Review rules, actions, and validations.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#0066FF' }}>
+              <Maximize2 size={14} />
+              <span>Open &amp; Configure</span>
+            </div>
+          </div>
+
+          <div
+            role="button"
+            tabIndex={0}
+            className="studio-zoom-card"
+            onClick={() => setActiveReqCard('ui')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setActiveReqCard('ui');
+            }}
+            style={{
+              padding: '22px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: '16px',
+              minHeight: '190px'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#EFF6FF', color: '#0066FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <LayoutTemplate size={20} />
+              </div>
+              {uiApproved && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', padding: '3px 9px', borderRadius: '999px', border: '1px solid #BBF7D0' }}>
+                  <CheckCircle2 size={13} /> Approved
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 style={{ margin: '0 0 6px', fontSize: '16px', fontWeight: 700, color: '#0F172A' }}>
+                2. UI &amp; Screen Design Requirements
+              </h3>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748B', lineHeight: 1.5 }}>
+                Floorplan: <strong>{project.requirementsSpec?.uiPreferences?.floorplan || 'LIST_REPORT_OBJECT_PAGE'}</strong>. Pick wireframe layout, badges, and bulk actions.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#0066FF' }}>
+              <Maximize2 size={14} />
+              <span>Open &amp; Design UI</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* BOX 1: Functional & Business Requirements (Zoomed-Out Full Workspace) */}
+      {activeReqCard === 'functional' && (
       <div
-        onMouseEnter={() => {
-          if (!functionalApproved) setOpenReqBox('functional');
-        }}
+        className="studio-zoom-expanded"
         style={{
           backgroundColor: '#FFFFFF',
-          border: openReqBox === 'functional' ? '1.5px solid #0066FF' : '1px solid #E2E8F0',
+          border: '1.5px solid #0066FF',
           borderRadius: '10px',
           overflow: 'hidden'
         }}
       >
         <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setOpenReqBox('functional')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') setOpenReqBox('functional');
-          }}
           style={{
             padding: '14px 18px',
-            backgroundColor: openReqBox === 'functional' ? '#F8FAFC' : '#FFFFFF',
+            backgroundColor: '#F8FAFC',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
             gap: '12px'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {openReqBox === 'functional' ? <ChevronDown size={16} color="#0066FF" /> : <ChevronRight size={16} color="#64748B" />}
             <FileText size={17} color="#0066FF" />
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
@@ -470,48 +559,59 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {(functionalApproved || summary?.allConfirmedOrResolved) && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 600, color: '#16A34A', backgroundColor: '#F0FDF4', padding: '3px 9px', borderRadius: '999px', border: '1px solid #BBF7D0' }}>
-                <CheckCircle2 size={13} /> Approved
-              </span>
-            )}
-            {openReqBox === 'functional' && (
-              <button
-                type="button"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  if (requirements.some((r) => r.status === 'DRAFT')) {
-                    await handleConfirmAllRequirements();
-                  }
-                  setFunctionalApproved(true);
-                  setOpenReqBox('ui');
-                }}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: '#0066FF',
-                  color: '#FFFFFF',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                <span>Approve Functional &amp; Open UI Design</span>
-                <ArrowRight size={13} />
-              </button>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={async () => {
+                if (requirements.some((r) => r.status === 'DRAFT')) {
+                  await handleConfirmAllRequirements();
+                }
+                setFunctionalApproved(true);
+                setActiveReqCard(null);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                border: 'none',
+                backgroundColor: '#16A34A',
+                color: '#FFFFFF',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <CheckCircle2 size={14} />
+              <span>Approve &amp; Back</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveReqCard(null)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 11px',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                backgroundColor: '#FFFFFF',
+                color: '#334155',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Minimize2 size={13} />
+              <span>Close</span>
+            </button>
           </div>
         </div>
 
-        {openReqBox === 'functional' && (
-          <div style={{ padding: '14px 16px', borderTop: '1px solid #E2E8F0' }}>
-            {/* Main Two-Column Layout */}
-            <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '16px', flex: 1, minHeight: '480px' }}>
+        <div style={{ padding: '14px 16px', borderTop: '1px solid #E2E8F0' }}>
+          {/* Main Two-Column Layout */}
+          <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '16px', flex: 1, minHeight: '480px' }}>
         {/* Left Column: Requirements Backlog */}
         <div
           style={{
@@ -998,43 +1098,34 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
               Select a requirement from the backlog to view and edit details.
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
-          </div>
-        )}
-      </div>
+      )}
 
-      {/* BOX 2: Visual UI & Screen Design Requirements (Hover/Click Expandable) */}
+      {/* BOX 2: Visual UI & Screen Design Requirements (Zoomed-Out Full Workspace) */}
+      {activeReqCard === 'ui' && (
       <div
-        onMouseEnter={() => {
-          if (functionalApproved) setOpenReqBox('ui');
-        }}
+        className="studio-zoom-expanded"
         style={{
           backgroundColor: '#FFFFFF',
-          border: openReqBox === 'ui' ? '1.5px solid #0066FF' : '1px solid #E2E8F0',
+          border: '1.5px solid #0066FF',
           borderRadius: '10px',
           overflow: 'hidden'
         }}
       >
         <div
-          role="button"
-          tabIndex={0}
-          onClick={() => setOpenReqBox('ui')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') setOpenReqBox('ui');
-          }}
           style={{
             padding: '14px 18px',
-            backgroundColor: openReqBox === 'ui' ? '#F8FAFC' : '#FFFFFF',
+            backgroundColor: '#F8FAFC',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
             gap: '12px'
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {openReqBox === 'ui' ? <ChevronDown size={16} color="#0066FF" /> : <ChevronRight size={16} color="#64748B" />}
             <LayoutTemplate size={17} color="#0066FF" />
             <div>
               <div style={{ fontSize: '14px', fontWeight: 700, color: '#0F172A' }}>
@@ -1046,35 +1137,54 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
             </div>
           </div>
 
-          {openReqBox === 'ui' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onNavigateView('data-model');
+              onClick={() => {
+                setUiApproved(true);
+                setActiveReqCard(null);
               }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '5px',
-                padding: '7px 14px',
+                padding: '6px 12px',
                 borderRadius: '6px',
                 border: 'none',
-                background: 'linear-gradient(180deg, #1A75FF 0%, #005CE6 100%)',
+                backgroundColor: '#16A34A',
                 color: '#FFFFFF',
                 fontSize: '12.5px',
                 fontWeight: 600,
                 cursor: 'pointer'
               }}
             >
-              <span>Approve UI Design &amp; Next: CDS Model</span>
-              <ArrowRight size={13} />
+              <CheckCircle2 size={14} />
+              <span>Approve &amp; Back</span>
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => setActiveReqCard(null)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                padding: '6px 11px',
+                borderRadius: '6px',
+                border: '1px solid #CBD5E1',
+                backgroundColor: '#FFFFFF',
+                color: '#334155',
+                fontSize: '12.5px',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              <Minimize2 size={13} />
+              <span>Close</span>
+            </button>
+          </div>
         </div>
 
-        {openReqBox === 'ui' && (
-          <div style={{ padding: '18px', borderTop: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ padding: '18px', borderTop: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(185px, 1fr))', gap: '12px' }}>
               {([
                 {
@@ -1271,8 +1381,8 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
               </label>
             </div>
           </div>
-        )}
       </div>
+      )}
 
       {/* Action Dialog (Confirm with comment / Defer with reason / Reject with reason) */}
       {actionDialog.open && (

@@ -22,12 +22,14 @@ interface AbapGeneratorProps {
   project: GenerationProject;
   onProjectUpdated: (updated: GenerationProject) => void;
   onNavigateView: (view: StudioInternalView) => void;
+  hideNextButton?: boolean;
 }
 
 export const AbapGenerator: React.FC<AbapGeneratorProps> = ({
   project,
   onProjectUpdated,
-  onNavigateView
+  onNavigateView,
+  hideNextButton = false
 }) => {
   const [artifacts, setArtifacts] = useState<GeneratedArtifact[]>([]);
   const [selectedArtifactId, setSelectedArtifactId] = useState<string | null>(null);
@@ -210,25 +212,27 @@ export const AbapGenerator: React.FC<AbapGeneratorProps> = ({
             <RefreshCw size={14} className={isGenerating ? 'animate-spin' : ''} />
             {isGenerating ? 'Synthesizing...' : 'Generate All ABAP Artifacts'}
           </button>
-          <button
-            type="button"
-            onClick={() => onNavigateView('ui-generator')}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 16px',
-              backgroundColor: '#0F172A',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#FFFFFF',
-              cursor: 'pointer'
-            }}
-          >
-            Proceed to Fiori UI Generator <ArrowRight size={14} />
-          </button>
+          {!hideNextButton && (
+            <button
+              type="button"
+              onClick={() => onNavigateView('ui-generator')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                backgroundColor: '#0F172A',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 600,
+                color: '#FFFFFF',
+                cursor: 'pointer'
+              }}
+            >
+              Proceed to Fiori UI Generator <ArrowRight size={14} />
+            </button>
+          )}
         </div>
       </div>
 

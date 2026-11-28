@@ -632,88 +632,23 @@ export const AssessmentResultsPage: React.FC = () => {
         onOpenExportModal={() => setIsExportOpen(true)}
       />
 
-      {/* Guided 3-Stage Stepper Bar */}
+      {/* 3 Main Workspace Navigation Tabs */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          backgroundColor: '#FFFFFF',
-          border: '1px solid var(--fiori-border, #E2E8F0)',
-          borderRadius: 'var(--radius-md, 8px)',
-          padding: '10px 16px',
-          boxShadow: 'var(--fiori-shadow-card, 0 1px 3px rgba(0,0,0,0.05))',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--fiori-text-secondary, #64748B)' }}>
-            Stage {tabs.findIndex((t) => t.key === activeTab) + 1} of {tabs.length}:
-          </span>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--fiori-navy, #102A43)' }}>
-            {tabs.find((t) => t.key === activeTab)?.label.replace(/^\d+\.\s*/, '')}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span
-            style={{
-              fontSize: '11px',
-              padding: '2px 8px',
-              borderRadius: '12px',
-              backgroundColor: assessment.status === 'APPROVED' ? '#DCFCE7' : '#FEF3C7',
-              color: assessment.status === 'APPROVED' ? '#166534' : '#92400E',
-              fontWeight: 600,
-              border: `1px solid ${assessment.status === 'APPROVED' ? '#86EFAC' : '#FCD34D'}`
-            }}
-          >
-            Status: {assessment.status || 'IN_PROGRESS'}
-          </span>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: '8px' }}>
-            <button
-              type="button"
-              className="fiori-btn fiori-btn-secondary"
-              disabled={tabs.findIndex((t) => t.key === activeTab) === 0}
-              onClick={() => {
-                const idx = tabs.findIndex((t) => t.key === activeTab);
-                if (idx > 0) handleTabChange(tabs[idx - 1].key);
-              }}
-              style={{ fontSize: '11px', height: '26px', padding: '0 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
-              <ArrowLeft size={12} /> Previous
-            </button>
-
-            <button
-              type="button"
-              className="fiori-btn fiori-btn-primary"
-              disabled={tabs.findIndex((t) => t.key === activeTab) === tabs.length - 1}
-              onClick={() => {
-                const idx = tabs.findIndex((t) => t.key === activeTab);
-                if (idx < tabs.length - 1) handleTabChange(tabs[idx + 1].key);
-              }}
-              style={{ fontSize: '11px', height: '26px', padding: '0 8px', display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
-              Next <ArrowRight size={12} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 3 Main Workspace Navigation Tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
+          gap: '8px',
           borderBottom: '1px solid var(--fiori-border, #E2E8F0)',
           backgroundColor: '#FFFFFF',
           padding: '4px 12px 0 12px',
           borderRadius: 'var(--radius-md, 8px) var(--radius-md, 8px) 0 0',
           border: '1px solid var(--fiori-border, #E2E8F0)',
-          borderBottomColor: 'transparent'
+          borderBottomColor: 'transparent',
+          flexWrap: 'wrap'
         }}
       >
+        <div style={{ display: 'flex', gap: '4px', overflowX: 'auto' }}>
         {tabs.map((t) => {
           const isActive = activeTab === t.key;
           const Icon = t.icon;
@@ -743,6 +678,26 @@ export const AssessmentResultsPage: React.FC = () => {
             </button>
           );
         })}
+        </div>
+
+        {(() => {
+          const idx = tabs.findIndex((t) => t.key === activeTab);
+          if (idx >= 0 && idx < tabs.length - 1) {
+            const nextTab = tabs[idx + 1];
+            return (
+              <button
+                type="button"
+                className="fiori-btn fiori-btn-primary"
+                onClick={() => handleTabChange(nextTab.key)}
+                style={{ fontSize: '12px', height: '30px', padding: '0 12px', display: 'inline-flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}
+              >
+                <span>Next: {nextTab.label.replace(/^\d+\.\s*/, '')}</span>
+                <ArrowRight size={13} />
+              </button>
+            );
+          }
+          return null;
+        })()}
       </div>
 
       {/* ========================================================================= */}

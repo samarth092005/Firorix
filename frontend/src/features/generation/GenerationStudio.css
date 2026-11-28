@@ -1226,3 +1226,46 @@
   height: 22px;
   font-size: 11px;
 }
+
+/* Smooth Zoom-Out / Zoom-In Card Workspace Transitions */
+@keyframes studioZoomOutExpand {
+  from {
+    opacity: 0.72;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes studioZoomInOverview {
+  from {
+    opacity: 0.75;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.studio-zoom-expanded {
+  animation: studioZoomOutExpand 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center top;
+}
+
+.studio-zoom-grid {
+  animation: studioZoomInOverview 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center center;
+}
+
+.studio-zoom-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.studio-zoom-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  border-color: #93C5FD !important;
+}

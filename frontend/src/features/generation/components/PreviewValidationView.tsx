@@ -846,23 +846,6 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                   <CheckCircle2 size={14} color="#10B981" /> Live OData V4 Service Binding
                 </div>
               </div>
-
-              <button
-                className="fiori-btn-primary"
-                onClick={handleStart}
-                disabled={loading}
-                style={{
-                  marginTop: '10px',
-                  padding: '10px 22px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-              >
-                <Play size={16} /> Launch Fiori Application Preview
-              </button>
             </div>
           )}
         </div>

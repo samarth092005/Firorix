@@ -29,6 +29,7 @@ import { SpecificationLifecycleView } from './SpecificationLifecycleView';
 import { DeploymentWorkspaceView } from './DeploymentWorkspaceView';
 import { LaunchpadView } from './LaunchpadView';
 import { BuildWorkspaceView } from './BuildWorkspaceView';
+import { ArchitectureAndGatesView } from './ArchitectureAndGatesView';
 
 interface WorkspaceShellViewProps {
   viewId: StudioInternalView;
@@ -207,27 +208,15 @@ export const WorkspaceShellView: React.FC<WorkspaceShellViewProps> = ({
     );
   }
 
-  // If viewing architecture and project is active, render ArchitectureDesigner (GEN-05)
-  if (viewId === 'architecture' && project) {
+  // Stage 3 Architecture & 13-Gate Readiness (2 Zoom-Out / Zoom-In Cards)
+  if ((viewId === 'architecture' || viewId === 'spec-lifecycle') && project) {
     return (
       <div className="workspace-canvas">
-        <ArchitectureDesigner
+        <ArchitectureAndGatesView
           project={project}
           onProjectUpdated={onProjectUpdated || (() => {})}
           onNavigateView={onNavigateView}
-        />
-      </div>
-    );
-  }
-
-  // S7: Specification Lifecycle & Review View
-  if (viewId === 'spec-lifecycle' && project) {
-    return (
-      <div className="workspace-canvas">
-        <SpecificationLifecycleView
-          project={project}
-          onProjectUpdated={(p) => onProjectUpdated && onProjectUpdated(p)}
-          onNavigateView={onNavigateView}
+          initialCard={viewId === 'spec-lifecycle' ? 'gates' : null}
         />
       </div>
     );

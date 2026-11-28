@@ -61,10 +61,7 @@ const STAGES: StageDefinition[] = [
     subtitle: 'RAP & 13-Gate Check',
     views: ['architecture', 'spec-lifecycle'],
     defaultView: 'architecture',
-    subItems: [
-      { id: 'architecture', label: 'RAP Architecture', icon: Cpu },
-      { id: 'spec-lifecycle', label: '13-Gate Check', icon: ShieldCheck }
-    ]
+    subItems: []
   },
   {
     id: 4,
@@ -88,10 +85,7 @@ const STAGES: StageDefinition[] = [
     subtitle: 'ZIP & CF Runbook',
     views: ['review-export', 'deployment'],
     defaultView: 'review-export',
-    subItems: [
-      { id: 'review-export', label: 'Export & Connectivity', icon: PackageCheck },
-      { id: 'deployment', label: 'SAP Deploy (Coming Soon)', icon: Send }
-    ]
+    subItems: []
   }
 ];
 

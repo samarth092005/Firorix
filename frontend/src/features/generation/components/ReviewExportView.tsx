@@ -578,6 +578,16 @@ export const ReviewExportView: React.FC<ReviewExportViewProps> = ({
                   Pre-configured for <code>/sap/*</code> proxy to SAP S/4HANA or local <code>mockserver.js</code>.
                 </div>
               </div>
+
+              <div style={{ padding: '12px', borderRadius: '6px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', opacity: 0.85 }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#B45309', textTransform: 'uppercase' }}>Direct SAP DEV Deployment</div>
+                <div style={{ fontWeight: 700, color: '#92400E', marginTop: '4px' }}>
+                  On Hold · Coming Soon
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#92400E', marginTop: '2px' }}>
+                  Direct repository transport is disabled in this release. Use ZIP export or <code>cf push</code>.
+                </div>
+              </div>
             </div>
           </div>
         );
