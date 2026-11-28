@@ -127,6 +127,35 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
     }
   };
 
+  const isSubCompleted = (subId: StudioInternalView): boolean => {
+    if (!project) return false;
+    const rawRegistry = project.artifactRegistry?.artifacts;
+    const artifacts: any[] = rawRegistry
+      ? (Array.isArray(rawRegistry) ? rawRegistry : Object.values(rawRegistry))
+      : [];
+    const hasArtifacts = artifacts.length > 0;
+    const reqItems = project.requirementsSpec?.items || [];
+    switch (subId) {
+      case 'requirements':
+        return reqItems.length > 0 && reqItems.every((r) => r.status === 'CONFIRMED' || r.status === 'DEFERRED');
+      case 'data-model':
+        return (project.dataModelSpec?.entities?.length || 0) > 0;
+      case 'architecture':
+        return Boolean(project.architectureSpec);
+      case 'spec-lifecycle':
+        return isStageCompleted(2);
+      case 'abap-generator':
+      case 'ui-generator':
+        return hasArtifacts;
+      case 'preview-validation':
+        return project.lifecycleStatus === 'VALIDATION_COMPLETED' || project.lifecycleStatus === 'EXPORTED';
+      case 'review-export':
+        return project.lifecycleStatus === 'EXPORTED';
+      default:
+        return false;
+    }
+  };
+
   // Dashboard already has its own clean header & action bar
   if (isDashboard) {
     return null;
@@ -179,6 +208,7 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
             {currentStage.subItems.map((sub) => {
               const SubIcon = sub.icon;
               const isSubActive = activeView === sub.id;
+              const subDone = isSubCompleted(sub.id);
 
               return (
                 <button
@@ -192,6 +222,9 @@ export const StudioNavigation: React.FC<StudioNavigationProps> = ({
                 >
                   <SubIcon size={14} />
                   <span>{sub.label}</span>
+                  {subDone && !isSubActive && (
+                    <Check size={12} strokeWidth={2.5} color="#16A34A" />
+                  )}
                 </button>
               );
             })}

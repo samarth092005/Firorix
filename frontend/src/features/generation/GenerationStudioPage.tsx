@@ -5,6 +5,8 @@ import { StudioNavigation } from './components/StudioNavigation';
 import { ProjectsDashboard } from './components/ProjectsDashboard';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { WorkspaceShellView } from './components/WorkspaceShellView';
+import { StudioOnboardingModal } from './components/StudioOnboardingModal';
+import { StudioGuideDrawer } from './components/StudioGuideDrawer';
 import { frontendGenerationProjectService } from './services/generationProjectService';
 import { GenerationProject, StudioInternalView, CreateProjectPayload } from './types';
 import './GenerationStudio.css';
@@ -30,6 +32,31 @@ export const GenerationStudioPage: React.FC = () => {
 
   // Modal states - never auto-open when auto-provisioning from assessmentId/handoffId
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!activeProject || activeView === 'projects') return;
+    try {
+      const seen = window.localStorage.getItem('fiorify_studio_onboarding_seen');
+      if (seen !== '1') {
+        setIsOnboardingOpen(true);
+      }
+    } catch {
+      // ignore storage access issues
+    }
+  }, [activeProject?.projectId]);
+
+  const handleCloseOnboarding = (dontShowAgain: boolean) => {
+    setIsOnboardingOpen(false);
+    if (dontShowAgain) {
+      try {
+        window.localStorage.setItem('fiorify_studio_onboarding_seen', '1');
+      } catch {
+        // ignore storage access issues
+      }
+    }
+  };
 
   // Sync state to URL search parameters (and clear one-time handoff/assessment triggers)
   const updateUrlParams = useCallback((projectId: string | null, view: StudioInternalView, clearIncoming = false) => {
@@ -282,6 +309,7 @@ export const GenerationStudioPage: React.FC = () => {
         onBackToDashboard={handleBackToDashboard}
         onRefresh={loadProjects}
         onOpenToolchain={() => handleSelectView('environment')}
+        onOpenGuide={() => setIsGuideOpen(true)}
         isLoading={isLoading}
       />
 
@@ -381,6 +409,27 @@ export const GenerationStudioPage: React.FC = () => {
         }}
         onSubmit={handleCreateProject}
         initialAssessmentId={incomingAssessmentId}
+      />
+
+      {/* Enterprise 4-Stage Onboarding Modal */}
+      <StudioOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={handleCloseOnboarding}
+        onStartStep={(targetView, dontShowAgain) => {
+          handleCloseOnboarding(dontShowAgain);
+          handleSelectView(targetView);
+        }}
+        currentView={activeView}
+      />
+
+      {/* Context-Aware Workflow Guide Drawer */}
+      <StudioGuideDrawer
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+        activeView={activeView}
+        project={activeProject}
+        onNavigateView={handleSelectView}
+        onOpenOverviewModal={() => setIsOnboardingOpen(true)}
       />
 
       {/* In-App Delete Confirmation Modal */}

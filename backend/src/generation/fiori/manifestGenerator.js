@@ -19,6 +19,50 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
 
   const childEntities = (project.dataModelSpec?.entities || []).filter((e) => e.entityId !== rootEntity.entityId);
 
+  const uiPrefs = {
+    ...(project.requirementsSpec?.uiPreferences || {}),
+    ...(uiConfig || {})
+  };
+  const floorplan = String(uiPrefs.floorplan || 'LIST_REPORT_OBJECT_PAGE').toUpperCase();
+  const isWorklist = floorplan === 'WORKLIST';
+  const isAnalytical = floorplan === 'ANALYTICAL_LIST_PAGE';
+  const objectPageSectionLayout = uiPrefs.objectPageStyle === 'ANCHOR_SECTIONS' ? 'Page' : 'Tabs';
+  const selectionMode = uiPrefs.bulkActions || isWorklist ? 'Multi' : 'None';
+
+  const sourceTemplateId = isWorklist
+    ? 'Fiorify.fe.worklist.v4'
+    : isAnalytical
+      ? 'Fiorify.fe.alp.v4'
+      : 'Fiorify.fe.lrop.v4';
+
+  const listReportSettings = {
+    entitySet: rootEntity.name,
+    initialLoad: 'Enabled',
+    hideFilterBar: isWorklist,
+    tableSettings: {
+      type: isAnalytical ? 'AnalyticalTable' : 'ResponsiveTable',
+      selectionMode
+    },
+    navigation: {
+      [rootEntity.name]: {
+        detail: {
+          route: `${rootEntity.name}ObjectPage`
+        }
+      }
+    }
+  };
+
+  if (isAnalytical || uiPrefs.viewMode === 'CHART_TABLE') {
+    listReportSettings.defaultContentView = 'ChartTable';
+    listReportSettings.views = {
+      paths: [
+        {
+          annotationPath: 'com.sap.vocabularies.UI.v1.SelectionPresentationVariant#Default'
+        }
+      ]
+    };
+  }
+
   const targetUi5Version = uiConfig.minUI5Version || TARGET_UI5_VERSION_S4HANA2023;
 
   const manifest = {
@@ -51,7 +95,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
         }
       },
       sourceTemplate: {
-        id: 'Fiorify.fe.lrop.v4',
+        id: sourceTemplateId,
         version: '1.0.0'
       },
       crossNavigation: {
@@ -146,20 +190,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
             id: `${rootEntity.name}ListReport`,
             name: 'sap.fe.templates.ListReport',
             options: {
-              settings: {
-                entitySet: rootEntity.name,
-                initialLoad: 'Enabled',
-                tableSettings: {
-                  type: 'ResponsiveTable'
-                },
-                navigation: {
-                  [rootEntity.name]: {
-                    detail: {
-                      route: `${rootEntity.name}ObjectPage`
-                    }
-                  }
-                }
-              }
+              settings: listReportSettings
             }
           },
           [`${rootEntity.name}ObjectPage`]: {
@@ -170,6 +201,7 @@ export function generateFioriManifest(project, architecture, uiConfig = {}) {
               settings: {
                 entitySet: rootEntity.name,
                 editableHeaderContent: false,
+                sectionLayout: objectPageSectionLayout,
                 navigation: Object.fromEntries(
                   childEntities.map((c) => [
                     `_${c.name}`,

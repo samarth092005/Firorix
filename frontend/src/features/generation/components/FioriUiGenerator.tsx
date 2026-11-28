@@ -84,6 +84,7 @@ export const FioriUiGenerator: React.FC<FioriUiGeneratorProps> = ({
     setSuccessMsg(null);
     try {
       const res = await frontendGenerationProjectService.generateFiori(project.projectId, {
+        ...(project.requirementsSpec?.uiPreferences || {}),
         appId,
         pageTitle: appTitle,
         forceOverwrite: true

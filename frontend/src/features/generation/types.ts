@@ -173,10 +173,45 @@ export interface RequirementsSummary {
   allConfirmedOrResolved: boolean;
 }
 
+export type FioriFloorplanType =
+  | 'LIST_REPORT_OBJECT_PAGE'
+  | 'WORKLIST'
+  | 'ANALYTICAL_LIST_PAGE'
+  | 'OVERVIEW_PAGE'
+  | 'FREESTYLE_WIZARD';
+
+export interface RequirementsUiPreferences {
+  floorplan?: FioriFloorplanType;
+  viewMode?: 'TABLE' | 'CARDS' | 'CHART_TABLE';
+  objectPageStyle?: 'TABS' | 'ANCHOR_SECTIONS';
+  bulkActions?: boolean;
+  kpiHeader?: boolean;
+  statusBadge?: boolean;
+  renamedLabels?: Record<string, string>;
+  customActions?: Array<{ label: string }>;
+}
+
+export interface PreviewCopilotDiff {
+  filePath: string;
+  additions: number;
+  deletions: number;
+  unifiedDiff: string;
+}
+
+export interface PreviewCopilotProposal {
+  proposalId: string;
+  instruction: string;
+  summary: string;
+  impactedLayers: string[];
+  diffs: PreviewCopilotDiff[];
+  proposedPatch: Record<string, any>;
+}
+
 export interface RequirementsSpec {
   specVersion: number;
   items: GenerationRequirement[];
   summary?: RequirementsSummary;
+  uiPreferences?: RequirementsUiPreferences;
   status: string;
 }
 

@@ -23,10 +23,12 @@ import {
   Terminal,
   BookOpen,
   UserCheck,
-  Globe
+  Globe,
+  Sparkles
 } from 'lucide-react';
 import { GenerationProject, PreviewSessionInfo, PreviewRequestLog, StudioInternalView, GeneratedArtifact } from '../types';
 import { defaultFrontendGenerationProjectService } from '../services/generationProjectService';
+import { PreviewCopilotDrawer } from './PreviewCopilotDrawer';
 import '../GenerationStudio.css';
 
 interface PreviewValidationViewProps {
@@ -264,6 +266,7 @@ define service ZUI_${prefix} {
 
 export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
   project,
+  onProjectUpdated,
   onNavigateView
 }) => {
   // 3-Pillar Navigation State
@@ -276,6 +279,8 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
   const [actionError, setActionError] = useState<string | null>(null);
   const [iframeKey, setIframeKey] = useState(1);
   const [showTelemetry, setShowTelemetry] = useState(false);
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [copilotNotice, setCopilotNotice] = useState<string | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Backend Artifacts State
@@ -640,6 +645,20 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
                 </button>
               )}
 
+              <button
+                type="button"
+                className="preview-action-btn"
+                onClick={() => setIsCopilotOpen((prev) => !prev)}
+                style={{
+                  borderColor: isCopilotOpen ? '#0066FF' : undefined,
+                  backgroundColor: isCopilotOpen ? '#EFF6FF' : undefined,
+                  color: isCopilotOpen ? '#0066FF' : undefined
+                }}
+              >
+                <Sparkles size={14} />
+                <span>Request Changes &amp; Review Diff</span>
+              </button>
+
               {onNavigateView && (
                 <>
                   <div className="preview-divider" />
@@ -677,32 +696,85 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
             </div>
           )}
 
+          {copilotNotice && (
+            <div
+              style={{
+                padding: '10px 14px',
+                backgroundColor: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                borderRadius: '6px',
+                color: '#166534',
+                fontSize: '13px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '8px'
+              }}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <CheckCircle2 size={15} />
+                Applied Copilot update: {copilotNotice}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCopilotNotice(null)}
+                style={{ border: 'none', background: 'transparent', color: '#166534', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
           {/* Main Preview Container */}
           {isRunning && session ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {/* Embedded Fiori Application Canvas */}
-              <div
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid #CBD5E1',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
-                }}
-              >
-                <iframe
-                  key={iframeKey}
-                  ref={iframeRef}
-                  src={session.previewUrl}
-                  title="Fiori Elements App Preview"
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'stretch' }}>
+                {/* Embedded Fiori Application Canvas */}
+                <div
                   style={{
-                    width: '100%',
-                    height: '720px',
-                    border: 'none',
-                    display: 'block',
-                    backgroundColor: '#FAFAFA'
+                    flex: 1,
+                    minWidth: 0,
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #CBD5E1',
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.06)'
                   }}
-                />
+                >
+                  <iframe
+                    key={iframeKey}
+                    ref={iframeRef}
+                    src={session.previewUrl}
+                    title="Fiori Elements App Preview"
+                    style={{
+                      width: '100%',
+                      height: '720px',
+                      border: 'none',
+                      display: 'block',
+                      backgroundColor: '#FAFAFA'
+                    }}
+                  />
+                </div>
+
+                {isCopilotOpen && (
+                  <PreviewCopilotDrawer
+                    isOpen={isCopilotOpen}
+                    onClose={() => setIsCopilotOpen(false)}
+                    projectId={project.projectId}
+                    onAppliedAndRefresh={async (summary) => {
+                      setCopilotNotice(summary);
+                      try {
+                        const updated = await defaultFrontendGenerationProjectService.getProject(project.projectId);
+                        onProjectUpdated?.(updated);
+                        const statusRes = await defaultFrontendGenerationProjectService.getPreviewStatus(project.projectId);
+                        if (statusRes?.previewStatus) setSession(statusRes.previewStatus);
+                      } catch {
+                        // ignore refresh errors
+                      }
+                      setIframeKey((k) => k + 1);
+                    }}
+                  />
+                )}
               </div>
 
               {/* Collapsible Architecture & Telemetry Inspector */}
@@ -964,7 +1036,21 @@ export const PreviewValidationView: React.FC<PreviewValidationViewProps> = ({
               {!loadingArtifacts && artifacts.length === 0 && (
                 <div style={{ padding: '16px 12px', backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', fontSize: '12px', color: '#92400E', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <span>No ABAP artifacts have been generated for this project yet.</span>
-                  {onNavigateView && (
+                  <button
+                type="button"
+                className="preview-action-btn"
+                onClick={() => setIsCopilotOpen((prev) => !prev)}
+                style={{
+                  borderColor: isCopilotOpen ? '#0066FF' : undefined,
+                  backgroundColor: isCopilotOpen ? '#EFF6FF' : undefined,
+                  color: isCopilotOpen ? '#0066FF' : undefined
+                }}
+              >
+                <Sparkles size={14} />
+                <span>Request Changes &amp; Review Diff</span>
+              </button>
+
+              {onNavigateView && (
                     <button
                       type="button"
                       onClick={() => onNavigateView('abap-generator')}

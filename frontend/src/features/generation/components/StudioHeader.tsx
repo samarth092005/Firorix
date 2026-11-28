@@ -5,7 +5,8 @@ import {
   RefreshCw,
   ArrowLeft,
   AlertTriangle,
-  Wrench
+  Wrench,
+  HelpCircle
 } from 'lucide-react';
 import { GenerationProject } from '../types';
 
@@ -14,6 +15,7 @@ interface StudioHeaderProps {
   onBackToDashboard: () => void;
   onRefresh: () => void;
   onOpenToolchain?: () => void;
+  onOpenGuide?: () => void;
   isLoading?: boolean;
 }
 
@@ -37,6 +39,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onBackToDashboard,
   onRefresh,
   onOpenToolchain,
+  onOpenGuide,
   isLoading
 }) => {
   const isArchived = project?.lifecycleStatus === 'ARCHIVED';
@@ -92,6 +95,18 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               </span>
               <span className="studio-meta-pill mono">{project.projectId}</span>
             </div>
+          )}
+
+          {onOpenGuide && (
+            <button
+              type="button"
+              className="studio-btn-icon"
+              onClick={onOpenGuide}
+              title="Open Context-Aware Workflow Guide"
+            >
+              <HelpCircle size={13} />
+              <span>Workflow Guide</span>
+            </button>
           )}
 
           {onOpenToolchain && (

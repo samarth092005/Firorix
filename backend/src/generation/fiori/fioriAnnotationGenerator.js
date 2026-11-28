@@ -22,6 +22,17 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   const childEntities = entities.filter((e) => e.entityId !== rootEntity.entityId);
   const confirmedActions = requirements.filter((r) => r.status === 'CONFIRMED' && r.category === 'ACTION');
 
+  const uiPrefs = {
+    ...(project.requirementsSpec?.uiPreferences || {}),
+    ...(uiConfig || {})
+  };
+  const floorplan = String(uiPrefs.floorplan || 'LIST_REPORT_OBJECT_PAGE').toUpperCase();
+  const isWorklist = floorplan === 'WORKLIST';
+  const isAnalytical = floorplan === 'ANALYTICAL_LIST_PAGE' || uiPrefs.viewMode === 'CHART_TABLE';
+  const renamedLabels = uiPrefs.renamedLabels || {};
+  const extraActions = Array.isArray(uiPrefs.customActions) ? uiPrefs.customActions : [];
+  const resolveLabel = (f) => renamedLabels[f.name] || f.label || f.name;
+
   let xml = `<?xml version="1.0" encoding="utf-8"?>\n`;
   xml += `<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">\n`;
   xml += `  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">\n`;
@@ -48,31 +59,87 @@ export function generateFioriAnnotationsXml(project, architecture, uiConfig = {}
   xml += `          </Record>\n`;
   xml += `        </Annotation>\n\n`;
 
-  // UI.SelectionFields
-  xml += `        <Annotation Term="UI.SelectionFields">\n`;
-  xml += `          <Collection>\n`;
-  const filterFields = fields.filter((f) => f.semanticRole === 'DOCUMENT_NUMBER' || f.isKey || f.semanticRole === 'STATUS').slice(0, 4);
-  for (const ff of (filterFields.length > 0 ? filterFields : fields.slice(0, 2))) {
-    xml += `            <PropertyPath>${ff.name}</PropertyPath>\n`;
+  // UI.SelectionFields (omitted for pure Worklist queues)
+  if (!isWorklist) {
+    xml += `        <Annotation Term="UI.SelectionFields">\n`;
+    xml += `          <Collection>\n`;
+    const filterFields = fields.filter((f) => f.semanticRole === 'DOCUMENT_NUMBER' || f.isKey || f.semanticRole === 'STATUS').slice(0, 4);
+    for (const ff of (filterFields.length > 0 ? filterFields : fields.slice(0, 2))) {
+      xml += `            <PropertyPath>${ff.name}</PropertyPath>\n`;
+    }
+    xml += `          </Collection>\n`;
+    xml += `        </Annotation>\n\n`;
   }
-  xml += `          </Collection>\n`;
-  xml += `        </Annotation>\n\n`;
 
-  // UI.LineItem (includes confirmed RAP actions)
+  // Analytical Chart + KPI DataPoint + SelectionPresentationVariant for ALP
+  if (isAnalytical || uiPrefs.kpiHeader) {
+    const measureField = fields.find((f) => /DEC|CURR|INT|QUAN|NUM/i.test(String(f.abapType || f.edmType || '')))?.name || titleField;
+    const dimField = fields.find((f) => f.semanticRole === 'STATUS' || f.name !== measureField)?.name || titleField;
+
+    xml += `        <Annotation Term="UI.DataPoint" Qualifier="KPIPrimary">\n`;
+    xml += `          <Record Type="UI.DataPointType">\n`;
+    xml += `            <PropertyValue Property="Title" String="${rootEntity.businessName || rootEntity.name} Count"/>\n`;
+    xml += `            <PropertyValue Property="Value" Path="${measureField}"/>\n`;
+    xml += `            <PropertyValue Property="CriticalityCalculation">\n`;
+    xml += `              <Record Type="UI.CriticalityCalculationType">\n`;
+    xml += `                <PropertyValue Property="ImprovementDirection" EnumMember="UI.ImprovementDirectionType/Maximize"/>\n`;
+    xml += `              </Record>\n`;
+    xml += `            </PropertyValue>\n`;
+    xml += `          </Record>\n`;
+    xml += `        </Annotation>\n\n`;
+
+    xml += `        <Annotation Term="UI.Chart" Qualifier="DefaultChart">\n`;
+    xml += `          <Record Type="UI.ChartDefinitionType">\n`;
+    xml += `            <PropertyValue Property="Title" String="${rootEntity.businessName || rootEntity.name} Analytics"/>\n`;
+    xml += `            <PropertyValue Property="ChartType" EnumMember="UI.ChartType/Column"/>\n`;
+    xml += `            <PropertyValue Property="Dimensions">\n`;
+    xml += `              <Collection><PropertyPath>${dimField}</PropertyPath></Collection>\n`;
+    xml += `            </PropertyValue>\n`;
+    xml += `            <PropertyValue Property="Measures">\n`;
+    xml += `              <Collection><PropertyPath>${measureField}</PropertyPath></Collection>\n`;
+    xml += `            </PropertyValue>\n`;
+    xml += `          </Record>\n`;
+    xml += `        </Annotation>\n\n`;
+
+    xml += `        <Annotation Term="UI.PresentationVariant" Qualifier="DefaultPV">\n`;
+    xml += `          <Record Type="UI.PresentationVariantType">\n`;
+    xml += `            <PropertyValue Property="Visualizations">\n`;
+    xml += `              <Collection>\n`;
+    xml += `                <AnnotationPath>@UI.Chart#DefaultChart</AnnotationPath>\n`;
+    xml += `                <AnnotationPath>@UI.LineItem</AnnotationPath>\n`;
+    xml += `              </Collection>\n`;
+    xml += `            </PropertyValue>\n`;
+    xml += `          </Record>\n`;
+    xml += `        </Annotation>\n\n`;
+
+    xml += `        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="Default">\n`;
+    xml += `          <Record Type="UI.SelectionPresentationVariantType">\n`;
+    xml += `            <PropertyValue Property="PresentationVariant" Path="@UI.PresentationVariant#DefaultPV"/>\n`;
+    xml += `          </Record>\n`;
+    xml += `        </Annotation>\n\n`;
+  }
+
+  // UI.LineItem (includes confirmed RAP actions + Copilot actions)
   xml += `        <Annotation Term="UI.LineItem">\n`;
   xml += `          <Collection>\n`;
-  for (const act of confirmedActions) {
+  for (const act of [...confirmedActions, ...extraActions.map((a) => ({ title: a.label || a }))]) {
     const cleanTitle = String(act.title || 'Action').replace(/^(action|validation|determination)\s*:\s*/i, '').replace(/[^a-zA-Z0-9]/g, '');
     const actionName = `execute${cleanTitle}`.slice(0, 30);
     xml += `            <Record Type="UI.DataFieldForAction">\n`;
     xml += `              <PropertyValue Property="Label" String="${act.title}"/>\n`;
     xml += `              <PropertyValue Property="Action" String="${serviceName}.${actionName}"/>\n`;
+    if (isWorklist) {
+      xml += `              <PropertyValue Property="Determining" Bool="false"/>\n`;
+    }
     xml += `            </Record>\n`;
   }
   for (const f of fields) {
     xml += `            <Record Type="UI.DataField">\n`;
     xml += `              <PropertyValue Property="Value" Path="${f.name}"/>\n`;
-    xml += `              <PropertyValue Property="Label" String="${f.label || f.name}"/>\n`;
+    xml += `              <PropertyValue Property="Label" String="${resolveLabel(f)}"/>\n`;
+    if (uiPrefs.statusBadge && (f.semanticRole === 'STATUS' || /status|state/i.test(f.name))) {
+      xml += `              <PropertyValue Property="Criticality" Int="3"/>\n`;
+    }
     xml += `            </Record>\n`;
   }
   xml += `          </Collection>\n`;

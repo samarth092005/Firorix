@@ -28,6 +28,7 @@ import {
   StaticValidationReport,
   TraceabilityItem,
   PreviewSessionInfo,
+  PreviewCopilotProposal,
   PreviewRequestLog,
   ExportReadinessResult,
   FullTraceabilityReport,
@@ -912,6 +913,32 @@ export class FrontendGenerationProjectService {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.errorMessage || `Failed to reset synthetic data (HTTP ${res.status})`);
+    return data;
+  }
+
+  async proposePreviewCopilot(projectId: string, instruction: string): Promise<{ proposal: PreviewCopilotProposal }> {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/copilot/propose`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instruction })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to generate Copilot diff (HTTP ${res.status})`);
+    return data;
+  }
+
+  async applyPreviewCopilot(
+    projectId: string,
+    proposalId: string,
+    approvedPatch: Record<string, any>
+  ): Promise<{ applied: boolean; summary: string; regeneratedCount: number; restarted: boolean }> {
+    const res = await authFetch(`${API_PROJECTS}/${encodeURIComponent(projectId)}/preview/copilot/apply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ proposalId, approvedPatch })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.errorMessage || `Failed to apply Copilot changes (HTTP ${res.status})`);
     return data;
   }
 

@@ -18,6 +18,14 @@ export function generateFreestyleUi5Artifacts(project, architecture, uiConfig = 
   const serviceName = formatCdsViewName('ZUI_', cleanName).toUpperCase();
   const fields = rootEntity.fields || [];
 
+  const uiPrefs = {
+    ...(project.requirementsSpec?.uiPreferences || {}),
+    ...(uiConfig || {})
+  };
+  const floorplan = String(uiPrefs.floorplan || '').toUpperCase();
+  const isOverviewPage = floorplan === 'OVERVIEW_PAGE';
+  const isWizard = floorplan === 'FREESTYLE_WIZARD';
+
   const columnsXml = fields.slice(0, 6).map((f) =>
     `          <Column><Text text="${f.label || f.name}" /></Column>`
   ).join('\n');
@@ -25,7 +33,99 @@ export function generateFreestyleUi5Artifacts(project, architecture, uiConfig = 
     `            <Text text="{${f.name}}" />`
   ).join('\n');
 
-  const mainViewXml = `<mvc:View
+  const formInputsXml = fields.slice(0, 6).map((f) =>
+    `              <Label text="${f.label || f.name}" />\n              <Input value="{/${rootEntity.name}/0/${f.name}}" placeholder="Enter ${f.label || f.name}" />`
+  ).join('\n');
+
+  let mainViewXml;
+  if (isOverviewPage) {
+    mainViewXml = `<mvc:View
+  controllerName="${appId}.controller.Main"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  displayBlock="true">
+  <Page id="mainPage" title="${uiConfig.pageTitle || project.projectName || rootEntity.name} — Overview Cockpit">
+    <content>
+      <HBox wrap="Wrap" class="sapUiSmallMargin">
+        <GenericTile header="Total ${rootEntity.businessName || rootEntity.name}s" subheader="Active Records" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" press=".onRefresh">
+          <TileContent><NumericContent value="4" indicator="Up" valueColor="Good" /></TileContent>
+        </GenericTile>
+        <GenericTile header="Pending Action" subheader="Requires Review" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" press=".onRefresh">
+          <TileContent><NumericContent value="2" valueColor="Critical" /></TileContent>
+        </GenericTile>
+        <GenericTile header="Clean Core Compliance" subheader="OData V4 Ready" class="sapUiTinyMarginBottom">
+          <TileContent><NumericContent value="100%" valueColor="Good" /></TileContent>
+        </GenericTile>
+      </HBox>
+      <Table id="itemsTable" items="{/${rootEntity.name}}" growing="true" growingThreshold="25" class="sapUiSmallMarginTop">
+        <headerToolbar>
+          <OverflowToolbar>
+            <Title text="${rootEntity.businessName || rootEntity.name} Quick Queue" level="H2" />
+            <ToolbarSpacer />
+            <SearchField width="18rem" search=".onSearch" />
+            <Button text="Refresh" icon="sap-icon://refresh" press=".onRefresh" />
+          </OverflowToolbar>
+        </headerToolbar>
+        <columns>
+${columnsXml}
+        </columns>
+        <items>
+          <ColumnListItem type="Navigation" press=".onItemPress">
+            <cells>
+${cellsXml}
+            </cells>
+          </ColumnListItem>
+        </items>
+      </Table>
+    </content>
+  </Page>
+</mvc:View>
+`;
+  } else if (isWizard) {
+    mainViewXml = `<mvc:View
+  controllerName="${appId}.controller.Main"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:f="sap.ui.layout.form"
+  displayBlock="true">
+  <Page id="mainPage" title="${uiConfig.pageTitle || project.projectName || rootEntity.name} — Guided Entry">
+    <content>
+      <Wizard id="guidedWizard" complete=".onRefresh">
+        <WizardStep id="stepGeneral" title="Step 1: ${rootEntity.businessName || rootEntity.name} Details" validated="true">
+          <f:SimpleForm editable="true" layout="ResponsiveGridLayout">
+            <f:content>
+${formInputsXml}
+            </f:content>
+          </f:SimpleForm>
+        </WizardStep>
+        <WizardStep id="stepReview" title="Step 2: Review Records" validated="true">
+          <Table id="itemsTable" items="{/${rootEntity.name}}" growing="true" growingThreshold="25">
+            <headerToolbar>
+              <OverflowToolbar>
+                <Title text="Existing ${rootEntity.businessName || rootEntity.name} Records" level="H2" />
+                <ToolbarSpacer />
+                <SearchField width="16rem" search=".onSearch" />
+              </OverflowToolbar>
+            </headerToolbar>
+            <columns>
+${columnsXml}
+            </columns>
+            <items>
+              <ColumnListItem type="Navigation" press=".onItemPress">
+                <cells>
+${cellsXml}
+                </cells>
+              </ColumnListItem>
+            </items>
+          </Table>
+        </WizardStep>
+      </Wizard>
+    </content>
+  </Page>
+</mvc:View>
+`;
+  } else {
+    mainViewXml = `<mvc:View
   controllerName="${appId}.controller.Main"
   xmlns:mvc="sap.ui.core.mvc"
   xmlns="sap.m"
@@ -56,6 +156,7 @@ ${cellsXml}
   </Page>
 </mvc:View>
 `;
+  }
 
   const mainControllerJs = `sap.ui.define([
   "sap/ui/core/mvc/Controller",

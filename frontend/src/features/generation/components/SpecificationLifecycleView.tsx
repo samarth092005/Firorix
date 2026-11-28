@@ -290,27 +290,35 @@ export const SpecificationLifecycleView: React.FC<SpecificationLifecycleViewProp
             >
               Submit for Review
             </button>
-            {onNavigateView && (Boolean(project.approvedBy) || project.lifecycleStatus === 'READY_FOR_GENERATION' || project.lifecycleStatus === 'GENERATED') && (
-              <button
-                type="button"
-                onClick={() => onNavigateView('preview-validation')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 16px',
-                  backgroundColor: '#0F172A',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontWeight: 600
-                }}
-              >
-                <span>Proceed to Artifact Sandbox</span>
-                <ArrowRight size={14} />
-              </button>
-            )}
+            {onNavigateView && (Boolean(project.approvedBy) || project.lifecycleStatus === 'READY_FOR_GENERATION' || project.lifecycleStatus === 'GENERATED') && (() => {
+              const rawRegistry = project.artifactRegistry?.artifacts;
+              const hasArtifacts = Array.isArray(rawRegistry)
+                ? rawRegistry.length > 0
+                : Boolean(rawRegistry && Object.keys(rawRegistry).length > 0);
+              const nextTarget = hasArtifacts ? 'preview-validation' : 'abap-generator';
+              const nextText = hasArtifacts ? 'Open Live Fiori Sandbox' : 'Proceed to ABAP & Fiori Build';
+              return (
+                <button
+                  type="button"
+                  onClick={() => onNavigateView(nextTarget)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    backgroundColor: '#0F172A',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 600
+                  }}
+                >
+                  <span>{nextText}</span>
+                  <ArrowRight size={14} />
+                </button>
+              );
+            })()}
           </div>
         </div>
       </div>

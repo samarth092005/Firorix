@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   Tag,
   ArrowRight,
-  RefreshCw
+  RefreshCw,
+  LayoutTemplate
 } from 'lucide-react';
 import {
   GenerationProject,
@@ -26,7 +27,9 @@ import {
   RequirementPriority,
   RequirementStatus,
   RequirementsSummary,
-  StudioInternalView
+  StudioInternalView,
+  FioriFloorplanType,
+  RequirementsUiPreferences
 } from '../types';
 import { defaultFrontendGenerationProjectService } from '../services/generationProjectService';
 import { CATEGORY_LABELS, PRIORITY_BADGES, STATUS_CONFIG } from './requirementConstants';
@@ -438,6 +441,145 @@ export const RequirementsDesigner: React.FC<RequirementsDesignerProps> = ({
           </button>
         </div>
       )}
+
+      {/* App Experience & Fiori Floorplan Selection */}
+      <div
+        style={{
+          padding: '14px 16px',
+          backgroundColor: '#FFFFFF',
+          border: '1px solid #E2E8F0',
+          borderRadius: '8px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <LayoutTemplate size={16} color="#0066FF" />
+            <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F172A' }}>
+              Target Fiori Floorplan &amp; UI Pattern
+            </span>
+            <span style={{ fontSize: '12px', color: '#64748B' }}>
+              Choose the application pattern instead of a one-size-fits-all template
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: '#334155' }}>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={Boolean(project.requirementsSpec?.uiPreferences?.bulkActions)}
+                onChange={async (e) => {
+                  const nextPrefs: RequirementsUiPreferences = {
+                    ...(project.requirementsSpec?.uiPreferences || {}),
+                    bulkActions: e.target.checked
+                  };
+                  try {
+                    const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                      requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                    });
+                    onProjectUpdated(updated);
+                  } catch (err: any) {
+                    setError(err?.message || 'Failed to update UI preference');
+                  }
+                }}
+              />
+              Bulk Actions
+            </label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={Boolean(project.requirementsSpec?.uiPreferences?.statusBadge)}
+                onChange={async (e) => {
+                  const nextPrefs: RequirementsUiPreferences = {
+                    ...(project.requirementsSpec?.uiPreferences || {}),
+                    statusBadge: e.target.checked
+                  };
+                  try {
+                    const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                      requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                    });
+                    onProjectUpdated(updated);
+                  } catch (err: any) {
+                    setError(err?.message || 'Failed to update UI preference');
+                  }
+                }}
+              />
+              Status Badges
+            </label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={Boolean(project.requirementsSpec?.uiPreferences?.kpiHeader)}
+                onChange={async (e) => {
+                  const nextPrefs: RequirementsUiPreferences = {
+                    ...(project.requirementsSpec?.uiPreferences || {}),
+                    kpiHeader: e.target.checked
+                  };
+                  try {
+                    const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                      requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                    });
+                    onProjectUpdated(updated);
+                  } catch (err: any) {
+                    setError(err?.message || 'Failed to update UI preference');
+                  }
+                }}
+              />
+              KPI Header
+            </label>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: '8px' }}>
+          {([
+            { id: 'LIST_REPORT_OBJECT_PAGE', label: 'List Report & Object Page', desc: 'Filter bar + table + detail tabs' },
+            { id: 'WORKLIST', label: 'Action Worklist', desc: 'Queue-focused bulk processing' },
+            { id: 'ANALYTICAL_LIST_PAGE', label: 'Analytical List Page', desc: 'KPI cards + chart + drill-down' },
+            { id: 'OVERVIEW_PAGE', label: 'Overview Cockpit', desc: 'Executive KPI tiles + quick queue' },
+            { id: 'FREESTYLE_WIZARD', label: 'Guided Wizard', desc: 'Step-by-step data entry flow' }
+          ] as Array<{ id: FioriFloorplanType; label: string; desc: string }>).map((fp) => {
+            const currentFloorplan = project.requirementsSpec?.uiPreferences?.floorplan || 'LIST_REPORT_OBJECT_PAGE';
+            const isSelected = currentFloorplan === fp.id;
+            return (
+              <button
+                key={fp.id}
+                type="button"
+                onClick={async () => {
+                  const nextPrefs: RequirementsUiPreferences = {
+                    ...(project.requirementsSpec?.uiPreferences || {}),
+                    floorplan: fp.id
+                  };
+                  try {
+                    const updated = await defaultFrontendGenerationProjectService.updateProject(project.projectId, {
+                      requirementsSpec: { ...project.requirementsSpec, uiPreferences: nextPrefs }
+                    });
+                    onProjectUpdated(updated);
+                    setActionSuccess(`Floorplan updated to ${fp.label}`);
+                  } catch (err: any) {
+                    setError(err?.message || 'Failed to update floorplan');
+                  }
+                }}
+                style={{
+                  textAlign: 'left',
+                  padding: '9px 11px',
+                  borderRadius: '6px',
+                  border: isSelected ? '1.5px solid #0066FF' : '1px solid #E2E8F0',
+                  backgroundColor: isSelected ? '#EFF6FF' : '#F8FAFC',
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ fontSize: '12.5px', fontWeight: 700, color: isSelected ? '#0066FF' : '#0F172A' }}>
+                  {fp.label}
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748B', marginTop: '2px' }}>
+                  {fp.desc}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Main Two-Column Layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: '16px', flex: 1, minHeight: '520px' }}>

@@ -33,17 +33,27 @@ export class FioriGeneratorEngine {
 
     const architecture = project.architectureSpec || this.archEngine.evaluate(project);
 
+    const uiPrefs = {
+      ...(project.requirementsSpec?.uiPreferences || {}),
+      ...(uiConfig || {})
+    };
+    const effectiveFloorplan = String(uiPrefs.floorplan || '').toUpperCase();
+    const isFreestylePattern =
+      String(uiConfig.uiType || '').toUpperCase() === 'FREESTYLE' ||
+      effectiveFloorplan === 'OVERVIEW_PAGE' ||
+      effectiveFloorplan === 'FREESTYLE_WIZARD';
+
     const fioriArtifacts = [];
 
-    if (String(uiConfig.uiType || '').toUpperCase() === 'FREESTYLE') {
-      fioriArtifacts.push(...generateFreestyleUi5Artifacts(project, architecture, uiConfig));
+    if (isFreestylePattern) {
+      fioriArtifacts.push(...generateFreestyleUi5Artifacts(project, architecture, uiPrefs));
     } else {
       // 1. webapp/manifest.json
-      const manifest = generateFioriManifest(project, architecture, uiConfig);
+      const manifest = generateFioriManifest(project, architecture, uiPrefs);
       if (manifest) fioriArtifacts.push(manifest);
 
       // 2. webapp/annotations/annotations.xml
-      const annotations = generateFioriAnnotationsXml(project, architecture, uiConfig);
+      const annotations = generateFioriAnnotationsXml(project, architecture, uiPrefs);
       if (annotations) fioriArtifacts.push(annotations);
     }
 

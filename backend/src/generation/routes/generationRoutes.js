@@ -15,6 +15,7 @@ import { defaultAbapGeneratorEngine } from '../abap/abapGeneratorEngine.js';
 import { defaultFioriGeneratorEngine } from '../fiori/fioriGeneratorEngine.js';
 import { defaultStaticValidationEngine } from '../validation/staticValidationEngine.js';
 import { defaultPreviewManager } from '../preview/previewManager.js';
+import { defaultPreviewCopilotService } from '../preview/previewCopilotService.js';
 import { defaultExportManager } from '../export/exportManager.js';
 import { buildTraceabilityMatrix } from '../export/traceabilityEngine.js';
 import { defaultToolchainScanner } from '../toolchain/toolchainScanner.js';
@@ -955,6 +956,36 @@ export async function handleGenerationRoutes(req, res, url, context = {}) {
         setSessionCookie(req, res, req.headers.authorization.slice(7).trim());
       }
       sendJson(res, 200, { success: true, session: result.session || result });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 45b. POST /api/v1/generation/projects/:projectId/preview/copilot/propose
+  const prevCopilotProposeMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/preview\/copilot\/propose$/);
+  if (req.method === 'POST' && prevCopilotProposeMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(prevCopilotProposeMatch[1]);
+    try {
+      const payload = await readJsonBody(req);
+      const proposal = await defaultPreviewCopilotService.proposeChanges(projectId, payload, currentUser);
+      sendJson(res, 200, { success: true, proposal });
+    } catch (err) {
+      sendError(res, err);
+    }
+    return true;
+  }
+
+  // 45c. POST /api/v1/generation/projects/:projectId/preview/copilot/apply
+  const prevCopilotApplyMatch = pathname.match(/^\/api\/v1\/generation\/projects\/([^/]+)\/preview\/copilot\/apply$/);
+  if (req.method === 'POST' && prevCopilotApplyMatch) {
+    if (!requirePermission(PERMISSIONS.GENERATION_MANAGE)) return true;
+    const projectId = decodeURIComponent(prevCopilotApplyMatch[1]);
+    try {
+      const payload = await readJsonBody(req);
+      const result = await defaultPreviewCopilotService.applyChanges(projectId, payload, currentUser);
+      sendJson(res, 200, { success: true, ...result });
     } catch (err) {
       sendError(res, err);
     }
